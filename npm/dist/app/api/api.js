@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Api = void 0;
-class Api {
+export class Api {
     // Dynamic endpoints with IDs
     static getProductInfo(id) {
         return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
@@ -33,7 +30,6 @@ class Api {
         return `${Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(String(id))}`;
     }
 }
-exports.Api = Api;
 Api.LOCAL_BASE = "http://localhost:3000";
 Api.IDENTITY_BASE = `https://storeak-identity-service.azurewebsites.net/api`;
 Api.NEWS_BASE = `https://storeak-news-service.azurewebsites.net/api`;

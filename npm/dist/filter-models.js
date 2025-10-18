@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ItemsFilterParameters = exports.PagingParameters = exports.NewArrivalPeriod = exports.AgeGroup = exports.Gender = exports.SortType = void 0;
 /**
  * Sort types available for product filtering
  * Based on the API documentation
  */
-var SortType;
+export var SortType;
 (function (SortType) {
     SortType["None"] = "None";
     SortType["Newest"] = "Newest";
@@ -14,40 +11,40 @@ var SortType;
     SortType["BestSelling"] = "BestSelling";
     SortType["MostViewed"] = "MostViewed";
     SortType["Name"] = "Name"; // A-Z alphabetical sorting
-})(SortType || (exports.SortType = SortType = {}));
+})(SortType || (SortType = {}));
 /**
  * Gender filter options
  */
-var Gender;
+export var Gender;
 (function (Gender) {
     Gender[Gender["Male"] = 1] = "Male";
     Gender[Gender["Female"] = 2] = "Female";
     Gender[Gender["Unisex"] = 3] = "Unisex";
-})(Gender || (exports.Gender = Gender = {}));
+})(Gender || (Gender = {}));
 /**
  * Age group filter options
  */
-var AgeGroup;
+export var AgeGroup;
 (function (AgeGroup) {
     AgeGroup[AgeGroup["Baby"] = 1] = "Baby";
     AgeGroup[AgeGroup["Kids"] = 2] = "Kids";
     AgeGroup[AgeGroup["Teens"] = 3] = "Teens";
     AgeGroup[AgeGroup["Adults"] = 4] = "Adults";
     AgeGroup[AgeGroup["Seniors"] = 5] = "Seniors";
-})(AgeGroup || (exports.AgeGroup = AgeGroup = {}));
+})(AgeGroup || (AgeGroup = {}));
 /**
  * New arrival time periods
  */
-var NewArrivalPeriod;
+export var NewArrivalPeriod;
 (function (NewArrivalPeriod) {
     NewArrivalPeriod["Last_7_Days"] = "Last_7_Days";
     NewArrivalPeriod["Last_30_Days"] = "Last_30_Days";
     NewArrivalPeriod["Last_90_Days"] = "Last_90_Days";
-})(NewArrivalPeriod || (exports.NewArrivalPeriod = NewArrivalPeriod = {}));
+})(NewArrivalPeriod || (NewArrivalPeriod = {}));
 /**
  * Paging and basic sorting configuration
  */
-class PagingParameters {
+export class PagingParameters {
     constructor({ currentPage = 1, pageSize = 20, sortField = null, } = {}) {
         this.currentPage = currentPage;
         this.pageSize = pageSize;
@@ -67,11 +64,10 @@ class PagingParameters {
         return params;
     }
 }
-exports.PagingParameters = PagingParameters;
 /**
  * Main filter class that handles all product filtering and sorting parameters
  */
-class ItemsFilterParameters {
+export class ItemsFilterParameters {
     constructor({ pagingParameters = new PagingParameters(), sortType = SortType.None, menuId = null, categoryId = null, minPrice = null, maxPrice = null, name = null, gender = null, age = null, sourceId = null, offerId = null, newArrival = null, getBrand = false, getColors = false, getColorsDefaultPictures = null, getOffer = false, getSize = false, getCollections = false, branchId = null, availability = null, minRating = null, hasDiscount = null, minDiscountPercentage = null } = {}) {
         this.pagingParameters = pagingParameters;
         this.sortType = sortType;
@@ -310,4 +306,3 @@ class ItemsFilterParameters {
         });
     }
 }
-exports.ItemsFilterParameters = ItemsFilterParameters;
