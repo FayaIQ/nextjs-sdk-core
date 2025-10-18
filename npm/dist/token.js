@@ -1,8 +1,5 @@
 "use server";
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = getToken;
-async function getToken() {
+export default async function getToken() {
     const response = await fetch(`https://storeak-identity-service.azurewebsites.net/api/v1/token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
