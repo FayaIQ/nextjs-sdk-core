@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-   "bin": {
+  "bin": {
     "my-nextjs-api-client": "./bin/setup.js"
   },
   "files": [
-    "dist" , "bin"
+    "dist",
+    "bin"
   ],
   "scripts": {
     "dev": "next dev",
-    "build": "tsc",
+    "build": "next build",
+    "build:lib": "tsc -p tsconfig.build.json",
     "start": "next start",
     "lint": "eslint"
   },
