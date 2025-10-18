@@ -1,4 +1,7 @@
-export class Api {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Api = void 0;
+class Api {
     // Dynamic endpoints with IDs
     static getProductInfo(id) {
         return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
@@ -30,6 +33,7 @@ export class Api {
         return `${Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(String(id))}`;
     }
 }
+exports.Api = Api;
 Api.LOCAL_BASE = "http://localhost:3000";
 Api.IDENTITY_BASE = `https://storeak-identity-service.azurewebsites.net/api`;
 Api.NEWS_BASE = `https://storeak-news-service.azurewebsites.net/api`;
@@ -54,7 +58,7 @@ Api.putUserPreferences = `${Api.IDENTITY_BASE}/v1/Users/preferences`;
 Api.phoneVerificationSend = `${Api.IDENTITY_BASE}/v1/verification/phone/send`;
 Api.phoneVerificationVerify = `${Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 // Other services
-Api.getProducts = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile?`;
+Api.getProducts = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
 Api.getCategories = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
 Api.getBranches = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
 Api.getBrands = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;

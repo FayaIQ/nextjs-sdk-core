@@ -13,7 +13,7 @@ export async function getProducts({
   // Map categoryId -> menuId and remove categoryId
   if (typeof window === "undefined") {
     const token = await getToken();
-    return apiFetch<Product>(`${Api.getProducts}${params.toString()}`, {
+    return apiFetch<Product>(`${Api.getProducts}?${params.toString()}`, {
       token,
     });
   } else {

@@ -13,8 +13,8 @@ export async function GET(req: NextRequest) {
     const token = req.cookies.get("access_token")?.value || (await getToken());
     const filters = req.nextUrl.searchParams.toString();
 
-    const data: Product = await apiFetch(`${BASE_URL}${filters}`, {
-      token: token,
+    const data: Product = await apiFetch(`${BASE_URL}?${filters}`, {
+      token,
     });
     return NextResponse.json(data);
   } catch {

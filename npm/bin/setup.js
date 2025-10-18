@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 // List of routes you want to create proxies for
-const routes = ["storeInfo", "getProducts", "productInfo"];
+const routes = ["storeInfo", "getProducts", "productInfo/[id]"];
 
 // 1️⃣ Determine whether to use "src/app" or "app"
 const projectRoot = process.cwd();

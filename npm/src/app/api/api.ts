@@ -25,7 +25,7 @@ export class Api {
   static phoneVerificationVerify: string = `${Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 
   // Other services
-  static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile?`;
+  static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
   static getCategories: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
   static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
