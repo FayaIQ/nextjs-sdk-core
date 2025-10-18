@@ -81,7 +81,7 @@ export declare class ItemsFilterParameters {
     minRating: number | null;
     hasDiscount: boolean | null;
     minDiscountPercentage: number | null;
-    constructor({ pagingParameters, sortType, menuId, categoryId, minPrice, maxPrice, name, gender, age, sourceId, offerId, newArrival, getBrand, getColors, getColorsDefaultPictures, getOffer, getSize, getCollections, branchId, availability, minRating, hasDiscount, minDiscountPercentage }?: {
+    constructor({ pagingParameters, sortType, menuId, categoryId, minPrice, maxPrice, name, gender, age, sourceId, offerId, newArrival, getBrand, getColors, getColorsDefaultPictures, getOffer, getSize, getCollections, branchId, availability, minRating, hasDiscount, minDiscountPercentage, }?: {
         pagingParameters?: PagingParameters;
         sortType?: SortType;
         menuId?: number | null;

@@ -13,7 +13,7 @@ var SortType;
     SortType["HighPrice"] = "HighPrice";
     SortType["BestSelling"] = "BestSelling";
     SortType["MostViewed"] = "MostViewed";
-    SortType["Name"] = "Name"; // A-Z alphabetical sorting
+    SortType["Name"] = "Name";
 })(SortType || (exports.SortType = SortType = {}));
 /**
  * Gender filter options
@@ -72,7 +72,7 @@ exports.PagingParameters = PagingParameters;
  * Main filter class that handles all product filtering and sorting parameters
  */
 class ItemsFilterParameters {
-    constructor({ pagingParameters = new PagingParameters(), sortType = SortType.None, menuId = null, categoryId = null, minPrice = null, maxPrice = null, name = null, gender = null, age = null, sourceId = null, offerId = null, newArrival = null, getBrand = false, getColors = false, getColorsDefaultPictures = null, getOffer = false, getSize = false, getCollections = false, branchId = null, availability = null, minRating = null, hasDiscount = null, minDiscountPercentage = null } = {}) {
+    constructor({ pagingParameters = new PagingParameters(), sortType = SortType.None, menuId = null, categoryId = null, minPrice = null, maxPrice = null, name = null, gender = null, age = null, sourceId = null, offerId = null, newArrival = null, getBrand = false, getColors = false, getColorsDefaultPictures = null, getOffer = false, getSize = false, getCollections = false, branchId = null, availability = null, minRating = null, hasDiscount = null, minDiscountPercentage = null, } = {}) {
         this.pagingParameters = pagingParameters;
         this.sortType = sortType;
         this.menuId = menuId;
@@ -116,15 +116,25 @@ class ItemsFilterParameters {
             newArrival: updates.newArrival !== undefined ? updates.newArrival : this.newArrival,
             getBrand: updates.getBrand !== undefined ? updates.getBrand : this.getBrand,
             getColors: updates.getColors !== undefined ? updates.getColors : this.getColors,
-            getColorsDefaultPictures: updates.getColorsDefaultPictures !== undefined ? updates.getColorsDefaultPictures : this.getColorsDefaultPictures,
+            getColorsDefaultPictures: updates.getColorsDefaultPictures !== undefined
+                ? updates.getColorsDefaultPictures
+                : this.getColorsDefaultPictures,
             getOffer: updates.getOffer !== undefined ? updates.getOffer : this.getOffer,
             getSize: updates.getSize !== undefined ? updates.getSize : this.getSize,
-            getCollections: updates.getCollections !== undefined ? updates.getCollections : this.getCollections,
+            getCollections: updates.getCollections !== undefined
+                ? updates.getCollections
+                : this.getCollections,
             branchId: updates.branchId !== undefined ? updates.branchId : this.branchId,
-            availability: updates.availability !== undefined ? updates.availability : this.availability,
+            availability: updates.availability !== undefined
+                ? updates.availability
+                : this.availability,
             minRating: updates.minRating !== undefined ? updates.minRating : this.minRating,
-            hasDiscount: updates.hasDiscount !== undefined ? updates.hasDiscount : this.hasDiscount,
-            minDiscountPercentage: updates.minDiscountPercentage !== undefined ? updates.minDiscountPercentage : this.minDiscountPercentage,
+            hasDiscount: updates.hasDiscount !== undefined
+                ? updates.hasDiscount
+                : this.hasDiscount,
+            minDiscountPercentage: updates.minDiscountPercentage !== undefined
+                ? updates.minDiscountPercentage
+                : this.minDiscountPercentage,
         });
     }
     /**
@@ -141,81 +151,81 @@ class ItemsFilterParameters {
         });
         // Add sort type
         if (this.sortType !== SortType.None) {
-            params.set('sortType', this.sortType);
+            params.set("sortType", this.sortType);
         }
         // Add category filters
         if (this.menuId !== null) {
-            params.set('menuId', this.menuId.toString());
+            params.set("menuId", this.menuId.toString());
         }
         if (this.categoryId !== null) {
-            params.set('categoryId', this.categoryId.toString());
+            params.set("categoryId", this.categoryId.toString());
         }
         // Add price filters
         if (this.minPrice !== null) {
-            params.set('minPrice', this.minPrice.toString());
+            params.set("minPrice", this.minPrice.toString());
         }
         if (this.maxPrice !== null) {
-            params.set('maxPrice', this.maxPrice.toString());
+            params.set("maxPrice", this.maxPrice.toString());
         }
         // Add search
-        if (this.name !== null && this.name.trim() !== '') {
-            params.set('name', this.name.trim());
+        if (this.name !== null && this.name.trim() !== "") {
+            params.set("name", this.name.trim());
         }
         // Add demographic filters
         if (this.gender !== null) {
-            params.set('gender', this.gender.toString());
+            params.set("gender", this.gender.toString());
         }
         if (this.age !== null) {
-            params.set('age', this.age.toString());
+            params.set("age", this.age.toString());
         }
         // Add brand/source filter
         if (this.sourceId !== null) {
-            params.set('sourceId', this.sourceId.toString());
+            params.set("sourceId", this.sourceId.toString());
         }
         if (this.offerId !== null) {
-            params.set('offerId', this.offerId.toString());
+            params.set("offerId", this.offerId.toString());
         }
         // Add time-based filter
         if (this.newArrival !== null) {
-            params.set('newArrival', this.newArrival);
+            params.set("newArrival", this.newArrival);
         }
         // Add additional data flags
         if (this.getBrand) {
-            params.set('getBrand', 'true');
+            params.set("getBrand", "true");
         }
         if (this.getColors) {
-            params.set('getColors', 'true');
+            params.set("getColors", "true");
         }
         if (this.getColorsDefaultPictures) {
-            params.set('getColorsDefaultPictures', 'true');
+            params.set("getColorsDefaultPictures", "true");
         }
         if (this.getOffer) {
-            params.set('getOffer', 'true');
+            params.set("getOffer", "true");
         }
         if (this.getSize) {
-            params.set('getSize', 'true');
+            params.set("getSize", "true");
         }
         if (this.getCollections) {
-            params.set('getCollections', 'true');
+            params.set("getCollections", "true");
         }
         // Add location filter
         if (this.branchId !== null) {
-            params.set('branchId', this.branchId.toString());
+            params.set("branchId", this.branchId.toString());
         }
         // Add availability filter
         if (this.availability !== null) {
-            params.set('availability', this.availability.toString());
+            params.set("availability", this.availability.toString());
         }
         // Add rating filter
         if (this.minRating !== null) {
-            params.set('minRating', this.minRating.toString());
+            params.set("minRating", this.minRating.toString());
         }
         // Add discount filters
         if (this.hasDiscount !== null) {
-            params.set('hasDiscount', this.hasDiscount.toString());
+            params.set("hasDiscount", this.hasDiscount.toString());
         }
         if (this.minDiscountPercentage !== null) {
-            params.set('minDiscountPercentage', this.minDiscountPercentage.toString());
+            params.set("minDiscountPercentage", this.minDiscountPercentage.toString());
         }
         return params;
     }
@@ -238,7 +248,7 @@ class ItemsFilterParameters {
             map.minPrice = this.minPrice;
         if (this.maxPrice !== null)
             map.maxPrice = this.maxPrice;
-        if (this.name !== null && this.name.trim() !== '')
+        if (this.name !== null && this.name.trim() !== "")
             map.name = this.name.trim();
         if (this.gender !== null)
             map.gender = this.gender;
@@ -279,34 +289,58 @@ class ItemsFilterParameters {
      */
     static fromURLSearchParams(params) {
         const pagingParameters = new PagingParameters({
-            currentPage: params.get('currentPage') ? parseInt(params.get('currentPage')) : 1,
-            pageSize: params.get('pageSize') ? parseInt(params.get('pageSize')) : 20,
-            sortField: params.get('sortField') || null,
+            currentPage: params.get("currentPage")
+                ? parseInt(params.get("currentPage"))
+                : 1,
+            pageSize: params.get("pageSize") ? parseInt(params.get("pageSize")) : 20,
+            sortField: params.get("sortField") || null,
         });
         return new ItemsFilterParameters({
             pagingParameters,
-            sortType: params.get('sortType') || SortType.None,
-            menuId: params.get('menuId') ? parseInt(params.get('menuId')) : null,
-            categoryId: params.get('categoryId') ? parseInt(params.get('categoryId')) : null,
-            minPrice: params.get('minPrice') ? parseFloat(params.get('minPrice')) : null,
-            maxPrice: params.get('maxPrice') ? parseFloat(params.get('maxPrice')) : null,
-            name: params.get('name') || null,
-            gender: params.get('gender') ? parseInt(params.get('gender')) : null,
-            age: params.get('age') ? parseInt(params.get('age')) : null,
-            sourceId: params.get('sourceId') ? parseInt(params.get('sourceId')) : null,
-            offerId: params.get('offerId') ? parseInt(params.get('offerId')) : null,
-            newArrival: params.get('newArrival') || null,
-            getBrand: params.get('getBrand') === 'true',
-            getColors: params.get('getColors') === 'true',
-            getColorsDefaultPictures: params.get('getColorsDefaultPictures') === 'true' || null,
-            getOffer: params.get('getOffer') === 'true',
-            getSize: params.get('getSize') === 'true',
-            getCollections: params.get('getCollections') === 'true',
-            branchId: params.get('branchId') ? parseInt(params.get('branchId')) : null,
-            availability: params.get('availability') ? params.get('availability') === 'true' : null,
-            minRating: params.get('minRating') ? parseFloat(params.get('minRating')) : null,
-            hasDiscount: params.get('hasDiscount') ? params.get('hasDiscount') === 'true' : null,
-            minDiscountPercentage: params.get('minDiscountPercentage') ? parseFloat(params.get('minDiscountPercentage')) : null,
+            sortType: params.get("sortType") || SortType.None,
+            menuId: params.get("menuId") ? parseInt(params.get("menuId")) : null,
+            categoryId: params.get("categoryId")
+                ? parseInt(params.get("categoryId"))
+                : null,
+            minPrice: params.get("minPrice")
+                ? parseFloat(params.get("minPrice"))
+                : null,
+            maxPrice: params.get("maxPrice")
+                ? parseFloat(params.get("maxPrice"))
+                : null,
+            name: params.get("name") || null,
+            gender: params.get("gender")
+                ? parseInt(params.get("gender"))
+                : null,
+            age: params.get("age")
+                ? parseInt(params.get("age"))
+                : null,
+            sourceId: params.get("sourceId")
+                ? parseInt(params.get("sourceId"))
+                : null,
+            offerId: params.get("offerId") ? parseInt(params.get("offerId")) : null,
+            newArrival: params.get("newArrival") || null,
+            getBrand: params.get("getBrand") === "true",
+            getColors: params.get("getColors") === "true",
+            getColorsDefaultPictures: params.get("getColorsDefaultPictures") === "true" || null,
+            getOffer: params.get("getOffer") === "true",
+            getSize: params.get("getSize") === "true",
+            getCollections: params.get("getCollections") === "true",
+            branchId: params.get("branchId")
+                ? parseInt(params.get("branchId"))
+                : null,
+            availability: params.get("availability")
+                ? params.get("availability") === "true"
+                : null,
+            minRating: params.get("minRating")
+                ? parseFloat(params.get("minRating"))
+                : null,
+            hasDiscount: params.get("hasDiscount")
+                ? params.get("hasDiscount") === "true"
+                : null,
+            minDiscountPercentage: params.get("minDiscountPercentage")
+                ? parseFloat(params.get("minDiscountPercentage"))
+                : null,
         });
     }
 }
