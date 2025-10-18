@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
+        "module": "ESNext",          // Use ES modules  
     "target": "ES2020",
     "declarationDir": "dist",
-    "module": "ESNext",
     "moduleResolution": "Node",
     "declaration": true,
     "outDir": "dist",
@@ -27,7 +27,7 @@
     // "noEmit": true
   },
   "include": [
-    "src",
+    "src/**/*.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [

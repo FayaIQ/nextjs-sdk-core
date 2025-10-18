@@ -15,7 +15,9 @@
     "build": "next build",
     "build:lib": "tsc -p tsconfig.build.json",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node ./bin/setup.js"
+
   },
   "dependencies": {
     "next": "15.5.4",
