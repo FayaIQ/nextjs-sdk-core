@@ -1,4 +1,7 @@
-export async function apiFetch(url, options = {}) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.apiFetch = apiFetch;
+async function apiFetch(url, options = {}) {
     const { method = "GET", headers = {}, data, query, token } = options;
     let endpoint = url;
     if (query) {

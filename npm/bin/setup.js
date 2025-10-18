@@ -2,6 +2,7 @@
 import fs from "fs";
 import path from "path";
 
+// List of routes you want to create proxies for
 const routes = ["storeInfo", "getProducts", "productInfo/[id]"];
 
 // Use INIT_CWD to get the target project root
