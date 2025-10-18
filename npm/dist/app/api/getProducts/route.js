@@ -14,7 +14,7 @@ async function GET(req) {
     try {
         const token = req.cookies.get("access_token")?.value || (await (0, token_1.default)());
         const filters = req.nextUrl.searchParams.toString();
-        const data = await (0, fetcher_1.apiFetch)(`${BASE_URL}${filters}`, {
+        const data = await (0, fetcher_1.apiFetch)(`${BASE_URL}`, {
             token: token,
         });
         return server_1.NextResponse.json(data);
