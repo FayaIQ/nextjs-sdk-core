@@ -11,16 +11,11 @@ const token_1 = __importDefault(require("../../../token"));
 const api_1 = require("../api");
 const BASE_URL = api_1.Api.getProducts;
 async function GET(req) {
-    try {
-        const token = req.cookies.get("access_token")?.value || (await (0, token_1.default)());
-        const filters = req.nextUrl.searchParams.toString();
-        console.log("filter:", filters);
-        const data = await (0, fetcher_1.apiFetch)(`${BASE_URL}`, {
-            token,
-        });
-        return server_1.NextResponse.json(data);
-    }
-    catch {
-        return server_1.NextResponse.json({ error: "Failed to fetch getProducts" }, { status: 500 });
-    }
+    const token = req.cookies.get("access_token")?.value || (await (0, token_1.default)());
+    const filters = req.nextUrl.searchParams.toString();
+    console.log("filter:", filters);
+    const data = await (0, fetcher_1.apiFetch)(`${BASE_URL}`, {
+        token,
+    });
+    return server_1.NextResponse.json(data);
 }

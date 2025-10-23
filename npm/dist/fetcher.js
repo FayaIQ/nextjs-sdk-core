@@ -21,9 +21,7 @@ async function apiFetch(url, options = {}) {
         headers: allHeaders,
         body: data && !(data instanceof FormData) ? JSON.stringify(data) : data,
     });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.message || `Request failed with status ${res.status}`);
-    }
-    return res.json();
+    // ✅ Read body ONCE
+    const raw = await res.json();
+    return raw;
 }

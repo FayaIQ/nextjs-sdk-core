@@ -9,19 +9,12 @@ import { Product } from "../../../types";
 const BASE_URL = Api.getProducts;
 
 export async function GET(req: NextRequest) {
-  try {
-    const token = req.cookies.get("access_token")?.value || (await getToken());
-    const filters = req.nextUrl.searchParams.toString();
-    console.log("filter:", filters);
+  const token = req.cookies.get("access_token")?.value || (await getToken());
+  const filters = req.nextUrl.searchParams.toString();
+  console.log("filter:", filters);
 
-    const data: Product = await apiFetch(`${BASE_URL}`, {
-      token,
-    });
-    return NextResponse.json(data);
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to fetch getProducts" },
-      { status: 500 }
-    );
-  }
+  const data = await apiFetch(`${BASE_URL}`, {
+    token,
+  });
+  return NextResponse.json(data);
 }

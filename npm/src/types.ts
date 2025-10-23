@@ -103,6 +103,17 @@ export interface Product {
   createdBy: string | null;
   updatedBy: string | null;
 }
+export interface Category {
+  subCategories: Category[]; // recursive tree
+  id: number;
+  parentID: number | null;
+  name: string;
+  nameSecondary: string;
+  iconUrl: string | null;
+  imageUrl: string | null;
+  emoji: string | null;
+  orderIndex: number;
+}
 
 export interface StoreType {
   id: string;

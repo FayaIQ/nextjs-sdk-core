@@ -19,7 +19,6 @@ export async function apiFetch<T>(
   options: ApiRequestOptions = {}
 ): Promise<T> {
   const { method = "GET", headers = {}, data, query, token } = options;
-
   let endpoint = url;
 
   if (query) {
@@ -41,10 +40,8 @@ export async function apiFetch<T>(
     body: data && !(data instanceof FormData) ? JSON.stringify(data) : data,
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.message || `Request failed with status ${res.status}`);
-  }
+  // ✅ Read body ONCE
+  const raw = await res.json();
 
-  return res.json();
+  return raw;
 }

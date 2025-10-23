@@ -7,7 +7,6 @@ import { Api } from "./app/api/api";
 export async function getProductInfo(id: string): Promise<Product> {
   if (typeof window === "undefined") {
     const token = await getToken();
-
     return apiFetch<Product>(`${Api.getProductInfo(id)}/`, {
       token,
     });
