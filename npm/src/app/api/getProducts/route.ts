@@ -8,14 +8,14 @@ import { Product } from "../../../types";
 
 const BASE_URL = Api.getProducts;
 
+
 export async function GET(req: NextRequest) {
   try {
     const token = req.cookies.get("access_token")?.value || (await getToken());
     const filters = req.nextUrl.searchParams.toString();
-    console.log("filter:", filters);
 
-    const data: Product = await apiFetch(`${BASE_URL}`, {
-      token,
+    const data: Product = await apiFetch(`${BASE_URL}${filters}`, {
+      token: token,
     });
     return NextResponse.json(data);
   } catch {

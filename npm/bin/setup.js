@@ -2,34 +2,29 @@
 import fs from "fs";
 import path from "path";
 
-// List of routes you want to create proxies for
-const routes = ["storeInfo", "getProducts", "productInfo/[id]"];
+const args = process.argv.slice(2);
 
-// Use INIT_CWD to get the target project root
-const projectRoot = process.env.INIT_CWD || process.cwd();
+if (args[0] === "init") {
+  const routePath = path.join(process.cwd(), "app", "api", "storeInfo");
+  const routeFile = path.join(routePath, "route.ts");
 
-const srcAppDir = path.join(projectRoot, "src", "app");
-const appDir = path.join(projectRoot, "app");
+  // Check if folder exists, if not create it
+  if (!fs.existsSync(routePath)) {
+    fs.mkdirSync(routePath, { recursive: true });
+    console.log(`📁 Created folder: ${routePath}`);
+  } else {
+    console.log(`📁 Folder already exists: ${routePath}`);
+  }
 
-const baseAppDir = fs.existsSync(srcAppDir) ? srcAppDir : appDir;
-fs.mkdirSync(baseAppDir, { recursive: true });
-
-const appApiDir = path.join(baseAppDir, "api");
-fs.mkdirSync(appApiDir, { recursive: true });
-
-for (const route of routes) {
-  const routeDir = path.join(appApiDir, route);
-  fs.mkdirSync(routeDir, { recursive: true });
-
-  const importPath = `my-nextjs-api-client/dist/app/api/${route}/route`.replace(
-    /\\/g,
-    "/"
-  );
-
-  const content = `export { GET } from "${importPath}";\n`;
-  fs.writeFileSync(path.join(routeDir, "route.ts"), content);
-
-  console.log(`✅ Created proxy route: /api/${route}`);
+  // Check if file already exists
+  if (fs.existsSync(routeFile)) {
+    console.log(`⚠️ Route file already exists: ${routeFile}`);
+  } else {
+    // Write the 1-liner export
+    const content = `export { GET } from "@zahraa/api-client/serverHandlers/storeInfoRoute";\n`;
+    fs.writeFileSync(routeFile, content, "utf8");
+    console.log(`✅ Created API route file at ${routeFile}`);
+  }
+} else {
+  console.log("Usage: npx zahraa-api init");
 }
-
-console.log("✨ All routes registered successfully!");
