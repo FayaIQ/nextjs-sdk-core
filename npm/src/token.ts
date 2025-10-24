@@ -1,40 +1,58 @@
 "use server";
 
+import { API_ROUTES, getAuthConfig, type AuthConfig } from "./config";
+
 export type TokenResponse = {
   access_token: string;
   token_type?: string;
   expires_in?: number;
-  [k: string]: unknown;
+  [key: string]: unknown;
 };
 
-export type TokenProvider = () => Promise<string | null>;
-
-
+/**
+ * Fetches an authentication token from the Storeak Identity Service
+ * Credentials can be provided via environment variables:
+ * - STOREAK_CLIENT_ID
+ * - STOREAK_CLIENT_SECRET
+ * - STOREAK_USERNAME
+ * - STOREAK_PASSWORD
+ * - STOREAK_LANGUAGE (optional, default: 0)
+ * - STOREAK_GMT (optional, default: 3)
+ * 
+ * @returns Promise with the access token string
+ * @throws Error if authentication fails
+ */
 export default async function getToken(): Promise<string> {
+  const authConfig = getAuthConfig();
 
-  const response = await fetch(
-    `https://storeak-identity-service.azurewebsites.net/api/v1/token`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        clientId: "610262c3-b8ff-40b5-8a8e-951eadbe7a31",
-        clientSecret: "UxiTJPZguIXBxVLjxGltrHvOdEqsjndG",
-  username: "athathak",
-     password: "123456",
-        Language: 0,
-        GMT: 3,
-        IsFromNotification: false,
-      }),
-    }
-  );
+  const requestBody = {
+    clientId: authConfig.clientId,
+    clientSecret: authConfig.clientSecret,
+    username: authConfig.username,
+    password: authConfig.password,
+    Language: authConfig.language ?? 0,
+    GMT: authConfig.gmt ?? 3,
+    IsFromNotification: false,
+  };
+
+  const response = await fetch(API_ROUTES.token, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(requestBody),
+  });
 
   if (!response.ok) {
-    throw new Error(`getToken failed: ${response.statusText}`);
+    throw new Error(
+      `Authentication failed: ${response.status} ${response.statusText}`
+    );
   }
 
-  const json = (await response.json()) as TokenResponse;
-  if (!json.access_token) throw new Error("Token missing in response");
+  const data = (await response.json()) as TokenResponse;
+  
+  if (!data.access_token) {
+    throw new Error("Token missing in authentication response");
+  }
 
-  return json.access_token;
+  return data.access_token;
 }
+

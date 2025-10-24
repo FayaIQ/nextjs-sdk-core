@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProductInfo as fetchProductInfo } from "../getProductInfo";
 
-/**
- * Ready-to-use API route handler for product info
- * Users can simply re-export this in their app/api/productInfo/[id]/route.ts:
- * 
- * @example
- * export { GET } from 'my-next-core/handlers/productInfo';
- */
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -16,10 +9,12 @@ export async function GET(
     const product = await fetchProductInfo(params.id);
     return NextResponse.json(product);
   } catch (error) {
-    console.error("Failed to fetch product info:", error);
+    const message = error instanceof Error ? error.message : "Failed to fetch product info";
+    console.error("Product info error:", message);
     return NextResponse.json(
-      { error: "Failed to fetch product info" },
+      { error: message },
       { status: 500 }
     );
   }
 }
+

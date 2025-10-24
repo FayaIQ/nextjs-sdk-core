@@ -17,10 +17,12 @@ export async function GET(request: NextRequest) {
     const products = await fetchProducts({ filterParams });
     return NextResponse.json(products);
   } catch (error) {
-    console.error("Failed to fetch products:", error);
+    const message = error instanceof Error ? error.message : "Failed to fetch products";
+    console.error("Products error:", message);
     return NextResponse.json(
-      { error: "Failed to fetch products" },
+      { error: message },
       { status: 500 }
     );
   }
 }
+

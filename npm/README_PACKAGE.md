@@ -12,20 +12,44 @@ yarn add my-next-core
 pnpm add my-next-core
 ```
 
-## 🔧 Setup
+## 🔧 Quick Setup
 
-### 1. Environment Variables
+### Automatic Setup (Recommended)
 
-Create a `.env.local` file in your Next.js project root:
+Run the setup command to automatically create all API routes:
 
-```env
-STOREAK_USERNAME=your-username
-STOREAK_PASSWORD=your-password
+```bash
+npx my-next-core setup
 ```
 
-### 2. API Routes (One-Liners!)
+This will create:
+- `app/api/storeInfo/route.ts`
+- `app/api/getProducts/route.ts`
+- `app/api/productInfo/[id]/route.ts`
 
-For client-side usage, create API routes with just **ONE LINE** each:
+### Manual Setup
+
+#### 1. Environment Variables (Optional but Recommended)
+
+Create a `.env.local` file in your Next.js project root to override default credentials:
+
+```env
+# Storeak API Credentials
+STOREAK_CLIENT_ID=your-client-id
+STOREAK_CLIENT_SECRET=your-client-secret
+STOREAK_USERNAME=your-username
+STOREAK_PASSWORD=your-password
+
+# Optional settings
+STOREAK_LANGUAGE=0
+STOREAK_GMT=3
+```
+
+⚠️ **Note:** If you don't provide environment variables, the package will use default credentials (for backward compatibility). However, it's recommended to use your own credentials in production.
+
+#### 2. API Routes (One-Liners!)
+
+If you didn't use the automatic setup, create these API routes manually:
 
 ```typescript
 // app/api/storeInfo/route.ts

@@ -1,3 +1,6 @@
+/**
+ * Type definitions for API requests
+ */
 export type Primitive = string | number | boolean | null | undefined;
 export type RequestData = Record<
   string,
@@ -14,6 +17,12 @@ export interface ApiRequestOptions {
   token?: string | null;
 }
 
+/**
+ * Generic API fetch wrapper with authentication and error handling
+ * @param url - The API endpoint URL
+ * @param options - Request configuration options
+ * @returns Promise with typed response data
+ */
 export async function apiFetch<T>(
   url: string,
   options: ApiRequestOptions = {}
@@ -22,29 +31,56 @@ export async function apiFetch<T>(
 
   let endpoint = url;
 
+  // Append query parameters if provided
   if (query) {
     const params = new URLSearchParams();
-    Object.entries(query).forEach(([k, v]) => {
-      if (v !== undefined && v !== null) params.append(k, String(v));
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
     });
-    endpoint += `?${params.toString()}`;
+    const queryString = params.toString();
+    if (queryString) {
+      endpoint += `?${queryString}`;
+    }
   }
 
-  const allHeaders = { ...headers };
-  allHeaders["Authorization"] = `Bearer ${token}`;
-  if (data && !(data instanceof FormData))
-    allHeaders["Content-Type"] = "application/json";
+  // Prepare headers
+  const requestHeaders: Record<string, string> = { ...headers };
+  
+  if (token) {
+    requestHeaders["Authorization"] = `Bearer ${token}`;
+  }
+  
+  if (data && !(data instanceof FormData)) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
 
-  const res = await fetch(endpoint, {
+  // Prepare request body
+  let body: string | FormData | undefined;
+  if (data) {
+    body = data instanceof FormData ? data : JSON.stringify(data);
+  }
+
+  // Make the request
+  const response = await fetch(endpoint, {
     method,
-    headers: allHeaders,
-    body: data && !(data instanceof FormData) ? JSON.stringify(data) : data,
+    headers: requestHeaders,
+    body,
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.message || `Request failed with status ${res.status}`);
+  // Handle response errors
+  if (!response.ok) {
+    let errorMessage = `Request failed with status ${response.status}`;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData?.message || errorMessage;
+    } catch {
+      // If error response is not JSON, use default message
+    }
+    throw new Error(errorMessage);
   }
 
-  return res.json();
+  return response.json();
 }
+
