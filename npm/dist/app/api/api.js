@@ -1,74 +1,104 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Api = void 0;
-class Api {
-    // Dynamic endpoints with IDs
-    static getProductInfo(id) {
-        return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
-    }
-    // Wishlist endpoints (lowercase per spec)
-    static postWish(id) {
-        return `${Api.INVENTORY_BASE}/v1/items/${id}/wish`;
-    }
-    static deleteWish(id) {
-        return `${Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
-    }
-    static getCategoryProducts(id) {
-        return `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile?CurrentPage=1&PageSize=1000&menuId=${id}`;
-    }
-    static getOrder(id) {
-        return `${Api.INVENTORY_BASE}/v3/Orders/${id}`;
-    }
-    static getInvoiceDiscount(code) {
-        const clean = encodeURIComponent(code);
-        return `${Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount/${clean}`;
-    }
-    static cancelOrder(id) {
-        return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
-    }
-    static patchCartItem(id) {
-        return `${Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(String(id))}`;
-    }
-    static deleteCartItem(id) {
-        return `${Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(String(id))}`;
-    }
-}
-exports.Api = Api;
-Api.LOCAL_BASE = "http://localhost:3000";
-Api.IDENTITY_BASE = `https://storeak-identity-service.azurewebsites.net/api`;
-Api.NEWS_BASE = `https://storeak-news-service.azurewebsites.net/api`;
-Api.STORES_BASE = `https://storeak-stores-service.azurewebsites.net/api`;
-Api.GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
-Api.THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
-Api.INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
-Api.IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/app/api/api.ts
+var api_exports = {};
+__export(api_exports, {
+  Api: () => Api
+});
+module.exports = __toCommonJS(api_exports);
+var _Api = class _Api {
+  // Dynamic endpoints with IDs
+  static getProductInfo(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
+  }
+  // Wishlist endpoints (lowercase per spec)
+  static postWish(id) {
+    return `${_Api.INVENTORY_BASE}/v1/items/${id}/wish`;
+  }
+  static deleteWish(id) {
+    return `${_Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
+  }
+  static getCategoryProducts(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile?CurrentPage=1&PageSize=1000&menuId=${id}`;
+  }
+  static getOrder(id) {
+    return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
+  }
+  static getInvoiceDiscount(code) {
+    const clean = encodeURIComponent(code);
+    return `${_Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount/${clean}`;
+  }
+  static cancelOrder(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
+  }
+  static patchCartItem(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
+      String(id)
+    )}`;
+  }
+  static deleteCartItem(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
+      String(id)
+    )}`;
+  }
+};
+_Api.LOCAL_BASE = "http://localhost:3000";
+_Api.IDENTITY_BASE = `https://storeak-identity-service.azurewebsites.net/api`;
+_Api.NEWS_BASE = `https://storeak-news-service.azurewebsites.net/api`;
+_Api.STORES_BASE = `https://storeak-stores-service.azurewebsites.net/api`;
+_Api.GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
+_Api.THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
+_Api.INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
+_Api.IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
 // Identity endpoints
-Api.signIn = `${Api.IDENTITY_BASE}/v1/token`;
-Api.refreshToken = `${Api.IDENTITY_BASE}/v1/token/refresh`;
-Api.sessionLogout = `${Api.IDENTITY_BASE}/v1/session/logout`;
-Api.clearCart = `${Api.INVENTORY_BASE}/v1/Carts/Clear`;
-Api.getUserInfo = `${Api.IDENTITY_BASE}/v1/Users`;
-Api.postUserInfo = `${Api.IDENTITY_BASE}/v1/Users`;
-Api.putUserInfo = `${Api.IDENTITY_BASE}/v1/Users`;
-Api.patchUserInfo = `${Api.IDENTITY_BASE}/v1/Users`;
-Api.putUserAvatar = `${Api.IDENTITY_BASE}/v1/Users/avatar`;
-Api.putUserPassword = `${Api.IDENTITY_BASE}/v1/Users/password`;
-Api.getUserPreferences = `${Api.IDENTITY_BASE}/v1/Users/preferences`;
-Api.putUserPreferences = `${Api.IDENTITY_BASE}/v1/Users/preferences`;
-Api.phoneVerificationSend = `${Api.IDENTITY_BASE}/v1/verification/phone/send`;
-Api.phoneVerificationVerify = `${Api.IDENTITY_BASE}/v1/verification/phone/verify`;
+_Api.signIn = `${_Api.IDENTITY_BASE}/v1/token`;
+_Api.refreshToken = `${_Api.IDENTITY_BASE}/v1/token/refresh`;
+_Api.sessionLogout = `${_Api.IDENTITY_BASE}/v1/session/logout`;
+_Api.clearCart = `${_Api.INVENTORY_BASE}/v1/Carts/Clear`;
+_Api.getUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
+_Api.postUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
+_Api.putUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
+_Api.patchUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
+_Api.putUserAvatar = `${_Api.IDENTITY_BASE}/v1/Users/avatar`;
+_Api.putUserPassword = `${_Api.IDENTITY_BASE}/v1/Users/password`;
+_Api.getUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
+_Api.putUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
+_Api.phoneVerificationSend = `${_Api.IDENTITY_BASE}/v1/verification/phone/send`;
+_Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 // Other services
-Api.getProducts = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-Api.getCategories = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
-Api.getBranches = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
-Api.getBrands = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
-Api.getWishes = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
-Api.getOrders = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
-Api.postOrders = `${Api.INVENTORY_BASE}/v2/Orders`;
-Api.getCities = `${Api.GPS_BASE}/v1/Locations`;
-Api.getDeliveryZones = `${Api.GPS_BASE}/v1/DeliveryZones`;
-Api.getSlideShows = `${Api.THEME_BASE}/v1/SlideShows/Paging`;
-Api.getCheckoutQuote = `${Api.INVENTORY_BASE}/v1/Checkout/Quote`;
+_Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
+_Api.getCategories = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+_Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
+_Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
+_Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
+_Api.getOrders = `${_Api.INVENTORY_BASE}/v1/Orders/Paging`;
+_Api.postOrders = `${_Api.INVENTORY_BASE}/v2/Orders`;
+_Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
+_Api.getDeliveryZones = `${_Api.GPS_BASE}/v1/DeliveryZones`;
+_Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
+_Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
 // Cart endpoints
-Api.getCurrentCart = `${Api.INVENTORY_BASE}/v1/Carts/Current`;
-Api.postCartItems = `${Api.INVENTORY_BASE}/v1/Carts/Items`;
+_Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
+_Api.postCartItems = `${_Api.INVENTORY_BASE}/v1/Carts/Items`;
+var Api = _Api;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  Api
+});

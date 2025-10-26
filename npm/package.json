@@ -1,36 +1,70 @@
 {
-  "name": "my-nextjs-api-client",
+  "name": "my-next-core",
   "version": "1.0.0",
+  "description": "A Next.js SDK for server and client components with simple API functions",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FayaIQ/nextjs-sdk-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FayaIQ/nextjs-sdk-core/issues"
+  },
+  "homepage": "https://github.com/FayaIQ/nextjs-sdk-core#readme",
   "bin": {
-    "my-nextjs-api-client": "./bin/setup.js"
+    "my-next-core": "./bin/setup.js"
   },
-  "files": [
-    "dist",
-    "bin"
-  ],
+  "files": ["dist", "bin", "README_PACKAGE.md"],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "build:lib": "tsc -p tsconfig.build.json",
-    "start": "next start",
-    "lint": "eslint",
-    "postinstall": "node ./bin/setup.js"
-
+    "build": "tsup src/index.ts src/handlers/storeInfo.ts src/handlers/getProducts.ts src/handlers/productInfo.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/handlers/storeInfo.ts src/handlers/getProducts.ts src/handlers/productInfo.ts --format cjs,esm --dts --watch",
+    "prepublishOnly": "npm run build"
   },
-  "dependencies": {
-    "next": "15.5.4",
-    "react-dom": "19.1.0"
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./handlers/storeInfo": {
+      "types": "./dist/handlers/storeInfo.d.ts",
+      "import": "./dist/handlers/storeInfo.mjs",
+      "require": "./dist/handlers/storeInfo.js"
+    },
+    "./handlers/getProducts": {
+      "types": "./dist/handlers/getProducts.d.ts",
+      "import": "./dist/handlers/getProducts.mjs",
+      "require": "./dist/handlers/getProducts.js"
+    },
+    "./handlers/productInfo": {
+      "types": "./dist/handlers/productInfo.d.ts",
+      "import": "./dist/handlers/productInfo.mjs",
+      "require": "./dist/handlers/productInfo.js"
+    }
+  },
+  "peerDependencies": {
+    "next": "^14.0.0 || ^15.0.0 || ^16.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.1",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.4",
-    "react": "^19.2.0",
-    "typescript": "^5.9.3"
-  }
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "nextjs",
+    "sdk",
+    "storeak",
+    "api",
+    "server-components",
+    "client-components",
+    "react",
+    "typescript"
+  ]
 }
