@@ -13,10 +13,12 @@ export async function GET() {
     const storeInfo = await fetchStoreInfo();
     return NextResponse.json(storeInfo);
   } catch (error) {
-    console.error("Failed to fetch store info:", error);
+    const message = error instanceof Error ? error.message : "Failed to fetch store info";
+    console.error("Store info error:", message);
     return NextResponse.json(
-      { error: "Failed to fetch store info" },
+      { error: message },
       { status: 500 }
     );
   }
 }
+

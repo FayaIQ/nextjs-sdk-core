@@ -1,20 +1,39 @@
-import { apiFetch } from "./fetcher";
+import { Api } from "./api/api";
+import { apiFetch } from "./core/fetcher";
 import getToken from "./token";
-import { Product } from "./types";
-import { Api } from "./app/api/api";
+import type { Product } from "./types";
 
-
+/**
+ * Fetches detailed information for a specific product by ID
+ * Works in both server and client components
+ * 
+ * @param id - The product ID to fetch
+ * @returns Promise with product details
+ * 
+ * @example
+ * // Server component
+ * const product = await getProductInfo("123");
+ * 
+ * @example
+ * // Client component
+ * const product = await getProductInfo("123");
+ */
 export async function getProductInfo(id: string): Promise<Product> {
+  // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const token = await getToken();
     return apiFetch<Product>(`${Api.getProductInfo(id)}/`, {
       token,
     });
-  } else {
-    return fetch(`/api/productInfo/${id}`).then((res) => {
-      console.log("🔹 Client fetch status:", res.status);
-      if (!res.ok) throw new Error("Failed to fetch from src products");
-      return res.json();
-    });
   }
+
+  // Client-side: Use Next.js API route
+  const response = await fetch(`/api/productInfo/${id}`);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch product info: ${response.statusText}`);
+  }
+  
+  return response.json();
 }
+

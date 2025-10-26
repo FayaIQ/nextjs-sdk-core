@@ -1,4 +1,4 @@
-// Main exports - Simple function names for developers
+// Main API functions - Works in both server and client components
 export { getStoreInfo } from "./storeInfo";
 export { getProducts } from "./getProducts";
 export { getProductInfo } from "./getProductInfo";
@@ -6,9 +6,15 @@ export { getProductInfo } from "./getProductInfo";
 // Type exports
 export * from "./types";
 export * from "./filter-models";
+export * from "./api/api";
+export * from "./inventory/orders/order-models"
+// Configuration exports
+export type { AuthConfig } from "./core/config";
 
-// Advanced exports for custom use
-export { apiFetch } from "./fetcher";
-export type { ApiRequestOptions } from "./fetcher";
+// Advanced exports for custom use cases
+export { apiFetch } from "./core/fetcher";
+
 export { default as getToken } from "./token";
+export type { TokenResponse } from "./token";
+
 

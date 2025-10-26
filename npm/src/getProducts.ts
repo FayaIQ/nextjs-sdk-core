@@ -1,8 +1,28 @@
-import { apiFetch } from "./fetcher";
+import { apiFetch } from "./core/fetcher";
 import getToken from "./token";
-import { Product } from "./types";
-import { Api } from "./app/api/api";
-import { ItemsFilterParameters } from "./filter-models";
+import type { Product } from "./types";
+import type { ItemsFilterParameters } from "./filter-models";
+import { Api } from "./api/api";
+
+/**
+ * Fetches a list of products with optional filtering and pagination
+ * Works in both server and client components
+ * 
+ * @param filterParams - Filter parameters for products (pagination, sorting, etc.)
+ * @returns Promise with product data
+ * 
+ * @example
+ * // Server component
+ * const products = await getProducts({ 
+ *   filterParams: new ItemsFilterParameters({ currentPage: 1, pageSize: 20 })
+ * });
+ * 
+ * @example
+ * // Client component
+ * const products = await getProducts({ 
+ *   filterParams: new ItemsFilterParameters({ sortType: SortType.Newest })
+ * });
+ */
 export async function getProducts({
   filterParams,
 }: {
@@ -10,16 +30,22 @@ export async function getProducts({
 }): Promise<Product> {
   const params = filterParams.toURLSearchParams();
   params.set("havePicture", "true");
-  // Map categoryId -> menuId and remove categoryId
+
+  // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const token = await getToken();
     return apiFetch<Product>(`${Api.getProducts}?${params.toString()}`, {
       token,
     });
-  } else {
-    return fetch(`/api/getProducts?${params.toString()}`).then((res) => {
-      if (!res.ok) throw new Error("Failed to fetch from src products");
-      return res.json();
-    });
   }
+
+  // Client-side: Use Next.js API route
+  const response = await fetch(`/api/getProducts?${params.toString()}`);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch products: ${response.statusText}`);
+  }
+  
+  return response.json();
 }
+

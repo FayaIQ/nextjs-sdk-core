@@ -7,7 +7,6 @@ export class Api {
   private static THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
   private static INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
   public static IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
-  // Identity endpoints
   static signIn: string = `${Api.IDENTITY_BASE}/v1/token`;
   static refreshToken: string = `${Api.IDENTITY_BASE}/v1/token/refresh`;
   static sessionLogout: string = `${Api.IDENTITY_BASE}/v1/session/logout`;
@@ -32,6 +31,7 @@ export class Api {
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
+  static getStoreInfo: string = `${Api.STORES_BASE}/v1/Stores/Info`;
   static getCities: string = `${Api.GPS_BASE}/v1/Locations`;
   static getDeliveryZones: string = `${Api.GPS_BASE}/v1/DeliveryZones`;
   static getSlideShows: string = `${Api.THEME_BASE}/v1/SlideShows/Paging`;
@@ -46,6 +46,7 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/wish`;
   }
 
+
   static deleteWish(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
   }
@@ -58,6 +59,80 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v3/Orders/${id}`;
   }
 
+
+  // orders endpoints
+
+  static getOrderFullInfo = `${Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
+
+  static putOrderApprove(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}ApproveDeliveryOrder`;
+
+  }
+
+  static putOrderApproveList(): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
+  }
+
+  static putOrderDisapprove(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}DisapproveDeliveryOrder`;
+  }
+
+  static putOrderDisapproveList(): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
+
+  }
+
+
+  static putChangeStatusOrder(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
+  }
+
+
+  static cancelOrder(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
+  }
+
+  static getOrdersDelagates (id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates`;
+  }
+
+
+  static postOrdersDelagates (id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates`;
+  }
+
+
+  static putOrdersDelagatesLoggedIn (id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates/LoggedInUser`;
+  }
+
+
+  static postOrderDelagatesList = `${Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+
+  static deleteDelagate (orderId : string | number, delegateId : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
+  }
+
+  static putOrderDiscount(id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+ 
+  }
+
+  static putOrderReferenceId(id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+  } 
+
+
+ static putOrderReferenceDeliveryId(id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
+  }
+
+
+
+
+
+  /////////////////////////////////////////
+  //
   static getInvoiceDiscount(code: string): string {
     const clean = encodeURIComponent(code);
     return `${Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount/${clean}`;
@@ -65,9 +140,6 @@ export class Api {
 
   static getCheckoutQuote: string = `${Api.INVENTORY_BASE}/v1/Checkout/Quote`;
 
-  static cancelOrder(id: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
-  }
 
   // Cart endpoints
   static getCurrentCart: string = `${Api.INVENTORY_BASE}/v1/Carts/Current`;
@@ -83,3 +155,5 @@ export class Api {
     )}`;
   }
 }
+
+
