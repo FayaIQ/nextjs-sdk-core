@@ -9,12 +9,9 @@ export async function GET(
     const product = await fetchProductInfo(params.id);
     return NextResponse.json(product);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch product info";
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch product info";
     console.error("Product info error:", message);
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

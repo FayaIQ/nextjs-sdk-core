@@ -1,30 +1,3 @@
-"use strict";
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-
-// src/handlers/storeInfo.ts
-var storeInfo_exports = {};
-__export(storeInfo_exports, {
-  GET: () => GET
-});
-module.exports = __toCommonJS(storeInfo_exports);
-var import_server = require("next/server");
-
 // src/api/api.ts
 var _Api = class _Api {
   static getProductInfo(id) {
@@ -144,7 +117,7 @@ _Api.postCartItems = `${_Api.INVENTORY_BASE}/v1/Carts/Items`;
 var Api = _Api;
 
 // src/token.ts
-var import_headers = require("next/headers");
+import { cookies } from "next/headers";
 
 // src/core/config.ts
 var getAuthConfig = () => {
@@ -177,7 +150,7 @@ var getAuthConfig = () => {
 var AUTH_MODE = process.env.STOREAK_AUTH_MODE || "auto";
 async function getToken() {
   if (AUTH_MODE === "strict") {
-    const cookie = await (0, import_headers.cookies)();
+    const cookie = await cookies();
     const accessTokenCookie = cookie.get("access_token")?.value;
     if (accessTokenCookie && accessTokenCookie) {
       return accessTokenCookie;
@@ -268,21 +241,9 @@ async function getStoreInfo() {
   return response.json();
 }
 
-// src/handlers/storeInfo.ts
-async function GET() {
-  try {
-    const storeInfo = await getStoreInfo();
-    return import_server.NextResponse.json(storeInfo);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch store info";
-    console.error("Store info error:", message);
-    return import_server.NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
-  }
-}
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  GET
-});
+export {
+  Api,
+  getToken,
+  apiFetch,
+  getStoreInfo
+};

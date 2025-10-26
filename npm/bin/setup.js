@@ -9,45 +9,52 @@ const command = args[0];
 const routes = [
   {
     name: "storeInfo",
-    path: ["app", "api", "storeInfo"],
+    path: ["src", "app", "api", "storeInfo"],
     handler: "my-next-core/handlers/storeInfo",
     methods: ["GET"],
     description: "Store information endpoint",
   },
   {
     name: "getProducts",
-    path: ["app", "api", "getProducts"],
-    handler: "my-next-core/handlers/getProducts",
+    path: ["src", "app", "api", "items", "getProducts"],
+    handler: "my-next-core/inventory/items/handler/getProducts",
     methods: ["GET"],
     description: "Products listing endpoint",
   },
   {
     name: "productInfo",
-    path: ["app", "api", "productInfo", "[id]"],
-    handler: "my-next-core/handlers/productInfo",
+    path: ["src", "app", "api", "items", "productInfo", "[id]"],
+    handler: "my-next-core/inventory/items/handler/productInfo",
     methods: ["GET"],
     description: "Product details endpoint (dynamic route)",
   },
   {
     name: "orders",
-    path: ["app", "api", "orders"],
+    path: ["src", "app", "api", "orders"],
     handler: "my-next-core/inventory/orders/handler/orders",
     methods: ["GET"],
     description: "Orders listing endpoint",
   },
   {
     name: "login",
-    path: ["app", "api", "auth", "login"],
+    path: ["src", "app", "api", "auth", "login"],
     handler: "my-next-core/identity/handler/login",
     methods: ["POST"],
     description: "User login endpoint",
   },
   {
     name: "logout",
-    path: ["app", "api", "auth", "logout"],
+    path: ["src", "app", "api", "auth", "logout"],
     handler: "my-next-core/identity/handler/logout",
     methods: ["POST"],
     description: "User logout endpoint",
+  },
+  {
+    name: "menus",
+    path: ["src", "app", "api", "menus", "getMenus"],
+    handler: "my-next-core/inventory/menus/getMenus",
+    methods: ["GET"],
+    description: "Menus listing endpoint",
   },
 ];
 
@@ -70,11 +77,17 @@ function createRoute(route) {
     return false;
   } else {
     // Generate export statement for methods
-    const methodExports = route.methods.map(method => `export { ${method} } from "${route.handler}";`).join('\n');
-    
+    const methodExports = route.methods
+      .map((method) => `export { ${method} } from "${route.handler}";`)
+      .join("\n");
+
     const content = `// Auto-generated API route - ${route.description}\n${methodExports}\n`;
     fs.writeFileSync(routeFile, content, "utf8");
-    console.log(`✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(', ')})`);
+    console.log(
+      `✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(
+        ", "
+      )})`
+    );
     return true;
   }
 }
@@ -106,7 +119,9 @@ function setupRoutes() {
   console.log("📖 Next steps:");
   console.log("   1. Configure your environment variables in .env.local");
   console.log("   2. Import functions in your components:");
-  console.log('      import { getStoreInfo, getProducts, getProductInfo } from "my-next-core";');
+  console.log(
+    '      import { getStoreInfo, getProducts, getProductInfo } from "my-next-core";'
+  );
   console.log("   3. Start your development server: npm run dev\n");
 }
 
@@ -120,7 +135,9 @@ function showHelp() {
   console.log("Available routes:");
   routes.forEach((route) => {
     const methods = route.methods.join(", ");
-    console.log(`  - ${route.path.join("/")} [${methods}] (${route.description})`);
+    console.log(
+      `  - ${route.path.join("/")} [${methods}] (${route.description})`
+    );
   });
   console.log();
 }
@@ -131,5 +148,7 @@ if (command === "setup" || command === "init") {
 } else if (command === "help" || command === "--help" || command === "-h") {
   showHelp();
 } else {
-  console.log('⚠️  Unknown command. Use "npx my-next-core setup" or "npx my-next-core help"');
+  console.log(
+    '⚠️  Unknown command. Use "npx my-next-core setup" or "npx my-next-core help"'
+  );
 }

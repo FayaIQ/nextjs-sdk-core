@@ -1,5 +1,5 @@
-import { S as StoreInfo, P as Product } from './types-DPi3zGBH.cjs';
-export { A as Address, a as City, C as Country, D as District, b as StoreType, U as UnitInfo } from './types-DPi3zGBH.cjs';
+import { S as StoreInfo, P as Product } from './types-BKRI70Wb.cjs';
+export { A as Address, b as Category, a as City, C as Country, D as District, c as StoreType, U as UnitInfo } from './types-BKRI70Wb.cjs';
 
 /**
  * Fetches store information
@@ -207,7 +207,8 @@ declare class Api {
     static phoneVerificationSend: string;
     static phoneVerificationVerify: string;
     static getProducts: string;
-    static getCategories: string;
+    static getProductInfo(id: string): string;
+    static getMenus: string;
     static getBranches: string;
     static getBrands: string;
     static getWishes: string;
@@ -217,7 +218,6 @@ declare class Api {
     static getCities: string;
     static getDeliveryZones: string;
     static getSlideShows: string;
-    static getProductInfo(id: string): string;
     static postWish(id: string | number): string;
     static deleteWish(id: string | number): string;
     static getCategoryProducts(id: string): string;

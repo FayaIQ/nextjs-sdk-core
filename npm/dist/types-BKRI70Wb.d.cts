@@ -96,6 +96,17 @@ interface Product {
     createdBy: string | null;
     updatedBy: string | null;
 }
+interface Category {
+    subCategories: Category[];
+    id: number;
+    parentID: number | null;
+    name: string;
+    nameSecondary: string;
+    iconUrl: string | null;
+    imageUrl: string | null;
+    emoji: string | null;
+    orderIndex: number;
+}
 interface StoreType {
     id: string;
     name: string;
@@ -137,4 +148,4 @@ interface StoreInfo {
     shifts: unknown[];
 }
 
-export type { Product as P, StoreInfo as S };
+export type { Address as A, Country as C, District as D, Product as P, StoreInfo as S, UnitInfo as U, City as a, Category as b, StoreType as c };

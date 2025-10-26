@@ -1,4 +1,4 @@
-import { S as StoreInfo } from '../types-DPi3zGBH.cjs';
+import { S as StoreInfo } from '../types-BKRI70Wb.cjs';
 import { NextResponse } from 'next/server';
 
 /**
