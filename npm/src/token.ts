@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { Api } from "./api/api";
 import { getAuthConfig } from "./core/config";
 
@@ -10,20 +11,27 @@ export type TokenResponse = {
   [key: string]: unknown;
 };
 
+// Environment variable to control behavior
+const AUTH_MODE = process.env.STOREAK_AUTH_MODE || "auto"; // "auto" | "strict"
+
 /**
- * Fetches an authentication token from the Storeak Identity Service
- * Credentials can be provided via environment variables:
- * - STOREAK_CLIENT_ID
- * - STOREAK_CLIENT_SECRET
- * - STOREAK_USERNAME
- * - STOREAK_PASSWORD
- * - STOREAK_LANGUAGE (optional, default: 0)
- * - STOREAK_GMT (optional, default: 3)
- * 
- * @returns Promise with the access token string
- * @throws Error if authentication fails
+ * Retrieves or generates an access token based on the configured mode.
+ *
+ * Modes:
+ * - "auto": automatically logs in if token missing or expired
+ * - "strict": throws Unauthorized error if no token exists
  */
 export default async function getToken(): Promise<string> {
+  if (AUTH_MODE === "strict") {
+    const cookie = await cookies();
+    const accessTokenCookie = cookie.get("access_token")?.value;
+    if (accessTokenCookie && accessTokenCookie) {
+      return accessTokenCookie;
+    }
+    throw new Error("Unauthorized: Access token missing (strict mode enabled)");
+  }
+
+  // AUTO MODE: perform login to fetch a new token
   const authConfig = getAuthConfig();
 
   const requestBody = {
@@ -49,11 +57,10 @@ export default async function getToken(): Promise<string> {
   }
 
   const data = (await response.json()) as TokenResponse;
-  
+
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
   }
 
   return data.access_token;
 }
-
