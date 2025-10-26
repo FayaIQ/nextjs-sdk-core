@@ -30,6 +30,7 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
   static getMenus: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+  static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
   static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
