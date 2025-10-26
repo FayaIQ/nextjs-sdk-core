@@ -1,30 +1,3 @@
-/**
- * Centralized configuration for API endpoints and authentication
- */
-
-// API Base URLs
-export const API_ENDPOINTS = {
-  IDENTITY: "https://storeak-identity-service.azurewebsites.net/api/v1",
-  STORES: "https://storeak-stores-service.azurewebsites.net/api/v1",
-  INVENTORY: "https://storeak-inventory-service.azurewebsites.net/api/v1",
-  NEWS: "https://storeak-news-service.azurewebsites.net/api",
-  GPS: "https://storeak-gps-service.azurewebsites.net/api",
-  THEME: "https://storeak-Theme-service.azurewebsites.net/api",
-} as const;
-
-// Specific API Routes
-export const API_ROUTES = {
-  // Identity
-  token: `${API_ENDPOINTS.IDENTITY}/token`,
-  
-  // Store
-  storeInfo: `${API_ENDPOINTS.STORES}/Stores/Info`,
-  
-  // Inventory/Products
-  products: `${API_ENDPOINTS.INVENTORY}/Items/Paging/Mobile`,
-  productInfo: (id: string) => `${API_ENDPOINTS.INVENTORY}/Items/${id}`,
-  categories: `${API_ENDPOINTS.INVENTORY}/Menus/Search/true`,
-} as const;
 
 // Authentication Configuration
 export interface AuthConfig {

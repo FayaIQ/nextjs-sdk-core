@@ -1,6 +1,7 @@
 "use server";
 
-import { API_ROUTES, getAuthConfig, type AuthConfig } from "./config";
+import { Api } from "./api/api";
+import { getAuthConfig } from "./core/config";
 
 export type TokenResponse = {
   access_token: string;
@@ -35,7 +36,7 @@ export default async function getToken(): Promise<string> {
     IsFromNotification: false,
   };
 
-  const response = await fetch(API_ROUTES.token, {
+  const response = await fetch(Api.signIn, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(requestBody),

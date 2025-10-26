@@ -25,8 +25,25 @@ const routes = [
     handler: "my-next-core/handlers/productInfo",
     description: "Product details endpoint (dynamic route)",
   },
+  {
+    name: "orders",
+    path: [ "src" , "app", "api", "orders"],
+    handler: "my-next-core/inventory/orders/handler/orders",
+    description: "Orders listing endpoint",
+  },
+  {
+    name: "login",
+    path: ["app", "api", "auth", "login"],
+    handler: "my-next-core/handlers/login",
+    description: "User login endpoint",
+  },
+  {
+    name: "logout",
+    path: ["app", "api", "auth", "logout"],
+    handler: "my-next-core/handlers/logout",
+    description: "User logout endpoint",
+  },
 ];
-
 /**
  * Create a single API route
  */

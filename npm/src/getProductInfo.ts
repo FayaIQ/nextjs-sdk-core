@@ -1,6 +1,6 @@
-import { apiFetch } from "./fetcher";
+import { Api } from "./api/api";
+import { apiFetch } from "./core/fetcher";
 import getToken from "./token";
-import { API_ROUTES } from "./config";
 import type { Product } from "./types";
 
 /**
@@ -22,7 +22,7 @@ export async function getProductInfo(id: string): Promise<Product> {
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const token = await getToken();
-    return apiFetch<Product>(`${API_ROUTES.productInfo(id)}/`, {
+    return apiFetch<Product>(`${Api.getProductInfo(id)}/`, {
       token,
     });
   }

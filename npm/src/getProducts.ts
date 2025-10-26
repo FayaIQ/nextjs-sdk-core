@@ -1,8 +1,8 @@
-import { apiFetch } from "./fetcher";
+import { apiFetch } from "./core/fetcher";
 import getToken from "./token";
-import { API_ROUTES } from "./config";
 import type { Product } from "./types";
 import type { ItemsFilterParameters } from "./filter-models";
+import { Api } from "./api/api";
 
 /**
  * Fetches a list of products with optional filtering and pagination
@@ -34,7 +34,7 @@ export async function getProducts({
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const token = await getToken();
-    return apiFetch<Product>(`${API_ROUTES.products}?${params.toString()}`, {
+    return apiFetch<Product>(`${Api.getProducts}?${params.toString()}`, {
       token,
     });
   }
