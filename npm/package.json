@@ -19,37 +19,63 @@
   "bin": {
     "my-next-core": "./bin/setup.js"
   },
-  "files": ["dist", "bin", "README_PACKAGE.md", "QUICK_START.md", ".env.example"],
+  "files": [
+    "dist",
+    "bin",
+    "README_PACKAGE.md",
+    "QUICK_START.md",
+    ".env.example"
+  ],
   "scripts": {
-    "build": "tsup src/index.ts src/config.ts src/handlers/storeInfo.ts src/handlers/getProducts.ts src/handlers/productInfo.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/config.ts src/handlers/storeInfo.ts src/handlers/getProducts.ts src/handlers/productInfo.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/handlers/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/handlers/index.ts --format cjs,esm --dts --watch",
     "prepublishOnly": "npm run build"
   },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
-    "./config": {
-      "types": "./dist/config.d.ts",
-      "import": "./dist/config.mjs",
-      "require": "./dist/config.js"
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
     },
-    "./handlers/storeInfo": {
-      "types": "./dist/handlers/storeInfo.d.ts",
-      "import": "./dist/handlers/storeInfo.mjs",
-      "require": "./dist/handlers/storeInfo.js"
+    "./identity": {
+      "types": "./dist/identity/index.d.ts",
+      "import": "./dist/identity/index.js",
+      "require": "./dist/identity/index.cjs"
     },
-    "./handlers/getProducts": {
-      "types": "./dist/handlers/getProducts.d.ts",
-      "import": "./dist/handlers/getProducts.mjs",
-      "require": "./dist/handlers/getProducts.js"
+    "./identity/server": {
+      "types": "./dist/identity/server.d.ts",
+      "import": "./dist/identity/server.js",
+      "require": "./dist/identity/server.cjs"
     },
-    "./handlers/productInfo": {
-      "types": "./dist/handlers/productInfo.d.ts",
-      "import": "./dist/handlers/productInfo.mjs",
-      "require": "./dist/handlers/productInfo.js"
+    "./identity/*": {
+      "types": "./dist/identity/*.d.ts",
+      "import": "./dist/identity/*.js",
+      "require": "./dist/identity/*.cjs"
+    },
+    "./handlers": {
+      "types": "./dist/handlers/index.d.ts",
+      "import": "./dist/handlers/index.js",
+      "require": "./dist/handlers/index.cjs"
+    },
+    "./handlers/*": {
+      "types": "./dist/handlers/*.d.ts",
+      "import": "./dist/handlers/*.js",
+      "require": "./dist/handlers/*.cjs"
+    },
+    "./inventory/orders": {
+      "types": "./dist/inventory/orders/index.d.ts",
+      "import": "./dist/inventory/orders/index.js",
+      "require": "./dist/inventory/orders/index.cjs"
+    },
+    "./inventory/orders/*": {
+      "types": "./dist/inventory/orders/*.d.ts",
+      "import": "./dist/inventory/orders/*.js",
+      "require": "./dist/inventory/orders/*.cjs"
     }
   },
   "peerDependencies": {
