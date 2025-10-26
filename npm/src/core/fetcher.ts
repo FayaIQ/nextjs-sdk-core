@@ -88,23 +88,27 @@ export async function apiFetch<T>(
  * Reusable API helper functions with and without authentication
  */
 
+// Import getToken for automatic token fetching
+import getToken from "../token";
+
 /**
- * GET request with authentication
+ * GET request with automatic authentication
+ * Automatically fetches the auth token - no need to pass it manually
+ * 
  * @param url - The API endpoint URL
- * @param token - Authentication token
  * @param query - Optional query parameters
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
  * 
  * @example
- * const data = await getWithAuth<Product[]>('/api/products', token, { page: 1 });
+ * const products = await getWithAuth<Product[]>('https://api.example.com/products', { page: 1 });
  */
 export async function getWithAuth<T>(
   url: string,
-  token: string,
   query?: QueryParams,
   headers?: Record<string, string>
 ): Promise<T> {
+  const token = await getToken();
   return apiFetch<T>(url, {
     method: "GET",
     token,
@@ -136,22 +140,23 @@ export async function getWithoutAuth<T>(
 }
 
 /**
- * POST request with authentication
+ * POST request with automatic authentication
+ * Automatically fetches the auth token - no need to pass it manually
+ * 
  * @param url - The API endpoint URL
- * @param token - Authentication token
  * @param data - Request body data
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
  * 
  * @example
- * const result = await postWithAuth<Order>('/api/orders', token, { items: [...] });
+ * const order = await postWithAuth<Order>('https://api.example.com/orders', { items: [...] });
  */
 export async function postWithAuth<T>(
   url: string,
-  token: string,
   data?: RequestData,
   headers?: Record<string, string>
 ): Promise<T> {
+  const token = await getToken();
   return apiFetch<T>(url, {
     method: "POST",
     token,
@@ -183,22 +188,23 @@ export async function postWithoutAuth<T>(
 }
 
 /**
- * PUT request with authentication
+ * PUT request with automatic authentication
+ * Automatically fetches the auth token - no need to pass it manually
+ * 
  * @param url - The API endpoint URL
- * @param token - Authentication token
  * @param data - Request body data
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
  * 
  * @example
- * const updated = await putWithAuth<Product>('/api/products/123', token, { name: 'New Name' });
+ * const updated = await putWithAuth<Product>('https://api.example.com/products/123', { name: 'New Name' });
  */
 export async function putWithAuth<T>(
   url: string,
-  token: string,
   data?: RequestData,
   headers?: Record<string, string>
 ): Promise<T> {
+  const token = await getToken();
   return apiFetch<T>(url, {
     method: "PUT",
     token,
@@ -230,20 +236,21 @@ export async function putWithoutAuth<T>(
 }
 
 /**
- * DELETE request with authentication
+ * DELETE request with automatic authentication
+ * Automatically fetches the auth token - no need to pass it manually
+ * 
  * @param url - The API endpoint URL
- * @param token - Authentication token
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
  * 
  * @example
- * await deleteWithAuth<void>('/api/products/123', token);
+ * await deleteWithAuth<void>('https://api.example.com/products/123');
  */
 export async function deleteWithAuth<T>(
   url: string,
-  token: string,
   headers?: Record<string, string>
 ): Promise<T> {
+  const token = await getToken();
   return apiFetch<T>(url, {
     method: "DELETE",
     token,
@@ -271,22 +278,23 @@ export async function deleteWithoutAuth<T>(
 }
 
 /**
- * PATCH request with authentication
+ * PATCH request with automatic authentication
+ * Automatically fetches the auth token - no need to pass it manually
+ * 
  * @param url - The API endpoint URL
- * @param token - Authentication token
  * @param data - Request body data (partial update)
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
  * 
  * @example
- * const patched = await patchWithAuth<Product>('/api/products/123', token, { price: 99.99 });
+ * const patched = await patchWithAuth<Product>('https://api.example.com/products/123', { price: 99.99 });
  */
 export async function patchWithAuth<T>(
   url: string,
-  token: string,
   data?: RequestData,
   headers?: Record<string, string>
 ): Promise<T> {
+  const token = await getToken();
   return apiFetch<T>(url, {
     method: "PATCH",
     token,

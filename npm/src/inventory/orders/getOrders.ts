@@ -25,7 +25,6 @@ export async function getOrders({
     const token = await getToken();
     return getWithAuth<OrdersResponse>(
       `${Api.getOrders}?${params.toString()}`,
-       token ,
     );
   }
 
