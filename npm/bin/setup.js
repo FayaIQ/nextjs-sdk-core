@@ -11,39 +11,46 @@ const routes = [
     name: "storeInfo",
     path: ["app", "api", "storeInfo"],
     handler: "my-next-core/handlers/storeInfo",
+    methods: ["GET"],
     description: "Store information endpoint",
   },
   {
     name: "getProducts",
     path: ["app", "api", "getProducts"],
     handler: "my-next-core/handlers/getProducts",
+    methods: ["GET"],
     description: "Products listing endpoint",
   },
   {
     name: "productInfo",
     path: ["app", "api", "productInfo", "[id]"],
     handler: "my-next-core/handlers/productInfo",
+    methods: ["GET"],
     description: "Product details endpoint (dynamic route)",
   },
   {
     name: "orders",
-    path: [ "src" , "app", "api", "orders"],
+    path: ["app", "api", "orders"],
     handler: "my-next-core/inventory/orders/handler/orders",
+    methods: ["GET"],
     description: "Orders listing endpoint",
   },
   {
     name: "login",
     path: ["app", "api", "auth", "login"],
-    handler: "my-next-core/handlers/login",
+    handler: "my-next-core/identity/handler/login",
+    methods: ["POST"],
     description: "User login endpoint",
   },
   {
     name: "logout",
     path: ["app", "api", "auth", "logout"],
-    handler: "my-next-core/handlers/logout",
+    handler: "my-next-core/identity/handler/logout",
+    methods: ["POST"],
     description: "User logout endpoint",
   },
 ];
+
 /**
  * Create a single API route
  */
@@ -62,10 +69,12 @@ function createRoute(route) {
     console.log(`⚠️  Route file already exists: ${routeFile}`);
     return false;
   } else {
-    // Write the 1-liner export
-    const content = `// Auto-generated API route - ${route.description}\nexport { GET } from "${route.handler}";\n`;
+    // Generate export statement for methods
+    const methodExports = route.methods.map(method => `export { ${method} } from "${route.handler}";`).join('\n');
+    
+    const content = `// Auto-generated API route - ${route.description}\n${methodExports}\n`;
     fs.writeFileSync(routeFile, content, "utf8");
-    console.log(`✅ Created: ${route.path.join("/")}/route.ts`);
+    console.log(`✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(', ')})`);
     return true;
   }
 }
@@ -110,7 +119,8 @@ function showHelp() {
   console.log("  npx my-next-core setup    Create all API route files\n");
   console.log("Available routes:");
   routes.forEach((route) => {
-    console.log(`  - ${route.path.join("/")} (${route.description})`);
+    const methods = route.methods.join(", ");
+    console.log(`  - ${route.path.join("/")} [${methods}] (${route.description})`);
   });
   console.log();
 }

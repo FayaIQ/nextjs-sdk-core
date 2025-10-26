@@ -1,5 +1,5 @@
-import { S as StoreInfo, P as Product } from './types-DPi3zGBH.js';
-export { A as Address, a as City, C as Country, D as District, b as StoreType, U as UnitInfo } from './types-DPi3zGBH.js';
+import { S as StoreInfo, P as Product } from './types-DPi3zGBH.cjs';
+export { A as Address, a as City, C as Country, D as District, b as StoreType, U as UnitInfo } from './types-DPi3zGBH.cjs';
 
 /**
  * Fetches store information

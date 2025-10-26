@@ -7,13 +7,10 @@ export async function putOrderApprove(id: string | number , note ?: string): Pro
   // Server-side: Use direct API call with authentication
     if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../core/fetcher");
-    const { default: getToken } = await import("../../token");
     const { Api } = await import("../../api/api");
 
-    const token = await getToken();
     return putWithAuth<ApproveOrderResponse>(
       Api.putOrderApprove(id),
-      token,
       { note: note || "" } 
     );
   }
@@ -38,14 +35,10 @@ export async function putOrderApproveList(ids: (string | number)[], note?: strin
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../core/fetcher");
-    const { default: getToken } = await import("../../token");
     const { Api } = await import("../../api/api");
     
-    const token = await getToken();
     return putWithAuth<ApproveOrderResponse>(
       Api.putOrderApproveList(),
-
-      token,
       { ordersIds : ids, note: note || "" } 
     );
   }

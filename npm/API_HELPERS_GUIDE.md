@@ -1,54 +1,52 @@
 # API Helper Functions - Usage Guide
 
-The `my-next-core` package now includes convenient helper functions for all common HTTP methods with and without authentication.
+The `my-next-core` package includes convenient helper functions for all common HTTP methods with and without authentication.
+
+**🎉 NEW:** Auth methods (`getWithAuth`, `postWithAuth`, etc.) now **automatically fetch the authentication token** - you don't need to pass it manually!
 
 ## 📚 Available Functions
 
 ### GET Requests
-- `getWithAuth<T>(url, token, query?, headers?)` - GET with authentication
+- `getWithAuth<T>(url, query?, headers?)` - GET with automatic authentication ✨
 - `getWithoutAuth<T>(url, query?, headers?)` - GET without authentication
 
 ### POST Requests
-- `postWithAuth<T>(url, token, data?, headers?)` - POST with authentication
+- `postWithAuth<T>(url, data?, headers?)` - POST with automatic authentication ✨
 - `postWithoutAuth<T>(url, data?, headers?)` - POST without authentication
 
 ### PUT Requests
-- `putWithAuth<T>(url, token, data?, headers?)` - PUT with authentication
+- `putWithAuth<T>(url, data?, headers?)` - PUT with automatic authentication ✨
 - `putWithoutAuth<T>(url, data?, headers?)` - PUT without authentication
 
 ### DELETE Requests
-- `deleteWithAuth<T>(url, token, headers?)` - DELETE with authentication
+- `deleteWithAuth<T>(url, headers?)` - DELETE with automatic authentication ✨
 - `deleteWithoutAuth<T>(url, headers?)` - DELETE without authentication
 
 ### PATCH Requests
-- `patchWithAuth<T>(url, token, data?, headers?)` - PATCH with authentication
+- `patchWithAuth<T>(url, data?, headers?)` - PATCH with automatic authentication ✨
 - `patchWithoutAuth<T>(url, data?, headers?)` - PATCH without authentication
 
 ---
 
 ## 🎯 Usage Examples
 
-### GET with Authentication
+### GET with Authentication (Automatic Token!)
 
 ```typescript
-import { getWithAuth, getToken } from 'my-next-core';
+import { getWithAuth } from 'my-next-core';
 
-// In a server component
+// No need to fetch token manually - it's automatic! ✨
 async function fetchUserProfile() {
-  const token = await getToken();
   const profile = await getWithAuth<UserProfile>(
-    'https://api.example.com/user/profile',
-    token
+    'https://api.example.com/user/profile'
   );
   return profile;
 }
 
 // With query parameters
 async function fetchProducts() {
-  const token = await getToken();
   const products = await getWithAuth<Product[]>(
     'https://api.example.com/products',
-    token,
     { page: 1, limit: 20, category: 'electronics' }
   );
   return products;
@@ -56,10 +54,8 @@ async function fetchProducts() {
 
 // With custom headers
 async function fetchWithCustomHeaders() {
-  const token = await getToken();
   const data = await getWithAuth<Data>(
     'https://api.example.com/data',
-    token,
     { filter: 'active' },
     { 'X-Custom-Header': 'value' }
   );
