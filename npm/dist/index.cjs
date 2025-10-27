@@ -53,10 +53,10 @@ module.exports = __toCommonJS(index_exports);
 
 // src/api/api.ts
 var _Api = class _Api {
-  // Dynamic endpoints with IDs
   static getProductInfo(id) {
     return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
+  // Dynamic endpoints with IDs
   // Wishlist endpoints (lowercase per spec)
   static postWish(id) {
     return `${_Api.INVENTORY_BASE}/v1/items/${id}/wish`;
@@ -150,7 +150,7 @@ _Api.phoneVerificationSend = `${_Api.IDENTITY_BASE}/v1/verification/phone/send`;
 _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 // Other services
 _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-_Api.getCategories = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+_Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
 _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
 _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
 _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
@@ -292,7 +292,7 @@ async function getStoreInfo() {
   return response.json();
 }
 
-// src/getProducts.ts
+// src/inventory/items/getProducts.ts
 async function getProducts({
   filterParams
 }) {
@@ -311,7 +311,7 @@ async function getProducts({
   return response.json();
 }
 
-// src/getProductInfo.ts
+// src/inventory/items/getProductInfo.ts
 async function getProductInfo(id) {
   if (typeof window === "undefined") {
     const token = await getToken();

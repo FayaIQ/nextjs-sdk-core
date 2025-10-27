@@ -1,7 +1,12 @@
+<<<<<<< HEAD
 import { S as StoreInfo, P as Product } from './types-DPi3zGBH.js';
 export { A as Address, a as City, C as Country, D as District, b as StoreType, U as UnitInfo } from './types-DPi3zGBH.js';
 export { C as CurrentPhase, D as DeliveryType, h as Order, c as OrderAddress, f as OrderClient, e as OrderCustomer, g as OrderItem, a as OrderPagingParameters, O as OrderType, d as OrdersApiResponse, b as OrdersFilterParameters, P as PayType, S as Sign } from './order-models-DRKf1XSv.js';
 export { a as apiFetch } from './index-LWUFWO9Q.js';
+=======
+import { S as StoreInfo, P as Product } from './types-BKRI70Wb.js';
+export { A as Address, b as Category, a as City, C as Country, D as District, c as StoreType, U as UnitInfo } from './types-BKRI70Wb.js';
+>>>>>>> d56b8824389fb1d3e3d7cbe822fb92c1a6d7e254
 
 /**
  * Fetches store information
@@ -209,7 +214,8 @@ declare class Api {
     static phoneVerificationSend: string;
     static phoneVerificationVerify: string;
     static getProducts: string;
-    static getCategories: string;
+    static getProductInfo(id: string): string;
+    static getMenus: string;
     static getBranches: string;
     static getBrands: string;
     static getWishes: string;
@@ -219,7 +225,6 @@ declare class Api {
     static getCities: string;
     static getDeliveryZones: string;
     static getSlideShows: string;
-    static getProductInfo(id: string): string;
     static postWish(id: string | number): string;
     static deleteWish(id: string | number): string;
     static getCategoryProducts(id: string): string;

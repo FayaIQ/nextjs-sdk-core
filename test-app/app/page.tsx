@@ -1,4 +1,4 @@
-import { getStoreInfo } from "my-next-core";
+import { getProducts, getStoreInfo, ItemsFilterParameters } from "my-next-core";
 import ClientProducts from "./components/ClientProducts";
 
 // Server Component - fetches data on the server
@@ -19,7 +19,10 @@ export default async function Home() {
             🖥️ Server Component - Store Info
           </h2>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-            This data is fetched on the server using: <code className="bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded">await getStoreInfo()</code>
+            This data is fetched on the server using:{" "}
+            <code className="bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded">
+              await getStoreInfo()
+            </code>
           </p>
           <div className="bg-zinc-50 dark:bg-zinc-700 p-4 rounded">
             <pre className="text-sm overflow-auto">
@@ -34,7 +37,10 @@ export default async function Home() {
             💻 Client Component - Products
           </h2>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-            This data is fetched on the client using: <code className="bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded">getProducts()</code>
+            This data is fetched on the client using:{" "}
+            <code className="bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded">
+              getProducts()
+            </code>
           </p>
           <ClientProducts />
         </section>
@@ -46,7 +52,9 @@ export default async function Home() {
           </h2>
           <div className="space-y-4 text-sm">
             <div>
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-2">1. API Routes (ONE LINE!):</h3>
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                1. API Routes (ONE LINE!):
+              </h3>
               <code className="block bg-white dark:bg-zinc-900 p-3 rounded text-xs">
                 {`// app/api/storeInfo/route.ts
 export { GET } from "my-next-core/handlers/storeInfo";
@@ -56,7 +64,9 @@ export { GET } from "my-next-core/handlers/getProducts";`}
               </code>
             </div>
             <div>
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-2">2. Server Component:</h3>
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                2. Server Component:
+              </h3>
               <code className="block bg-white dark:bg-zinc-900 p-3 rounded text-xs">
                 {`import { getStoreInfo } from 'my-next-core';
 
@@ -67,7 +77,9 @@ export default async function Page() {
               </code>
             </div>
             <div>
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-2">3. Client Component:</h3>
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                3. Client Component:
+              </h3>
               <code className="block bg-white dark:bg-zinc-900 p-3 rounded text-xs">
                 {`'use client';
 import { getProducts, ItemsFilterParameters } from 'my-next-core';

@@ -7,6 +7,7 @@ export class Api {
   private static THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
   private static INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
   public static IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
+
   static signIn: string = `${Api.IDENTITY_BASE}/v1/token`;
   static refreshToken: string = `${Api.IDENTITY_BASE}/v1/token/refresh`;
   static sessionLogout: string = `${Api.IDENTITY_BASE}/v1/session/logout`;
@@ -25,7 +26,11 @@ export class Api {
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-  static getCategories: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+  static getProductInfo(id: string): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
+  }
+  static getMenus: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+  static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
   static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
@@ -37,15 +42,11 @@ export class Api {
   static getSlideShows: string = `${Api.THEME_BASE}/v1/SlideShows/Paging`;
 
   // Dynamic endpoints with IDs
-  static getProductInfo(id: string): string {
-    return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
-  }
 
   // Wishlist endpoints (lowercase per spec)
   static postWish(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/wish`;
   }
-
 
   static deleteWish(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
@@ -59,14 +60,12 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v3/Orders/${id}`;
   }
 
-
   // orders endpoints
 
   static getOrderFullInfo = `${Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
 
   static putOrderApprove(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}ApproveDeliveryOrder`;
-
   }
 
   static putOrderApproveList(): string {
@@ -79,26 +78,10 @@ export class Api {
 
   static putOrderDisapproveList(): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
-
   }
-
 
   static putChangeStatusOrder(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
-  }
-
-    static putOrderDiscount(id : string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
- 
-  }
-
-  static putOrderReferenceId(id : string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
-  } 
-
-
- static putOrderReferenceDeliveryId(id : string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
   }
 
 
@@ -107,31 +90,38 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
   }
 
-  static getOrdersDelagates (id : string | number): string {
+  static getOrdersDelagates(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates`;
   }
 
-
-  static postOrdersDelagates (id : string | number): string {
+  static postOrdersDelagates(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates`;
   }
 
-
-  static putOrdersDelagatesLoggedIn (id : string | number): string {
+  static putOrdersDelagatesLoggedIn(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates/LoggedInUser`;
   }
 
-
   static postOrderDelagatesList = `${Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
 
-  static deleteDelagate (orderId : string | number, delegateId : string | number): string {
+  static deleteDelagate(
+    orderId: string | number,
+    delegateId: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
   }
 
+  static putOrderDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+  }
 
+  static putOrderReferenceId(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+  }
 
-
-
+  static putOrderReferenceDeliveryId(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
+  }
 
   /////////////////////////////////////////
   //
@@ -141,7 +131,6 @@ export class Api {
   }
 
   static getCheckoutQuote: string = `${Api.INVENTORY_BASE}/v1/Checkout/Quote`;
-
 
   // Cart endpoints
   static getCurrentCart: string = `${Api.INVENTORY_BASE}/v1/Carts/Current`;
@@ -157,5 +146,3 @@ export class Api {
     )}`;
   }
 }
-
-

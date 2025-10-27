@@ -112,7 +112,13 @@ const routes = [
     exportName: "PUTOrderReferenceDeliveryId",
     description: "Update order reference delivery ID",
   },
-
+  {
+    name: "menus",
+    path: ["src", "app", "api", "menus", "getMenus"],
+    handler: "my-next-core/inventory/menus/getMenus",
+    methods: ["GET"],
+    description: "Menus listing endpoint",
+  },
 ];
 
 /**
@@ -141,7 +147,11 @@ function createRoute(route) {
     
     const content = `// Auto-generated API route - ${route.description}\n${methodExports}\n`;
     fs.writeFileSync(routeFile, content, "utf8");
-    console.log(`✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(', ')})`);
+    console.log(
+      `✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(
+        ", "
+      )})`
+    );
     return true;
   }
 }
@@ -173,7 +183,9 @@ function setupRoutes() {
   console.log("📖 Next steps:");
   console.log("   1. Configure your environment variables in .env.local");
   console.log("   2. Import functions in your components:");
-  console.log('      import { getStoreInfo, getProducts, getProductInfo } from "my-next-core";');
+  console.log(
+    '      import { getStoreInfo, getProducts, getProductInfo } from "my-next-core";'
+  );
   console.log("   3. Start your development server: npm run dev\n");
 }
 
@@ -187,7 +199,9 @@ function showHelp() {
   console.log("Available routes:");
   routes.forEach((route) => {
     const methods = route.methods.join(", ");
-    console.log(`  - ${route.path.join("/")} [${methods}] (${route.description})`);
+    console.log(
+      `  - ${route.path.join("/")} [${methods}] (${route.description})`
+    );
   });
   console.log();
 }
@@ -198,5 +212,7 @@ if (command === "setup" || command === "init") {
 } else if (command === "help" || command === "--help" || command === "-h") {
   showHelp();
 } else {
-  console.log('⚠️  Unknown command. Use "npx my-next-core setup" or "npx my-next-core help"');
+  console.log(
+    '⚠️  Unknown command. Use "npx my-next-core setup" or "npx my-next-core help"'
+  );
 }

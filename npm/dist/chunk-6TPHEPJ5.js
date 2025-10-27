@@ -1,48 +1,3 @@
-"use strict";
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-
-// src/core/index.ts
-var core_exports = {};
-__export(core_exports, {
-  deleteWithAuth: () => deleteWithAuth,
-  deleteWithoutAuth: () => deleteWithoutAuth,
-  getWithAuth: () => getWithAuth,
-  getWithoutAuth: () => getWithoutAuth,
-  patchWithAuth: () => patchWithAuth,
-  patchWithoutAuth: () => patchWithoutAuth,
-  postWithAuth: () => postWithAuth,
-  postWithoutAuth: () => postWithoutAuth,
-  putWithAuth: () => putWithAuth,
-  putWithoutAuth: () => putWithoutAuth
-});
-module.exports = __toCommonJS(core_exports);
-
 // src/api/api.ts
 var _Api = class _Api {
   static getProductInfo(id) {
@@ -77,15 +32,6 @@ var _Api = class _Api {
   static putChangeStatusOrder(id) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
   }
-  static putOrderDiscount(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
-  }
-  static putOrderReferenceId(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
-  }
-  static putOrderReferenceDeliveryId(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
-  }
   static cancelOrder(id) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
   }
@@ -100,6 +46,15 @@ var _Api = class _Api {
   }
   static deleteDelagate(orderId, delegateId) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
+  }
+  static putOrderDiscount(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+  }
+  static putOrderReferenceId(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+  }
+  static putOrderReferenceDeliveryId(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
   }
   /////////////////////////////////////////
   //
@@ -161,6 +116,9 @@ _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
 _Api.postCartItems = `${_Api.INVENTORY_BASE}/v1/Carts/Items`;
 var Api = _Api;
 
+// src/token.ts
+import { cookies } from "next/headers";
+
 // src/core/config.ts
 var getAuthConfig = () => {
   if (typeof process !== "undefined" && process.env) {
@@ -191,8 +149,7 @@ var getAuthConfig = () => {
 // src/token.ts
 var AUTH_MODE = process.env.STOREAK_AUTH_MODE || "auto";
 async function getToken() {
-  if (AUTH_MODE === "strict" && typeof window === "undefined") {
-    const { cookies } = await import("next/headers");
+  if (AUTH_MODE === "strict") {
     const cookie = await cookies();
     const accessTokenCookie = cookie.get("access_token")?.value;
     if (accessTokenCookie && accessTokenCookie) {
@@ -270,101 +227,23 @@ async function apiFetch(url, options = {}) {
   }
   return response.json();
 }
-async function getWithAuth(url, query, headers) {
-  const token = await getToken();
-  return apiFetch(url, {
-    method: "GET",
-    token,
-    query,
-    headers
-  });
-}
-async function getWithoutAuth(url, query, headers) {
-  return apiFetch(url, {
-    method: "GET",
-    query,
-    headers
-  });
-}
-async function postWithAuth(url, data, headers) {
-  const token = await getToken();
-  return apiFetch(url, {
-    method: "POST",
-    token,
-    data,
-    headers
-  });
-}
-async function postWithoutAuth(url, data, headers = {}) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    },
-    body: data ? JSON.stringify(data) : void 0
-  });
-  if (!response.ok) {
-    throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
+
+// src/storeInfo.ts
+async function getStoreInfo() {
+  if (typeof window === "undefined") {
+    const token = await getToken();
+    return apiFetch(Api.getStoreInfo, { token });
   }
-  return await response.json();
+  const response = await fetch("/api/storeInfo");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch store info: ${response.statusText}`);
+  }
+  return response.json();
 }
-async function putWithAuth(url, data, headers) {
-  const token = await getToken();
-  return apiFetch(url, {
-    method: "PUT",
-    token,
-    data,
-    headers
-  });
-}
-async function putWithoutAuth(url, data, headers) {
-  return apiFetch(url, {
-    method: "PUT",
-    data,
-    headers
-  });
-}
-async function deleteWithAuth(url, headers) {
-  const token = await getToken();
-  return apiFetch(url, {
-    method: "DELETE",
-    token,
-    headers
-  });
-}
-async function deleteWithoutAuth(url, headers) {
-  return apiFetch(url, {
-    method: "DELETE",
-    headers
-  });
-}
-async function patchWithAuth(url, data, headers) {
-  const token = await getToken();
-  return apiFetch(url, {
-    method: "PATCH",
-    token,
-    data,
-    headers
-  });
-}
-async function patchWithoutAuth(url, data, headers) {
-  return apiFetch(url, {
-    method: "PATCH",
-    data,
-    headers
-  });
-}
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  deleteWithAuth,
-  deleteWithoutAuth,
-  getWithAuth,
-  getWithoutAuth,
-  patchWithAuth,
-  patchWithoutAuth,
-  postWithAuth,
-  postWithoutAuth,
-  putWithAuth,
-  putWithoutAuth
-});
+
+export {
+  Api,
+  getToken,
+  apiFetch,
+  getStoreInfo
+};
