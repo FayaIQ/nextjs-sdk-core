@@ -1,5 +1,3 @@
-import { getWithAuth } from "../../core/fetcher";
-import { Api } from "../../api/api";
 
 /**
  * Fetches a list of products with optional filtering and pagination
@@ -23,6 +21,8 @@ import { Api } from "../../api/api";
 export async function getCoupons() {
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
+    const { getWithAuth } = await import("../../core");
+    const { Api } = await import("../../api/api");
     return getWithAuth(Api.getCouponOffers);
   }
 

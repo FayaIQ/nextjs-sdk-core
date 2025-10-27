@@ -1,18 +1,18 @@
 import {
-  DeliveryType,
+  DeleveryType,
   OrderPagingParameters,
   OrderType,
   OrdersFilterParameters,
   PayType,
   Sign
-} from "../../chunk-5K2Y5K5A.js";
+} from "../../chunk-32ZFB6TZ.js";
 import {
   putWithAuth
-} from "../../chunk-A723DX7U.js";
-import "../../chunk-GQDJ3DYT.js";
+} from "../../chunk-76HZBVY5.js";
+import "../../chunk-VOEBTXP5.js";
 import {
   Api
-} from "../../chunk-Q7ILR5WQ.js";
+} from "../../chunk-DY3BK5GC.js";
 
 // src/inventory/orders/getOrders.ts
 async function getOrders({
@@ -20,9 +20,9 @@ async function getOrders({
 }) {
   const params = filterParams.toURLSearchParams();
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-55YFY27Y.js");
-    const { default: getToken } = await import("../../token-NMZUG2ER.js");
-    const { Api: Api2 } = await import("../../api-6ERQX7G2.js");
+    const { getWithAuth } = await import("../../fetcher-UK3RVZCD.js");
+    const { default: getToken } = await import("../../token-LPYK6WGA.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
     const token = await getToken();
     return getWithAuth(
       `${Api2.getOrders}?${params.toString()}`
@@ -38,10 +38,8 @@ async function getOrders({
 // src/inventory/orders/getOrder.ts
 async function getOrder(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-55YFY27Y.js");
-    const { default: getToken } = await import("../../token-NMZUG2ER.js");
-    const { Api: Api2 } = await import("../../api-6ERQX7G2.js");
-    const token = await getToken();
+    const { getWithAuth } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
     return getWithAuth(
       `${Api2.getOrder(id)}`
     );
@@ -56,8 +54,8 @@ async function getOrder(id) {
 // src/inventory/orders/putOrderApprove.ts
 async function putOrderApprove(id, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-55YFY27Y.js");
-    const { Api: Api2 } = await import("../../api-6ERQX7G2.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
     return putWithAuth2(
       Api2.putOrderApprove(id),
       { note: note || "" }
@@ -77,8 +75,8 @@ async function putOrderApprove(id, note) {
 }
 async function putOrderApproveList(ids, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-55YFY27Y.js");
-    const { Api: Api2 } = await import("../../api-6ERQX7G2.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
     return putWithAuth2(
       Api2.putOrderApproveList(),
       { ordersIds: ids, note: note || "" }
@@ -100,8 +98,8 @@ async function putOrderApproveList(ids, note) {
 // src/inventory/orders/putOrderDisapprove.ts
 async function putOrderDisapprove(id, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-55YFY27Y.js");
-    const { Api: Api2 } = await import("../../api-6ERQX7G2.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
     return putWithAuth2(
       Api2.putOrderDisapprove(id),
       { note }
@@ -121,8 +119,8 @@ async function putOrderDisapprove(id, note) {
 }
 async function putOrderDisapproveList(ids, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-55YFY27Y.js");
-    const { Api: Api2 } = await import("../../api-6ERQX7G2.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
     return putWithAuth2(
       Api2.putOrderDisapproveList(),
       { ordersIds: ids, note }
@@ -144,8 +142,8 @@ async function putOrderDisapproveList(ids, note) {
 // src/inventory/orders/getOrdersFullInfo.ts
 async function getOrdersFullInfo(body) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-55YFY27Y.js");
-    const { Api: Api2 } = await import("../../api-6ERQX7G2.js");
+    const { postWithAuth } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
     return postWithAuth(
       Api2.getOrderFullInfo,
       { orderIds: body }
@@ -167,7 +165,9 @@ async function getOrdersFullInfo(body) {
 // src/inventory/orders/putOrderChangeStatus.ts
 async function putOrderChangeStatus(orderId, data) {
   if (typeof window === "undefined") {
-    return await putWithAuth(Api.putChangeStatusOrder(orderId), data);
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
+    return await putWithAuth2(Api2.putChangeStatusOrder(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/change-status`, {
     method: "PUT",
@@ -203,7 +203,9 @@ async function putOrderDiscount(orderId, data) {
 // src/inventory/orders/putOrderReferenceId.ts
 async function putOrderReferenceId(orderId, data) {
   if (typeof window === "undefined") {
-    return await putWithAuth(Api.putOrderReferenceId(orderId), data);
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
+    return await putWithAuth2(Api2.putOrderReferenceId(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/referenceId`, {
     method: "PUT",
@@ -221,7 +223,9 @@ async function putOrderReferenceId(orderId, data) {
 // src/inventory/orders/putOrderReferenceDeliveryId.ts
 async function putOrderReferenceDeliveryId(orderId, data) {
   if (typeof window === "undefined") {
-    return await putWithAuth(Api.putOrderReferenceDeliveryId(orderId), data);
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-UK3RVZCD.js");
+    const { Api: Api2 } = await import("../../api-3Z4KILZV.js");
+    return await putWithAuth2(Api2.putOrderReferenceDeliveryId(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/referenceDeliveryId`, {
     method: "PUT",
@@ -446,7 +450,7 @@ async function PUT8(request, { params }) {
   }
 }
 export {
-  DeliveryType,
+  DeleveryType,
   GET2 as GETOrder,
   GET as GETOrders,
   OrderPagingParameters,

@@ -1,5 +1,5 @@
 // Main API functions - Works in both server and client components
-export { getStoreInfo } from "./storeInfo";
+export { getStoreInfo } from "./identity/application/storeInfo";
 export { getProducts } from "./inventory/items/getProducts";
 export { getProductInfo } from "./inventory/items/getProductInfo";
 

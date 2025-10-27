@@ -114,11 +114,69 @@ const routes = [
   },
   {
     name: "menus",
-    path: ["src", "app", "api", "menus", "getMenus"],
-    handler: "my-next-core/inventory/menus/getMenus",
+    path: ["src", "app", "api", "menus"],
+    handler: "my-next-core/inventory/menus",
     methods: ["GET"],
+    exportName: "GetMenusGET",
     description: "Menus listing endpoint",
   },
+  {
+    name: "products",
+    path: ["src", "app", "api", "products"],
+    handler: "my-next-core/inventory/items",
+    methods: ["GET"],
+    exportName: "GetProductsGET",
+    description: "Products listing endpoint",
+  },
+  {
+    name: "productInfo",
+    path: ["src", "app", "api", "products", "[id]"],
+    handler: "my-next-core/inventory/items",
+    methods: ["GET"],
+    exportName: "ProductInfoGET",
+    description: "Product details endpoint",
+  },
+  {
+    name: "coupons",
+    path: ["src", "app", "api", "offers", "coupons"],
+    handler: "my-next-core/inventory/offers",
+    methods: ["GET"],
+    exportName: "CouponsGET",
+    description: "Coupons/offers listing endpoint",
+  },
+  {
+    name: "locations",
+    path: ["src", "app", "api", "locations" , "countries"],
+    handler: "my-next-core/gps/locations",
+    methods: ["GET"],
+    exportName: "getCountriesHandler",
+    description: "Locations listing endpoint",
+  },
+  {
+    name: "location",
+    path: ["src", "app", "api", "locations", "[parentId]" , "children"],
+    handler: "my-next-core/gps/locations",
+    methods: ["GET"],
+    exportName: "getLocationChildrenHandler",
+    description: "Location details endpoint",
+  },
+  {
+    name: "stores",
+    path: ["src", "app", "api", "stores"],
+    handler: "my-next-core/identity/application",
+    methods: ["GET"],
+    exportName: "GETStores",
+    description: "Stores listing endpoint",
+  },
+  {
+    name: "storeInfo",
+    path: ["src", "app", "api", "storeInfo"],
+    handler: "my-next-core/identity/application",
+    methods: ["GET"],
+    exportName: "GETStoreInfo",
+    description: "Store details endpoint",
+  }
+
 ];
 
 /**
@@ -183,9 +241,6 @@ function setupRoutes() {
   console.log("📖 Next steps:");
   console.log("   1. Configure your environment variables in .env.local");
   console.log("   2. Import functions in your components:");
-  console.log(
-    '      import { getStoreInfo, getProducts, getProductInfo } from "my-next-core";'
-  );
   console.log("   3. Start your development server: npm run dev\n");
 }
 

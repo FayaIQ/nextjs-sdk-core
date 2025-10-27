@@ -40,10 +40,10 @@ var init_api = __esm({
   "src/api/api.ts"() {
     "use strict";
     _Api = class _Api {
-      // Dynamic endpoints with IDs
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
+      // Dynamic endpoints with IDs
       // Wishlist endpoints (lowercase per spec)
       static postWish(id) {
         return `${_Api.INVENTORY_BASE}/v1/items/${id}/wish`;
@@ -72,15 +72,6 @@ var init_api = __esm({
       static putChangeStatusOrder(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
       }
-      static putOrderDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
-      }
-      static putOrderReferenceId(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
-      }
-      static putOrderReferenceDeliveryId(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
-      }
       static cancelOrder(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
       }
@@ -96,7 +87,18 @@ var init_api = __esm({
       static deleteDelagate(orderId, delegateId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
       }
-      /////////////////////////////////////////
+      static putOrderDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+      }
+      static putOrderReferenceId(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+      }
+      static putOrderReferenceDeliveryId(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
+      }
+      static getLocationChildren(parentId) {
+        return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
+      }
       //
       static getInvoiceDiscount(code) {
         const clean = encodeURIComponent(code);
@@ -137,7 +139,8 @@ var init_api = __esm({
     _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-    _Api.getCategories = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+    _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+    _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
     _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
     _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
     _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
@@ -150,6 +153,11 @@ var init_api = __esm({
     // orders endpoints
     _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
     _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+    // identity 
+    _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
+    /////////////////////////////////////////
+    //GPS 
+    _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
     _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
     // Cart endpoints
     _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
@@ -394,7 +402,7 @@ var init_fetcher = __esm({
 // src/inventory/orders/index.ts
 var orders_exports = {};
 __export(orders_exports, {
-  DeliveryType: () => DeliveryType,
+  DeleveryType: () => DeleveryType,
   GETOrder: () => GET2,
   GETOrders: () => GET,
   OrderPagingParameters: () => OrderPagingParameters,
@@ -450,9 +458,7 @@ async function getOrders({
 async function getOrder(id) {
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { default: getToken2 } = await Promise.resolve().then(() => (init_token(), token_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    const token = await getToken2();
     return getWithAuth2(
       `${Api2.getOrder(id)}`
     );
@@ -484,12 +490,12 @@ var PayType = /* @__PURE__ */ ((PayType2) => {
   PayType2[PayType2["CashOnline"] = 3] = "CashOnline";
   return PayType2;
 })(PayType || {});
-var DeliveryType = /* @__PURE__ */ ((DeliveryType2) => {
-  DeliveryType2[DeliveryType2["None"] = 0] = "None";
-  DeliveryType2[DeliveryType2["StorePickup"] = 1] = "StorePickup";
-  DeliveryType2[DeliveryType2["HomeDelivery"] = 2] = "HomeDelivery";
-  return DeliveryType2;
-})(DeliveryType || {});
+var DeleveryType = /* @__PURE__ */ ((DeleveryType2) => {
+  DeleveryType2[DeleveryType2["None"] = 0] = "None";
+  DeleveryType2[DeleveryType2["StorePickup"] = 1] = "StorePickup";
+  DeleveryType2[DeleveryType2["HomeDelivery"] = 2] = "HomeDelivery";
+  return DeleveryType2;
+})(DeleveryType || {});
 var Sign = /* @__PURE__ */ ((Sign2) => {
   Sign2[Sign2["Equal"] = 0] = "Equal";
   Sign2[Sign2["NotEqual"] = 1] = "NotEqual";
@@ -551,7 +557,7 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
     apartmentId = null,
     orderType = null,
     payType = null,
-    deliveryType = null,
+    DeleveryType: DeleveryType2 = null,
     username = null,
     customerId = null,
     delegateId = null,
@@ -587,7 +593,7 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
     this.apartmentId = apartmentId;
     this.orderType = orderType;
     this.payType = payType;
-    this.deliveryType = deliveryType;
+    this.DeleveryType = DeleveryType2;
     this.username = username;
     this.customerId = customerId;
     this.delegateId = delegateId;
@@ -628,7 +634,7 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
       apartmentId: updates.apartmentId !== void 0 ? updates.apartmentId : this.apartmentId,
       orderType: updates.orderType !== void 0 ? updates.orderType : this.orderType,
       payType: updates.payType !== void 0 ? updates.payType : this.payType,
-      deliveryType: updates.deliveryType !== void 0 ? updates.deliveryType : this.deliveryType,
+      DeleveryType: updates.DeleveryType !== void 0 ? updates.DeleveryType : this.DeleveryType,
       username: updates.username !== void 0 ? updates.username : this.username,
       customerId: updates.customerId !== void 0 ? updates.customerId : this.customerId,
       delegateId: updates.delegateId !== void 0 ? updates.delegateId : this.delegateId,
@@ -643,6 +649,7 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
   }
   /**
    * Convert to URL search parameters
+   * FIXED: This is the key method that was causing the issue
    */
   toURLSearchParams() {
     const params = new URLSearchParams();
@@ -677,7 +684,7 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
     if (this.apartmentId !== null) params.set("AppartmentId", this.apartmentId.toString());
     if (this.orderType !== null) params.set("OrderType", this.orderType.toString());
     if (this.payType !== null) params.set("PayType", this.payType.toString());
-    if (this.deliveryType !== null) params.set("DeleveryType", this.deliveryType.toString());
+    if (this.DeleveryType !== null) params.set("DeleveryType", this.DeleveryType.toString());
     if (this.username !== null) params.set("Username", this.username);
     if (this.customerId !== null) params.set("CustomerId", this.customerId);
     if (this.delegateId !== null) params.set("DelagateId", this.delegateId);
@@ -720,7 +727,7 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
     if (this.apartmentId !== null) map.AppartmentId = this.apartmentId;
     if (this.orderType !== null) map.OrderType = this.orderType;
     if (this.payType !== null) map.PayType = this.payType;
-    if (this.deliveryType !== null) map.DeleveryType = this.deliveryType;
+    if (this.DeleveryType !== null) map.DeleveryType = this.DeleveryType;
     if (this.username !== null) map.Username = this.username;
     if (this.customerId !== null) map.CustomerId = this.customerId;
     if (this.delegateId !== null) map.DelagateId = this.delegateId;
@@ -770,7 +777,7 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
       apartmentId: params.get("AppartmentId") ? parseInt(params.get("AppartmentId")) : null,
       orderType: params.get("OrderType") ? parseInt(params.get("OrderType")) : null,
       payType: params.get("PayType") ? parseInt(params.get("PayType")) : null,
-      deliveryType: params.get("DeleveryType") ? parseInt(params.get("DeleveryType")) : null,
+      DeleveryType: params.get("DeleveryType") ? parseInt(params.get("DeleveryType")) : null,
       username: params.get("Username") || null,
       customerId: params.get("CustomerId") || null,
       delegateId: params.get("DelagateId") || null,
@@ -897,11 +904,11 @@ async function getOrdersFullInfo(body) {
 }
 
 // src/inventory/orders/putOrderChangeStatus.ts
-init_api();
-init_fetcher();
 async function putOrderChangeStatus(orderId, data) {
   if (typeof window === "undefined") {
-    return await putWithAuth(Api.putChangeStatusOrder(orderId), data);
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return await putWithAuth2(Api2.putChangeStatusOrder(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/change-status`, {
     method: "PUT",
@@ -937,11 +944,11 @@ async function putOrderDiscount(orderId, data) {
 }
 
 // src/inventory/orders/putOrderReferenceId.ts
-init_api();
-init_fetcher();
 async function putOrderReferenceId(orderId, data) {
   if (typeof window === "undefined") {
-    return await putWithAuth(Api.putOrderReferenceId(orderId), data);
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return await putWithAuth2(Api2.putOrderReferenceId(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/referenceId`, {
     method: "PUT",
@@ -957,11 +964,11 @@ async function putOrderReferenceId(orderId, data) {
 }
 
 // src/inventory/orders/putOrderReferenceDeliveryId.ts
-init_api();
-init_fetcher();
 async function putOrderReferenceDeliveryId(orderId, data) {
   if (typeof window === "undefined") {
-    return await putWithAuth(Api.putOrderReferenceDeliveryId(orderId), data);
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return await putWithAuth2(Api2.putOrderReferenceDeliveryId(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/referenceDeliveryId`, {
     method: "PUT",
@@ -1187,7 +1194,7 @@ async function PUT8(request, { params }) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  DeliveryType,
+  DeleveryType,
   GETOrder,
   GETOrders,
   OrderPagingParameters,

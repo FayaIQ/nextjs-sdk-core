@@ -1,7 +1,3 @@
-"use server";
-
-import { Api } from "../../api/api";
-import { getWithAuth } from "../../core/fetcher";
 
 /**
  * Get single order details by ID
@@ -12,10 +8,8 @@ export async function getOrder( id : string ) {
   if (typeof window === "undefined") {
     // Import these from your existing setup
     const { getWithAuth  } = await import("../../core/fetcher");
-    const { default: getToken } = await import("../../token");
     const { Api} = await import("../../api/api");
-    
-    const token = await getToken();
+
     return getWithAuth(
       `${Api.getOrder(id)}`,
     );

@@ -77,15 +77,6 @@ var _Api = class _Api {
   static putChangeStatusOrder(id) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
   }
-  static putOrderDiscount(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
-  }
-  static putOrderReferenceId(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
-  }
-  static putOrderReferenceDeliveryId(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
-  }
   static cancelOrder(id) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
   }
@@ -101,7 +92,18 @@ var _Api = class _Api {
   static deleteDelagate(orderId, delegateId) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
   }
-  /////////////////////////////////////////
+  static putOrderDiscount(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+  }
+  static putOrderReferenceId(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+  }
+  static putOrderReferenceDeliveryId(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
+  }
+  static getLocationChildren(parentId) {
+    return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
+  }
   //
   static getInvoiceDiscount(code) {
     const clean = encodeURIComponent(code);
@@ -143,6 +145,7 @@ _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/veri
 // Other services
 _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
 _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+_Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
 _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
 _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
 _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
@@ -155,6 +158,11 @@ _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
 // orders endpoints
 _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
 _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+// identity 
+_Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
+/////////////////////////////////////////
+//GPS 
+_Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
 _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
 // Cart endpoints
 _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;

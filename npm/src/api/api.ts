@@ -123,7 +123,21 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
   }
 
+  // identity 
+  static getApplicationsStores: string = `${Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
+
   /////////////////////////////////////////
+  //GPS 
+
+
+  static getCountries: string = `${Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
+
+
+static getLocationChildren(parentId: string | number): string {
+    return `${Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
+  }
+
+
   //
   static getInvoiceDiscount(code: string): string {
     const clean = encodeURIComponent(code);

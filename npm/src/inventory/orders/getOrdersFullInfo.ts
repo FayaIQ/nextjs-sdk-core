@@ -1,7 +1,7 @@
-import { Order } from "./order-models";
+import { OrderDetail } from "./order-models";
 
 export interface OrderFullInfoResponse {
-  data: Order[];
+  data: OrderDetail[];
 }
 
 export async function getOrdersFullInfo( body: string | number []): Promise<OrderFullInfoResponse> {

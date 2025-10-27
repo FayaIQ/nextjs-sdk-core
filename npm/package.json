@@ -27,8 +27,8 @@
     ".env.example"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/handlers/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/handlers/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/gps/locations/index.ts src/identity/application/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/identity/application/index.ts src/gps/locations/index.ts --format cjs,esm --dts --watch",
     "prepublishOnly": "npm run build"
   },
   "exports": {
@@ -42,7 +42,28 @@
       "import": "./dist/core/index.js",
       "require": "./dist/core/index.cjs"
     },
-    "./identity": {
+    "./gps": {
+      "types": "./dist/identity/index.d.ts",
+      "import": "./dist/identity/index.js",
+      "require": "./dist/identity/index.cjs"
+    },
+    "./gps/*": {
+      "types": "./dist/identity/*.d.ts",
+      "import": "./dist/identity/*.js",
+      "require": "./dist/identity/*.cjs"
+    },
+
+    "./gps/locations": {
+      "types": "./dist/gps/locations/index.d.ts",
+      "import": "./dist/gps/locations/index.js",
+      "require": "./dist/gps/locations/index.cjs"
+    },
+    "./gps/locations/*": {
+      "types": "./dist/gps/locations/*.d.ts",
+      "import": "./dist/gps/locations/*.js",
+      "require": "./dist/gps/locations/*.cjs"
+    },
+      "./identity": {
       "types": "./dist/identity/index.d.ts",
       "import": "./dist/identity/index.js",
       "require": "./dist/identity/index.cjs"
@@ -52,17 +73,18 @@
       "import": "./dist/identity/*.js",
       "require": "./dist/identity/*.cjs"
     },
-    "./handlers": {
-      "types": "./dist/handlers/index.d.ts",
-      "import": "./dist/handlers/index.js",
-      "require": "./dist/handlers/index.cjs"
+       "./identity/application": {
+      "types": "./dist/identity/application/index.d.ts",
+      "import": "./dist/identity/application/index.js",
+      "require": "./dist/identity/application/index.cjs"
     },
-    "./handlers/*": {
-      "types": "./dist/handlers/*.d.ts",
-      "import": "./dist/handlers/*.js",
-      "require": "./dist/handlers/*.cjs"
+    "./identity/application/*": {
+      "types": "./dist/identity/application/*.d.ts",
+      "import": "./dist/identity/application/*.js",
+      "require": "./dist/identity/application/*.cjs"
     },
-  
+
+
     "./inventory/orders": {
       "types": "./dist/inventory/orders/index.d.ts",
       "import": "./dist/inventory/orders/index.js",
@@ -72,6 +94,36 @@
       "types": "./dist/inventory/orders/*.d.ts",
       "import": "./dist/inventory/orders/*.js",
       "require": "./dist/inventory/orders/*.cjs"
+    },
+    "./inventory/items": {
+      "types": "./dist/inventory/items/index.d.ts",
+      "import": "./dist/inventory/items/index.js",
+      "require": "./dist/inventory/items/index.cjs"
+    },
+    "./inventory/items/*": {
+      "types": "./dist/inventory/items/*.d.ts",
+      "import": "./dist/inventory/items/*.js",
+      "require": "./dist/inventory/items/*.cjs"
+    },
+    "./inventory/menus": {
+      "types": "./dist/inventory/menus/index.d.ts",
+      "import": "./dist/inventory/menus/index.js",
+      "require": "./dist/inventory/menus/index.cjs"
+    },
+    "./inventory/menus/*": {
+      "types": "./dist/inventory/menus/*.d.ts",
+      "import": "./dist/inventory/menus/*.js",
+      "require": "./dist/inventory/menus/*.cjs"
+    },
+    "./inventory/offers": {
+      "types": "./dist/inventory/offers/index.d.ts",
+      "import": "./dist/inventory/offers/index.js",
+      "require": "./dist/inventory/offers/index.cjs"
+    },
+    "./inventory/offers/*": {
+      "types": "./dist/inventory/offers/*.d.ts",
+      "import": "./dist/inventory/offers/*.js",
+      "require": "./dist/inventory/offers/*.cjs"
     }
   },
   "peerDependencies": {

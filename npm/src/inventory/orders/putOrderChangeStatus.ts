@@ -1,7 +1,3 @@
-"use server";
-
-import { Api } from "../../api/api";
-import { putWithAuth } from "../../core/fetcher";
 
 export interface ChangeOrderStatusRequest {
   status: number;
@@ -17,6 +13,8 @@ export async function putOrderChangeStatus(
   data: ChangeOrderStatusRequest
 ): Promise<any> {
    if (typeof window === "undefined") {
+    const { putWithAuth } = await import("../../core/fetcher");
+    const { Api } = await import("../../api/api");
     return await putWithAuth(Api.putChangeStatusOrder(orderId), data);
    }
 

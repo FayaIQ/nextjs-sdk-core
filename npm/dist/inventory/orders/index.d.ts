@@ -1,5 +1,5 @@
-import { b as OrdersFilterParameters, d as OrdersApiResponse, h as Order } from '../../order-models-DRKf1XSv.js';
-export { C as CurrentPhase, D as DeliveryType, c as OrderAddress, f as OrderClient, e as OrderCustomer, g as OrderItem, a as OrderPagingParameters, O as OrderType, P as PayType, S as Sign } from '../../order-models-DRKf1XSv.js';
+import { b as OrdersFilterParameters, d as OrdersApiResponse, i as OrderDetail } from '../../order-models-_98VLduD.js';
+export { C as CurrentPhase, D as DeleveryType, h as Order, c as OrderAddress, f as OrderClient, e as OrderCustomer, g as OrderItem, a as OrderPagingParameters, O as OrderType, P as PayType, S as Sign } from '../../order-models-_98VLduD.js';
 import { NextRequest, NextResponse } from 'next/server';
 
 declare function getOrders({ filterParams, }: {
@@ -26,7 +26,7 @@ declare function putOrderDisapprove(id: string | number, note: string): Promise<
 declare function putOrderDisapproveList(ids: (string | number)[], note?: string): Promise<DisapproveOrderResponse>;
 
 interface OrderFullInfoResponse {
-    data: Order[];
+    data: OrderDetail[];
 }
 declare function getOrdersFullInfo(body: string | number[]): Promise<OrderFullInfoResponse>;
 
@@ -180,4 +180,4 @@ declare function PUT(request: NextRequest, { params }: {
     }>;
 }): Promise<NextResponse<any>>;
 
-export { type ApproveOrderResponse, type ChangeOrderStatusRequest, type DisapproveOrderResponse, GET as GETOrder, GET$1 as GETOrders, Order, type OrderDiscountRequest, type OrderFullInfoResponse, type OrderReferenceDeliveryIdRequest, type OrderReferenceIdRequest, OrdersApiResponse, OrdersFilterParameters, POST as POSTOrderFullInfo, PUT$7 as PUTOrderApprove, PUT$5 as PUTOrderApproveList, PUT$3 as PUTOrderChangeStatus, PUT$6 as PUTOrderDisapprove, PUT$4 as PUTOrderDisapproveList, PUT$2 as PUTOrderDiscount, PUT as PUTOrderReferenceDeliveryId, PUT$1 as PUTOrderReferenceId, getOrder, getOrders, getOrdersFullInfo, putOrderApprove, putOrderApproveList, putOrderChangeStatus, putOrderDisapprove, putOrderDisapproveList, putOrderDiscount, putOrderReferenceDeliveryId, putOrderReferenceId };
+export { type ApproveOrderResponse, type ChangeOrderStatusRequest, type DisapproveOrderResponse, GET as GETOrder, GET$1 as GETOrders, OrderDetail, type OrderDiscountRequest, type OrderFullInfoResponse, type OrderReferenceDeliveryIdRequest, type OrderReferenceIdRequest, OrdersApiResponse, OrdersFilterParameters, POST as POSTOrderFullInfo, PUT$7 as PUTOrderApprove, PUT$5 as PUTOrderApproveList, PUT$3 as PUTOrderChangeStatus, PUT$6 as PUTOrderDisapprove, PUT$4 as PUTOrderDisapproveList, PUT$2 as PUTOrderDiscount, PUT as PUTOrderReferenceDeliveryId, PUT$1 as PUTOrderReferenceId, getOrder, getOrders, getOrdersFullInfo, putOrderApprove, putOrderApproveList, putOrderChangeStatus, putOrderDisapprove, putOrderDisapproveList, putOrderDiscount, putOrderReferenceDeliveryId, putOrderReferenceId };

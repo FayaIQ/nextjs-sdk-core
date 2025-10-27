@@ -30,7 +30,7 @@ export enum PayType {
 /**
  * Delivery method types
  */
-export enum DeliveryType {
+export enum DeleveryType {
   None = 0,
   StorePickup = 1,
   HomeDelivery = 2,
@@ -135,7 +135,7 @@ export class OrdersFilterParameters {
   // Order type and payment
   orderType: OrderType | null;
   payType: PayType | null;
-  deliveryType: DeliveryType | null;
+  DeleveryType: DeleveryType | null;
 
   // User and delegate
   username: string | null;
@@ -178,7 +178,7 @@ export class OrdersFilterParameters {
     apartmentId = null,
     orderType = null,
     payType = null,
-    deliveryType = null,
+    DeleveryType = null,
     username = null,
     customerId = null,
     delegateId = null,
@@ -214,7 +214,7 @@ export class OrdersFilterParameters {
     apartmentId?: number | null;
     orderType?: OrderType | null;
     payType?: PayType | null;
-    deliveryType?: DeliveryType | null;
+    DeleveryType?: DeleveryType | null;
     username?: string | null;
     customerId?: string | null;
     delegateId?: string | null;
@@ -250,7 +250,7 @@ export class OrdersFilterParameters {
     this.apartmentId = apartmentId;
     this.orderType = orderType;
     this.payType = payType;
-    this.deliveryType = deliveryType;
+    this.DeleveryType = DeleveryType;
     this.username = username;
     this.customerId = customerId;
     this.delegateId = delegateId;
@@ -292,7 +292,7 @@ export class OrdersFilterParameters {
       apartmentId: updates.apartmentId !== undefined ? updates.apartmentId : this.apartmentId,
       orderType: updates.orderType !== undefined ? updates.orderType : this.orderType,
       payType: updates.payType !== undefined ? updates.payType : this.payType,
-      deliveryType: updates.deliveryType !== undefined ? updates.deliveryType : this.deliveryType,
+      DeleveryType: updates.DeleveryType !== undefined ? updates.DeleveryType : this.DeleveryType,
       username: updates.username !== undefined ? updates.username : this.username,
       customerId: updates.customerId !== undefined ? updates.customerId : this.customerId,
       delegateId: updates.delegateId !== undefined ? updates.delegateId : this.delegateId,
@@ -308,11 +308,12 @@ export class OrdersFilterParameters {
 
   /**
    * Convert to URL search parameters
+   * FIXED: This is the key method that was causing the issue
    */
   toURLSearchParams(): URLSearchParams {
     const params = new URLSearchParams();
 
-    // Add paging parameters
+    // Add paging parameters directly (don't add pagingParameters as object!)
     const pagingParams = this.pagingParameters.toURLParams();
     Object.entries(pagingParams).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
@@ -349,7 +350,7 @@ export class OrdersFilterParameters {
     if (this.apartmentId !== null) params.set("AppartmentId", this.apartmentId.toString());
     if (this.orderType !== null) params.set("OrderType", this.orderType.toString());
     if (this.payType !== null) params.set("PayType", this.payType.toString());
-    if (this.deliveryType !== null) params.set("DeleveryType", this.deliveryType.toString());
+    if (this.DeleveryType !== null) params.set("DeleveryType", this.DeleveryType.toString());
     if (this.username !== null) params.set("Username", this.username);
     if (this.customerId !== null) params.set("CustomerId", this.customerId);
     if (this.delegateId !== null) params.set("DelagateId", this.delegateId);
@@ -396,7 +397,7 @@ export class OrdersFilterParameters {
     if (this.apartmentId !== null) map.AppartmentId = this.apartmentId;
     if (this.orderType !== null) map.OrderType = this.orderType;
     if (this.payType !== null) map.PayType = this.payType;
-    if (this.deliveryType !== null) map.DeleveryType = this.deliveryType;
+    if (this.DeleveryType !== null) map.DeleveryType = this.DeleveryType;
     if (this.username !== null) map.Username = this.username;
     if (this.customerId !== null) map.CustomerId = this.customerId;
     if (this.delegateId !== null) map.DelagateId = this.delegateId;
@@ -451,7 +452,7 @@ export class OrdersFilterParameters {
       apartmentId: params.get("AppartmentId") ? parseInt(params.get("AppartmentId")!) : null,
       orderType: params.get("OrderType") ? parseInt(params.get("OrderType")!) as OrderType : null,
       payType: params.get("PayType") ? parseInt(params.get("PayType")!) as PayType : null,
-      deliveryType: params.get("DeleveryType") ? parseInt(params.get("DeleveryType")!) as DeliveryType : null,
+      DeleveryType: params.get("DeleveryType") ? parseInt(params.get("DeleveryType")!) as DeleveryType : null,
       username: params.get("Username") || null,
       customerId: params.get("CustomerId") || null,
       delegateId: params.get("DelagateId") || null,
@@ -466,7 +467,7 @@ export class OrdersFilterParameters {
   }
 }
 
-
+// Interfaces remain the same...
 export interface CurrentPhase {
   orderPhaseID: number;
   statusID: number;
@@ -476,7 +477,6 @@ export interface CurrentPhase {
   username: string;
   note: string | null;
 }
-
 
 export interface OrderAddress {
   id: number;
@@ -496,13 +496,11 @@ export interface OrdersApiResponse {
   pageSize: number;
   rowCount: number;
   sortField: string;
-  currentSortField: string ;
-  currentSortOrder: string ;
-  nextSortOrder: string ;
+  currentSortField: string;
+  currentSortOrder: string;
+  nextSortOrder: string;
   results: Order[];
 }
-
-
 
 export interface OrderCustomer {
   id: string;
@@ -544,7 +542,7 @@ export interface OrderItem {
   total: number;
   quantity: number;
   discountType?: number;
-  payType : number;
+  payType: number;
   offerDesc?: string;
   isCanceled: boolean;
   note?: string | null;
@@ -573,8 +571,6 @@ export interface OrderItem {
   };
 }
 
-
-
 export interface Order {
   orderID: number;
   orderNo: number;
@@ -590,7 +586,7 @@ export interface Order {
   storeId: string | null;
   storeName?: string | null;
   discountType?: number | null;
-  discountValue?: string | number ;
+  discountValue?: string | number;
   totalAmount: number;
   referenceId?: string | null;
   latestOrderStatus: number;
@@ -607,10 +603,47 @@ export interface Order {
   orderPhases?: CurrentPhase[];
   paymentStatus?: string;
   couponOffer?: {
-    name: string,
-    couponCode: string,
-    discountType: number,
-    discountValue: number,
+    name: string;
+    couponCode: string;
+    discountType: number;
+    discountValue: number;
+  };
+}
 
+export interface OrderDetail {
+  orderID: number;
+  orderDate: string;
+  orderDeleveryDate: string | null;
+  orderNo: number;
+  total: number;
+  deliveryPrice: number;
+  totalAmount: number;
+  orderType: number;
+  payType: number;
+  deleveryType: number;
+  orderPhaseID: number;
+  storeId: string | null;
+  latestOrderStatus: number;
+  currentPhase: CurrentPhase;
+  discountType?: number | null;
+  discountValue?: string | number | undefined;
+  isRejected?: boolean;
+  rejectionNote?: string | null;
+  laserNote?: string | null;
+  giftNote?: string | null;
+  customer?: OrderCustomer;
+  client?: OrderClient | null;
+  address?: OrderAddress;
+  orderItems?: OrderItem[];
+  orderPhases: CurrentPhase[];
+  referenceId?: string | null;
+  referenceDeliveryId?: string | null;
+  gatewayType?: number;
+  paymentStatus?: string;
+  couponOffer?: {
+    name?: string;
+    couponCode?: string;
+    discountType?: number;
+    discountValue?: number;
   };
 }

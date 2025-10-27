@@ -1,7 +1,3 @@
-"use server";
-
-import { Api } from "../../api/api";
-import { putWithAuth } from "../../core/fetcher";
 
 export interface OrderReferenceDeliveryIdRequest {
   referenceDeliveryId: string;
@@ -16,6 +12,8 @@ export async function putOrderReferenceDeliveryId(
   data: OrderReferenceDeliveryIdRequest
 ): Promise<any> {
       if (typeof window === "undefined") {
+        const { putWithAuth } = await import("../../core/fetcher");
+        const { Api } = await import("../../api/api");
       return await putWithAuth(Api.putOrderReferenceDeliveryId(orderId), data);
      }
   
