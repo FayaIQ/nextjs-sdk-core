@@ -4,12 +4,12 @@ import { putOrderApprove } from "../putOrderApprove";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } =       await   params;
     const body = await request.json();
-    
+
     if (!id) {
       return NextResponse.json(
         { error: "Order ID is required" },

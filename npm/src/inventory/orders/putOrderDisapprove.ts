@@ -36,10 +36,8 @@ export async function putOrderDisapproveList(ids: (string | number)[] , note?: s
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../core/fetcher");
-    const { default: getToken } = await import("../../token");
     const { Api } = await import("../../api/api");
     
-    const token = await getToken();
     return putWithAuth<DisapproveOrderResponse>(
       Api.putOrderDisapproveList(),
        { ordersIds : ids, note: note }

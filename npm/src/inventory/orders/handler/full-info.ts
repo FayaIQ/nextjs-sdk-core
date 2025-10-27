@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOrderFullInfo } from "../getOrdersFullInfo";
+import { getOrdersFullInfo } from "../getOrdersFullInfo";
 
 /**
  * Ready-to-use API route handler for order full info
@@ -11,7 +11,7 @@ import { getOrderFullInfo } from "../getOrdersFullInfo";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = await getOrderFullInfo( body);
+    const result = await getOrdersFullInfo( body);
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch order full info";

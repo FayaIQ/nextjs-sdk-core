@@ -1,6 +1,6 @@
 import { S as StoreInfo, P as Product } from './types-DPi3zGBH.js';
 export { A as Address, a as City, C as Country, D as District, b as StoreType, U as UnitInfo } from './types-DPi3zGBH.js';
-export { D as DeliveryType, O as Order, c as OrderPagingParameters, b as OrderType, a as OrdersFilterParameters, P as PayType, S as Sign } from './order-models-Bmpo9Eib.js';
+export { C as CurrentPhase, D as DeliveryType, h as Order, c as OrderAddress, f as OrderClient, e as OrderCustomer, g as OrderItem, a as OrderPagingParameters, O as OrderType, d as OrdersApiResponse, b as OrdersFilterParameters, P as PayType, S as Sign } from './order-models-DRKf1XSv.js';
 export { a as apiFetch } from './index-LWUFWO9Q.js';
 
 /**
@@ -230,15 +230,15 @@ declare class Api {
     static putOrderDisapprove(id: string | number): string;
     static putOrderDisapproveList(): string;
     static putChangeStatusOrder(id: string | number): string;
+    static putOrderDiscount(id: string | number): string;
+    static putOrderReferenceId(id: string | number): string;
+    static putOrderReferenceDeliveryId(id: string | number): string;
     static cancelOrder(id: string | number): string;
     static getOrdersDelagates(id: string | number): string;
     static postOrdersDelagates(id: string | number): string;
     static putOrdersDelagatesLoggedIn(id: string | number): string;
     static postOrderDelagatesList: string;
     static deleteDelagate(orderId: string | number, delegateId: string | number): string;
-    static putOrderDiscount(id: string | number): string;
-    static putOrderReferenceId(id: string | number): string;
-    static putOrderReferenceDeliveryId(id: string | number): string;
     static getInvoiceDiscount(code: string): string;
     static getCheckoutQuote: string;
     static getCurrentCart: string;

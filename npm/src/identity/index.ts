@@ -1,5 +1,5 @@
 // Re-export all identity functions
-export {  loginUser } from "./login";
+export { loginUser } from "./login";
 export {  logoutUser } from "./logout";
 
 // Re-export handlers for Next.js API routes

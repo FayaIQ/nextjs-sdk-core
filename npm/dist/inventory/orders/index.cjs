@@ -72,6 +72,15 @@ var init_api = __esm({
       static putChangeStatusOrder(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
       }
+      static putOrderDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+      }
+      static putOrderReferenceId(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+      }
+      static putOrderReferenceDeliveryId(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
+      }
       static cancelOrder(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
       }
@@ -86,15 +95,6 @@ var init_api = __esm({
       }
       static deleteDelagate(orderId, delegateId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
-      }
-      static putOrderDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
-      }
-      static putOrderReferenceId(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
-      }
-      static putOrderReferenceDeliveryId(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
       }
       /////////////////////////////////////////
       //
@@ -395,13 +395,33 @@ var init_fetcher = __esm({
 var orders_exports = {};
 __export(orders_exports, {
   DeliveryType: () => DeliveryType,
-  GET: () => GET,
+  GETOrder: () => GET2,
+  GETOrders: () => GET,
   OrderPagingParameters: () => OrderPagingParameters,
   OrderType: () => OrderType,
   OrdersFilterParameters: () => OrdersFilterParameters,
+  POSTOrderFullInfo: () => POST,
+  PUTOrderApprove: () => PUT,
+  PUTOrderApproveList: () => PUT3,
+  PUTOrderChangeStatus: () => PUT5,
+  PUTOrderDisapprove: () => PUT2,
+  PUTOrderDisapproveList: () => PUT4,
+  PUTOrderDiscount: () => PUT6,
+  PUTOrderReferenceDeliveryId: () => PUT8,
+  PUTOrderReferenceId: () => PUT7,
   PayType: () => PayType,
   Sign: () => Sign,
-  getOrders: () => getOrders
+  getOrder: () => getOrder,
+  getOrders: () => getOrders,
+  getOrdersFullInfo: () => getOrdersFullInfo,
+  putOrderApprove: () => putOrderApprove,
+  putOrderApproveList: () => putOrderApproveList,
+  putOrderChangeStatus: () => putOrderChangeStatus,
+  putOrderDisapprove: () => putOrderDisapprove,
+  putOrderDisapproveList: () => putOrderDisapproveList,
+  putOrderDiscount: () => putOrderDiscount,
+  putOrderReferenceDeliveryId: () => putOrderReferenceDeliveryId,
+  putOrderReferenceId: () => putOrderReferenceId
 });
 module.exports = __toCommonJS(orders_exports);
 
@@ -420,6 +440,24 @@ async function getOrders({
     );
   }
   const response = await fetch(`/api/orders?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/orders/getOrder.ts
+async function getOrder(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { default: getToken2 } = await Promise.resolve().then(() => (init_token(), token_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    const token = await getToken2();
+    return getWithAuth2(
+      `${Api2.getOrder(id)}`
+    );
+  }
+  const response = await fetch(`/api/orders/${id}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch orders: ${response.statusText}`);
   }
@@ -747,19 +785,402 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
   }
 };
 
-// src/inventory/orders/handler/orders.ts
+// src/inventory/orders/putOrderApprove.ts
+async function putOrderApprove(id, note) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(
+      Api2.putOrderApprove(id),
+      { note: note || "" }
+    );
+  }
+  const response = await fetch(`/api/orders/${id}/approve`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ note: note || "" })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to approve order: ${response.statusText}`);
+  }
+  return response.json();
+}
+async function putOrderApproveList(ids, note) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(
+      Api2.putOrderApproveList(),
+      { ordersIds: ids, note: note || "" }
+    );
+  }
+  const response = await fetch("/api/orders/approve-list", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ orderIds: ids, note: note || "" })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to approve orders: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/orders/putOrderDisapprove.ts
+async function putOrderDisapprove(id, note) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(
+      Api2.putOrderDisapprove(id),
+      { note }
+    );
+  }
+  const response = await fetch(`/api/orders/${id}/disapprove`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ note })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to disapprove order: ${response.statusText}`);
+  }
+  return response.json();
+}
+async function putOrderDisapproveList(ids, note) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(
+      Api2.putOrderDisapproveList(),
+      { ordersIds: ids, note }
+    );
+  }
+  const response = await fetch("/api/orders/disapprove-list", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ orderIds: ids, note: note || "" })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to disapprove orders: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/orders/getOrdersFullInfo.ts
+async function getOrdersFullInfo(body) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(
+      Api2.getOrderFullInfo,
+      { orderIds: body }
+    );
+  }
+  const response = await fetch("/api/orders/full-info", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ orderIds: body })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch order full info: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/orders/putOrderChangeStatus.ts
+init_api();
+init_fetcher();
+async function putOrderChangeStatus(orderId, data) {
+  if (typeof window === "undefined") {
+    return await putWithAuth(Api.putChangeStatusOrder(orderId), data);
+  }
+  const res = await fetch(`/api/orders/${orderId}/change-status`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to change order status: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+// src/inventory/orders/putOrderDiscount.ts
+init_api();
+init_fetcher();
+async function putOrderDiscount(orderId, data) {
+  if (typeof window === "undefined") {
+    return await putWithAuth(Api.putOrderDiscount(orderId), data);
+  }
+  const res = await fetch(`/api/orders/${orderId}/discount`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to apply order discount: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+// src/inventory/orders/putOrderReferenceId.ts
+init_api();
+init_fetcher();
+async function putOrderReferenceId(orderId, data) {
+  if (typeof window === "undefined") {
+    return await putWithAuth(Api.putOrderReferenceId(orderId), data);
+  }
+  const res = await fetch(`/api/orders/${orderId}/referenceId`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to apply order reference ID: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+// src/inventory/orders/putOrderReferenceDeliveryId.ts
+init_api();
+init_fetcher();
+async function putOrderReferenceDeliveryId(orderId, data) {
+  if (typeof window === "undefined") {
+    return await putWithAuth(Api.putOrderReferenceDeliveryId(orderId), data);
+  }
+  const res = await fetch(`/api/orders/${orderId}/referenceDeliveryId`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to apply order reference delivery ID: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+// src/inventory/orders/handler/full-info.ts
 var import_server = require("next/server");
+async function POST(request) {
+  try {
+    const body = await request.json();
+    const result = await getOrdersFullInfo(body);
+    return import_server.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch order full info";
+    console.error("Order full info error:", message);
+    return import_server.NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/approve.ts
+var import_server2 = require("next/server");
+async function PUT(request, { params }) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    if (!id) {
+      return import_server2.NextResponse.json(
+        { error: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderApprove(id, body?.note);
+    return import_server2.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to approve order";
+    console.error("Order approve error:", message);
+    return import_server2.NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/disapprove.ts
+var import_server3 = require("next/server");
+async function PUT2(request, { params }) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    if (!id) {
+      return import_server3.NextResponse.json(
+        { error: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderDisapprove(id, body?.note);
+    return import_server3.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to disapprove order";
+    console.error("Order disapprove error:", message);
+    return import_server3.NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/approve-list.ts
+var import_server4 = require("next/server");
+async function PUT3(request) {
+  try {
+    const body = await request.json();
+    const { orderIds, note } = body;
+    if (!orderIds || !Array.isArray(orderIds)) {
+      return import_server4.NextResponse.json(
+        { error: "orderIds array is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderApproveList(orderIds, note);
+    return import_server4.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to approve orders";
+    console.error("Order approve list error:", message);
+    return import_server4.NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/disapprove-list.ts
+var import_server5 = require("next/server");
+async function PUT4(request) {
+  try {
+    const body = await request.json();
+    const { orderIds, note } = body;
+    if (!orderIds || !Array.isArray(orderIds)) {
+      return import_server5.NextResponse.json(
+        { error: "orderIds array is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderDisapproveList(orderIds, note);
+    return import_server5.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to disapprove orders";
+    console.error("Order disapprove list error:", message);
+    return import_server5.NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/orders.ts
+var import_server6 = require("next/server");
 async function GET(request) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const filterParams = OrdersFilterParameters.fromURLSearchParams(searchParams);
     const orders = await getOrders({ filterParams });
-    return import_server.NextResponse.json(orders);
+    return import_server6.NextResponse.json(orders);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch orders";
     console.error("orders error:", message);
-    return import_server.NextResponse.json(
+    return import_server6.NextResponse.json(
       { error: message },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/order.ts
+var import_server7 = require("next/server");
+async function GET2(request, { params }) {
+  try {
+    const { id } = await params;
+    const result = await getOrder(id);
+    return import_server7.NextResponse.json(result);
+  } catch (error) {
+    return import_server7.NextResponse.json(
+      { error: error.message || "Failed to fetch order" },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/change-status.ts
+var import_server8 = require("next/server");
+async function PUT5(request, { params }) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const result = await putOrderChangeStatus(id, body);
+    return import_server8.NextResponse.json(result);
+  } catch (error) {
+    return import_server8.NextResponse.json(
+      { error: error.message || "Failed to change order status" },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/discount.ts
+var import_server9 = require("next/server");
+async function PUT6(request, { params }) {
+  try {
+    const body = await request.json();
+    const { id } = await params;
+    const result = await putOrderDiscount(id, body);
+    return import_server9.NextResponse.json(result);
+  } catch (error) {
+    return import_server9.NextResponse.json(
+      { error: error.message || "Failed to apply order discount" },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/reference-id.ts
+var import_server10 = require("next/server");
+async function PUT7(request, { params }) {
+  try {
+    const body = await request.json();
+    const { id } = await params;
+    const result = await putOrderReferenceId(id, body);
+    return import_server10.NextResponse.json(result);
+  } catch (error) {
+    return import_server10.NextResponse.json(
+      { error: error.message || "Failed to update order reference ID" },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/reference-delivery-id.ts
+var import_server11 = require("next/server");
+async function PUT8(request, { params }) {
+  try {
+    const body = await request.json();
+    const { id } = await params;
+    const result = await putOrderReferenceDeliveryId(id, body);
+    return import_server11.NextResponse.json(result);
+  } catch (error) {
+    return import_server11.NextResponse.json(
+      { error: error.message || "Failed to update order reference delivery ID" },
       { status: 500 }
     );
   }
@@ -767,11 +1188,31 @@ async function GET(request) {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DeliveryType,
-  GET,
+  GETOrder,
+  GETOrders,
   OrderPagingParameters,
   OrderType,
   OrdersFilterParameters,
+  POSTOrderFullInfo,
+  PUTOrderApprove,
+  PUTOrderApproveList,
+  PUTOrderChangeStatus,
+  PUTOrderDisapprove,
+  PUTOrderDisapproveList,
+  PUTOrderDiscount,
+  PUTOrderReferenceDeliveryId,
+  PUTOrderReferenceId,
   PayType,
   Sign,
-  getOrders
+  getOrder,
+  getOrders,
+  getOrdersFullInfo,
+  putOrderApprove,
+  putOrderApproveList,
+  putOrderChangeStatus,
+  putOrderDisapprove,
+  putOrderDisapproveList,
+  putOrderDiscount,
+  putOrderReferenceDeliveryId,
+  putOrderReferenceId
 });

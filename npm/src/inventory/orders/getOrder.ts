@@ -1,14 +1,12 @@
-import {  OrdersApiResponse, OrdersFilterParameters } from "./order-models";
+"use server";
 
+import { Api } from "../../api/api";
+import { getWithAuth } from "../../core/fetcher";
 
-
-
-export async function getOrders({
-  filterParams,
-}: {
-  filterParams: OrdersFilterParameters;
-}): Promise<OrdersApiResponse> {
-  const params = filterParams.toURLSearchParams();
+/**
+ * Get single order details by ID
+ */
+export async function getOrder( id : string ) {
 
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
@@ -18,13 +16,14 @@ export async function getOrders({
     const { Api} = await import("../../api/api");
     
     const token = await getToken();
-    return getWithAuth<OrdersApiResponse>(
-      `${Api.getOrders}?${params.toString()}`,
+    return getWithAuth(
+      `${Api.getOrder(id)}`,
     );
   }
 
   // Client-side: Use Next.js API route
-  const response = await fetch(`/api/orders?${params.toString()}`);
+  const response = await fetch(`/api/orders/${id}`);
+
 
   if (!response.ok) {
     throw new Error(`Failed to fetch orders: ${response.statusText}`);

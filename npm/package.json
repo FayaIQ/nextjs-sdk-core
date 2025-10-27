@@ -47,11 +47,6 @@
       "import": "./dist/identity/index.js",
       "require": "./dist/identity/index.cjs"
     },
-    "./identity/server": {
-      "types": "./dist/identity/server.d.ts",
-      "import": "./dist/identity/server.js",
-      "require": "./dist/identity/server.cjs"
-    },
     "./identity/*": {
       "types": "./dist/identity/*.d.ts",
       "import": "./dist/identity/*.js",
@@ -67,6 +62,7 @@
       "import": "./dist/handlers/*.js",
       "require": "./dist/handlers/*.cjs"
     },
+  
     "./inventory/orders": {
       "types": "./dist/inventory/orders/index.d.ts",
       "import": "./dist/inventory/orders/index.js",

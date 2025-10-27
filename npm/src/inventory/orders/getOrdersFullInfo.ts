@@ -2,10 +2,9 @@ import { Order } from "./order-models";
 
 export interface OrderFullInfoResponse {
   data: Order[];
-  totalCount: number;
 }
 
-export async function getOrderFullInfo( body: string | number []): Promise<OrderFullInfoResponse> {
+export async function getOrdersFullInfo( body: string | number []): Promise<OrderFullInfoResponse> {
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const { postWithAuth } = await import("../../core/fetcher");

@@ -87,6 +87,21 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
   }
 
+    static putOrderDiscount(id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+ 
+  }
+
+  static putOrderReferenceId(id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+  } 
+
+
+ static putOrderReferenceDeliveryId(id : string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
+  }
+
+
 
   static cancelOrder(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
@@ -113,19 +128,6 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
   }
 
-  static putOrderDiscount(id : string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
- 
-  }
-
-  static putOrderReferenceId(id : string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
-  } 
-
-
- static putOrderReferenceDeliveryId(id : string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
-  }
 
 
 

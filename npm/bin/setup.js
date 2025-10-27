@@ -7,34 +7,7 @@ const command = args[0];
 
 // API routes configuration
 const routes = [
-  {
-    name: "storeInfo",
-    path: ["app", "api", "storeInfo"],
-    handler: "my-next-core/handlers/storeInfo",
-    methods: ["GET"],
-    description: "Store information endpoint",
-  },
-  {
-    name: "getProducts",
-    path: ["app", "api", "getProducts"],
-    handler: "my-next-core/handlers/getProducts",
-    methods: ["GET"],
-    description: "Products listing endpoint",
-  },
-  {
-    name: "productInfo",
-    path: ["app", "api", "productInfo", "[id]"],
-    handler: "my-next-core/handlers/productInfo",
-    methods: ["GET"],
-    description: "Product details endpoint (dynamic route)",
-  },
-  {
-    name: "orders",
-    path: ["app", "api", "orders"],
-    handler: "my-next-core/inventory/orders/handler/orders",
-    methods: ["GET"],
-    description: "Orders listing endpoint",
-  },
+
   {
     name: "login",
     path: [ "src" , "app", "api", "auth", "login"],
@@ -51,6 +24,95 @@ const routes = [
     exportName: "LogoutPOST",
     description: "User logout endpoint",
   },
+    {
+    name: "orders",
+    path: ["src", "app", "api", "orders"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["GET"],
+    exportName: "GETOrders",
+    description: "Orders listing endpoint",
+  },
+  {
+    name: "orderFullInfo",
+    path: ["src", "app", "api", "orders", "full-info"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["POST"],
+    exportName: "POSTOrderFullInfo",
+    description: "Get full order information",
+  },
+  {
+    name: "orderApprove",
+    path: ["src", "app", "api", "orders", "[id]", "approve"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderApprove",
+    description: "Approve a single order",
+  },
+  {
+    name: "orderDisapprove",
+    path: ["src", "app", "api", "orders", "[id]", "disapprove"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderDisapprove",
+    description: "Disapprove a single order",
+  },
+  {
+    name: "orderApproveList",
+    path: ["src", "app", "api", "orders", "approve-list"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderApproveList",
+    description: "Approve multiple orders at once",
+  },
+  {
+    name: "orderDisapproveList",
+    path: ["src", "app", "api", "orders", "disapprove-list"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderDisapproveList",
+    description: "Disapprove multiple orders at once",
+  },
+  {
+    name: "order",
+    path: ["src", "app", "api", "orders", "[id]"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["GET"],
+    exportName: "GETOrder",
+    description: "Get single order details",
+  },
+  {
+    name: "orderChangeStatus",
+    path: ["src", "app", "api", "orders", "[id]", "change-status"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderChangeStatus",
+    description: "Change order delivery status",
+  },
+  {
+    name: "orderDiscount",
+    path: ["src", "app", "api", "orders", "[id]", "discount"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderDiscount",
+    description: "Apply discount to order",
+  },
+  {
+    name: "orderReferenceId",
+    path: ["src", "app", "api", "orders", "[id]", "referenceId"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderReferenceId",
+    description: "Update order reference ID",
+  },
+  {
+    name: "orderReferenceDeliveryId",
+    path: ["src", "app", "api", "orders", "[id]", "referenceDeliveryId"],
+    handler: "my-next-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderReferenceDeliveryId",
+    description: "Update order reference delivery ID",
+  },
+
 ];
 
 /**

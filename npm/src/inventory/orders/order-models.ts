@@ -466,15 +466,151 @@ export class OrdersFilterParameters {
   }
 }
 
-export interface Order {
+
+export interface CurrentPhase {
+  orderPhaseID: number;
+  statusID: number;
+  status: string;
+  status_en: string;
+  time: string;
+  username: string;
+  note: string | null;
+}
+
+
+export interface OrderAddress {
+  id: number;
+  gps: string;
+  distance: number;
+  country: { id: number; name: string; name_en: string };
+  city: { id: number; name: string; name_en: string };
+  district: { id: number; name: string; name_en: string };
+  building: string | null;
+  appartmentNumber: string | null;
+  note: string;
+}
+
+export interface OrdersApiResponse {
+  currentPage: number;
+  pageCount: number;
+  pageSize: number;
+  rowCount: number;
+  sortField: string;
+  currentSortField: string ;
+  currentSortOrder: string ;
+  nextSortOrder: string ;
+  results: Order[];
+}
+
+
+
+export interface OrderCustomer {
   id: string;
-  number: number;
+  username: string;
+  fullName: string;
+  email: string;
+  emailConfirmed: boolean;
+  phoneNumber: string;
+  phoneNumberConfirmed: boolean;
+  gender: number;
+  birthdate: string;
+  address: OrderAddress;
+}
+
+export interface OrderClient {
+  id: string;
+  name: string;
   storeId: number;
-  customerId: string;
+  locationId: number;
+  address: string | null;
+  addressId: number;
+  email: string;
+  phoneCode: string | null;
+  phoneNumber: string;
+  createdBy: string | null;
+  isApproved: boolean;
+  isAddedByAdmin: boolean;
+  isPublic: boolean;
+  clientTypeId: string;
+  clientType: unknown | null;
+  classId: string;
+  class: unknown | null;
+}
+
+export interface OrderItem {
+  orderItemID: number;
+  itemID: number;
+  price: number;
+  total: number;
+  quantity: number;
+  discountType?: number;
+  payType : number;
+  offerDesc?: string;
+  isCanceled: boolean;
+  note?: string | null;
+  
+  itemInfo: {
+    name: string;
+    nameSecondary: string | null;
+    iconPath: string;
+    picturePath: string;
+    barcode: string;
+    code: string | null;
+  };
+  collectionInfo?: {
+    color?: {
+      code: string;
+      colorName: string;
+      secondaryColorName?: string;
+      picturePath?: string;
+      iconPath?: string;
+      isDefault?: boolean | null;
+      syncThirdPartyId?: string | null;
+    };
+    size?: {
+      val1: string;
+    };
+  };
+}
+
+
+
+export interface Order {
+  orderID: number;
+  orderNo: number;
+  orderDate: string;
+  total: number;
+  orderType: number;
+  payType: number;
+  deleveryType: number;
+  deliveryPrice: number;
+  orderDeleveryDate: string | null;
+  orderPhaseID: number;
+  coupanCode?: string | undefined;
+  storeId: string | null;
+  storeName?: string | null;
+  discountType?: number | null;
+  discountValue?: string | number ;
   totalAmount: number;
-  orderType: OrderType;
-  payType: PayType;
-  deliveryType: DeliveryType;
-  orderStatusId: number;
-  dateCreated: string;
+  referenceId?: string | null;
+  latestOrderStatus: number;
+  currentPhase: CurrentPhase;
+  currencyExchangeRateHistory?: null;
+  isRejected?: boolean;
+  rejectionNote?: string | null;
+  laserNote?: string | null;
+  giftNote?: string | null;
+  customer?: OrderCustomer;
+  client?: OrderClient | null;
+  address?: OrderAddress;
+  orderItems?: OrderItem[];
+  orderPhases?: CurrentPhase[];
+  paymentStatus?: string;
+  couponOffer?: {
+    name: string,
+    couponCode: string,
+    discountType: number,
+    discountValue: number,
+
+  };
 }

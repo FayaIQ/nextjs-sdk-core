@@ -75,6 +75,15 @@ var _Api = class _Api {
   static putChangeStatusOrder(id) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
   }
+  static putOrderDiscount(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+  }
+  static putOrderReferenceId(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+  }
+  static putOrderReferenceDeliveryId(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
+  }
   static cancelOrder(id) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
   }
@@ -89,15 +98,6 @@ var _Api = class _Api {
   }
   static deleteDelagate(orderId, delegateId) {
     return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
-  }
-  static putOrderDiscount(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
-  }
-  static putOrderReferenceId(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
-  }
-  static putOrderReferenceDeliveryId(id) {
-    return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
   }
   /////////////////////////////////////////
   //
