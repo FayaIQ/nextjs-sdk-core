@@ -1,5 +1,155 @@
-import { S as StoreInfo, P as Product } from './types-BKRI70Wb.cjs';
-export { A as Address, b as Category, a as City, C as Country, D as District, c as StoreType, U as UnitInfo } from './types-BKRI70Wb.cjs';
+export { D as DeliveryType, d as Order, b as OrderPagingParameters, a as OrderType, c as OrdersFilterParameters, P as PayType, S as Sign, g as getOrders } from './getOrders-DqBDyqNN.cjs';
+export { a as apiFetch } from './index-LWUFWO9Q.cjs';
+
+interface Country {
+    id: number;
+    name: string;
+    name_en: string;
+}
+interface City {
+    id: number;
+    name: string;
+    name_en: string;
+}
+interface District {
+    id: number;
+    name: string;
+    name_en: string;
+}
+interface Address {
+    id: number;
+    gps: string | null;
+    distance: number;
+    country: Country;
+    city: City;
+    district: District;
+    building: string | null;
+    appartmentNumber: string | null;
+    note: string | null;
+}
+interface UnitInfo {
+    type: number;
+    name: string;
+    value: number;
+    isActive: boolean;
+}
+interface Product {
+    id: number;
+    barcode: string;
+    code: string | null;
+    price: number;
+    name: string;
+    subDescription: string | null;
+    description: string | null;
+    nameSecondary: string | null;
+    subDescriptionSecondary: string | null;
+    descriptionSecondary: string | null;
+    currencyId: number;
+    menu: object | null;
+    brand: object | null;
+    sizeSet: unknown | null;
+    unitInfo: UnitInfo;
+    packs: unknown | null;
+    age: number | null;
+    gender: number | null;
+    tempPicturePath: string | null;
+    picturePath: string | null;
+    iconPath: string | null;
+    isDeliverable: boolean;
+    isAvailable: boolean;
+    isFeatured: boolean;
+    isNew: boolean;
+    isApproved: boolean | null;
+    preparation: number;
+    calories: number;
+    views: number;
+    likes: number;
+    isLiked: boolean;
+    wishes: number;
+    isWished: boolean;
+    favourites: number;
+    isFavourite: boolean;
+    rating: number;
+    rejectionNote: string | null;
+    offer: unknown | null;
+    customerItemOffer: unknown | null;
+    pointOffer: unknown | null;
+    collectionItemOffer: unknown | null;
+    darkItemOffer: unknown | null;
+    multipleMenus: unknown | null;
+    colors: unknown | null;
+    generalPictures: unknown | null;
+    collections: unknown | null;
+    hasColors: boolean;
+    hasSizes: boolean;
+    createDate: string;
+    publishDate: string;
+    checkQuantitiesBeforeSale: boolean;
+    sizePatternId: number | null;
+    isLocked: boolean;
+    isActive: boolean;
+    minimumOrderQuantity: number | null;
+    maximumOrderQuantity: number | null;
+    isDeleted: boolean;
+    storeId: number;
+    totalQuantity: number;
+    videoURL: string | null;
+    currentOfferId: number | null;
+    pointOfferId: number | null;
+    createdBy: string | null;
+    updatedBy: string | null;
+}
+interface Category {
+    subCategories: Category[];
+    id: number;
+    parentID: number | null;
+    name: string;
+    nameSecondary: string;
+    iconUrl: string | null;
+    imageUrl: string | null;
+    emoji: string | null;
+    orderIndex: number;
+}
+interface StoreType {
+    id: string;
+    name: string;
+    isActive: boolean;
+}
+interface StoreInfo {
+    id: number;
+    name: string;
+    code: string;
+    subDescription: string | null;
+    description: string;
+    nameSecondary: string | null;
+    subDescriptionSecondary: string | null;
+    descriptionSecondary: string | null;
+    typeID: string;
+    gps: string | null;
+    address: Address;
+    freeNumber: string | null;
+    phoneNumber1: string | null;
+    phoneNumber2: string | null;
+    phoneNumber3: string | null;
+    website: string | null;
+    email: string | null;
+    parentId: number | null;
+    originalLogoPath: string | null;
+    originalLogoId: string | null;
+    originalPicturePath: string | null;
+    originalPictureId: string | null;
+    picturePath: string | null;
+    isActive: boolean;
+    facebookLink: string | null;
+    youtubeLink: string | null;
+    whatsappLink: string | null;
+    instagramLink: string | null;
+    snapchatLink: string | null;
+    tiktokLink: string | null;
+    children: StoreInfo[];
+    storeType: StoreType;
+    shifts: unknown[];
+}
 
 /**
  * Fetches store information
@@ -143,6 +293,17 @@ declare class ItemsFilterParameters {
     static fromURLSearchParams(params: URLSearchParams): ItemsFilterParameters;
 }
 
+interface ProductResponse {
+    currentPage: number;
+    currentSortField: null;
+    currentSortOrder: null;
+    nextSortOrder: null;
+    pageCount: number;
+    pageSize: number;
+    results: Product[];
+    rowCount: number;
+    sortField: null;
+}
 /**
  * Fetches a list of products with optional filtering and pagination
  * Works in both server and client components
@@ -164,7 +325,7 @@ declare class ItemsFilterParameters {
  */
 declare function getProducts({ filterParams, }: {
     filterParams: ItemsFilterParameters;
-}): Promise<Product>;
+}): Promise<ProductResponse>;
 
 /**
  * Fetches detailed information for a specific product by ID
@@ -182,6 +343,10 @@ declare function getProducts({ filterParams, }: {
  * const product = await getProductInfo("123");
  */
 declare function getProductInfo(id: string): Promise<Product>;
+
+declare function getMenus({ filterParams, }: {
+    filterParams: ItemsFilterParameters;
+}): Promise<Category[]>;
 
 declare class Api {
     private static LOCAL_BASE;
@@ -209,6 +374,7 @@ declare class Api {
     static getProducts: string;
     static getProductInfo(id: string): string;
     static getMenus: string;
+    static getCouponOffers: string;
     static getBranches: string;
     static getBrands: string;
     static getWishes: string;
@@ -245,173 +411,6 @@ declare class Api {
     static deleteCartItem(id: string | number): string;
 }
 
-/**
- * Order filter models and API integration
- * Based on the Orders/Paging API endpoint
- */
-/**
- * Order type classification
- */
-declare enum OrderType {
-    UnderAcceptance = 1,
-    Conformed = 2,
-    UnderPreparing = 3,
-    Delivering = 4,
-    Prepared = 5,
-    Delivered = 6,
-    Rejected = 7,
-    Canceled = 8,
-    Unknown = 9
-}
-declare enum PayType {
-    None = 0,
-    CashOnDelivery = 1,
-    CashOnStore = 2,
-    CashOnline = 3
-}
-/**
- * Delivery method types
- */
-declare enum DeliveryType {
-    None = 0,
-    StorePickup = 1,
-    HomeDelivery = 2
-}
-/**
- * Sign/comparison operators for filtering
- */
-declare enum Sign {
-    Equal = 0,
-    NotEqual = 1,
-    GreaterThan = 2,
-    LessThan = 3,
-    GreaterThanOrEqual = 4,
-    LessThanOrEqual = 5
-}
-/**
- * Paging and sorting configuration for orders
- */
-declare class OrderPagingParameters {
-    currentPage: number;
-    pageSize: number;
-    sortField: string | null;
-    currentSortField: string | null;
-    currentSortOrder: string | null;
-    constructor({ currentPage, pageSize, sortField, currentSortField, currentSortOrder, }?: {
-        currentPage?: number;
-        pageSize?: number;
-        sortField?: string | null;
-        currentSortField?: string | null;
-        currentSortOrder?: string | null;
-    });
-    toURLParams(): Record<string, string>;
-}
-/**
- * Comprehensive order filtering parameters
- */
-declare class OrdersFilterParameters {
-    pagingParameters: OrderPagingParameters;
-    storeId: number | null;
-    menuId: number | null;
-    dateFrom: string | null;
-    dateTo: string | null;
-    startTime: string | null;
-    endTime: string | null;
-    orderStatusId: number | null;
-    orderStatusIds: number[] | null;
-    isCanceled: boolean | null;
-    isConfirmed: boolean | null;
-    isRejected: boolean | null;
-    isPrint: boolean | null;
-    number: number | null;
-    referenceId: string | null;
-    referenceDeliveryId: string | null;
-    locationId: number | null;
-    countryId: number | null;
-    cityId: number | null;
-    districtId: number | null;
-    buildingId: number | null;
-    apartmentId: number | null;
-    orderType: OrderType | null;
-    payType: PayType | null;
-    deliveryType: DeliveryType | null;
-    username: string | null;
-    customerId: string | null;
-    delegateId: string | null;
-    delegateWithCustomerId: string | null;
-    statusChangedBy: string | null;
-    viewInMainCurrency: boolean | null;
-    totalAmount: number | null;
-    sign: Sign | null;
-    couponOfferId: string | null;
-    applicationId: string | null;
-    constructor({ pagingParameters, storeId, menuId, dateFrom, dateTo, startTime, endTime, orderStatusId, orderStatusIds, isCanceled, isConfirmed, isRejected, isPrint, number, referenceId, referenceDeliveryId, locationId, countryId, cityId, districtId, buildingId, apartmentId, orderType, payType, deliveryType, username, customerId, delegateId, delegateWithCustomerId, statusChangedBy, viewInMainCurrency, totalAmount, sign, couponOfferId, applicationId, }?: {
-        pagingParameters?: OrderPagingParameters;
-        storeId?: number | null;
-        menuId?: number | null;
-        dateFrom?: string | null;
-        dateTo?: string | null;
-        startTime?: string | null;
-        endTime?: string | null;
-        orderStatusId?: number | null;
-        orderStatusIds?: number[] | null;
-        isCanceled?: boolean | null;
-        isConfirmed?: boolean | null;
-        isRejected?: boolean | null;
-        isPrint?: boolean | null;
-        number?: number | null;
-        referenceId?: string | null;
-        referenceDeliveryId?: string | null;
-        locationId?: number | null;
-        countryId?: number | null;
-        cityId?: number | null;
-        districtId?: number | null;
-        buildingId?: number | null;
-        apartmentId?: number | null;
-        orderType?: OrderType | null;
-        payType?: PayType | null;
-        deliveryType?: DeliveryType | null;
-        username?: string | null;
-        customerId?: string | null;
-        delegateId?: string | null;
-        delegateWithCustomerId?: string | null;
-        statusChangedBy?: string | null;
-        viewInMainCurrency?: boolean | null;
-        totalAmount?: number | null;
-        sign?: Sign | null;
-        couponOfferId?: string | null;
-        applicationId?: string | null;
-    });
-    /**
-     * Create a copy with updated parameters
-     */
-    copyWith(updates: Partial<OrdersFilterParameters>): OrdersFilterParameters;
-    /**
-     * Convert to URL search parameters
-     */
-    toURLSearchParams(): URLSearchParams;
-    /**
-     * Convert to plain object map
-     */
-    toMap(): Record<string, any>;
-    /**
-     * Create filter from URL search parameters
-     */
-    static fromURLSearchParams(params: URLSearchParams): OrdersFilterParameters;
-}
-interface Order {
-    id: string;
-    number: number;
-    storeId: number;
-    customerId: string;
-    totalAmount: number;
-    orderType: OrderType;
-    payType: PayType;
-    deliveryType: DeliveryType;
-    orderStatusId: number;
-    dateCreated: string;
-}
-
 interface AuthConfig {
     clientId: string;
     clientSecret: string;
@@ -420,28 +419,6 @@ interface AuthConfig {
     language?: number;
     gmt?: number;
 }
-
-/**
- * Type definitions for API requests
- */
-type Primitive = string | number | boolean | null | undefined;
-type RequestData = Record<string, Primitive | Primitive[] | Record<string, Primitive>>;
-type QueryParams = Record<string, Primitive>;
-interface ApiRequestOptions {
-    method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-    headers?: Record<string, string>;
-    body?: object;
-    data?: RequestData;
-    query?: QueryParams;
-    token?: string | null;
-}
-/**
- * Generic API fetch wrapper with authentication and error handling
- * @param url - The API endpoint URL
- * @param options - Request configuration options
- * @returns Promise with typed response data
- */
-declare function apiFetch<T>(url: string, options?: ApiRequestOptions): Promise<T>;
 
 type TokenResponse = {
     access_token: string;
@@ -458,4 +435,4 @@ type TokenResponse = {
  */
 declare function getToken(): Promise<string>;
 
-export { AgeGroup, Api, type AuthConfig, DeliveryType, Gender, ItemsFilterParameters, NewArrivalPeriod, type Order, OrderPagingParameters, OrderType, OrdersFilterParameters, PagingParameters, PayType, Product, Sign, SortType, StoreInfo, type TokenResponse, apiFetch, getProductInfo, getProducts, getStoreInfo, getToken };
+export { type Address, AgeGroup, Api, type AuthConfig, type Category, type City, type Country, type District, Gender, ItemsFilterParameters, NewArrivalPeriod, PagingParameters, type Product, SortType, type StoreInfo, type StoreType, type TokenResponse, type UnitInfo, getMenus, getProductInfo, getProducts, getStoreInfo, getToken };

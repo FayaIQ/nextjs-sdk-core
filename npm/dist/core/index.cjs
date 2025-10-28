@@ -1,7 +1,9 @@
 "use strict";
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -15,22 +17,38 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/handlers/productInfo.ts
-var productInfo_exports = {};
-__export(productInfo_exports, {
-  GET: () => GET
+// src/core/index.ts
+var core_exports = {};
+__export(core_exports, {
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
 });
-module.exports = __toCommonJS(productInfo_exports);
-var import_server = require("next/server");
+module.exports = __toCommonJS(core_exports);
 
 // src/api/api.ts
 var _Api = class _Api {
-  // Dynamic endpoints with IDs
   static getProductInfo(id) {
     return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
+  // Dynamic endpoints with IDs
   // Wishlist endpoints (lowercase per spec)
   static postWish(id) {
     return `${_Api.INVENTORY_BASE}/v1/items/${id}/wish`;
@@ -124,7 +142,8 @@ _Api.phoneVerificationSend = `${_Api.IDENTITY_BASE}/v1/verification/phone/send`;
 _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 // Other services
 _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-_Api.getCategories = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+_Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+_Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
 _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
 _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
 _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
@@ -142,9 +161,6 @@ _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
 _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
 _Api.postCartItems = `${_Api.INVENTORY_BASE}/v1/Carts/Items`;
 var Api = _Api;
-
-// src/token.ts
-var import_headers = require("next/headers");
 
 // src/core/config.ts
 var getAuthConfig = () => {
@@ -176,8 +192,9 @@ var getAuthConfig = () => {
 // src/token.ts
 var AUTH_MODE = process.env.STOREAK_AUTH_MODE || "auto";
 async function getToken() {
-  if (AUTH_MODE === "strict") {
-    const cookie = await (0, import_headers.cookies)();
+  if (AUTH_MODE === "strict" && typeof window === "undefined") {
+    const { cookies } = await import("next/headers");
+    const cookie = await cookies();
     const accessTokenCookie = cookie.get("access_token")?.value;
     if (accessTokenCookie && accessTokenCookie) {
       return accessTokenCookie;
@@ -254,37 +271,101 @@ async function apiFetch(url, options = {}) {
   }
   return response.json();
 }
-
-// src/getProductInfo.ts
-async function getProductInfo(id) {
-  if (typeof window === "undefined") {
-    const token = await getToken();
-    return apiFetch(`${Api.getProductInfo(id)}/`, {
-      token
-    });
-  }
-  const response = await fetch(`/api/productInfo/${id}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch product info: ${response.statusText}`);
-  }
-  return response.json();
+async function getWithAuth(url, query, headers) {
+  const token = await getToken();
+  return apiFetch(url, {
+    method: "GET",
+    token,
+    query,
+    headers
+  });
 }
-
-// src/handlers/productInfo.ts
-async function GET(request, { params }) {
-  try {
-    const product = await getProductInfo(params.id);
-    return import_server.NextResponse.json(product);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch product info";
-    console.error("Product info error:", message);
-    return import_server.NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+async function getWithoutAuth(url, query, headers) {
+  return apiFetch(url, {
+    method: "GET",
+    query,
+    headers
+  });
+}
+async function postWithAuth(url, data, headers) {
+  const token = await getToken();
+  return apiFetch(url, {
+    method: "POST",
+    token,
+    data,
+    headers
+  });
+}
+async function postWithoutAuth(url, data, headers = {}) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers
+    },
+    body: data ? JSON.stringify(data) : void 0
+  });
+  if (!response.ok) {
+    throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
   }
+  return await response.json();
+}
+async function putWithAuth(url, data, headers) {
+  const token = await getToken();
+  return apiFetch(url, {
+    method: "PUT",
+    token,
+    data,
+    headers
+  });
+}
+async function putWithoutAuth(url, data, headers) {
+  return apiFetch(url, {
+    method: "PUT",
+    data,
+    headers
+  });
+}
+async function deleteWithAuth(url, headers) {
+  const token = await getToken();
+  return apiFetch(url, {
+    method: "DELETE",
+    token,
+    headers
+  });
+}
+async function deleteWithoutAuth(url, headers) {
+  return apiFetch(url, {
+    method: "DELETE",
+    headers
+  });
+}
+async function patchWithAuth(url, data, headers) {
+  const token = await getToken();
+  return apiFetch(url, {
+    method: "PATCH",
+    token,
+    data,
+    headers
+  });
+}
+async function patchWithoutAuth(url, data, headers) {
+  return apiFetch(url, {
+    method: "PATCH",
+    data,
+    headers
+  });
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  GET
+  deleteWithAuth,
+  deleteWithoutAuth,
+  getWithAuth,
+  getWithoutAuth,
+  patchWithAuth,
+  patchWithoutAuth,
+  postWithAuth,
+  postWithoutAuth,
+  putWithAuth,
+  putWithoutAuth
 });

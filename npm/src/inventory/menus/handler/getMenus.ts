@@ -1,13 +1,15 @@
+// file   : nextjs-sdk-core/npm/src/inventory/orders/handler/orders.ts
+
 import { NextRequest, NextResponse } from "next/server";
-import { getMenus as fetchProducts } from "../getMenus";
 import { ItemsFilterParameters } from "../../../filter-models";
+import { getMenus } from "../getMenus";
 
 /**
- * Ready-to-use API route handler for products
- * Users can simply re-export this in their app/api/getProducts/route.ts:
+ * Ready-to-use API route handler for orders
+ * Users can simply re-export this in their app/api/getOrders/route.ts:
  *
  * @example
- * export { GET } from 'my-next-core/handlers/getProducts';
+ * export { GET } from 'my-next-core/handlers/getOrders';
  */
 export async function GET(request: NextRequest) {
   try {
@@ -15,12 +17,12 @@ export async function GET(request: NextRequest) {
     const filterParams =
       ItemsFilterParameters.fromURLSearchParams(searchParams);
 
-    const menus = await fetchProducts({ filterParams });
+    const menus = await getMenus({ filterParams });
     return NextResponse.json(menus);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Failed to fetch products";
-    console.error("Products error:", message);
+      error instanceof Error ? error.message : "Failed to fetch orders";
+    console.error("orders error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

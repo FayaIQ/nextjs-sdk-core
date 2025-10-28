@@ -1,6 +1,4 @@
-"use server";
 
-import { cookies } from "next/headers";
 import { Api } from "./api/api";
 import { getAuthConfig } from "./core/config";
 
@@ -22,7 +20,8 @@ const AUTH_MODE = process.env.STOREAK_AUTH_MODE || "auto"; // "auto" | "strict"
  * - "strict": throws Unauthorized error if no token exists
  */
 export default async function getToken(): Promise<string> {
-  if (AUTH_MODE === "strict") {
+  if (AUTH_MODE === "strict" && typeof window === "undefined") {
+ const { cookies } = await import("next/headers");
     const cookie = await cookies();
     const accessTokenCookie = cookie.get("access_token")?.value;
     if (accessTokenCookie && accessTokenCookie) {

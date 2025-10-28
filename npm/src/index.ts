@@ -2,7 +2,8 @@
 export { getStoreInfo } from "./storeInfo";
 export { getProducts } from "./inventory/items/getProducts";
 export { getProductInfo } from "./inventory/items/getProductInfo";
-
+export { getMenus } from "./inventory/menus/getMenus";
+export { getOrders } from "./inventory/orders/getOrders";
 // Type exports
 export * from "./types";
 export * from "./filter-models";

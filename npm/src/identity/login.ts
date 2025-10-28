@@ -1,13 +1,20 @@
-"use server";
 
-import { cookies } from "next/headers";
 import { Api } from "../api/api";
 import { postWithoutAuth } from "../core/fetcher";
+import { getAuthConfig } from "../core/config";
 
 /**
  * Represents login credentials for Storeak Identity Service
  */
 export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+/**
+ * Full credentials including config from environment
+ */
+interface FullLoginCredentials {
   clientId: string;
   clientSecret: string;
   username: string;
@@ -15,6 +22,7 @@ export interface LoginRequest {
   Language?: number;
   GMT?: number;
   IsFromNotification?: boolean;
+  [key: string]: string | number | boolean | undefined;
 }
 
 /**
@@ -48,22 +56,39 @@ export interface LoginResponse {
 /**
  * Logs in a user and retrieves an access token.
  * Automatically saves the token, roles, and store ID to cookies.
- * 
- * @param credentials - Login credentials
- * @returns Login response with token and user data
+ * Only requires username and password - other credentials come from env config.
  */
-export async function loginUser(
-  credentials: LoginRequest
-): Promise<LoginResponse> {
-  // Perform login call
-  const response = await postWithoutAuth<LoginResponse>(Api.signIn, credentials as any);
+export async function loginUser(credentials: LoginRequest): Promise<LoginResponse> {
+  const isServer = typeof window === "undefined";
 
-  // Save to cookies if successful
-  if (response?.access_token) {
+  // ✅ SERVER SIDE
+  if (isServer) {
+    // Get client credentials from environment
+    const config = getAuthConfig();
+    const { cookies } = await import("next/headers");
+
+    
+    // Merge user credentials with env config
+    const fullCredentials: FullLoginCredentials = {
+      clientId: config.clientId,
+      clientSecret: config.clientSecret,
+      username: credentials.username,
+      password: credentials.password,
+      Language: config.language ?? 0,
+      GMT: config.gmt ?? 3,
+      IsFromNotification: false,
+    };
+
+    const response = await postWithoutAuth<LoginResponse>(Api.signIn, fullCredentials);
+
+    if (!response?.access_token) {
+      throw new Error("Invalid login response: missing access token");
+    }
+
     const cookieStore = await cookies();
-    const expiresIn = response.expires || 7200; // default 2 hours
 
-    // Save access token
+    const expiresIn = response.expires || 7200; // 2 hours
+
     cookieStore.set("access_token", response.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -72,9 +97,8 @@ export async function loginUser(
       maxAge: expiresIn,
     });
 
-    // Save employee store ID if available
     if (response.employeeStoreId) {
-      cookieStore.set("employee_store_id", response.employeeStoreId.toString(), {
+      cookieStore.set("employee_store_id", String(response.employeeStoreId), {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -83,8 +107,7 @@ export async function loginUser(
       });
     }
 
-    // Save roles if available
-    if (response.roles && Array.isArray(response.roles)) {
+    if (response.roles?.length) {
       cookieStore.set("roles", response.roles.join(","), {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
@@ -93,8 +116,18 @@ export async function loginUser(
         maxAge: expiresIn,
       });
     }
+
+    return response;
   }
 
-  return response;
-}
+  // ✅ CLIENT SIDE
+  const res = await fetch(`/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
 
+  if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
+
+  return res.json();
+}

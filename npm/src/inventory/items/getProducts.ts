@@ -1,9 +1,17 @@
-import { apiFetch } from "../../core/fetcher";
-import getToken from "../../token";
 import type { Product } from "../../types";
 import type { ItemsFilterParameters } from "../../filter-models";
-import { Api } from "../../api/api";
 
+export interface ProductResponse {
+  currentPage: number;
+  currentSortField: null;
+  currentSortOrder: null;
+  nextSortOrder: null;
+  pageCount: number;
+  pageSize: number;
+  results: Product[];
+  rowCount: number;
+  sortField: null;
+}
 /**
  * Fetches a list of products with optional filtering and pagination
  * Works in both server and client components
@@ -27,16 +35,18 @@ export async function getProducts({
   filterParams,
 }: {
   filterParams: ItemsFilterParameters;
-}): Promise<Product> {
+}): Promise<ProductResponse> {
   const params = filterParams.toURLSearchParams();
   params.set("havePicture", "true");
 
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
-    const token = await getToken();
-    return apiFetch<Product>(`${Api.getProducts}?${params.toString()}`, {
-      token,
-    });
+    const { getWithAuth } = await import("../../core/fetcher");
+    const { Api } = await import("../../api/api");
+
+    return getWithAuth<ProductResponse>(
+      `${Api.getProducts}?${params.toString()}`
+    );
   }
 
   // Client-side: Use Next.js API route

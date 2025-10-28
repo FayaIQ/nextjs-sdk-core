@@ -50,7 +50,7 @@ export interface Product {
   descriptionSecondary: string | null;
   currencyId: number;
   menu: object | null;
-  brand: unknown | null;
+  brand: object | null;
   sizeSet: unknown | null;
   unitInfo: UnitInfo;
   packs: unknown | null;

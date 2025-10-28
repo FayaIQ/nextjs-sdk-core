@@ -2,10 +2,12 @@
  * Type definitions for API requests
  */
 export type Primitive = string | number | boolean | null | undefined;
+
 export type RequestData = Record<
   string,
   Primitive | Primitive[] | Record<string, Primitive>
 >;
+
 export type QueryParams = Record<string, Primitive>;
 
 export interface ApiRequestOptions {
@@ -178,13 +180,22 @@ export async function postWithAuth<T>(
 export async function postWithoutAuth<T>(
   url: string,
   data?: RequestData,
-  headers?: Record<string, string>
+  headers: Record<string, string> = {}
 ): Promise<T> {
-  return apiFetch<T>(url, {
+  const response = await fetch(url, {
     method: "POST",
-    data,
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    body: data ? JSON.stringify(data) : undefined,
   });
+
+  if (!response.ok) {
+    throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
+  }
+
+  return (await response.json()) as T;
 }
 
 /**

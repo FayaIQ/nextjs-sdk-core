@@ -38,15 +38,17 @@ const routes = [
   {
     name: "login",
     path: ["src", "app", "api", "auth", "login"],
-    handler: "my-next-core/identity/handler/login",
+    handler: "my-next-core/identity",
     methods: ["POST"],
+    exportName: "LoginPOST",
     description: "User login endpoint",
   },
   {
     name: "logout",
     path: ["src", "app", "api", "auth", "logout"],
-    handler: "my-next-core/identity/handler/logout",
+    handler: "my-next-core/identity",
     methods: ["POST"],
+    exportName: "LogoutPOST",
     description: "User logout endpoint",
   },
   {
@@ -78,7 +80,10 @@ function createRoute(route) {
   } else {
     // Generate export statement for methods
     const methodExports = route.methods
-      .map((method) => `export { ${method} } from "${route.handler}";`)
+      .map((method) => {
+        const exportName = route.exportName || method;
+        return `export { ${exportName} as ${method} } from "${route.handler}";`;
+      })
       .join("\n");
 
     const content = `// Auto-generated API route - ${route.description}\n${methodExports}\n`;

@@ -1,7 +1,9 @@
 "use strict";
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -15,15 +17,25 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/handlers/storeInfo.ts
-var storeInfo_exports = {};
-__export(storeInfo_exports, {
-  GET: () => GET
+// src/identity/index.ts
+var identity_exports = {};
+__export(identity_exports, {
+  LoginPOST: () => POST,
+  LogoutPOST: () => POST2,
+  loginUser: () => loginUser,
+  logoutUser: () => logoutUser
 });
-module.exports = __toCommonJS(storeInfo_exports);
-var import_server = require("next/server");
+module.exports = __toCommonJS(identity_exports);
 
 // src/api/api.ts
 var _Api = class _Api {
@@ -125,6 +137,7 @@ _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/veri
 // Other services
 _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
 _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+_Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
 _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
 _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
 _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
@@ -142,9 +155,6 @@ _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
 _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
 _Api.postCartItems = `${_Api.INVENTORY_BASE}/v1/Carts/Items`;
 var Api = _Api;
-
-// src/token.ts
-var import_headers = require("next/headers");
 
 // src/core/config.ts
 var getAuthConfig = () => {
@@ -175,114 +185,155 @@ var getAuthConfig = () => {
 
 // src/token.ts
 var AUTH_MODE = process.env.STOREAK_AUTH_MODE || "auto";
-async function getToken() {
-  if (AUTH_MODE === "strict") {
-    const cookie = await (0, import_headers.cookies)();
-    const accessTokenCookie = cookie.get("access_token")?.value;
-    if (accessTokenCookie && accessTokenCookie) {
-      return accessTokenCookie;
-    }
-    throw new Error("Unauthorized: Access token missing (strict mode enabled)");
-  }
-  const authConfig = getAuthConfig();
-  const requestBody = {
-    clientId: authConfig.clientId,
-    clientSecret: authConfig.clientSecret,
-    username: authConfig.username,
-    password: authConfig.password,
-    Language: authConfig.language ?? 0,
-    GMT: authConfig.gmt ?? 3,
-    IsFromNotification: false
-  };
-  const response = await fetch(Api.signIn, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(requestBody)
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Authentication failed: ${response.status} ${response.statusText}`
-    );
-  }
-  const data = await response.json();
-  if (!data.access_token) {
-    throw new Error("Token missing in authentication response");
-  }
-  return data.access_token;
-}
 
 // src/core/fetcher.ts
-async function apiFetch(url, options = {}) {
-  const { method = "GET", headers = {}, data, query, token } = options;
-  let endpoint = url;
-  if (query) {
-    const params = new URLSearchParams();
-    Object.entries(query).forEach(([key, value]) => {
-      if (value !== void 0 && value !== null) {
-        params.append(key, String(value));
-      }
-    });
-    const queryString = params.toString();
-    if (queryString) {
-      endpoint += `?${queryString}`;
-    }
-  }
-  const requestHeaders = { ...headers };
-  if (token) {
-    requestHeaders["Authorization"] = `Bearer ${token}`;
-  }
-  if (data && !(data instanceof FormData)) {
-    requestHeaders["Content-Type"] = "application/json";
-  }
-  let body;
-  if (data) {
-    body = data instanceof FormData ? data : JSON.stringify(data);
-  }
-  const response = await fetch(endpoint, {
-    method,
-    headers: requestHeaders,
-    body
+async function postWithoutAuth(url, data, headers = {}) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers
+    },
+    body: data ? JSON.stringify(data) : void 0
   });
   if (!response.ok) {
-    let errorMessage = `Request failed with status ${response.status}`;
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData?.message || errorMessage;
-    } catch {
+    throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+// src/identity/login.ts
+async function loginUser(credentials) {
+  const isServer = typeof window === "undefined";
+  if (isServer) {
+    const config = getAuthConfig();
+    const { cookies } = await import("next/headers");
+    const fullCredentials = {
+      clientId: config.clientId,
+      clientSecret: config.clientSecret,
+      username: credentials.username,
+      password: credentials.password,
+      Language: config.language ?? 0,
+      GMT: config.gmt ?? 3,
+      IsFromNotification: false
+    };
+    const response = await postWithoutAuth(Api.signIn, fullCredentials);
+    if (!response?.access_token) {
+      throw new Error("Invalid login response: missing access token");
     }
-    throw new Error(errorMessage);
+    const cookieStore = await cookies();
+    const expiresIn = response.expires || 7200;
+    cookieStore.set("access_token", response.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: expiresIn
+    });
+    if (response.employeeStoreId) {
+      cookieStore.set("employee_store_id", String(response.employeeStoreId), {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: expiresIn
+      });
+    }
+    if (response.roles?.length) {
+      cookieStore.set("roles", response.roles.join(","), {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: expiresIn
+      });
+    }
+    return response;
   }
-  return response.json();
+  const res = await fetch(`/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials)
+  });
+  if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
+  return res.json();
 }
 
-// src/storeInfo.ts
-async function getStoreInfo() {
+// src/identity/logout.ts
+async function logoutUser() {
   if (typeof window === "undefined") {
-    const token = await getToken();
-    return apiFetch(Api.getStoreInfo, { token });
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    cookieStore.delete("access_token");
+    cookieStore.delete("employee_store_id");
+    cookieStore.delete("roles");
+    return { success: true };
   }
-  const response = await fetch("/api/storeInfo");
-  if (!response.ok) {
-    throw new Error(`Failed to fetch store info: ${response.statusText}`);
-  }
-  return response.json();
+  const res = await fetch("/api/auth/logout", {
+    method: "POST"
+  });
+  if (!res.ok) throw new Error(`Logout failed: ${res.statusText}`);
+  return res.json();
 }
 
-// src/handlers/storeInfo.ts
-async function GET() {
+// src/identity/handler/login.ts
+var import_server = require("next/server");
+async function POST(request) {
   try {
-    const storeInfo = await getStoreInfo();
-    return import_server.NextResponse.json(storeInfo);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch store info";
-    console.error("Store info error:", message);
+    const body = await request.json().catch(() => ({}));
+    const config = getAuthConfig();
+    const credentials = {
+      clientId: body.clientId ?? config.clientId,
+      clientSecret: body.clientSecret ?? config.clientSecret,
+      username: body.username ?? config.username,
+      password: body.password ?? config.password,
+      Language: body.Language ?? config.language ?? 0,
+      GMT: body.GMT ?? config.gmt ?? 3,
+      IsFromNotification: false
+    };
+    const response = await loginUser(credentials);
     return import_server.NextResponse.json(
-      { error: message },
+      {
+        success: true,
+        message: "Login successful",
+        employeeStoreId: response.employeeStoreId || null,
+        roles: response.roles || [],
+        user: response.user || null
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Login failed unexpectedly";
+    console.error("Login error:", message);
+    return import_server.NextResponse.json(
+      { success: false, error: message },
+      { status: 401 }
+    );
+  }
+}
+
+// src/identity/handler/logout.ts
+var import_server2 = require("next/server");
+async function POST2() {
+  try {
+    await logoutUser();
+    return import_server2.NextResponse.json(
+      { success: true, message: "Logged out successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Logout failed";
+    console.error("Logout error:", message);
+    return import_server2.NextResponse.json(
+      { success: false, error: message },
       { status: 500 }
     );
   }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  GET
+  LoginPOST,
+  LogoutPOST,
+  loginUser,
+  logoutUser
 });
