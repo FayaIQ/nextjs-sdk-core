@@ -37,10 +37,12 @@ export async function putOrderApproveList(ids: (string | number)[], note?: strin
     const { putWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
     
-    return putWithAuth<ApproveOrderResponse>(
-      Api.putOrderApproveList(),
-      { ordersIds : ids, note: note || "" } 
-    );
+      // Api.putOrderApproveList is a string constant (URL) not a function
+      // Use the payload key "orderIds" to match client and API expectations
+      return putWithAuth<ApproveOrderResponse>(
+        Api.putOrderApproveList,
+        { orderIds: ids, note: note || "" }
+      );
   }
 
   // Client-side: Use Next.js API route

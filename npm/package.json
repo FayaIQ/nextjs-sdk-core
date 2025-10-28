@@ -27,8 +27,8 @@
     ".env.example"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/gps/locations/index.ts src/identity/application/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/identity/application/index.ts src/gps/locations/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/gps/locations/index.ts src/identity/application/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/identity/application/index.ts src/gps/locations/index.ts --format cjs,esm --dts --watch",
     "prepublishOnly": "npm run build"
   },
   "exports": {
@@ -94,6 +94,27 @@
       "types": "./dist/inventory/orders/*.d.ts",
       "import": "./dist/inventory/orders/*.js",
       "require": "./dist/inventory/orders/*.cjs"
+    }, 
+    
+    "./inventory/itemSource": {
+      "types": "./dist/inventory/itemSource/index.d.ts",
+      "import": "./dist/inventory/itemSource/index.js",
+      "require": "./dist/inventory/itemSource/index.cjs"
+    },
+    "./inventory/itemSource/*": {
+      "types": "./dist/inventory/itemSource/*.d.ts",
+      "import": "./dist/inventory/itemSource/*.js",
+      "require": "./dist/inventory/itemSource/*.cjs"
+    },
+    "./inventory/category": {
+      "types": "./dist/inventory/category/index.d.ts",
+      "import": "./dist/inventory/category/index.js",
+      "require": "./dist/inventory/category/index.cjs"
+    },
+    "./inventory/category/*": {
+      "types": "./dist/inventory/category/*.d.ts",
+      "import": "./dist/inventory/category/*.js",
+      "require": "./dist/inventory/category/*.cjs"
     },
     "./inventory/items": {
       "types": "./dist/inventory/items/index.d.ts",

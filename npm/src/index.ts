@@ -5,7 +5,7 @@ export { getProductInfo } from "./inventory/items/getProductInfo";
 
 // Type exports
 export * from "./types";
-export * from "./filter-models";
+export * from "./inventory/items/filter-models";
 export * from "./api/api";
 export * from "./inventory/orders/order-models";
 // Configuration exports

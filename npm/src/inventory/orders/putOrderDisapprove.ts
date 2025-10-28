@@ -38,9 +38,10 @@ export async function putOrderDisapproveList(ids: (string | number)[] , note?: s
     const { putWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
     
+    // Use the payload key "orderIds" to match client and API expectations
     return putWithAuth<DisapproveOrderResponse>(
-      Api.putOrderDisapproveList(),
-       { ordersIds : ids, note: note }
+      Api.putOrderDisapproveList,
+      { orderIds: ids, note: note || "" }
     );
   }
 

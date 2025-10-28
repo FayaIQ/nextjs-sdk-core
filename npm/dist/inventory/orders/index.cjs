@@ -58,16 +58,10 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
       }
       static putOrderApprove(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}ApproveDeliveryOrder`;
-      }
-      static putOrderApproveList() {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ApproveDeliveryOrder`;
       }
       static putOrderDisapprove(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}DisapproveDeliveryOrder`;
-      }
-      static putOrderDisapproveList() {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/DisapproveDeliveryOrder`;
       }
       static putChangeStatusOrder(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
@@ -140,6 +134,7 @@ var init_api = __esm({
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
     _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+    _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
     _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
     _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
     _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
@@ -152,9 +147,14 @@ var init_api = __esm({
     _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
     // orders endpoints
     _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
+    _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
+    _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
     _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+    // category 
+    _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
     // identity 
     _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
+    _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
     /////////////////////////////////////////
     //GPS 
     _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
@@ -819,8 +819,8 @@ async function putOrderApproveList(ids, note) {
     const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
     return putWithAuth2(
-      Api2.putOrderApproveList(),
-      { ordersIds: ids, note: note || "" }
+      Api2.putOrderApproveList,
+      { orderIds: ids, note: note || "" }
     );
   }
   const response = await fetch("/api/orders/approve-list", {
@@ -863,8 +863,8 @@ async function putOrderDisapproveList(ids, note) {
     const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
     return putWithAuth2(
-      Api2.putOrderDisapproveList(),
-      { ordersIds: ids, note }
+      Api2.putOrderDisapproveList,
+      { orderIds: ids, note: note || "" }
     );
   }
   const response = await fetch("/api/orders/disapprove-list", {
@@ -885,6 +885,7 @@ async function getOrdersFullInfo(body) {
   if (typeof window === "undefined") {
     const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    console.log("requesting full info for orders:", body);
     return postWithAuth2(
       Api2.getOrderFullInfo,
       { orderIds: body }

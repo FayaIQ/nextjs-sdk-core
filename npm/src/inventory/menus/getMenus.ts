@@ -1,5 +1,5 @@
 import { Category } from "../../types";
-import { ItemsFilterParameters } from "../../filter-models";
+import { ItemsFilterParameters } from "../items/filter-models";
 export async function getMenus({
   filterParams,
 }: {

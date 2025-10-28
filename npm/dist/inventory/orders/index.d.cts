@@ -28,7 +28,7 @@ declare function putOrderDisapproveList(ids: (string | number)[], note?: string)
 interface OrderFullInfoResponse {
     data: OrderDetail[];
 }
-declare function getOrdersFullInfo(body: string | number[]): Promise<OrderFullInfoResponse>;
+declare function getOrdersFullInfo(body: number[]): Promise<OrderFullInfoResponse>;
 
 interface ChangeOrderStatusRequest {
     status: number;

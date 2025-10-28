@@ -30,6 +30,7 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
   static getMenus: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+  static getMenusDropdown: string = `${Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
   static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
   static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
@@ -65,20 +66,16 @@ export class Api {
   static getOrderFullInfo = `${Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
 
   static putOrderApprove(id: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}ApproveDeliveryOrder`;
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ApproveDeliveryOrder`;
   }
 
-  static putOrderApproveList(): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
-  }
+  static putOrderApproveList: string = `${Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
 
   static putOrderDisapprove(id: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${id}DisapproveDeliveryOrder`;
+    return `${Api.INVENTORY_BASE}/v1/Orders/${id}/DisapproveDeliveryOrder`;
   }
 
-  static putOrderDisapproveList(): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
-  }
+  static putOrderDisapproveList: string = `${Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
 
   static putChangeStatusOrder(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
@@ -123,9 +120,14 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
   }
 
+
+  // category 
+
+  static getCatigories: string = `${Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
   // identity 
   static getApplicationsStores: string = `${Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
 
+  static getItemsSource: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
   /////////////////////////////////////////
   //GPS 
 

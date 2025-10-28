@@ -1,7 +1,7 @@
 import { apiFetch } from "../../core/fetcher";
 import getToken from "../../token";
 import type { Product } from "../../types";
-import type { ItemsFilterParameters } from "../../filter-models";
+import type { ItemsFilterParameters } from "./filter-models";
 import { Api } from "../../api/api";
 
 /**
@@ -29,8 +29,6 @@ export async function getProducts({
   filterParams: ItemsFilterParameters;
 }): Promise<Product> {
   const params = filterParams.toURLSearchParams();
-  params.set("havePicture", "true");
-
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const token = await getToken();
@@ -40,7 +38,7 @@ export async function getProducts({
   }
 
   // Client-side: Use Next.js API route
-  const response = await fetch(`/api/getProducts?${params.toString()}`);
+  const response = await fetch(`/api/products?${params.toString()}`);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);

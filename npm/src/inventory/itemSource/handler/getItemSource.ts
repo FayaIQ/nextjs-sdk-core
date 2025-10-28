@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProducts as fetchProducts } from "../getProducts";
-import { ItemsFilterParameters } from "../filter-models";
+import { getItemsSource } from "../getItemsSource";
+
 
 /**
  * Ready-to-use API route handler for products
@@ -11,12 +11,9 @@ import { ItemsFilterParameters } from "../filter-models";
  */
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const filterParams =
-      ItemsFilterParameters.fromURLSearchParams(searchParams);
 
-    const products = await fetchProducts({ filterParams });
-    return NextResponse.json(products);
+    const  itemsSource = await getItemsSource();
+    return NextResponse.json(itemsSource);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch products";

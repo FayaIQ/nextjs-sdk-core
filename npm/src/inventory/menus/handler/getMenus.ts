@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMenus as fetchProducts } from "../getMenus";
-import { ItemsFilterParameters } from "../../../filter-models";
+import { ItemsFilterParameters } from "../../items/filter-models";
 
 /**
  * Ready-to-use API route handler for products

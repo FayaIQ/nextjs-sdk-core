@@ -137,6 +137,14 @@ const routes = [
     description: "Product details endpoint",
   },
   {
+    name: "categories",
+    path: ["src", "app", "api", "categories"],
+    handler: "my-next-core/inventory/category",
+    methods: ["GET"],
+    exportName: "CategoriesGET",
+    description: "Categories listing endpoint",
+  },
+  {
     name: "coupons",
     path: ["src", "app", "api", "offers", "coupons"],
     handler: "my-next-core/inventory/offers",
@@ -175,6 +183,22 @@ const routes = [
     methods: ["GET"],
     exportName: "GETStoreInfo",
     description: "Store details endpoint",
+  },
+  {
+    name: "itemSources",
+    path: ["src", "app", "api", "itemSource"],
+    handler: "my-next-core/inventory/itemSource",
+    methods: ["GET"],
+    exportName: "ItemSourcesGET",
+    description: "Item sources listing endpoint",
+  },
+  {
+    name : "menusDropdown",
+    path: ["src", "app", "api", "menus", "dropdown"],
+    handler: "my-next-core/inventory/menus",
+    methods: ["GET"],
+    exportName: "GetMenusDropdownGET",
+    description: "Menus dropdown listing endpoint",
   }
 
 ];

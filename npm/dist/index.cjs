@@ -58,16 +58,10 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
       }
       static putOrderApprove(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}ApproveDeliveryOrder`;
-      }
-      static putOrderApproveList() {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ApproveDeliveryOrder`;
       }
       static putOrderDisapprove(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}DisapproveDeliveryOrder`;
-      }
-      static putOrderDisapproveList() {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/DisapproveDeliveryOrder`;
       }
       static putChangeStatusOrder(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
@@ -140,6 +134,7 @@ var init_api = __esm({
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
     _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+    _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
     _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
     _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
     _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
@@ -152,9 +147,14 @@ var init_api = __esm({
     _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
     // orders endpoints
     _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
+    _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
+    _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
     _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+    // category 
+    _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
     // identity 
     _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
+    _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
     /////////////////////////////////////////
     //GPS 
     _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
@@ -448,14 +448,13 @@ async function getProducts({
   filterParams
 }) {
   const params = filterParams.toURLSearchParams();
-  params.set("havePicture", "true");
   if (typeof window === "undefined") {
     const token = await getToken();
     return apiFetch(`${Api.getProducts}?${params.toString()}`, {
       token
     });
   }
-  const response = await fetch(`/api/getProducts?${params.toString()}`);
+  const response = await fetch(`/api/products?${params.toString()}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);
   }
@@ -480,7 +479,7 @@ async function getProductInfo(id) {
   return response.json();
 }
 
-// src/filter-models.ts
+// src/inventory/items/filter-models.ts
 var SortType = /* @__PURE__ */ ((SortType2) => {
   SortType2["None"] = "None";
   SortType2["Newest"] = "Newest";

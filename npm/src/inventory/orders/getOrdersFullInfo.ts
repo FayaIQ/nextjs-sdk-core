@@ -4,12 +4,13 @@ export interface OrderFullInfoResponse {
   data: OrderDetail[];
 }
 
-export async function getOrdersFullInfo( body: string | number []): Promise<OrderFullInfoResponse> {
+export async function getOrdersFullInfo( body:number []): Promise<OrderFullInfoResponse> {
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const { postWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
 
+    console.log("requesting full info for orders:", body);
     return postWithAuth<OrderFullInfoResponse>(
       Api.getOrderFullInfo,
       { orderIds: body }
