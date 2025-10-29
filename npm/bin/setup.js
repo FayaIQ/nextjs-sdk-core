@@ -58,6 +58,13 @@ const routes = [
     methods: ["GET"],
     description: "Menus listing endpoint",
   },
+  {
+    name: "slides",
+    path: ["src", "app", "api", "slides"],
+    handler: "my-next-core/inventory/slides/getSlides",
+    methods: ["GET"],
+    description: "Slides listing endpoint",
+  },
 ];
 
 /**

@@ -76,6 +76,21 @@
       "types": "./dist/inventory/orders/*.d.ts",
       "import": "./dist/inventory/orders/*.js",
       "require": "./dist/inventory/orders/*.cjs"
+    },
+    "./inventory/slides/*": {
+      "types": "./dist/inventory/slides/*.d.ts",
+      "import": "./dist/inventory/slides/*.js",
+      "require": "./dist/inventory/slides/*.cjs"
+    },
+    "./inventory/*": {
+      "types": "./dist/inventory/*.d.ts",
+      "import": "./dist/inventory/*.js",
+      "require": "./dist/inventory/*.cjs"
+    },
+    "./inventory": {
+      "types": "./dist/inventory/index.d.ts",
+      "import": "./dist/inventory/index.js",
+      "require": "./dist/inventory/index.cjs"
     }
   },
   "peerDependencies": {
