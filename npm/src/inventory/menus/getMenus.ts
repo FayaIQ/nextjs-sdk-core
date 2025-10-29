@@ -11,7 +11,7 @@ export async function getMenus({
     const {getWithAuth} = await import("../../core");
     const { Api } = await import("../../api/api");
 
-    return getWithAuth<Category>(`${Api.getMenus}?${params.toString()}`, {
+    return getWithAuth<Category[]>(`${Api.getMenus}?${params.toString()}`, {
     });
   } else {
     return fetch(`/api/menus?${params.toString()}`).then((res) => {

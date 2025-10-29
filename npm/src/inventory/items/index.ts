@@ -7,5 +7,5 @@ export {GET as GetParentProductsGET} from "./handler/getParentProducts";
 
 export * from "./filter-models";
 export * from "./postCopyParentStore";
-export * from "./types";
+export * from "./types"
 export { POST as CopyParentStorePOST } from "./handler/postCopyParentStore";

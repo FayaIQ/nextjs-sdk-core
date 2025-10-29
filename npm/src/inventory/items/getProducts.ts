@@ -1,17 +1,7 @@
-import type { Product } from "../../types";
-import type { ItemsFilterParameters } from "../../filter-models";
+import type { Product, ProductResponse } from "./types";
+import type { ItemsFilterParameters } from "./filter-models";
 
-export interface ProductResponse {
-  currentPage: number;
-  currentSortField: null;
-  currentSortOrder: null;
-  nextSortOrder: null;
-  pageCount: number;
-  pageSize: number;
-  results: Product[];
-  rowCount: number;
-  sortField: null;
-}
+
 /**
  * Fetches a list of products with optional filtering and pagination
  * Works in both server and client components
