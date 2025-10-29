@@ -10,7 +10,11 @@ const routes = [
 
   {
     name: "login",
+<<<<<<< HEAD
     path: [ "src" , "app", "api", "auth", "login"],
+=======
+    path: ["src", "app", "api", "auth", "login"],
+>>>>>>> bde475e970efacaee3c3b1086b5b1827fe431e67
     handler: "my-next-core/identity",
     methods: ["POST"],
     exportName: "LoginPOST",
@@ -18,7 +22,11 @@ const routes = [
   },
   {
     name: "logout",
+<<<<<<< HEAD
     path: ["src" , "app", "api", "auth", "logout"],
+=======
+    path: ["src", "app", "api", "auth", "logout"],
+>>>>>>> bde475e970efacaee3c3b1086b5b1827fe431e67
     handler: "my-next-core/identity",
     methods: ["POST"],
     exportName: "LogoutPOST",
@@ -121,6 +129,7 @@ const routes = [
     description: "Menus listing endpoint",
   },
   {
+<<<<<<< HEAD
     name: "products",
     path: ["src", "app", "api", "products"],
     handler: "my-next-core/inventory/items",
@@ -261,6 +270,14 @@ const routes = [
     description: "Update an order item",
   }
 
+=======
+    name: "slides",
+    path: ["src", "app", "api", "slides"],
+    handler: "my-next-core/inventory/slides/getSlides",
+    methods: ["GET"],
+    description: "Slides listing endpoint",
+  },
+>>>>>>> bde475e970efacaee3c3b1086b5b1827fe431e67
 ];
 
 /**
@@ -282,11 +299,21 @@ function createRoute(route) {
     return false;
   } else {
     // Generate export statement for methods
+<<<<<<< HEAD
     const methodExports = route.methods.map(method => {
       const exportName = route.exportName || method;
       return `export { ${exportName} as ${method} } from "${route.handler}";`;
     }).join('\n');
     
+=======
+    const methodExports = route.methods
+      .map((method) => {
+        const exportName = route.exportName || method;
+        return `export { ${exportName} as ${method} } from "${route.handler}";`;
+      })
+      .join("\n");
+
+>>>>>>> bde475e970efacaee3c3b1086b5b1827fe431e67
     const content = `// Auto-generated API route - ${route.description}\n${methodExports}\n`;
     fs.writeFileSync(routeFile, content, "utf8");
     console.log(

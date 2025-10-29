@@ -1,8 +1,7 @@
 // file   : nextjs-sdk-core/npm/src/inventory/orders/handler/orders.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { ItemsFilterParameters } from "../../items/filter-models";
-import { getMenus } from "../getMenus";
+import { getSlides } from "../getSlides";
 
 /**
  * Ready-to-use API route handler for orders
@@ -13,12 +12,8 @@ import { getMenus } from "../getMenus";
  */
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const filterParams =
-      ItemsFilterParameters.fromURLSearchParams(searchParams);
-
-    const menus = await getMenus({ filterParams });
-    return NextResponse.json(menus);
+    const Slides = await getSlides();
+    return NextResponse.json(Slides);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch orders";

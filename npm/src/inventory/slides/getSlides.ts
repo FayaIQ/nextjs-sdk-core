@@ -1,17 +1,3 @@
-import type { Product } from "../../types";
-import type { ItemsFilterParameters } from "../../filter-models";
-
-export interface ProductResponse {
-  currentPage: number;
-  currentSortField: null;
-  currentSortOrder: null;
-  nextSortOrder: null;
-  pageCount: number;
-  pageSize: number;
-  results: Product[];
-  rowCount: number;
-  sortField: null;
-}
 /**
  * Fetches a list of products with optional filtering and pagination
  * Works in both server and client components
@@ -31,24 +17,17 @@ export interface ProductResponse {
  *   filterParams: new ItemsFilterParameters({ sortType: SortType.Newest })
  * });
  */
-export async function getProducts({
-  filterParams,
-}: {
-  filterParams: ItemsFilterParameters;
-}): Promise<ProductResponse> {
-  const params = filterParams.toURLSearchParams();
+export async function getSlides() {
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
 
-    return getWithAuth<ProductResponse>(
-      `${Api.getProducts}?${params.toString()}`
-    );
+    return getWithAuth(Api.getSlideShows);
   }
 
   // Client-side: Use Next.js API route
-  const response = await fetch(`/api/products?${params.toString()}`);
+  const response = await fetch(`/api/slides?`);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);

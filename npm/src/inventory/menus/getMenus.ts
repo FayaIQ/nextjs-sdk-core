@@ -4,7 +4,7 @@ export async function getMenus({
   filterParams,
 }: {
   filterParams: ItemsFilterParameters;
-}): Promise<Category> {
+}): Promise<Category[]> {
   const params = filterParams.toURLSearchParams();
   // Map categoryId -> menuId and remove categoryId
   if (typeof window === "undefined") {

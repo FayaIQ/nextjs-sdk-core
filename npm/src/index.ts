@@ -2,7 +2,9 @@
 export { getStoreInfo } from "./identity/application/storeInfo";
 export { getProducts } from "./inventory/items/getProducts";
 export { getProductInfo } from "./inventory/items/getProductInfo";
-
+export { getMenus } from "./inventory/menus/getMenus";
+export { getOrders } from "./inventory/orders/getOrders";
+export { getSlides } from "./inventory/slides/getSlides";
 // Type exports
 export * from "./types";
 export * from "./inventory/items/filter-models";
