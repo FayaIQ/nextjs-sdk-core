@@ -199,6 +199,66 @@ const routes = [
     methods: ["GET"],
     exportName: "GetMenusDropdownGET",
     description: "Menus dropdown listing endpoint",
+  },
+  {
+    name : "itemsParent",
+    path: ["src", "app", "api", "items", "parent"],
+    handler: "my-next-core/inventory/items",
+    methods: ["GET"],
+    exportName: "GetParentProductsGET",
+    description: "Parent products listing endpoint",
+  }
+  ,
+  {
+    name: "copyParentStore",
+    path: ["src", "app", "api", "items", "copy-parent-store"],
+    handler: "my-next-core/inventory/items",
+    methods: ["POST"],
+    exportName: "CopyParentStorePOST",
+    description: "Copy parent store items endpoint",
+  }
+
+  ,
+  // Order item endpoints under orders
+  {
+    name: "orderItemGet",
+    path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]"],
+    handler: "my-next-core/inventory/orderItem",
+    methods: ["GET"],
+    exportName: "GetOrderItemGET",
+    description: "Get single order item",
+  },
+  {
+    name: "orderItemPost",
+    path: ["src", "app", "api", "orders", "[id]", "orderItems"],
+    handler: "my-next-core/inventory/orderItem",
+    methods: ["POST"],
+    exportName: "PostOrderItemPOST",
+    description: "Create new order item",
+  },
+  {
+    name: "orderItemCancel",
+    path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "cancel"],
+    handler: "my-next-core/inventory/orderItem",
+    methods: ["PUT"],
+    exportName: "PutOrderItemCancelPUT",
+    description: "Cancel an order item",
+  },
+  {
+    name: "orderItemUndoCancel",
+    path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "undo-cancel"],
+    handler: "my-next-core/inventory/orderItem",
+    methods: ["PUT"],
+    exportName: "PutOrderItemUndoCancelPUT",
+    description: "Undo cancel on an order item",
+  },
+  {
+    name: "orderItemUpdate",
+    path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "update"],
+    handler: "my-next-core/inventory/orderItem",
+    methods: ["PUT"],
+    exportName: "PutOrderItemUpdatePUT",
+    description: "Update an order item",
   }
 
 ];

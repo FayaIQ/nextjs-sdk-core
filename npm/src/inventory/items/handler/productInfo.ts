@@ -3,10 +3,11 @@ import { getProductInfo as fetchProductInfo } from "../getProductInfo";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const product = await fetchProductInfo(params.id);
+    const { id } = await params;
+    const product = await fetchProductInfo(id);
     return NextResponse.json(product);
   } catch (error) {
     const message =

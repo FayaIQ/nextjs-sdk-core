@@ -1,6 +1,6 @@
 import { apiFetch } from "../../core/fetcher";
 import getToken from "../../token";
-import type { Product } from "../../types";
+import type { Product, ProductResponse } from "./types";
 import type { ItemsFilterParameters } from "./filter-models";
 import { Api } from "../../api/api";
 
@@ -27,12 +27,12 @@ export async function getProducts({
   filterParams,
 }: {
   filterParams: ItemsFilterParameters;
-}): Promise<Product> {
+}): Promise<ProductResponse> {
   const params = filterParams.toURLSearchParams();
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const token = await getToken();
-    return apiFetch<Product>(`${Api.getProducts}?${params.toString()}`, {
+    return apiFetch<ProductResponse>(`${Api.getProducts}?${params.toString()}`, {
       token,
     });
   }

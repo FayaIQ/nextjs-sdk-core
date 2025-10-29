@@ -1,7 +1,7 @@
 import { Api } from "../../api/api";
 import { apiFetch } from "../../core/fetcher";
 import getToken from "../../token";
-import type { Product } from "../../types";
+import type { Product } from "./types";
 
 /**
  * Fetches detailed information for a specific product by ID

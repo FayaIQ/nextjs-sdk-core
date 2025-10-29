@@ -57,6 +57,22 @@ var init_api = __esm({
       static getOrder(id) {
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
       }
+      // Order item endpoints (v3)
+      static getOrderItem(orderId, itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
+      }
+      static postOrderItem(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items`;
+      }
+      static putOrderItemCancel(orderId, itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/cancel`;
+      }
+      static putOrderItemUndoCancel(orderId, itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/undo-cancel`;
+      }
+      static putOrderItemUpdate(orderId, itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/update`;
+      }
       static putOrderApprove(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ApproveDeliveryOrder`;
       }
@@ -158,6 +174,9 @@ var init_api = __esm({
     /////////////////////////////////////////
     //GPS 
     _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
+    _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
+    // Items copy endpoints
+    _Api.postCopyParentStore = `${_Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
     _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
     // Cart endpoints
     _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;

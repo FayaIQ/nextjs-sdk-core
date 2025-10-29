@@ -61,6 +61,27 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v3/Orders/${id}`;
   }
 
+  // Order item endpoints (v3)
+  static getOrderItem(orderId: string | number, itemId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
+  }
+
+  static postOrderItem(orderId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items`;
+  }
+
+  static putOrderItemCancel(orderId: string | number, itemId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/cancel`;
+  }
+
+  static putOrderItemUndoCancel(orderId: string | number, itemId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/undo-cancel`;
+  }
+
+  static putOrderItemUpdate(orderId: string | number, itemId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/update`;
+  }
+
   // orders endpoints
 
   static getOrderFullInfo = `${Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
@@ -134,6 +155,10 @@ export class Api {
 
   static getCountries: string = `${Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
 
+static getParentProducts: string = `${Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
+  
+  // Items copy endpoints
+  static postCopyParentStore: string = `${Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
 
 static getLocationChildren(parentId: string | number): string {
     return `${Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
