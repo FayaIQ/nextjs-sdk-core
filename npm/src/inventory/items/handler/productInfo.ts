@@ -1,17 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getProductInfo as fetchProductInfo } from "../getProductInfo";
+// file   : nextjs-sdk-core/npm/src/inventory/orders/handler/orders.ts
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+import { NextRequest, NextResponse } from "next/server";
+import { getProductInfo } from "../getProductInfo";
+
+/**
+ * Ready-to-use API route handler for orders
+ * Users can simply re-export this in their app/api/getOrders/route.ts:
+ *
+ * @example
+ * export { GET } from 'my-next-core/handlers/getOrders';
+ */
+export async function GET(request: NextRequest) {
   try {
-    const product = await fetchProductInfo(params.id);
+    const searchParams = request.nextUrl.id;
+
+    const product = await getProductInfo(searchParams);
     return NextResponse.json(product);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Failed to fetch product info";
-    console.error("Product info error:", message);
+      error instanceof Error ? error.message : "Failed to fetch orders";
+    console.error("orders error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
