@@ -1,6 +1,3 @@
-import { postWithAuth } from "../../core/fetcher";
-import { Api } from "../../api/api";
-
 export interface CopyParentResponse {
   success: boolean;
   message?: string;
@@ -13,6 +10,11 @@ export interface CopyParentResponse {
 export async function postCopyParentStore(itemIds: (number | string)[]): Promise<CopyParentResponse> {
   // server-side: call API directly with auth
   if (typeof window === "undefined") {
+    // Import cookies only on server side
+    const { postWithAuth } = await import("../../core/fetcher");
+    const { Api } = await import("../../api/api");
+    
+
     return postWithAuth<CopyParentResponse>(Api.postCopyParentStore, { itemIds });
   }
 

@@ -1,6 +1,3 @@
-import { Api } from "../../api/api";
-import { apiFetch } from "../../core/fetcher";
-import getToken from "../../token";
 import type { Product } from "./types";
 
 /**
@@ -19,16 +16,16 @@ import type { Product } from "./types";
  * const product = await getProductInfo("123");
  */
 export async function getProductInfo(id: string): Promise<Product> {
+
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
-    const token = await getToken();
-    return apiFetch<Product>(`${Api.getProductInfo(id)}/`, {
-      token,
-    });
+    const { getWithAuth  } = await import("../../core/fetcher");
+    const { Api } = await import("../../api/api");
+    return getWithAuth<Product>(`${Api.getProductInfo(id)}`);
   }
 
   // Client-side: Use Next.js API route
-  const response = await fetch(`/api/productInfo/${id}`);
+  const response = await fetch(`/api/products/${id}`);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch product info: ${response.statusText}`);

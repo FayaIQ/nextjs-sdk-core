@@ -73,14 +73,45 @@ export async function apiFetch<T>(
 
   // Handle response errors
   if (!response.ok) {
-    let errorMessage = `Request failed with status ${response.status}`;
+    // Try to parse JSON error body and extract a user-friendly message.
+    let defaultMessage = `Request failed with status ${response.status} ${response.statusText}`;
     try {
       const errorData = await response.json();
-      errorMessage = errorData?.message || errorMessage;
-    } catch {
-      // If error response is not JSON, use default message
+
+      const extractMessage = (data: any): string | null => {
+        if (!data) return null;
+        if (typeof data === "string") return data;
+        // Common fields
+        if (data.message) return String(data.message);
+        if (data.Message) return String(data.Message);
+        // Some APIs nest errors
+        if (data.error) {
+          if (typeof data.error === "string") return data.error;
+          if (data.error.message) return String(data.error.message);
+          if (data.error.Message) return String(data.error.Message);
+        }
+        // Specific shape used in this project: { code, name, message }
+        if (data.code && data.name && data.message) return String(data.message);
+        // Array of errors
+        if (Array.isArray(data) && data.length > 0) {
+          const first = data[0];
+          if (first?.message) return String(first.message);
+        }
+        // Fallback to stringified JSON
+        try {
+          return JSON.stringify(data);
+        } catch {
+          return null;
+        }
+      };
+
+      const msg = extractMessage(errorData) || defaultMessage;
+      throw new Error(msg);
+    } catch (err) {
+      // If parsing failed or response wasn't JSON, throw a default message or the parser error
+      if (err instanceof Error) throw err;
+      throw new Error(defaultMessage);
     }
-    throw new Error(errorMessage);
   }
 
   return response.json();

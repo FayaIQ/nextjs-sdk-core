@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrderItem } from "../getOrderItem";
 
-export async function GET(request: NextRequest, { params }: { params: {  id: string , itemId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string , itemId: string }> }) {
   try {
-    const { id, itemId } = params;
+    const { id, itemId } = await params;
     const result = await getOrderItem(id, itemId);
     return NextResponse.json(result);
   } catch (err) {

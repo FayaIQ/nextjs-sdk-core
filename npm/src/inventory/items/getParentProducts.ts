@@ -1,6 +1,26 @@
 import { ProductResponse } from "./types";
 import { ItemsFilterParameters } from "./filter-models";
 
+
+/**
+ * Fetches a list of products with optional filtering and pagination
+
+  * Works in both server and client components
+  *
+  * @returns Promise with product data
+  * @example
+  * // Server component
+  * const filterParams = new ItemsFilterParameters();
+  * filterParams.page = 1;
+  * const products = await getParentProducts({ filterParams });
+  * @example
+  * // Client component
+  * const filterParams = new ItemsFilterParameters();
+  * filterParams.page = 1;
+  * const products = await getParentProducts({ filterParams });
+  * /
+  * */
+ 
 export async function getParentProducts({
   filterParams,
 }: {

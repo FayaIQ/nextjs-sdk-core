@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { postOrderItem } from "../postOrderItem";
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json().catch(() => ({}));
     const result = await postOrderItem(id, body);
     return NextResponse.json(result);

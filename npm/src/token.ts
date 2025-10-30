@@ -1,7 +1,4 @@
 
-import { Api } from "./api/api";
-import { getAuthConfig } from "./core/config";
-
 export type TokenResponse = {
   access_token: string;
   token_type?: string;
@@ -10,7 +7,7 @@ export type TokenResponse = {
 };
 
 // Environment variable to control behavior
-const AUTH_MODE = process.env.STOREAK_AUTH_MODE || "auto"; // "auto" | "strict"
+const AUTH_MODE = process.env.AUTH_MODE || "auto"; // "auto" | "strict"
 
 /**
  * Retrieves or generates an access token based on the configured mode.
@@ -20,16 +17,19 @@ const AUTH_MODE = process.env.STOREAK_AUTH_MODE || "auto"; // "auto" | "strict"
  * - "strict": throws Unauthorized error if no token exists
  */
 export default async function getToken(): Promise<string> {
-  if (AUTH_MODE === "strict" && typeof window === "undefined") {
+if (AUTH_MODE === "strict" && typeof window === "undefined") {
  const { cookies } = await import("next/headers");
+
     const cookie = await cookies();
     const accessTokenCookie = cookie.get("access_token")?.value;
-    if (accessTokenCookie && accessTokenCookie) {
+    if (accessTokenCookie) {
       return accessTokenCookie;
     }
     throw new Error("Unauthorized: Access token missing (strict mode enabled)");
   }
 
+  const { getAuthConfig } = await import("./core/config");
+  const { Api } = await import("./api/api");
   // AUTO MODE: perform login to fetch a new token
   const authConfig = getAuthConfig();
 

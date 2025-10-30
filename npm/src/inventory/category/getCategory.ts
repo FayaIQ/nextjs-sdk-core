@@ -1,5 +1,19 @@
 import { Category } from "./types";
 
+/**
+ * Fetches a list of categories from the server
+ * Works in both server and client components
+ *
+ * @returns Promise with category data
+ *
+ * @example
+ * // Server component
+ * const categories = await getCatigories();
+ *
+ * @example
+ * // Client component
+ * const categories = await getCatigories();
+ */
 export async function getCatigories(): Promise<Category[]> {
   if (typeof window === "undefined") {
     const {getWithAuth} = await import("../../core");

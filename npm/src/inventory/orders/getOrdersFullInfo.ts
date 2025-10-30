@@ -1,20 +1,23 @@
 import { OrderDetail } from "./order-models";
 
-export interface OrderFullInfoResponse {
-  data: OrderDetail[];
-}
+type OrderIdsInput = number[] | { orderIds?: number[]; body?: number[] };
 
-export async function getOrdersFullInfo( body:number []): Promise<OrderFullInfoResponse> {
+/**
+ * Fetch full info for orders. Accepts either an array of ids or an object
+ * containing `orderIds` (or legacy `body`) and normalizes to the shape the
+ * backend expects: { orderIds: [...] }.
+ */
+export async function getOrdersFullInfo(input: OrderIdsInput): Promise<OrderDetail[]> {
+  const orderIds: number[] = Array.isArray(input)
+    ? input
+    : (input.orderIds ?? input.body ?? []);
+
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const { postWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
 
-    console.log("requesting full info for orders:", body);
-    return postWithAuth<OrderFullInfoResponse>(
-      Api.getOrderFullInfo,
-      { orderIds: body }
-    );
+    return postWithAuth<OrderDetail[]>(Api.getOrderFullInfo, { orderIds });
   }
 
   // Client-side: Use Next.js API route
@@ -23,12 +26,12 @@ export async function getOrdersFullInfo( body:number []): Promise<OrderFullInfoR
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ orderIds: body }),
+    body: JSON.stringify({ orderIds }),
   });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch order full info: ${response.statusText}`);
   }
-  
+
   return response.json();
 }

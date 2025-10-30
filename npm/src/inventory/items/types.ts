@@ -6,6 +6,63 @@ export interface UnitInfo {
   isActive: boolean;
 }
 
+export interface SizeValue {
+  id: number;
+  value1: string | null;
+  value2: string | null;
+  fullValue: string;
+  index: number;
+  
+}
+
+export interface SizeSet {
+  sizeTypeId: number;
+  name: string;
+  parameter1: string | null;
+  parameter2: string | null;
+  values: SizeValue[];
+}
+
+export interface MultipleMenu {
+  id: number;
+  parentID: number | null;
+  name: string;
+  nameSecondary: string | null;
+  iconUrl: string | null;
+  imageUrl: string | null;
+  emoji: string | null;
+  orderIndex: number;
+}
+
+export interface CollectionItem {
+  id: number;
+  itemId: number;
+  itemName: string | null;
+  barcode: string | null;
+  code: string | null;
+  price: number;
+  colorId: number;
+  sizeValueId: number;
+  sizeValue: SizeValue;
+  isActive: boolean;
+  unitLevel: number;
+  totalQuantity: number;
+  syncThirdPartyId: unknown | null;
+  collectionItemOffer: unknown | null;
+  darkItemOffer: unknown | null;
+}
+
+export interface Packs {
+  unitLevel2: unknown | null;
+  unitLevel3: unknown | null;
+}
+
+export interface ItemColor {
+  id: number;
+  name: string;
+  secondaryName?: string;
+  code: string;
+}
 
 export interface Product {
   id: number;
@@ -21,9 +78,9 @@ export interface Product {
   currencyId: number;
   menu: object | null;
   brand: unknown | null;
-  sizeSet: unknown | null;
+  sizeSet: SizeSet | null;
   unitInfo: UnitInfo;
-  packs: unknown | null;
+  packs: Packs | null;
   age: number | null;
   gender: number | null;
   tempPicturePath: string | null;
@@ -50,10 +107,10 @@ export interface Product {
   pointOffer: unknown | null;
   collectionItemOffer: unknown | null;
   darkItemOffer: unknown | null;
-  multipleMenus: unknown | null;
-  colors: unknown | null;
+  multipleMenus: MultipleMenu[] | null;
+  colors: ItemColor[] | null;
   generalPictures: unknown | null;
-  collections: unknown | null;
+  collections: CollectionItem[] | null;
   hasColors: boolean;
   hasSizes: boolean;
   createDate: string; // ISO string
@@ -86,3 +143,4 @@ export interface ProductResponse {
   nextSortOrder: string | null;
   results: Product[];
 }
+

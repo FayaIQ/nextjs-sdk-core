@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { putOrderItemUpdate } from "../putOrderItemUpdate";
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string, itemId: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise< { id: string, itemId: string }> }) {
   try {
-    const { id, itemId } = params;
+    const { id, itemId } = await params;
     const body = await request.json().catch(() => ({}));
     const result = await putOrderItemUpdate(id, itemId, body);
     return NextResponse.json(result);

@@ -137,6 +137,22 @@ const routes = [
     description: "Product details endpoint",
   },
   {
+    name: "itemActivate",
+    path: ["src", "app", "api", "items", "[id]", "activate"],
+    handler: "my-next-core/inventory/items",
+    methods: ["PUT"],
+    exportName: "PutItemActivatePUT",
+    description: "Activate an item",
+  },
+  {
+    name: "itemDeactivate",
+    path: ["src", "app", "api", "items", "[id]", "deactivate"],
+    handler: "my-next-core/inventory/items",
+    methods: ["PUT"],
+    exportName: "PutItemDeactivatePUT",
+    description: "Deactivate an item",
+  },
+  {
     name: "categories",
     path: ["src", "app", "api", "categories"],
     handler: "my-next-core/inventory/category",
@@ -177,6 +193,14 @@ const routes = [
     description: "Stores listing endpoint",
   },
   {
+    name: "customersDropdown",
+    path: ["src", "app", "api", "customers", "dropdown"],
+    handler: "my-next-core/identity",
+    methods: ["GET"],
+    exportName: "CustomersDropdownGET",
+    description: "Customers dropdown (username, FullName) endpoint",
+  },
+  {
     name: "storeInfo",
     path: ["src", "app", "api", "storeInfo"],
     handler: "my-next-core/identity/application",
@@ -207,6 +231,14 @@ const routes = [
     methods: ["GET"],
     exportName: "GetParentProductsGET",
     description: "Parent products listing endpoint",
+  },
+  {
+    name : "itemsPaging",
+    path: ["src", "app", "api", "items", "paging"],
+    handler: "my-next-core/inventory/items",
+    methods: ["GET"],
+    exportName: "GetItemsPagingGET",
+    description: "Items paging (v2) listing endpoint with GetMultipleMenu",
   }
   ,
   {
@@ -300,6 +332,26 @@ function createRoute(route) {
         ", "
       )})`
     );
+    // Also create a route file without the leading 'src' if present so apps
+    // using the top-level `app/` directory receive the same generated route.
+    if (route.path[0] === "src") {
+      const altPath = path.join(process.cwd(), ...route.path.slice(1));
+      const altFile = path.join(altPath, "route.ts");
+      if (!fs.existsSync(altPath)) {
+        fs.mkdirSync(altPath, { recursive: true });
+        console.log(`📁 Created folder: ${altPath}`);
+      }
+      if (!fs.existsSync(altFile)) {
+        fs.writeFileSync(altFile, content, "utf8");
+        console.log(
+          `✅ Created (alt): ${route.path.slice(1).join("/")}/route.ts (${route.methods.join(
+            ", "
+          )})`
+        );
+      } else {
+        console.log(`⚠️  Route file already exists: ${altFile}`);
+      }
+    }
     return true;
   }
 }

@@ -26,6 +26,7 @@ export class Api {
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
+  static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
@@ -67,19 +68,19 @@ export class Api {
   }
 
   static postOrderItem(orderId: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items`;
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems`;
   }
 
   static putOrderItemCancel(orderId: string | number, itemId: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/cancel`;
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
   }
 
   static putOrderItemUndoCancel(orderId: string | number, itemId: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/undo-cancel`;
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
   }
 
   static putOrderItemUpdate(orderId: string | number, itemId: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}/update`;
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/update`;
   }
 
   // orders endpoints
@@ -147,6 +148,7 @@ export class Api {
   static getCatigories: string = `${Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
   // identity 
   static getApplicationsStores: string = `${Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
+  static getCustomersDropdown: string = `${Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
 
   static getItemsSource: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
   /////////////////////////////////////////
@@ -158,7 +160,17 @@ export class Api {
 static getParentProducts: string = `${Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
   
   // Items copy endpoints
-  static postCopyParentStore: string = `${Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
+  static postCopyParentStore : string = `${Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
+
+  // Item activation endpoints
+  static putItemActivate(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${id}/Activate`;
+  }
+
+  static putItemDeactivate(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${id}/Deactivate`;
+  }
+
 
 static getLocationChildren(parentId: string | number): string {
     return `${Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;

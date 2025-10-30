@@ -114,6 +114,35 @@ export class ItemsFilterParameters {
   // Discount
   hasDiscount: boolean | null;
   minDiscountPercentage: number | null;
+  //
+  ItemQuantityStatus: number | null;
+  SyncThirdPartyIds: string | null;
+  SyncThirdPartyId: string | null;
+  
+  RejectionNote: string | null;
+  Deliveryability: boolean | null;
+  Availability: boolean | null;
+  
+  // New parameters
+  IsMultiMenuStore: boolean | null;
+  UseApprovalSystem: boolean | null;
+  CurrentSortField: string | null;
+  CurrentSortOrder: string | null;
+  Code: string | null;
+  barcode: string | null;
+  IsFeatured: boolean | null;
+  IsActive: boolean | null;
+  ApprovedStatus: number | null;
+  HavePicture: boolean | null;
+  HaveDescription: boolean | null;
+  HaveColor: boolean | null;
+  HaveOffer: boolean | null;
+  HaveItemCollectionOffer: boolean | null;
+  IsDeleted: boolean | null;
+  CheckQuantityBeforeSale: boolean | null;
+
+
+
   constructor({
     pagingParameters = new PagingParameters(),
     sortType = SortType.None,
@@ -138,6 +167,28 @@ export class ItemsFilterParameters {
     minRating = null,
     hasDiscount = null,
     minDiscountPercentage = null,
+    ItemQuantityStatus = null,
+    RejectionNote = null,
+    Deliveryability = null,
+    Availability = null,
+    SyncThirdPartyIds = null,
+    SyncThirdPartyId = null,
+    IsMultiMenuStore = null,
+    UseApprovalSystem = null,
+    CurrentSortField = null,
+    CurrentSortOrder = null,
+    Code = null,
+    barcode = null,
+    IsFeatured = null,
+    IsActive = null,
+    ApprovedStatus = null,
+    HavePicture = null,
+    HaveDescription = null,
+    HaveColor = null,
+    HaveOffer = null,
+    HaveItemCollectionOffer = null,
+    IsDeleted = null,
+    CheckQuantityBeforeSale = null,
   }: {
     pagingParameters?: PagingParameters;
     sortType?: SortType;
@@ -162,6 +213,28 @@ export class ItemsFilterParameters {
     minRating?: number | null;
     hasDiscount?: boolean | null;
     minDiscountPercentage?: number | null;
+    ItemQuantityStatus?: number | null;
+    RejectionNote?: string | null;
+    Deliveryability?: boolean | null;
+    Availability?: boolean | null;
+    SyncThirdPartyIds?: string | null;
+    SyncThirdPartyId?: string | null;
+    IsMultiMenuStore?: boolean | null;
+    UseApprovalSystem?: boolean | null;
+    CurrentSortField?: string | null;
+    CurrentSortOrder?: string | null;
+    Code?: string | null;
+    barcode?: string | null;
+    IsFeatured?: boolean | null;
+    IsActive?: boolean | null;
+    ApprovedStatus?: number | null;
+    HavePicture?: boolean | null;
+    HaveDescription?: boolean | null;
+    HaveColor?: boolean | null;
+    HaveOffer?: boolean | null;
+    HaveItemCollectionOffer?: boolean | null;
+    IsDeleted?: boolean | null;
+    CheckQuantityBeforeSale?: boolean | null;
   } = {}) {
     this.pagingParameters = pagingParameters;
     this.sortType = sortType;
@@ -186,6 +259,28 @@ export class ItemsFilterParameters {
     this.minRating = minRating;
     this.hasDiscount = hasDiscount;
     this.minDiscountPercentage = minDiscountPercentage;
+    this.ItemQuantityStatus = ItemQuantityStatus;
+    this.SyncThirdPartyIds = SyncThirdPartyIds;
+    this.SyncThirdPartyId = SyncThirdPartyId;
+    this.RejectionNote = RejectionNote;
+    this.Deliveryability = Deliveryability;
+    this.Availability = Availability;
+    this.IsMultiMenuStore = IsMultiMenuStore;
+    this.UseApprovalSystem = UseApprovalSystem;
+    this.CurrentSortField = CurrentSortField;
+    this.CurrentSortOrder = CurrentSortOrder;
+    this.Code = Code;
+    this.barcode = barcode;
+    this.IsFeatured = IsFeatured;
+    this.IsActive = IsActive;
+    this.ApprovedStatus = ApprovedStatus;
+    this.HavePicture = HavePicture;
+    this.HaveDescription = HaveDescription;
+    this.HaveColor = HaveColor;
+    this.HaveOffer = HaveOffer;
+    this.HaveItemCollectionOffer = HaveItemCollectionOffer;
+    this.IsDeleted = IsDeleted;
+    this.CheckQuantityBeforeSale = CheckQuantityBeforeSale;
   }
   /**
    * Create a copy of the filter with updated parameters
@@ -241,7 +336,96 @@ export class ItemsFilterParameters {
         updates.minDiscountPercentage !== undefined
           ? updates.minDiscountPercentage
           : this.minDiscountPercentage,
+      ItemQuantityStatus:
+        updates.ItemQuantityStatus !== undefined
+          ? updates.ItemQuantityStatus
+          : this.ItemQuantityStatus,
+      SyncThirdPartyIds:
+        updates.SyncThirdPartyIds !== undefined
+          ? updates.SyncThirdPartyIds
+          : this.SyncThirdPartyIds,
+      SyncThirdPartyId:
+        updates.SyncThirdPartyId !== undefined
+          ? updates.SyncThirdPartyId
+          : this.SyncThirdPartyId,
+      RejectionNote:
+        updates.RejectionNote !== undefined
+          ? updates.RejectionNote
+          : this.RejectionNote,
+      Deliveryability:
+        updates.Deliveryability !== undefined
+          ? updates.Deliveryability
+          : this.Deliveryability,
+      Availability:
+        updates.Availability !== undefined
+          ? updates.Availability
+          : this.Availability,
+      IsMultiMenuStore:
+        updates.IsMultiMenuStore !== undefined
+          ? updates.IsMultiMenuStore
+          : this.IsMultiMenuStore,
+      UseApprovalSystem:
+        updates.UseApprovalSystem !== undefined
+          ? updates.UseApprovalSystem
+          : this.UseApprovalSystem,
+      CurrentSortField:
+        updates.CurrentSortField !== undefined
+          ? updates.CurrentSortField
+          : this.CurrentSortField,
+      CurrentSortOrder:
+        updates.CurrentSortOrder !== undefined
+          ? updates.CurrentSortOrder
+          : this.CurrentSortOrder,
+      Code:
+        updates.Code !== undefined
+          ? updates.Code
+          : this.Code,
+      barcode:
+        updates.barcode !== undefined
+          ? updates.barcode
+          : this.barcode,
+      IsFeatured:
+        updates.IsFeatured !== undefined
+          ? updates.IsFeatured
+          : this.IsFeatured,
+      IsActive:
+        updates.IsActive !== undefined
+          ? updates.IsActive
+          : this.IsActive,
+      ApprovedStatus:
+        updates.ApprovedStatus !== undefined
+          ? updates.ApprovedStatus
+          : this.ApprovedStatus,
+      HavePicture:
+        updates.HavePicture !== undefined
+          ? updates.HavePicture
+          : this.HavePicture,
+      HaveDescription:
+        updates.HaveDescription !== undefined
+          ? updates.HaveDescription
+          : this.HaveDescription,
+      HaveColor:
+        updates.HaveColor !== undefined
+          ? updates.HaveColor
+          : this.HaveColor,
+      HaveOffer:
+        updates.HaveOffer !== undefined
+          ? updates.HaveOffer
+          : this.HaveOffer,
+      HaveItemCollectionOffer:
+        updates.HaveItemCollectionOffer !== undefined
+          ? updates.HaveItemCollectionOffer
+          : this.HaveItemCollectionOffer,
+      IsDeleted:
+        updates.IsDeleted !== undefined
+          ? updates.IsDeleted
+          : this.IsDeleted,
+      CheckQuantityBeforeSale:
+        updates.CheckQuantityBeforeSale !== undefined
+          ? updates.CheckQuantityBeforeSale
+          : this.CheckQuantityBeforeSale,
     });
+
   }
   /**
    * Convert filter parameters to URL search parameters
@@ -336,6 +520,72 @@ export class ItemsFilterParameters {
         this.minDiscountPercentage.toString()
       );
     }
+    if (this.ItemQuantityStatus !== null) {
+      params.set("ItemQuantityStatus", this.ItemQuantityStatus.toString());
+    }
+    if (this.SyncThirdPartyIds !== null) {
+      params.set("SyncThirdPartyIds", this.SyncThirdPartyIds);
+    }
+    if (this.SyncThirdPartyId !== null) {
+      params.set("SyncThirdPartyId", this.SyncThirdPartyId);
+    }
+    if (this.RejectionNote !== null) {
+      params.set("RejectionNote", this.RejectionNote);
+    }
+    if (this.Deliveryability !== null) {
+      params.set("Deliveryability", String(this.Deliveryability));
+    }
+    if (this.Availability !== null) {
+      params.set("Availability", String(this.Availability));
+    }
+    if (this.IsMultiMenuStore !== null) {
+      params.set("IsMultiMenuStore", String(this.IsMultiMenuStore));
+    }
+    if (this.UseApprovalSystem !== null) {
+      params.set("UseApprovalSystem", String(this.UseApprovalSystem));
+    }
+    if (this.CurrentSortField !== null) {
+      params.set("CurrentSortField", this.CurrentSortField);
+    }
+    if (this.CurrentSortOrder !== null) {
+      params.set("CurrentSortOrder", this.CurrentSortOrder);
+    }
+    if (this.Code !== null && this.Code.trim() !== "") {
+      params.set("Code", this.Code.trim());
+    }
+    if (this.barcode !== null && this.barcode.trim() !== "") {
+      params.set("barcode", this.barcode.trim());
+    }
+    if (this.IsFeatured !== null) {
+      params.set("IsFeatured", String(this.IsFeatured));
+    }
+    if (this.IsActive !== null) {
+      params.set("IsActive", String(this.IsActive));
+    }
+    if (this.ApprovedStatus !== null) {
+      params.set("ApprovedStatus", this.ApprovedStatus.toString());
+    }
+    if (this.HavePicture !== null) {
+      params.set("HavePicture", String(this.HavePicture));
+    }
+    if (this.HaveDescription !== null) {
+      params.set("HaveDescription", String(this.HaveDescription));
+    }
+    if (this.HaveColor !== null) {
+      params.set("HaveColor", String(this.HaveColor));
+    }
+    if (this.HaveOffer !== null) {
+      params.set("HaveOffer", String(this.HaveOffer));
+    }
+    if (this.HaveItemCollectionOffer !== null) {
+      params.set("HaveItemCollectionOffer", String(this.HaveItemCollectionOffer));
+    }
+    if (this.IsDeleted !== null) {
+      params.set("IsDeleted", String(this.IsDeleted));
+    }
+    if (this.CheckQuantityBeforeSale !== null) {
+      params.set("CheckQuantityBeforeSale", String(this.CheckQuantityBeforeSale));
+    }
     return params;
   }
   /**
@@ -371,6 +621,51 @@ export class ItemsFilterParameters {
     if (this.hasDiscount !== null) map.hasDiscount = this.hasDiscount;
     if (this.minDiscountPercentage !== null)
       map.minDiscountPercentage = this.minDiscountPercentage;
+    if (this.ItemQuantityStatus !== null)
+      map.ItemQuantityStatus = this.ItemQuantityStatus;
+    if (this.SyncThirdPartyIds !== null)
+      map.SyncThirdPartyIds = this.SyncThirdPartyIds;
+    if (this.SyncThirdPartyId !== null)
+      map.SyncThirdPartyId = this.SyncThirdPartyId;
+    if (this.RejectionNote !== null)
+      map.RejectionNote = this.RejectionNote;
+    if (this.Deliveryability !== null)
+      map.Deliveryability = this.Deliveryability;
+    if (this.Availability !== null)
+      map.Availability = this.Availability;
+    if (this.IsMultiMenuStore !== null)
+      map.IsMultiMenuStore = this.IsMultiMenuStore;
+    if (this.UseApprovalSystem !== null)
+      map.UseApprovalSystem = this.UseApprovalSystem;
+    if (this.CurrentSortField !== null)
+      map.CurrentSortField = this.CurrentSortField;
+    if (this.CurrentSortOrder !== null)
+      map.CurrentSortOrder = this.CurrentSortOrder;
+    if (this.Code !== null && this.Code.trim() !== "")
+      map.Code = this.Code.trim();
+    if (this.barcode !== null && this.barcode.trim() !== "")
+      map.barcode = this.barcode.trim();
+    if (this.IsFeatured !== null)
+      map.IsFeatured = this.IsFeatured;
+    if (this.IsActive !== null)
+      map.IsActive = this.IsActive;
+    if (this.ApprovedStatus !== null)
+      map.ApprovedStatus = this.ApprovedStatus;
+    if (this.HavePicture !== null)
+      map.HavePicture = this.HavePicture;
+    if (this.HaveDescription !== null)
+      map.HaveDescription = this.HaveDescription;
+    if (this.HaveColor !== null)
+      map.HaveColor = this.HaveColor;
+    if (this.HaveOffer !== null)
+      map.HaveOffer = this.HaveOffer;
+    if (this.HaveItemCollectionOffer !== null)
+      map.HaveItemCollectionOffer = this.HaveItemCollectionOffer;
+    if (this.IsDeleted !== null)
+      map.IsDeleted = this.IsDeleted;
+    if (this.CheckQuantityBeforeSale !== null)
+      map.CheckQuantityBeforeSale = this.CheckQuantityBeforeSale;
+      
     return map;
   }
   /**
@@ -423,7 +718,7 @@ export class ItemsFilterParameters {
         ? params.get("availability") === "true"
         : null,
       minRating: params.get("minRating")
-        ? parseFloat(params.get("minRating")!)
+        ? parseFloat(params.get("minRatin g")!)
         : null,
       hasDiscount: params.get("hasDiscount")
         ? params.get("hasDiscount") === "true"

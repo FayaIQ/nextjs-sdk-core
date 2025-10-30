@@ -10,8 +10,18 @@ import { getOrdersFullInfo } from "../getOrdersFullInfo";
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const result = await getOrdersFullInfo( body);
+    const payload = await request.json().catch(() => ({}));
+    // Normalize payload to an array of orderIds
+    const orderIds: number[] = Array.isArray(payload)
+      ? payload
+      : payload.orderIds ?? payload.body ?? [];
+
+    console.log("Received body for full info:", payload);
+    if (!Array.isArray(orderIds) || orderIds.length === 0) {
+      return NextResponse.json({ error: "orderIds array is required" }, { status: 400 });
+    }
+
+    const result = await getOrdersFullInfo(orderIds);
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch order full info";

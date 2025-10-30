@@ -36,13 +36,31 @@ export const getAuthConfig = (): AuthConfig => {
   }
 
   // Fallback to default values (for backward compatibility)
-  // TODO: Remove these defaults in production - should use env vars only
+  // Do not provide hardcoded defaults here. Require environment configuration.
+  // This makes missing configuration fail fast so callers can fix env setup.
+  const missing: string[] = [];
+  const required = [
+    "STOREAK_CLIENT_ID",
+    "STOREAK_CLIENT_SECRET",
+  ];
+
+  required.forEach((name) => {
+    if (!process.env?.[name]) missing.push(name);
+  });
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables for authentication: ${missing.join(", ")}`
+    );
+  }
+
+  // If we reach here, env vars are present (paranoia check kept above)
   return {
-    clientId: "610262c3-b8ff-40b5-8a8e-951eadbe7a31",
-    clientSecret: "UxiTJPZguIXBxVLjxGltrHvOdEqsjndG",
-    username: "athathak",
-    password: "123456",
-    language: 0,
-    gmt: 3,
-  };
+    clientId: process.env.STOREAK_CLIENT_ID ,
+    clientSecret: process.env.STOREAK_CLIENT_SECRET,
+    username: process.env.STOREAK_USERNAME,
+    password: process.env.STOREAK_PASSWORD,
+    language: parseInt(process.env.STOREAK_LANGUAGE || "0"),
+    gmt: parseInt(process.env.STOREAK_GMT || "3"),
+  } as AuthConfig;
 };
