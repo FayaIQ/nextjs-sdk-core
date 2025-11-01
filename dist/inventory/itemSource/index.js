@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 async function getItemsSource() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-JWWNRBX7.js");
+    const { Api } = await import("../../api-25UVO5DL.js");
     return getWithAuth(`${Api.getItemsSource}`, {});
   } else {
     return fetch(`/api/itemSource`).then((res) => {

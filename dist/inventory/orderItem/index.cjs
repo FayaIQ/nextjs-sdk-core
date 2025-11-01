@@ -93,6 +93,12 @@ var init_api = __esm({
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
+      static getMenuById(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Menus/${id}`;
+      }
+      static getItemById(id) {
+        return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
+      }
       // Dynamic endpoints with IDs
       // Wishlist endpoints (lowercase per spec)
       static postWish(id) {
@@ -163,6 +169,10 @@ var init_api = __esm({
       static putItemDeactivate(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Deactivate`;
       }
+      // Item update endpoint
+      static putItem(id) {
+        return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
+      }
       static getLocationChildren(parentId) {
         return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
       }
@@ -206,7 +216,7 @@ var init_api = __esm({
     _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-    _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
+    _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v1/Items/Paging`;
     _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
     _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
     _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
@@ -375,7 +385,17 @@ async function apiFetch(url, options = {}) {
     return {};
   }
   try {
-    return JSON.parse(text);
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed === "object" && "code" in parsed && "message" in parsed && !("success" in parsed)) {
+      return {
+        success: true,
+        message: parsed.message || parsed.code,
+        code: parsed.code,
+        name: parsed.name,
+        ...parsed
+      };
+    }
+    return parsed;
   } catch (err) {
     throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
   }

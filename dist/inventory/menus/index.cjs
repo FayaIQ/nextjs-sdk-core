@@ -93,6 +93,12 @@ var init_api = __esm({
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
+      static getMenuById(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Menus/${id}`;
+      }
+      static getItemById(id) {
+        return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
+      }
       // Dynamic endpoints with IDs
       // Wishlist endpoints (lowercase per spec)
       static postWish(id) {
@@ -163,6 +169,10 @@ var init_api = __esm({
       static putItemDeactivate(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Deactivate`;
       }
+      // Item update endpoint
+      static putItem(id) {
+        return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
+      }
       static getLocationChildren(parentId) {
         return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
       }
@@ -206,7 +216,7 @@ var init_api = __esm({
     _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-    _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
+    _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v1/Items/Paging`;
     _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
     _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
     _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
@@ -292,6 +302,20 @@ var init_token = __esm({
 });
 
 // src/core/fetcher.ts
+var fetcher_exports = {};
+__export(fetcher_exports, {
+  apiFetch: () => apiFetch,
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
+});
 async function apiFetch(url, options = {}) {
   const { method = "GET", headers = {}, data, query, token } = options;
   let endpoint = url;
@@ -365,7 +389,17 @@ async function apiFetch(url, options = {}) {
     return {};
   }
   try {
-    return JSON.parse(text);
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed === "object" && "code" in parsed && "message" in parsed && !("success" in parsed)) {
+      return {
+        success: true,
+        message: parsed.message || parsed.code,
+        code: parsed.code,
+        name: parsed.name,
+        ...parsed
+      };
+    }
+    return parsed;
   } catch (err) {
     throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
   }
@@ -407,7 +441,19 @@ async function postWithoutAuth(url, data, headers = {}) {
   if (!response.ok) {
     throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
   }
-  return await response.json();
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0") {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+  }
 }
 async function putWithAuth(url, data, headers) {
   const token = await getToken();
@@ -486,8 +532,10 @@ var init_core = __esm({
 // src/inventory/menus/index.ts
 var menus_exports = {};
 __export(menus_exports, {
+  GetMenuByIdGET: () => GET3,
   GetMenusDropdownGET: () => GET2,
   GetMenusGET: () => GET,
+  getMenuById: () => getMenuById,
   getMenus: () => getMenus,
   getMenusDropdown: () => getMenusDropdown
 });
@@ -986,10 +1034,37 @@ async function GET2(request) {
     return import_server2.NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+// src/inventory/menus/getMenuById.ts
+async function getMenuById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getMenuById(id));
+  }
+  const res = await fetch(`/api/menus/${id}`);
+  if (!res.ok) throw new Error(`Failed to fetch menu ${id}: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/menus/handler/getMenuById.ts
+var import_server3 = require("next/server");
+async function GET3(request, { params }) {
+  try {
+    const result = await getMenuById(params.id);
+    return import_server3.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch menu";
+    console.error("getMenuById error:", message);
+    return import_server3.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  GetMenuByIdGET,
   GetMenusDropdownGET,
   GetMenusGET,
+  getMenuById,
   getMenus,
   getMenusDropdown
 });

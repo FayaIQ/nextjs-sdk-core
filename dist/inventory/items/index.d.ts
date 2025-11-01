@@ -1,5 +1,5 @@
-import { P as ProductResponse, b as Product } from '../../getProductInfo-DfEXgRja.js';
-export { C as CollectionItem, I as ItemColor, M as MultipleMenu, d as Packs, c as SizeSet, S as SizeValue, U as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-DfEXgRja.js';
+import { P as ProductResponse, b as Product } from '../../getProductInfo-Csj5t4Sh.js';
+export { C as CollectionItem, I as ItemColor, M as MultipleMenu, d as Packs, c as SizeSet, S as SizeValue, U as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-Csj5t4Sh.js';
 import { I as ItemsFilterParameters } from '../../filter-models-BrX8v95o.js';
 export { A as AgeGroup, G as Gender, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from '../../filter-models-BrX8v95o.js';
 import { NextRequest, NextResponse } from 'next/server';
@@ -35,17 +35,34 @@ type GetItemsPagingParams = ItemsFilterParameters;
 declare function getItemsPaging(filters?: GetItemsPagingParams): Promise<ProductResponse>;
 
 /**
+ * Fetches item by ID using v3 API endpoint
+ * Works in both server and client components
+ *
+ * @param id - The item ID to fetch
+ * @returns Promise with item details
+ *
+ * @example
+ * // Server component
+ * const item = await getItemById(123);
+ *
+ * @example
+ * // Client component
+ * const item = await getItemById("123");
+ */
+declare function getItemById(id: string | number): Promise<Product>;
+
+/**
  * Ready-to-use API route handler for products
  * Users can simply re-export this in their app/api/getProducts/route.ts:
  *
  * @example
  * export { GET } from 'my-next-core/handlers/getProducts';
  */
-declare function GET$3(request: NextRequest): Promise<NextResponse<ProductResponse> | NextResponse<{
+declare function GET$4(request: NextRequest): Promise<NextResponse<ProductResponse> | NextResponse<{
     error: string;
 }>>;
 
-declare function GET$2(request: NextRequest, { params }: {
+declare function GET$3(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -60,7 +77,7 @@ declare function GET$2(request: NextRequest, { params }: {
  * @example
  * export { GET } from 'my-next-core/handlers/getProducts';
  */
-declare function GET$1(request: NextRequest): Promise<NextResponse<ProductResponse> | NextResponse<{
+declare function GET$2(request: NextRequest): Promise<NextResponse<ProductResponse> | NextResponse<{
     error: string;
 }>>;
 
@@ -68,7 +85,15 @@ declare function GET$1(request: NextRequest): Promise<NextResponse<ProductRespon
  * GET handler for items paging (v2 API)
  * Fetches items with pagination and filters, with GetMultipleMenu set to true
  */
-declare function GET(request: NextRequest): Promise<NextResponse<unknown>>;
+declare function GET$1(request: NextRequest): Promise<NextResponse<unknown>>;
+
+declare function GET(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<NextResponse<Product> | NextResponse<{
+    error: string;
+}>>;
 
 interface CopyParentResponse {
     success: boolean;
@@ -94,6 +119,42 @@ declare function putActivateItem(id: string | number): Promise<any>;
  */
 declare function putDeactivateItem(id: string | number): Promise<any>;
 
+interface UpdateItemRequest {
+    name?: string;
+    nameSecondary?: string;
+    description?: string;
+    descriptionSecondary?: string;
+    defaultPrice: number;
+    menuIds?: number[];
+    minimumOrderQuantity: number;
+    maximumOrderQuantity: number;
+    price?: number;
+    barcode?: string;
+    code?: string;
+    isActive?: boolean;
+    isFeatured?: boolean;
+    isDeliverable?: boolean;
+    [key: string]: any;
+}
+interface UpdateItemResponse {
+    success: boolean;
+    message?: string;
+    code?: string;
+    name?: string;
+}
+/**
+ * Update an item by id
+ * @param id - Item ID
+ * @param data - Fields to update
+ */
+declare function putItem(id: string | number, data: UpdateItemRequest): Promise<UpdateItemResponse>;
+
+declare function PUT$2(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<NextResponse<any>>;
+
 declare function PUT$1(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
@@ -104,6 +165,8 @@ declare function PUT(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
-}): Promise<NextResponse<any>>;
+}): Promise<NextResponse<UpdateItemResponse> | NextResponse<{
+    error: string;
+}>>;
 
-export { type CopyParentResponse, POST as CopyParentStorePOST, GET as GetItemsPagingGET, type GetItemsPagingParams, GET$1 as GetParentProductsGET, GET$3 as GetProductsGET, ItemsFilterParameters, Product, GET$2 as ProductInfoGET, ProductResponse, PUT$1 as PutItemActivatePUT, PUT as PutItemDeactivatePUT, getItemsPaging, getParentProducts, postCopyParentStore, putActivateItem, putDeactivateItem };
+export { type CopyParentResponse, POST as CopyParentStorePOST, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$4 as GetProductsGET, ItemsFilterParameters, Product, GET$3 as ProductInfoGET, ProductResponse, PUT$2 as PutItemActivatePUT, PUT$1 as PutItemDeactivatePUT, PUT as PutItemPUT, type UpdateItemRequest, type UpdateItemResponse, getItemById, getItemsPaging, getParentProducts, postCopyParentStore, putActivateItem, putDeactivateItem, putItem };

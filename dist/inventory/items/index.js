@@ -1,7 +1,7 @@
 import {
   getProductInfo,
   getProducts
-} from "../../chunk-2XEQ3BF3.js";
+} from "../../chunk-QKBSLE2V.js";
 import {
   AgeGroup,
   Gender,
@@ -12,11 +12,11 @@ import {
 } from "../../chunk-QPGSHSJO.js";
 import {
   Api
-} from "../../chunk-NBTINCB2.js";
+} from "../../chunk-627OBKGP.js";
 import {
   getWithAuth
-} from "../../chunk-DGXAGJRL.js";
-import "../../chunk-OREK46JA.js";
+} from "../../chunk-KYRAWEHI.js";
+import "../../chunk-3GFDDB2C.js";
 
 // src/inventory/items/getParentProducts.ts
 async function getParentProducts({
@@ -24,7 +24,7 @@ async function getParentProducts({
 }) {
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await import("../../core/index.js");
-    const { Api: Api2 } = await import("../../api-JWWNRBX7.js");
+    const { Api: Api2 } = await import("../../api-25UVO5DL.js");
     const params = filterParams.toURLSearchParams();
     return getWithAuth2(`${Api2.getParentProducts}?${params.toString()}`, {});
   } else {
@@ -59,6 +59,20 @@ async function getItemsPaging(filters) {
     return response.json();
   }
   return getWithAuth(url);
+}
+
+// src/inventory/items/getItemById.ts
+async function getItemById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-HY2UR7S7.js");
+    const { Api: Api2 } = await import("../../api-25UVO5DL.js");
+    return getWithAuth2(Api2.getItemById(id));
+  }
+  const response = await fetch(`/api/items/${id}/info`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch item: ${response.statusText}`);
+  }
+  return response.json();
 }
 
 // src/inventory/items/handler/getProducts.ts
@@ -131,67 +145,58 @@ async function GET4(request) {
   }
 }
 
+// src/inventory/items/handler/getItemById.ts
+import { NextResponse as NextResponse5 } from "next/server";
+async function GET5(request, { params }) {
+  try {
+    const { id } = await params;
+    const result = await getItemById(id);
+    return NextResponse5.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch item";
+    console.error("getItemById error:", message);
+    return NextResponse5.json({ error: message }, { status: 500 });
+  }
+}
+
 // src/inventory/items/postCopyParentStore.ts
 async function postCopyParentStore(itemIds) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-RP3NQYAJ.js");
-    const { Api: Api2 } = await import("../../api-JWWNRBX7.js");
-    try {
-      const result = await postWithAuth(Api2.postCopyParentStore, { itemIds });
-      return result || { success: true, message: "Items copied successfully" };
-    } catch (error) {
-      throw error;
-    }
+    const { postWithAuth } = await import("../../fetcher-HY2UR7S7.js");
+    const { Api: Api2 } = await import("../../api-25UVO5DL.js");
+    return postWithAuth(Api2.postCopyParentStore, { itemIds });
   }
   const res = await fetch(`/api/items/copy-parent-store`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ itemIds })
   });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(`Copy parent store failed: ${errorData.error || res.statusText}`);
-  }
-  const data = await res.json();
-  return data || { success: true, message: "Items copied successfully" };
+  if (!res.ok) throw new Error(`Copy parent store failed: ${res.statusText}`);
+  return res.json();
 }
 
 // src/inventory/items/handler/postCopyParentStore.ts
-import { NextResponse as NextResponse5 } from "next/server";
+import { NextResponse as NextResponse6 } from "next/server";
 async function POST(request) {
   try {
-    console.log("\u{1F4E9} [API] /api/items/copy-parent-store called");
-    const rawBody = await request.text();
-    console.log("\u{1F9FE} Raw body received:", rawBody);
-    let itemIds;
-    try {
-      const parsed = JSON.parse(rawBody || "{}");
-      itemIds = parsed.itemIds;
-      console.log("\u2705 Parsed itemIds:", itemIds);
-    } catch (parseErr) {
-      console.error("\u274C JSON parse error:", parseErr);
-      return NextResponse5.json({ error: "Invalid JSON in request body" }, { status: 400 });
+    const { itemIds } = await request.json();
+    if (!itemIds) {
+      return NextResponse6.json({ error: "itemIds array is required" }, { status: 400 });
     }
-    if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
-      console.warn("\u26A0\uFE0F Missing or invalid itemIds:", itemIds);
-      return NextResponse5.json({ error: "itemIds array is required" }, { status: 400 });
-    }
-    console.log("\u{1F680} Calling postCopyParentStore with:", itemIds);
     const result = await postCopyParentStore(itemIds);
-    console.log("\u2705 Copy result:", result);
-    return NextResponse5.json(result);
+    return NextResponse6.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to copy parent items";
-    console.error("\u{1F4A5} postCopyParentStore error:", message);
-    return NextResponse5.json({ error: message }, { status: 500 });
+    console.error("postCopyParentStore error:", message);
+    return NextResponse6.json({ error: message }, { status: 500 });
   }
 }
 
 // src/inventory/items/putActivate.ts
 async function putActivateItem(id) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-RP3NQYAJ.js");
-    const { Api: Api2 } = await import("../../api-JWWNRBX7.js");
+    const { putWithAuth } = await import("../../fetcher-HY2UR7S7.js");
+    const { Api: Api2 } = await import("../../api-25UVO5DL.js");
     return putWithAuth(Api2.putItemActivate(id));
   }
   const res = await fetch(`/api/items/${id}/activate`, { method: "PUT" });
@@ -202,8 +207,8 @@ async function putActivateItem(id) {
 // src/inventory/items/putDeactivate.ts
 async function putDeactivateItem(id) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-RP3NQYAJ.js");
-    const { Api: Api2 } = await import("../../api-JWWNRBX7.js");
+    const { putWithAuth } = await import("../../fetcher-HY2UR7S7.js");
+    const { Api: Api2 } = await import("../../api-25UVO5DL.js");
     return putWithAuth(Api2.putItemDeactivate(id));
   }
   const res = await fetch(`/api/items/${id}/deactivate`, { method: "PUT" });
@@ -211,37 +216,73 @@ async function putDeactivateItem(id) {
   return res.json();
 }
 
+// src/inventory/items/putItem.ts
+async function putItem(id, data) {
+  if (typeof window === "undefined") {
+    const { putWithAuth } = await import("../../fetcher-HY2UR7S7.js");
+    const { Api: Api2 } = await import("../../api-25UVO5DL.js");
+    console.log("putItem data:", data);
+    return putWithAuth(Api2.putItem(id), data);
+  }
+  const res = await fetch(`/api/items/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(`Update item failed: ${errorData.error || res.statusText}`);
+  }
+  return res.json();
+}
+
 // src/inventory/items/handler/putActivate.ts
-import { NextResponse as NextResponse6 } from "next/server";
+import { NextResponse as NextResponse7 } from "next/server";
 async function PUT(request, { params }) {
   try {
     const { id } = await params;
     const result = await putActivateItem(id);
-    return NextResponse6.json(result);
+    return NextResponse7.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to activate item";
     console.error("putActivate handler error:", message);
-    return NextResponse6.json({ error: message }, { status: 500 });
+    return NextResponse7.json({ error: message }, { status: 500 });
   }
 }
 
 // src/inventory/items/handler/putDeactivate.ts
-import { NextResponse as NextResponse7 } from "next/server";
+import { NextResponse as NextResponse8 } from "next/server";
 async function PUT2(request, { params }) {
   try {
     const { id } = await params;
     const result = await putDeactivateItem(id);
-    return NextResponse7.json(result);
+    return NextResponse8.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to deactivate item";
     console.error("putDeactivate handler error:", message);
-    return NextResponse7.json({ error: message }, { status: 500 });
+    return NextResponse8.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/items/handler/putItem.ts
+import { NextResponse as NextResponse9 } from "next/server";
+async function PUT3(request, { params }) {
+  try {
+    const data = await request.json();
+    const { id } = await params;
+    const result = await putItem(id, data);
+    return NextResponse9.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to update item";
+    console.error("putItem error:", message);
+    return NextResponse9.json({ error: message }, { status: 500 });
   }
 }
 export {
   AgeGroup,
   POST as CopyParentStorePOST,
   Gender,
+  GET5 as GetItemByIdGET,
   GET4 as GetItemsPagingGET,
   GET3 as GetParentProductsGET,
   GET as GetProductsGET,
@@ -251,12 +292,15 @@ export {
   GET2 as ProductInfoGET,
   PUT as PutItemActivatePUT,
   PUT2 as PutItemDeactivatePUT,
+  PUT3 as PutItemPUT,
   SortType,
+  getItemById,
   getItemsPaging,
   getParentProducts,
   getProductInfo,
   getProducts,
   postCopyParentStore,
   putActivateItem,
-  putDeactivateItem
+  putDeactivateItem,
+  putItem
 };

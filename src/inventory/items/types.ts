@@ -129,6 +129,10 @@ export interface Product {
   pointOfferId: number | null;
   createdBy: string | null;
   updatedBy: string | null;
+  defaultPrice: number | null;
+  itemID: number | null;
+  menuIds: number[] | null;
+  menuID: number | null;
 }
 
 // Standard paginated response for product lists

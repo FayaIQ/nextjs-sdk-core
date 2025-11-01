@@ -26,12 +26,15 @@ export class Api {
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-  static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
+  static getItemsPaging: string = `${Api.INVENTORY_BASE}/v1/Items/Paging`;
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
   static getMenus: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
   static getMenusDropdown: string = `${Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
+  static getMenuById(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Menus/${id}`;
+  }
   static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
   static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
@@ -43,6 +46,9 @@ export class Api {
   static getDeliveryZones: string = `${Api.GPS_BASE}/v1/DeliveryZones`;
   static getSlideShows: string = `${Api.THEME_BASE}/v1/SlideShows/Paging`;
 
+  static getItemById(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v3/Items/${id}`;
+  }
   // Dynamic endpoints with IDs
 
   // Wishlist endpoints (lowercase per spec)
@@ -169,6 +175,11 @@ static getParentProducts: string = `${Api.INVENTORY_BASE}/v1/Items/ParentStore/P
 
   static putItemDeactivate(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/Deactivate`;
+  }
+
+  // Item update endpoint
+  static putItem(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v3/Items/${id}`;
   }
 
 

@@ -121,6 +121,14 @@ const routes = [
     description: "Menus listing endpoint",
   },
   {
+    name: "menuById",
+    path: ["src", "app", "api", "menus", "[id]"],
+    handler: "my-next-core/inventory/menus",
+    methods: ["GET"],
+    exportName: "GetMenuByIdGET",
+    description: "Get menu by ID",
+  },
+  {
     name: "products",
     path: ["src", "app", "api", "products"],
     handler: "my-next-core/inventory/items",
@@ -151,6 +159,22 @@ const routes = [
     methods: ["PUT"],
     exportName: "PutItemDeactivatePUT",
     description: "Deactivate an item",
+  },
+  {
+    name: "itemUpdate",
+    path: ["src", "app", "api", "items", "[id]"],
+    handler: "my-next-core/inventory/items",
+    methods: ["PUT"],
+    exportName: "PutItemPUT",
+    description: "Update an item",
+  },
+  {
+    name: "itemById",
+    path: ["src", "app", "api", "items", "[id]", "info"],
+    handler: "my-next-core/inventory/items",
+    methods: ["GET"],
+    exportName: "GetItemByIdGET",
+    description: "Get item by ID (v3 endpoint)",
   },
   {
     name: "categories",

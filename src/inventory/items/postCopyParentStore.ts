@@ -14,13 +14,8 @@ export async function postCopyParentStore(itemIds: (number | string)[]): Promise
     const { postWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
     
-    try {
-      const result = await postWithAuth<CopyParentResponse>(Api.postCopyParentStore, { itemIds });
-      // Handle empty response from backend
-      return result || { success: true, message: "Items copied successfully" };
-    } catch (error) {
-      throw error;
-    }
+
+    return postWithAuth<CopyParentResponse>(Api.postCopyParentStore, { itemIds });
   }
 
   // client-side: call Next.js API route
@@ -30,11 +25,6 @@ export async function postCopyParentStore(itemIds: (number | string)[]): Promise
     body: JSON.stringify({ itemIds }),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(`Copy parent store failed: ${errorData.error || res.statusText}`);
-  }
-  
-  const data = await res.json();
-  return data || { success: true, message: "Items copied successfully" };
+  if (!res.ok) throw new Error(`Copy parent store failed: ${res.statusText}`);
+  return res.json();
 }

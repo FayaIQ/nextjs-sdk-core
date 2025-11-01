@@ -2,7 +2,7 @@
 async function getCoupons() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-JWWNRBX7.js");
+    const { Api } = await import("../../api-25UVO5DL.js");
     return getWithAuth(Api.getCouponOffers);
   }
   const response = await fetch(`/api/offers/coupons`);

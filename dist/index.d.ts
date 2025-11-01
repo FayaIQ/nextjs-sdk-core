@@ -1,5 +1,5 @@
 export { g as getStoreInfo } from './storeInfo-q3EctBMs.js';
-export { a as getProductInfo, g as getProducts } from './getProductInfo-DfEXgRja.js';
+export { a as getProductInfo, g as getProducts } from './getProductInfo-Csj5t4Sh.js';
 export { g as getMenus } from './getMenus-K5kP8uiL.js';
 export { g as getOrders } from './getOrders-DvAowZ5l.js';
 export { A as Address, C as Category, b as City, a as Country, D as District, S as StoreType } from './types-D0Xbpetb.js';
@@ -56,6 +56,7 @@ declare class Api {
     static getProductInfo(id: string): string;
     static getMenus: string;
     static getMenusDropdown: string;
+    static getMenuById(id: string | number): string;
     static getCouponOffers: string;
     static getBranches: string;
     static getBrands: string;
@@ -66,6 +67,7 @@ declare class Api {
     static getCities: string;
     static getDeliveryZones: string;
     static getSlideShows: string;
+    static getItemById(id: string | number): string;
     static postWish(id: string | number): string;
     static deleteWish(id: string | number): string;
     static getCategoryProducts(id: string): string;
@@ -99,6 +101,7 @@ declare class Api {
     static postCopyParentStore: string;
     static putItemActivate(id: string | number): string;
     static putItemDeactivate(id: string | number): string;
+    static putItem(id: string | number): string;
     static getLocationChildren(parentId: string | number): string;
     static getInvoiceDiscount(code: string): string;
     static getCheckoutQuote: string;

@@ -130,7 +130,21 @@ export async function apiFetch<T>(
   }
   
   try {
-    return JSON.parse(text) as T;
+    const parsed = JSON.parse(text);
+    
+    // Normalize backend response format: { code, name, message }
+    // Convert to standard format with success field
+    if (parsed && typeof parsed === 'object' && 'code' in parsed && 'message' in parsed && !('success' in parsed)) {
+      return {
+        success: true,
+        message: parsed.message || parsed.code,
+        code: parsed.code,
+        name: parsed.name,
+        ...parsed
+      } as T;
+    }
+    
+    return parsed as T;
   } catch (err) {
     throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
   }
@@ -245,7 +259,22 @@ export async function postWithoutAuth<T>(
     throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
   }
 
-  return (await response.json()) as T;
+  // Handle empty response body
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0") {
+    return {} as T;
+  }
+
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {} as T;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch (err) {
+    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+  }
 }
 
 /**

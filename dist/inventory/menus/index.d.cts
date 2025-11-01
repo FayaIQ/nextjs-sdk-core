@@ -10,7 +10,7 @@ import '../../filter-models-BrX8v95o.cjs';
  * @example
  * export { GET } from 'my-next-core/handlers/getOrders';
  */
-declare function GET$1(request: NextRequest): Promise<NextResponse<Category[]> | NextResponse<{
+declare function GET$2(request: NextRequest): Promise<NextResponse<Category[]> | NextResponse<{
     error: string;
 }>>;
 
@@ -34,8 +34,21 @@ declare function getMenusDropdown(): Promise<Category>;
  * @example
  * export { GET } from 'my-next-core/handlers/getProducts';
  */
-declare function GET(request: NextRequest): Promise<NextResponse<Category> | NextResponse<{
+declare function GET$1(request: NextRequest): Promise<NextResponse<Category> | NextResponse<{
     error: string;
 }>>;
 
-export { GET as GetMenusDropdownGET, GET$1 as GetMenusGET, type MenusDropdown, getMenusDropdown };
+/**
+ * Fetch a single menu by ID (v1)
+ */
+declare function getMenuById(id: string | number): Promise<Category>;
+
+declare function GET(request: NextRequest, { params }: {
+    params: {
+        id: string;
+    };
+}): Promise<NextResponse<Category> | NextResponse<{
+    error: string;
+}>>;
+
+export { GET as GetMenuByIdGET, GET$1 as GetMenusDropdownGET, GET$2 as GetMenusGET, type MenusDropdown, getMenuById, getMenusDropdown };
