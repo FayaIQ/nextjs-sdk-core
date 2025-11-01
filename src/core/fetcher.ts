@@ -114,7 +114,26 @@ export async function apiFetch<T>(
     }
   }
 
-  return response.json();
+  // Handle empty response body
+  const contentType = response.headers.get("content-type");
+  const contentLength = response.headers.get("content-length");
+  
+  // If content-length is 0 or no content-type, return empty object
+  if (contentLength === "0" || (!contentType && response.status === 200)) {
+    return {} as T;
+  }
+  
+  // Check if response has content
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {} as T;
+  }
+  
+  try {
+    return JSON.parse(text) as T;
+  } catch (err) {
+    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+  }
 }
 
 /**
