@@ -365,7 +365,20 @@ async function apiFetch(url, options = {}) {
       throw new Error(defaultMessage);
     }
   }
-  return response.json();
+  const contentType = response.headers.get("content-type");
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0" || !contentType && response.status === 200) {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+  }
 }
 async function getWithAuth(url, query, headers) {
   const token = await getToken();

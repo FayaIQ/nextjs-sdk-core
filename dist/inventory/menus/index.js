@@ -1,6 +1,6 @@
 import {
   getMenus
-} from "../../chunk-ZFEZCDR4.js";
+} from "../../chunk-GZNDLCNE.js";
 import {
   ItemsFilterParameters
 } from "../../chunk-QPGSHSJO.js";

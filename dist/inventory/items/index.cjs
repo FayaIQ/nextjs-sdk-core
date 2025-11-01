@@ -369,7 +369,20 @@ async function apiFetch(url, options = {}) {
       throw new Error(defaultMessage);
     }
   }
-  return response.json();
+  const contentType = response.headers.get("content-type");
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0" || !contentType && response.status === 200) {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+  }
 }
 async function getWithAuth(url, query, headers) {
   const token = await getToken();
@@ -1130,15 +1143,24 @@ async function postCopyParentStore(itemIds) {
   if (typeof window === "undefined") {
     const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return postWithAuth2(Api2.postCopyParentStore, { itemIds });
+    try {
+      const result = await postWithAuth2(Api2.postCopyParentStore, { itemIds });
+      return result || { success: true, message: "Items copied successfully" };
+    } catch (error) {
+      throw error;
+    }
   }
   const res = await fetch(`/api/items/copy-parent-store`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ itemIds })
   });
-  if (!res.ok) throw new Error(`Copy parent store failed: ${res.statusText}`);
-  return res.json();
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(`Copy parent store failed: ${errorData.error || res.statusText}`);
+  }
+  const data = await res.json();
+  return data || { success: true, message: "Items copied successfully" };
 }
 
 // src/inventory/items/handler/postCopyParentStore.ts
