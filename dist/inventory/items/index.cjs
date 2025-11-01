@@ -1167,15 +1167,29 @@ async function postCopyParentStore(itemIds) {
 var import_server5 = require("next/server");
 async function POST(request) {
   try {
-    const { itemIds } = await request.json();
-    if (!itemIds || !Array.isArray(itemIds)) {
+    console.log("\u{1F4E9} [API] /api/items/copy-parent-store called");
+    const rawBody = await request.text();
+    console.log("\u{1F9FE} Raw body received:", rawBody);
+    let itemIds;
+    try {
+      const parsed = JSON.parse(rawBody || "{}");
+      itemIds = parsed.itemIds;
+      console.log("\u2705 Parsed itemIds:", itemIds);
+    } catch (parseErr) {
+      console.error("\u274C JSON parse error:", parseErr);
+      return import_server5.NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
+    }
+    if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
+      console.warn("\u26A0\uFE0F Missing or invalid itemIds:", itemIds);
       return import_server5.NextResponse.json({ error: "itemIds array is required" }, { status: 400 });
     }
+    console.log("\u{1F680} Calling postCopyParentStore with:", itemIds);
     const result = await postCopyParentStore(itemIds);
+    console.log("\u2705 Copy result:", result);
     return import_server5.NextResponse.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to copy parent items";
-    console.error("postCopyParentStore error:", message);
+    console.error("\u{1F4A5} postCopyParentStore error:", message);
     return import_server5.NextResponse.json({ error: message }, { status: 500 });
   }
 }
