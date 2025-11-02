@@ -44,9 +44,9 @@ declare function GET$1(request: NextRequest): Promise<NextResponse<Category> | N
 declare function getMenuById(id: string | number): Promise<Category>;
 
 declare function GET(request: NextRequest, { params }: {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }): Promise<NextResponse<Category> | NextResponse<{
     error: string;
 }>>;

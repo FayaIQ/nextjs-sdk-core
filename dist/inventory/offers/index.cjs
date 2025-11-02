@@ -96,6 +96,48 @@ var init_api = __esm({
       static getMenuById(id) {
         return `${_Api.INVENTORY_BASE}/v1/Menus/${id}`;
       }
+      static getOfferById(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
+      }
+      static deleteOffer(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
+      }
+      static getStoreInvoiceDiscount(storeId, coupon) {
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+      }
+      static getDeliveryZoneDiscount(deliveryZoneId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
+      }
+      static putOffersCustomerDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
+      }
+      static putOffersExtraItemDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ExtraItemDiscount`;
+      }
+      static putOffersInvoiceDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/InvoiceDiscount`;
+      }
+      static putOffersItemsDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount`;
+      }
+      static putOffersItemsDiscountCustomers(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount/Customers`;
+      }
+      static putOffersShippingDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ShippingDiscount`;
+      }
+      static putOffersPointDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/PointDiscount`;
+      }
+      static putOffersItemCollectionDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemCollectionDiscount`;
+      }
+      static putOffersMultiCouponDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/MultiCouponDiscount`;
+      }
+      static putOffersDarkDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
       static getItemById(id) {
         return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
       }
@@ -219,6 +261,26 @@ var init_api = __esm({
     _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v1/Items/Paging`;
     _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
     _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
+    // Offers endpoints
+    _Api.getOffersPaging = `${_Api.INVENTORY_BASE}/v1/Offers/Paging`;
+    _Api.getOffersCustomerItemLoggedIn = `${_Api.INVENTORY_BASE}/v1/Offers/CustomerItem/LoggedIn`;
+    _Api.getOffersItemsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Items/DropDown`;
+    _Api.getOffersSlideShowsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/SlideShows/DropDown`;
+    _Api.getOffersItemsStores = `${_Api.INVENTORY_BASE}/v1/Offers/Items/Stores`;
+    _Api.getOffersPointsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
+    _Api.getOffersNewsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
+    _Api.getOffersCouponsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
+    _Api.postOffersItemsDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
+    _Api.postOffersItemsDiscountCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
+    _Api.postOffersExtraItemDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
+    _Api.postOffersCustomerDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/CustomerDiscount`;
+    _Api.postOffersInvoiceDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount`;
+    _Api.postOffersMultiCouponDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/MultiCouponDiscount`;
+    _Api.postOffersShippingDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ShippingDiscount`;
+    _Api.postOffersPointDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/PointDiscount`;
+    _Api.postOffersItemCollectionDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemCollectionDiscount`;
+    _Api.postOffersDarkDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/DarkDiscount`;
+    _Api.getOffersCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/Customers`;
     _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
     _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
     _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
@@ -302,6 +364,20 @@ var init_token = __esm({
 });
 
 // src/core/fetcher.ts
+var fetcher_exports = {};
+__export(fetcher_exports, {
+  apiFetch: () => apiFetch,
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
+});
 async function apiFetch(url, options = {}) {
   const { method = "GET", headers = {}, data, query, token } = options;
   let endpoint = url;
@@ -494,63 +570,284 @@ var init_fetcher = __esm({
   }
 });
 
-// src/core/index.ts
-var core_exports = {};
-__export(core_exports, {
-  deleteWithAuth: () => deleteWithAuth,
-  deleteWithoutAuth: () => deleteWithoutAuth,
-  getWithAuth: () => getWithAuth,
-  getWithoutAuth: () => getWithoutAuth,
-  patchWithAuth: () => patchWithAuth,
-  patchWithoutAuth: () => patchWithoutAuth,
-  postWithAuth: () => postWithAuth,
-  postWithoutAuth: () => postWithoutAuth,
-  putWithAuth: () => putWithAuth,
-  putWithoutAuth: () => putWithoutAuth
-});
-var init_core = __esm({
-  "src/core/index.ts"() {
-    "use strict";
-    init_fetcher();
-  }
-});
-
 // src/inventory/offers/index.ts
 var offers_exports = {};
 __export(offers_exports, {
-  CouponsGET: () => GET,
-  getCoupons: () => getCoupons
+  DeleteOfferDELETE: () => DELETE,
+  GetInvoiceDiscountGET: () => GET3,
+  GetOfferByIdGET: () => GET2,
+  GetOffersCouponsDropdownGET: () => GET5,
+  GetOffersCustomersGET: () => GET6,
+  GetOffersItemsDropdownGET: () => GET4,
+  GetOffersPagingGET: () => GET,
+  PostOffersItemsDiscountPOST: () => POST,
+  PutOffersItemsDiscountPUT: () => PUT,
+  deleteOffer: () => deleteOffer,
+  getInvoiceDiscount: () => getInvoiceDiscount,
+  getOfferById: () => getOfferById,
+  getOffersCouponsDropdown: () => getOffersCouponsDropdown,
+  getOffersCustomers: () => getOffersCustomers,
+  getOffersItemsDropdown: () => getOffersItemsDropdown,
+  getOffersPaging: () => getOffersPaging,
+  postOffersItemsDiscount: () => postOffersItemsDiscount,
+  putOffersItemsDiscount: () => putOffersItemsDiscount
 });
 module.exports = __toCommonJS(offers_exports);
 
-// src/inventory/offers/getCoupons.ts
-async function getCoupons() {
+// src/inventory/offers/getOffersPaging.ts
+async function getOffersPaging(query) {
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(Api2.getCouponOffers);
+    return getWithAuth2(Api2.getOffersPaging, query);
   }
-  const response = await fetch(`/api/offers/coupons`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch products: ${response.statusText}`);
-  }
-  return response.json();
+  const qs = query ? new URLSearchParams(query).toString() : "";
+  const res = await fetch(`/api/offers/paging${qs ? `?${qs}` : ""}`);
+  if (!res.ok) throw new Error(`Failed to fetch offers: ${res.statusText}`);
+  return res.json();
 }
 
-// src/inventory/offers/handler/coupons.ts
+// src/inventory/offers/getOfferById.ts
+async function getOfferById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getOfferById(id));
+  }
+  const res = await fetch(`/api/offers/${id}`);
+  if (!res.ok) throw new Error(`Failed to fetch offer ${id}: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/deleteOffer.ts
+async function deleteOffer(id) {
+  if (typeof window === "undefined") {
+    const { deleteWithAuth: deleteWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return deleteWithAuth2(Api2.deleteOffer(id));
+  }
+  const res = await fetch(`/api/offers/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(`Failed to delete offer ${id}: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/getInvoiceDiscount.ts
+async function getInvoiceDiscount(coupon) {
+  if (typeof window === "undefined") {
+    const { getWithoutAuth: getWithoutAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithoutAuth2(Api2.getInvoiceDiscount(coupon));
+  }
+  const res = await fetch(`/api/offers/invoice-discount/${encodeURIComponent(String(coupon))}`);
+  if (!res.ok) throw new Error(`Failed to fetch invoice discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/getOffersItemsDropdown.ts
+async function getOffersItemsDropdown() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getOffersItemsDropdown);
+  }
+  const res = await fetch(`/api/offers/items/dropdown`);
+  if (!res.ok) throw new Error(`Failed to fetch offers items dropdown: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/getOffersCouponsDropdown.ts
+async function getOffersCouponsDropdown() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getOffersCouponsDropdown);
+  }
+  const res = await fetch(`/api/offers/coupons/dropdown`);
+  if (!res.ok) throw new Error(`Failed to fetch offers coupons dropdown: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/postOffersItemsDiscount.ts
+async function postOffersItemsDiscount(payload) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(Api2.postOffersItemsDiscount, payload);
+  }
+  const res = await fetch(`/api/offers/items-discount`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to post items discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersItemsDiscount.ts
+async function putOffersItemsDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putOffersItemsDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/items-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put items discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/getOffersCustomers.ts
+async function getOffersCustomers() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getOffersCustomers);
+  }
+  const res = await fetch(`/api/offers/customers`);
+  if (!res.ok) throw new Error(`Failed to fetch offers customers: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/handler/getOffersPaging.ts
 var import_server = require("next/server");
 async function GET(request) {
   try {
-    const Coupons = await getCoupons();
-    return import_server.NextResponse.json(Coupons);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch orders";
-    console.error("orders error:", message);
+    const params = Object.fromEntries(new URL(request.url).searchParams.entries());
+    const result = await getOffersPaging(params);
+    return import_server.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch offers";
+    console.error("getOffersPaging error:", message);
     return import_server.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/getOfferById.ts
+var import_server2 = require("next/server");
+async function GET2(request, { params }) {
+  try {
+    const result = await getOfferById((await params).id);
+    return import_server2.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch offer";
+    console.error("getOfferById error:", message);
+    return import_server2.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/deleteOffer.ts
+var import_server3 = require("next/server");
+async function DELETE(request, { params }) {
+  try {
+    const result = await deleteOffer((await params).id);
+    return import_server3.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to delete offer";
+    console.error("deleteOffer error:", message);
+    return import_server3.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/getInvoiceDiscount.ts
+var import_server4 = require("next/server");
+async function GET3(request, { params }) {
+  try {
+    const result = await getInvoiceDiscount((await params).coupon);
+    return import_server4.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch invoice discount";
+    console.error("getInvoiceDiscount error:", message);
+    return import_server4.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/getOffersItemsDropdown.ts
+var import_server5 = require("next/server");
+async function GET4() {
+  try {
+    const result = await getOffersItemsDropdown();
+    return import_server5.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch offers items dropdown";
+    console.error("getOffersItemsDropdown error:", message);
+    return import_server5.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/getOffersCouponsDropdown.ts
+var import_server6 = require("next/server");
+async function GET5() {
+  try {
+    const result = await getOffersCouponsDropdown();
+    return import_server6.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch offers coupons dropdown";
+    console.error("getOffersCouponsDropdown error:", message);
+    return import_server6.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/postOffersItemsDiscount.ts
+var import_server7 = require("next/server");
+async function POST(request) {
+  try {
+    const data = await request.json();
+    const result = await postOffersItemsDiscount(data);
+    return import_server7.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to post items discount";
+    console.error("postOffersItemsDiscount error:", message);
+    return import_server7.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersItemsDiscount.ts
+var import_server8 = require("next/server");
+async function PUT(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersItemsDiscount((await params).id, data);
+    return import_server8.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to put items discount";
+    console.error("putOffersItemsDiscount error:", message);
+    return import_server8.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/getOffersCustomers.ts
+var import_server9 = require("next/server");
+async function GET6() {
+  try {
+    const result = await getOffersCustomers();
+    return import_server9.NextResponse.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch offers customers";
+    console.error("getOffersCustomers error:", message);
+    return import_server9.NextResponse.json({ error: message }, { status: 500 });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  CouponsGET,
-  getCoupons
+  DeleteOfferDELETE,
+  GetInvoiceDiscountGET,
+  GetOfferByIdGET,
+  GetOffersCouponsDropdownGET,
+  GetOffersCustomersGET,
+  GetOffersItemsDropdownGET,
+  GetOffersPagingGET,
+  PostOffersItemsDiscountPOST,
+  PutOffersItemsDiscountPUT,
+  deleteOffer,
+  getInvoiceDiscount,
+  getOfferById,
+  getOffersCouponsDropdown,
+  getOffersCustomers,
+  getOffersItemsDropdown,
+  getOffersPaging,
+  postOffersItemsDiscount,
+  putOffersItemsDiscount
 });

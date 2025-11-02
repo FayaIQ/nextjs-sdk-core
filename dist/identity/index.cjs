@@ -46,6 +46,48 @@ var init_api = __esm({
       static getMenuById(id) {
         return `${_Api.INVENTORY_BASE}/v1/Menus/${id}`;
       }
+      static getOfferById(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
+      }
+      static deleteOffer(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
+      }
+      static getStoreInvoiceDiscount(storeId, coupon) {
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+      }
+      static getDeliveryZoneDiscount(deliveryZoneId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
+      }
+      static putOffersCustomerDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
+      }
+      static putOffersExtraItemDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ExtraItemDiscount`;
+      }
+      static putOffersInvoiceDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/InvoiceDiscount`;
+      }
+      static putOffersItemsDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount`;
+      }
+      static putOffersItemsDiscountCustomers(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount/Customers`;
+      }
+      static putOffersShippingDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ShippingDiscount`;
+      }
+      static putOffersPointDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/PointDiscount`;
+      }
+      static putOffersItemCollectionDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemCollectionDiscount`;
+      }
+      static putOffersMultiCouponDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/MultiCouponDiscount`;
+      }
+      static putOffersDarkDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
       static getItemById(id) {
         return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
       }
@@ -169,6 +211,26 @@ var init_api = __esm({
     _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v1/Items/Paging`;
     _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
     _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
+    // Offers endpoints
+    _Api.getOffersPaging = `${_Api.INVENTORY_BASE}/v1/Offers/Paging`;
+    _Api.getOffersCustomerItemLoggedIn = `${_Api.INVENTORY_BASE}/v1/Offers/CustomerItem/LoggedIn`;
+    _Api.getOffersItemsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Items/DropDown`;
+    _Api.getOffersSlideShowsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/SlideShows/DropDown`;
+    _Api.getOffersItemsStores = `${_Api.INVENTORY_BASE}/v1/Offers/Items/Stores`;
+    _Api.getOffersPointsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
+    _Api.getOffersNewsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
+    _Api.getOffersCouponsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
+    _Api.postOffersItemsDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
+    _Api.postOffersItemsDiscountCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
+    _Api.postOffersExtraItemDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
+    _Api.postOffersCustomerDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/CustomerDiscount`;
+    _Api.postOffersInvoiceDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount`;
+    _Api.postOffersMultiCouponDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/MultiCouponDiscount`;
+    _Api.postOffersShippingDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ShippingDiscount`;
+    _Api.postOffersPointDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/PointDiscount`;
+    _Api.postOffersItemCollectionDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemCollectionDiscount`;
+    _Api.postOffersDarkDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/DarkDiscount`;
+    _Api.getOffersCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/Customers`;
     _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
     _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
     _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;

@@ -35,6 +35,68 @@ export class Api {
   static getMenuById(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Menus/${id}`;
   }
+  // Offers endpoints
+  static getOffersPaging: string = `${Api.INVENTORY_BASE}/v1/Offers/Paging`;
+  static getOfferById(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}`;
+  }
+  static deleteOffer(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}`;
+  }
+  static getOffersCustomerItemLoggedIn: string = `${Api.INVENTORY_BASE}/v1/Offers/CustomerItem/LoggedIn`;
+  static getStoreInvoiceDiscount(storeId: string | number, coupon: string): string {
+    return `${Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+  }
+  static getDeliveryZoneDiscount(deliveryZoneId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
+  }
+  static getOffersItemsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/Items/DropDown`;
+  static getOffersSlideShowsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/SlideShows/DropDown`;
+  static getOffersItemsStores: string = `${Api.INVENTORY_BASE}/v1/Offers/Items/Stores`;
+  static getOffersPointsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
+  static getOffersNewsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
+  static getOffersCouponsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
+  static postOffersItemsDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
+  static postOffersItemsDiscountCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
+  static postOffersExtraItemDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
+  static postOffersCustomerDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/CustomerDiscount`;
+  static postOffersInvoiceDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount`;
+  static postOffersMultiCouponDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/MultiCouponDiscount`;
+  static postOffersShippingDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ShippingDiscount`;
+  static postOffersPointDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/PointDiscount`;
+  static postOffersItemCollectionDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemCollectionDiscount`;
+  static postOffersDarkDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/DarkDiscount`;
+  static putOffersCustomerDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
+  }
+  static putOffersExtraItemDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/ExtraItemDiscount`;
+  }
+  static putOffersInvoiceDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/InvoiceDiscount`;
+  }
+  static putOffersItemsDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount`;
+  }
+  static putOffersItemsDiscountCustomers(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount/Customers`;
+  }
+  static putOffersShippingDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/ShippingDiscount`;
+  }
+  static putOffersPointDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/PointDiscount`;
+  }
+  static putOffersItemCollectionDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/ItemCollectionDiscount`;
+  }
+  static putOffersMultiCouponDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/MultiCouponDiscount`;
+  }
+  static putOffersDarkDiscount(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+  }
+  static getOffersCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/Customers`;
   static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
   static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;

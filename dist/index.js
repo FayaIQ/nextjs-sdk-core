@@ -1,6 +1,10 @@
 import {
-  getMenus
-} from "./chunk-HOLN63FT.js";
+  getStoreInfo
+} from "./chunk-G5HCR3PJ.js";
+import {
+  getProductInfo,
+  getProducts
+} from "./chunk-U6Q5FWPZ.js";
 import {
   DeleveryType,
   OrderPagingParameters,
@@ -9,14 +13,10 @@ import {
   PayType,
   Sign,
   getOrders
-} from "./chunk-3GF4S55Z.js";
+} from "./chunk-CSQCZ3FH.js";
 import {
-  getStoreInfo
-} from "./chunk-TJBWLRAX.js";
-import {
-  getProductInfo,
-  getProducts
-} from "./chunk-QKBSLE2V.js";
+  getMenus
+} from "./chunk-3B746WRM.js";
 import {
   AgeGroup,
   Gender,
@@ -27,19 +27,19 @@ import {
 } from "./chunk-QPGSHSJO.js";
 import {
   Api
-} from "./chunk-627OBKGP.js";
+} from "./chunk-HCBNRXOI.js";
 import {
   apiFetch
-} from "./chunk-KYRAWEHI.js";
+} from "./chunk-WWKX3HSA.js";
 import {
   getToken
-} from "./chunk-3GFDDB2C.js";
+} from "./chunk-C347AHO2.js";
 
 // src/inventory/slides/getSlides.ts
 async function getSlides() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-HY2UR7S7.js");
-    const { Api: Api2 } = await import("./api-25UVO5DL.js");
+    const { getWithAuth } = await import("./fetcher-TNCNK5RR.js");
+    const { Api: Api2 } = await import("./api-QN4A3WS4.js");
     return getWithAuth(Api2.getSlideShows);
   }
   const response = await fetch(`/api/slides?`);
