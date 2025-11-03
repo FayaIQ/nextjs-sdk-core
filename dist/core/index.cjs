@@ -108,6 +108,9 @@ var init_api = __esm({
       static getDeliveryZoneDiscount(deliveryZoneId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
       }
+      static postOffersAddItemsByFilter(offerId, forceUpdate) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+      }
       static putOffersCustomerDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
       }
@@ -374,6 +377,14 @@ async function getToken() {
 }
 
 // src/core/fetcher.ts
+var ApiError = class _ApiError extends Error {
+  constructor(status, body, message) {
+    super(message || `Request failed with status ${status}`);
+    this.status = status;
+    this.body = body;
+    Object.setPrototypeOf(this, _ApiError.prototype);
+  }
+};
 async function apiFetch(url, options = {}) {
   const { method = "GET", headers = {}, data, query, token } = options;
   let endpoint = url;
@@ -406,35 +417,20 @@ async function apiFetch(url, options = {}) {
     body
   });
   if (!response.ok) {
-    let defaultMessage = `Request failed with status ${response.status} ${response.statusText}`;
     try {
-      const errorData = await response.json();
-      const extractMessage = (data2) => {
-        if (!data2) return null;
-        if (typeof data2 === "string") return data2;
-        if (data2.message) return String(data2.message);
-        if (data2.Message) return String(data2.Message);
-        if (data2.error) {
-          if (typeof data2.error === "string") return data2.error;
-          if (data2.error.message) return String(data2.error.message);
-          if (data2.error.Message) return String(data2.error.Message);
-        }
-        if (data2.code && data2.name && data2.message) return String(data2.message);
-        if (Array.isArray(data2) && data2.length > 0) {
-          const first = data2[0];
-          if (first?.message) return String(first.message);
-        }
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
         try {
-          return JSON.stringify(data2);
+          const errorData = JSON.parse(text2);
+          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
         } catch {
-          return null;
+          throw new ApiError(response.status, text2, text2 || response.statusText);
         }
-      };
-      const msg = extractMessage(errorData) || defaultMessage;
-      throw new Error(msg);
+      }
+      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
     } catch (err) {
-      if (err instanceof Error) throw err;
-      throw new Error(defaultMessage);
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
     }
   }
   const contentType = response.headers.get("content-type");
@@ -448,15 +444,6 @@ async function apiFetch(url, options = {}) {
   }
   try {
     const parsed = JSON.parse(text);
-    if (parsed && typeof parsed === "object" && "code" in parsed && "message" in parsed && !("success" in parsed)) {
-      return {
-        success: true,
-        message: parsed.message || parsed.code,
-        code: parsed.code,
-        name: parsed.name,
-        ...parsed
-      };
-    }
     return parsed;
   } catch (err) {
     throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
@@ -497,7 +484,21 @@ async function postWithoutAuth(url, data, headers = {}) {
     body: data ? JSON.stringify(data) : void 0
   });
   if (!response.ok) {
-    throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
+    try {
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
+        try {
+          const errorData = JSON.parse(text2);
+          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
+        } catch {
+          throw new ApiError(response.status, text2, text2 || response.statusText);
+        }
+      }
+      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+    }
   }
   const contentLength = response.headers.get("content-length");
   if (contentLength === "0") {

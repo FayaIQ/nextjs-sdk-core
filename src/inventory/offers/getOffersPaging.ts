@@ -1,11 +1,13 @@
+import { OffersPagingResponse } from "./types";
+
 /**
  * Fetch paginated offers
  */
-export async function getOffersPaging(query?: Record<string, any>): Promise<any> {
+export async function getOffersPaging(query?: Record<string, any>): Promise<OffersPagingResponse> {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
-    return getWithAuth<any>(Api.getOffersPaging, query);
+    return getWithAuth<OffersPagingResponse>(Api.getOffersPaging, query);
   }
 
   const qs = query ? new URLSearchParams(query as Record<string,string>).toString() : "";

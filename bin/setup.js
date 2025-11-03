@@ -11,23 +11,32 @@ const routes = [
   {
     name: "login",
     path: [ "src" , "app", "api", "auth", "login"],
-    handler: "my-next-core/identity",
+    handler: "erp-core/identity",
     methods: ["POST"],
     exportName: "LoginPOST",
     description: "User login endpoint",
   },
   {
-    name: "logout",
-    path: ["src" , "app", "api", "auth", "logout"],
-    handler: "my-next-core/identity",
-    methods: ["POST"],
-    exportName: "LogoutPOST",
-    description: "User logout endpoint",
+    name: "offerByIdGet",
+    path: ["src", "app", "api", "offers", "[id]"],
+    handler: "erp-core/inventory/offers",
+    methods: ["GET"],
+    exportName: "GetOfferByIdGET",
+    description: "Get offer by id",
   },
+  {
+    name: "offerByIdDelete",
+    path: ["src", "app", "api", "offers", "[id]"],
+    handler: "erp-core/inventory/offers",
+    methods: ["DELETE"],
+    exportName: "DeleteOfferDELETE",
+    description: "Delete offer by id",
+  },
+  
     {
     name: "orders",
     path: ["src", "app", "api", "orders"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["GET"],
     exportName: "GETOrders",
     description: "Orders listing endpoint",
@@ -35,7 +44,7 @@ const routes = [
   {
     name: "orderFullInfo",
     path: ["src", "app", "api", "orders", "full-info"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["POST"],
     exportName: "POSTOrderFullInfo",
     description: "Get full order information",
@@ -43,7 +52,7 @@ const routes = [
   {
     name: "orderApprove",
     path: ["src", "app", "api", "orders", "[id]", "approve"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderApprove",
     description: "Approve a single order",
@@ -51,7 +60,7 @@ const routes = [
   {
     name: "orderDisapprove",
     path: ["src", "app", "api", "orders", "[id]", "disapprove"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderDisapprove",
     description: "Disapprove a single order",
@@ -59,7 +68,7 @@ const routes = [
   {
     name: "orderApproveList",
     path: ["src", "app", "api", "orders", "approve-list"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderApproveList",
     description: "Approve multiple orders at once",
@@ -67,7 +76,7 @@ const routes = [
   {
     name: "orderDisapproveList",
     path: ["src", "app", "api", "orders", "disapprove-list"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderDisapproveList",
     description: "Disapprove multiple orders at once",
@@ -75,7 +84,7 @@ const routes = [
   {
     name: "order",
     path: ["src", "app", "api", "orders", "[id]"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["GET"],
     exportName: "GETOrder",
     description: "Get single order details",
@@ -83,7 +92,7 @@ const routes = [
   {
     name: "orderChangeStatus",
     path: ["src", "app", "api", "orders", "[id]", "change-status"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderChangeStatus",
     description: "Change order delivery status",
@@ -91,7 +100,7 @@ const routes = [
   {
     name: "orderDiscount",
     path: ["src", "app", "api", "orders", "[id]", "discount"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderDiscount",
     description: "Apply discount to order",
@@ -99,7 +108,7 @@ const routes = [
   {
     name: "orderReferenceId",
     path: ["src", "app", "api", "orders", "[id]", "referenceId"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderReferenceId",
     description: "Update order reference ID",
@@ -107,7 +116,7 @@ const routes = [
   {
     name: "orderReferenceDeliveryId",
     path: ["src", "app", "api", "orders", "[id]", "referenceDeliveryId"],
-    handler: "my-next-core/inventory/orders",
+    handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderReferenceDeliveryId",
     description: "Update order reference delivery ID",
@@ -115,7 +124,7 @@ const routes = [
   {
     name: "menus",
     path: ["src", "app", "api", "menus"],
-    handler: "my-next-core/inventory/menus",
+    handler: "erp-core/inventory/menus",
     methods: ["GET"],
     exportName: "GetMenusGET",
     description: "Menus listing endpoint",
@@ -123,7 +132,7 @@ const routes = [
   {
     name: "menuById",
     path: ["src", "app", "api", "menus", "[id]"],
-    handler: "my-next-core/inventory/menus",
+    handler: "erp-core/inventory/menus",
     methods: ["GET"],
     exportName: "GetMenuByIdGET",
     description: "Get menu by ID",
@@ -131,7 +140,7 @@ const routes = [
   {
     name: "products",
     path: ["src", "app", "api", "products"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["GET"],
     exportName: "GetProductsGET",
     description: "Products listing endpoint",
@@ -139,7 +148,7 @@ const routes = [
   {
     name: "productInfo",
     path: ["src", "app", "api", "products", "[id]"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["GET"],
     exportName: "ProductInfoGET",
     description: "Product details endpoint",
@@ -147,7 +156,7 @@ const routes = [
   {
     name: "itemActivate",
     path: ["src", "app", "api", "items", "[id]", "activate"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["PUT"],
     exportName: "PutItemActivatePUT",
     description: "Activate an item",
@@ -155,7 +164,7 @@ const routes = [
   {
     name: "itemDeactivate",
     path: ["src", "app", "api", "items", "[id]", "deactivate"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["PUT"],
     exportName: "PutItemDeactivatePUT",
     description: "Deactivate an item",
@@ -163,7 +172,7 @@ const routes = [
   {
     name: "itemUpdate",
     path: ["src", "app", "api", "items", "[id]"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["PUT"],
     exportName: "PutItemPUT",
     description: "Update an item",
@@ -171,7 +180,7 @@ const routes = [
   {
     name: "itemById",
     path: ["src", "app", "api", "items", "[id]", "info"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["GET"],
     exportName: "GetItemByIdGET",
     description: "Get item by ID (v3 endpoint)",
@@ -179,7 +188,7 @@ const routes = [
   {
     name: "categories",
     path: ["src", "app", "api", "categories"],
-    handler: "my-next-core/inventory/category",
+    handler: "erp-core/inventory/category",
     methods: ["GET"],
     exportName: "CategoriesGET",
     description: "Categories listing endpoint",
@@ -187,15 +196,15 @@ const routes = [
   {
     name: "coupons",
     path: ["src", "app", "api", "offers", "coupons"],
-    handler: "my-next-core/inventory/offers",
+    handler: "erp-core/inventory/offers",
     methods: ["GET"],
-    exportName: "CouponsGET",
+    exportName: "GetCouponsGET",
     description: "Coupons/offers listing endpoint",
   },
   {
     name: "locations",
     path: ["src", "app", "api", "locations" , "countries"],
-    handler: "my-next-core/gps/locations",
+    handler: "erp-core/gps/locations",
     methods: ["GET"],
     exportName: "getCountriesHandler",
     description: "Locations listing endpoint",
@@ -203,7 +212,7 @@ const routes = [
   {
     name: "location",
     path: ["src", "app", "api", "locations", "[parentId]" , "children"],
-    handler: "my-next-core/gps/locations",
+    handler: "erp-core/gps/locations",
     methods: ["GET"],
     exportName: "getLocationChildrenHandler",
     description: "Location details endpoint",
@@ -211,7 +220,7 @@ const routes = [
   {
     name: "stores",
     path: ["src", "app", "api", "stores"],
-    handler: "my-next-core/identity/application",
+    handler: "erp-core/identity/application",
     methods: ["GET"],
     exportName: "GETStores",
     description: "Stores listing endpoint",
@@ -219,7 +228,7 @@ const routes = [
   {
     name: "customersDropdown",
     path: ["src", "app", "api", "customers", "dropdown"],
-    handler: "my-next-core/identity",
+    handler: "erp-core/identity",
     methods: ["GET"],
     exportName: "CustomersDropdownGET",
     description: "Customers dropdown (username, FullName) endpoint",
@@ -227,7 +236,7 @@ const routes = [
   {
     name: "storeInfo",
     path: ["src", "app", "api", "storeInfo"],
-    handler: "my-next-core/identity/application",
+    handler: "erp-core/identity/application",
     methods: ["GET"],
     exportName: "GETStoreInfo",
     description: "Store details endpoint",
@@ -235,7 +244,7 @@ const routes = [
   {
     name: "itemSources",
     path: ["src", "app", "api", "itemSource"],
-    handler: "my-next-core/inventory/itemSource",
+    handler: "erp-core/inventory/itemSource",
     methods: ["GET"],
     exportName: "ItemSourcesGET",
     description: "Item sources listing endpoint",
@@ -243,7 +252,7 @@ const routes = [
   {
     name : "menusDropdown",
     path: ["src", "app", "api", "menus", "dropdown"],
-    handler: "my-next-core/inventory/menus",
+    handler: "erp-core/inventory/menus",
     methods: ["GET"],
     exportName: "GetMenusDropdownGET",
     description: "Menus dropdown listing endpoint",
@@ -251,7 +260,7 @@ const routes = [
   {
     name : "itemsParent",
     path: ["src", "app", "api", "items", "parent"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["GET"],
     exportName: "GetParentProductsGET",
     description: "Parent products listing endpoint",
@@ -259,42 +268,31 @@ const routes = [
   {
     name : "itemsPaging",
     path: ["src", "app", "api", "items", "paging"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["GET"],
     exportName: "GetItemsPagingGET",
     description: "Items paging (v2) listing endpoint with GetMultipleMenu",
-  }
-  ,
+  },
   {
     name: "copyParentStore",
     path: ["src", "app", "api", "items", "copy-parent-store"],
-    handler: "my-next-core/inventory/items",
+    handler: "erp-core/inventory/items",
     methods: ["POST"],
     exportName: "CopyParentStorePOST",
     description: "Copy parent store items endpoint",
-  }
-
-  ,
+  },
   {
     name: "offersPaging",
     path: ["src", "app", "api", "offers", "paging"],
-    handler: "my-next-core/inventory/offers",
+    handler: "erp-core/inventory/offers",
     methods: ["GET"],
     exportName: "GetOffersPagingGET",
     description: "Offers paging endpoint",
   },
   {
-    name: "offerById",
-    path: ["src", "app", "api", "offers", "[id]"],
-    handler: "my-next-core/inventory/offers",
-    methods: ["GET", "DELETE"],
-    exportName: "GetOfferByIdGET",
-    description: "Get or delete offer by id",
-  },
-  {
     name: "offersInvoiceDiscount",
     path: ["src", "app", "api", "offers", "invoice-discount", "[coupon]"],
-    handler: "my-next-core/inventory/offers",
+    handler: "erp-core/inventory/offers",
     methods: ["GET"],
     exportName: "GetInvoiceDiscountGET",
     description: "Get invoice discount by coupon",
@@ -302,7 +300,7 @@ const routes = [
   {
     name: "offersItemsDropdown",
     path: ["src", "app", "api", "offers", "items", "dropdown"],
-    handler: "my-next-core/inventory/offers",
+    handler: "erp-core/inventory/offers",
     methods: ["GET"],
     exportName: "GetOffersItemsDropdownGET",
     description: "Offers items dropdown",
@@ -310,7 +308,7 @@ const routes = [
   {
     name: "offersCouponsDropdown",
     path: ["src", "app", "api", "offers", "coupons", "dropdown"],
-    handler: "my-next-core/inventory/offers",
+    handler: "erp-core/inventory/offers",
     methods: ["GET"],
     exportName: "GetOffersCouponsDropdownGET",
     description: "Offers coupons dropdown",
@@ -318,23 +316,55 @@ const routes = [
   {
     name: "offersItemsDiscount",
     path: ["src", "app", "api", "offers", "items-discount"],
-    handler: "my-next-core/inventory/offers",
+    handler: "erp-core/inventory/offers",
     methods: ["POST"],
     exportName: "PostOffersItemsDiscountPOST",
     description: "Create items discount",
   },
   {
+    name: "offersCustomerDiscount",
+    path: ["src", "app", "api", "offers", "customer-discount"],
+    handler: "erp-core/inventory/offers",
+    methods: ["POST"],
+    exportName: "PostOffersCustomerDiscountPOST",
+    description: "Create customer discount",
+  },
+  {
+    name: "offersInvoiceDiscountPost",
+    path: ["src", "app", "api", "offers", "invoice-discount"],
+    handler: "erp-core/inventory/offers",
+    methods: ["POST"],
+    exportName: "PostOffersInvoiceDiscountPOST",
+    description: "Create invoice discount",
+  },
+  {
+    name: "offersShippingDiscount",
+    path: ["src", "app", "api", "offers", "shipping-discount"],
+    handler: "erp-core/inventory/offers",
+    methods: ["POST"],
+    exportName: "PostOffersShippingDiscountPOST",
+    description: "Create shipping discount",
+  },
+  {
     name: "offersItemsDiscountPut",
     path: ["src", "app", "api", "offers", "[id]", "items-discount"],
-    handler: "my-next-core/inventory/offers",
+    handler: "erp-core/inventory/offers",
     methods: ["PUT"],
     exportName: "PutOffersItemsDiscountPUT",
     description: "Update items discount",
   },
   {
+    name: "offersAddItemsByFilter",
+    path: ["src", "app", "api", "offers", "[id]", "add-items-by-filter", "[forceUpdate]"],
+    handler: "erp-core/inventory/offers",
+    methods: ["POST"],
+    exportName: "PostOffersAddItemsByFilterPOST",
+    description: "Add items to offer by filter with force update flag",
+  },
+  {
     name: "offersCustomers",
     path: ["src", "app", "api", "offers", "customers"],
-    handler: "my-next-core/inventory/offers",
+    handler: "erp-core/inventory/offers",
     methods: ["GET"],
     exportName: "GetOffersCustomersGET",
     description: "Offers customers endpoint",
@@ -343,7 +373,7 @@ const routes = [
   {
     name: "orderItemGet",
     path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]"],
-    handler: "my-next-core/inventory/orderItem",
+    handler: "erp-core/inventory/orderItem",
     methods: ["GET"],
     exportName: "GetOrderItemGET",
     description: "Get single order item",
@@ -351,7 +381,7 @@ const routes = [
   {
     name: "orderItemPost",
     path: ["src", "app", "api", "orders", "[id]", "orderItems"],
-    handler: "my-next-core/inventory/orderItem",
+    handler: "erp-core/inventory/orderItem",
     methods: ["POST"],
     exportName: "PostOrderItemPOST",
     description: "Create new order item",
@@ -359,7 +389,7 @@ const routes = [
   {
     name: "orderItemCancel",
     path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "cancel"],
-    handler: "my-next-core/inventory/orderItem",
+    handler: "erp-core/inventory/orderItem",
     methods: ["PUT"],
     exportName: "PutOrderItemCancelPUT",
     description: "Cancel an order item",
@@ -367,7 +397,7 @@ const routes = [
   {
     name: "orderItemUndoCancel",
     path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "undo-cancel"],
-    handler: "my-next-core/inventory/orderItem",
+    handler: "erp-core/inventory/orderItem",
     methods: ["PUT"],
     exportName: "PutOrderItemUndoCancelPUT",
     description: "Undo cancel on an order item",
@@ -375,7 +405,7 @@ const routes = [
   {
     name: "orderItemUpdate",
     path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "update"],
-    handler: "my-next-core/inventory/orderItem",
+    handler: "erp-core/inventory/orderItem",
     methods: ["PUT"],
     exportName: "PutOrderItemUpdatePUT",
     description: "Update an order item",
@@ -383,7 +413,7 @@ const routes = [
 {
     name: "slides",
     path: ["src", "app", "api", "slides"],
-    handler: "my-next-core/inventory/slides/getSlides",
+    handler: "erp-core/inventory/slides/getSlides",
     methods: ["GET"],
     description: "Slides listing endpoint",
   },
@@ -448,7 +478,7 @@ function createRoute(route) {
  * Setup all API routes
  */
 function setupRoutes() {
-  console.log("\n🚀 Setting up API routes for my-next-core...\n");
+  console.log("\n🚀 Setting up API routes for erp-core...\n");
 
   let created = 0;
   let skipped = 0;
@@ -478,9 +508,9 @@ function setupRoutes() {
  * Show help
  */
 function showHelp() {
-  console.log("\n📦 my-next-core CLI\n");
+  console.log("\n📦 erp-core CLI\n");
   console.log("Usage:");
-  console.log("  npx my-next-core setup    Create all API route files\n");
+  console.log("  npx erp-core setup    Create all API route files\n");
   console.log("Available routes:");
   routes.forEach((route) => {
     const methods = route.methods.join(", ");
@@ -498,6 +528,6 @@ if (command === "setup" || command === "init") {
   showHelp();
 } else {
   console.log(
-    '⚠️  Unknown command. Use "npx my-next-core setup" or "npx my-next-core help"'
+    '⚠️  Unknown command. Use "npx erp-core setup" or "npx erp-core help"'
   );
 }

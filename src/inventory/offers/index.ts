@@ -7,8 +7,14 @@ export * from "./getOffersCouponsDropdown";
 export * from "./postOffersItemsDiscount";
 export * from "./putOffersItemsDiscount";
 export * from "./getOffersCustomers";
+export * from "./postOffersCustomerDiscount";
+export * from "./postOffersInvoiceDiscount";
+export * from "./postOffersShippingDiscount";
+export * from "./postOffersAddItemsByFilter";
+export * from "./getCoupons"
 
 export { GET as GetOffersPagingGET } from "./handler/getOffersPaging";
+export { GET as GetCouponsGET } from "./handler/coupons";
 export { GET as GetOfferByIdGET } from "./handler/getOfferById";
 export { DELETE as DeleteOfferDELETE } from "./handler/deleteOffer";
 export { GET as GetInvoiceDiscountGET } from "./handler/getInvoiceDiscount";
@@ -17,3 +23,7 @@ export { GET as GetOffersCouponsDropdownGET } from "./handler/getOffersCouponsDr
 export { POST as PostOffersItemsDiscountPOST } from "./handler/postOffersItemsDiscount";
 export { PUT as PutOffersItemsDiscountPUT } from "./handler/putOffersItemsDiscount";
 export { GET as GetOffersCustomersGET } from "./handler/getOffersCustomers";
+export { POST as PostOffersCustomerDiscountPOST } from "./handler/postOffersCustomerDiscount";
+export { POST as PostOffersInvoiceDiscountPOST } from "./handler/postOffersInvoiceDiscount";
+export { POST as PostOffersShippingDiscountPOST } from "./handler/postOffersShippingDiscount";
+export { POST as PostOffersAddItemsByFilterPOST } from "./handler/postOffersAddItemsByFilter";

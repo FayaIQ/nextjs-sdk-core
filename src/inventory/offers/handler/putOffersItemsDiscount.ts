@@ -7,8 +7,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const result = await putOffersItemsDiscount((await params).id, data);
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to put items discount";
-    console.error("putOffersItemsDiscount error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: err }, { status: 500 });
   }
 }

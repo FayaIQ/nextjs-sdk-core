@@ -6,6 +6,18 @@ export async function deleteOffer(id: string | number): Promise<any> {
   }
 
   const res = await fetch(`/api/offers/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Failed to delete offer ${id}: ${res.statusText}`);
-  return res.json();
+ if (!res.ok) {
+    // Extract error message from response body before throwing
+    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      // Use the error message from the API response
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      // If parsing fails, use the default message
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
+    return res.json();
 }

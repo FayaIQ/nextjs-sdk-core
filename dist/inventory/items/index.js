@@ -1,7 +1,7 @@
 import {
   getProductInfo,
   getProducts
-} from "../../chunk-U6Q5FWPZ.js";
+} from "../../chunk-U4NGO4DQ.js";
 import {
   AgeGroup,
   Gender,
@@ -12,11 +12,11 @@ import {
 } from "../../chunk-QPGSHSJO.js";
 import {
   Api
-} from "../../chunk-HCBNRXOI.js";
+} from "../../chunk-CKBJVO52.js";
 import {
   getWithAuth
-} from "../../chunk-WWKX3HSA.js";
-import "../../chunk-C347AHO2.js";
+} from "../../chunk-G3RE74RT.js";
+import "../../chunk-7HFB7GTE.js";
 
 // src/inventory/items/getParentProducts.ts
 async function getParentProducts({
@@ -24,7 +24,7 @@ async function getParentProducts({
 }) {
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await import("../../core/index.js");
-    const { Api: Api2 } = await import("../../api-QN4A3WS4.js");
+    const { Api: Api2 } = await import("../../api-ALZDPWU7.js");
     const params = filterParams.toURLSearchParams();
     return getWithAuth2(`${Api2.getParentProducts}?${params.toString()}`, {});
   } else {
@@ -64,8 +64,8 @@ async function getItemsPaging(filters) {
 // src/inventory/items/getItemById.ts
 async function getItemById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-TNCNK5RR.js");
-    const { Api: Api2 } = await import("../../api-QN4A3WS4.js");
+    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-53SEI2RB.js");
+    const { Api: Api2 } = await import("../../api-ALZDPWU7.js");
     return getWithAuth2(Api2.getItemById(id));
   }
   const response = await fetch(`/api/items/${id}/info`);
@@ -162,8 +162,8 @@ async function GET5(request, { params }) {
 // src/inventory/items/postCopyParentStore.ts
 async function postCopyParentStore(itemIds) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-TNCNK5RR.js");
-    const { Api: Api2 } = await import("../../api-QN4A3WS4.js");
+    const { postWithAuth } = await import("../../fetcher-53SEI2RB.js");
+    const { Api: Api2 } = await import("../../api-ALZDPWU7.js");
     return postWithAuth(Api2.postCopyParentStore, { itemIds });
   }
   const res = await fetch(`/api/items/copy-parent-store`, {
@@ -171,7 +171,17 @@ async function postCopyParentStore(itemIds) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ itemIds })
   });
-  if (!res.ok) throw new Error(`Copy parent store failed: ${res.statusText}`);
+  console.log("postCopyParentStore response status:", res.status);
+  if (!res.ok) {
+    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -195,8 +205,8 @@ async function POST(request) {
 // src/inventory/items/putActivate.ts
 async function putActivateItem(id) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-TNCNK5RR.js");
-    const { Api: Api2 } = await import("../../api-QN4A3WS4.js");
+    const { putWithAuth } = await import("../../fetcher-53SEI2RB.js");
+    const { Api: Api2 } = await import("../../api-ALZDPWU7.js");
     return putWithAuth(Api2.putItemActivate(id));
   }
   const res = await fetch(`/api/items/${id}/activate`, { method: "PUT" });
@@ -207,8 +217,8 @@ async function putActivateItem(id) {
 // src/inventory/items/putDeactivate.ts
 async function putDeactivateItem(id) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-TNCNK5RR.js");
-    const { Api: Api2 } = await import("../../api-QN4A3WS4.js");
+    const { putWithAuth } = await import("../../fetcher-53SEI2RB.js");
+    const { Api: Api2 } = await import("../../api-ALZDPWU7.js");
     return putWithAuth(Api2.putItemDeactivate(id));
   }
   const res = await fetch(`/api/items/${id}/deactivate`, { method: "PUT" });
@@ -219,8 +229,8 @@ async function putDeactivateItem(id) {
 // src/inventory/items/putItem.ts
 async function putItem(id, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-TNCNK5RR.js");
-    const { Api: Api2 } = await import("../../api-QN4A3WS4.js");
+    const { putWithAuth } = await import("../../fetcher-53SEI2RB.js");
+    const { Api: Api2 } = await import("../../api-ALZDPWU7.js");
     console.log("putItem data:", data);
     return putWithAuth(Api2.putItem(id), data);
   }

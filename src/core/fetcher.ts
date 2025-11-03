@@ -20,6 +20,21 @@ export interface ApiRequestOptions {
 }
 
 /**
+ * Error thrown by apiFetch when backend returns non-2xx.
+ * Contains the HTTP status and the parsed response body (if any).
+ */
+export class ApiError extends Error {
+  status: number;
+  body: any;
+  constructor(status: number, body: any, message?: string) {
+    super(message || `Request failed with status ${status}`);
+    this.status = status;
+    this.body = body;
+    Object.setPrototypeOf(this, ApiError.prototype);
+  }
+}
+
+/**
  * Generic API fetch wrapper with authentication and error handling
  * @param url - The API endpoint URL
  * @param options - Request configuration options
@@ -70,47 +85,25 @@ export async function apiFetch<T>(
     headers: requestHeaders,
     body,
   });
-
-  // Handle response errors
+  // Handle response errors - parse body and throw ApiError so callers must handle non-2xx
   if (!response.ok) {
-    // Try to parse JSON error body and extract a user-friendly message.
-    let defaultMessage = `Request failed with status ${response.status} ${response.statusText}`;
     try {
-      const errorData = await response.json();
-
-      const extractMessage = (data: any): string | null => {
-        if (!data) return null;
-        if (typeof data === "string") return data;
-        // Common fields
-        if (data.message) return String(data.message);
-        if (data.Message) return String(data.Message);
-        // Some APIs nest errors
-        if (data.error) {
-          if (typeof data.error === "string") return data.error;
-          if (data.error.message) return String(data.error.message);
-          if (data.error.Message) return String(data.error.Message);
-        }
-        // Specific shape used in this project: { code, name, message }
-        if (data.code && data.name && data.message) return String(data.message);
-        // Array of errors
-        if (Array.isArray(data) && data.length > 0) {
-          const first = data[0];
-          if (first?.message) return String(first.message);
-        }
-        // Fallback to stringified JSON
+      const text = await response.text();
+      if (text && text.trim()) {
         try {
-          return JSON.stringify(data);
+          const errorData = JSON.parse(text);
+          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
         } catch {
-          return null;
+          // Not JSON - include raw text
+          throw new ApiError(response.status, text, text || response.statusText);
         }
-      };
-
-      const msg = extractMessage(errorData) || defaultMessage;
-      throw new Error(msg);
+      }
+      // Empty error body
+      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
     } catch (err) {
-      // If parsing failed or response wasn't JSON, throw a default message or the parser error
-      if (err instanceof Error) throw err;
-      throw new Error(defaultMessage);
+      if (err instanceof ApiError) throw err;
+      // Reading response failed - throw generic ApiError
+      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
     }
   }
 
@@ -131,19 +124,7 @@ export async function apiFetch<T>(
   
   try {
     const parsed = JSON.parse(text);
-    
-    // Normalize backend response format: { code, name, message }
-    // Convert to standard format with success field
-    if (parsed && typeof parsed === 'object' && 'code' in parsed && 'message' in parsed && !('success' in parsed)) {
-      return {
-        success: true,
-        message: parsed.message || parsed.code,
-        code: parsed.code,
-        name: parsed.name,
-        ...parsed
-      } as T;
-    }
-    
+    // Return response as-is without any normalization
     return parsed as T;
   } catch (err) {
     throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
@@ -255,8 +236,27 @@ export async function postWithoutAuth<T>(
     body: data ? JSON.stringify(data) : undefined,
   });
 
+  // Handle error responses - return full error body instead of throwing
+  // Handle error responses - parse body and throw ApiError so callers must handle non-2xx
   if (!response.ok) {
-    throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
+    try {
+      const text = await response.text();
+      if (text && text.trim()) {
+        try {
+          const errorData = JSON.parse(text);
+          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
+        } catch {
+          // Not JSON - include raw text
+          throw new ApiError(response.status, text, text || response.statusText);
+        }
+      }
+      // Empty error body
+      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      // Reading response failed - throw generic ApiError
+      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+    }
   }
 
   // Handle empty response body

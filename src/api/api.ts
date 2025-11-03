@@ -57,6 +57,9 @@ export class Api {
   static getOffersNewsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
   static getOffersCouponsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static postOffersItemsDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
+  static postOffersAddItemsByFilter(offerId: string | number, forceUpdate: boolean | string): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+  }
   static postOffersItemsDiscountCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
   static postOffersExtraItemDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
   static postOffersCustomerDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/CustomerDiscount`;

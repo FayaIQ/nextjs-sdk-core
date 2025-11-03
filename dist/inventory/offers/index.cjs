@@ -108,6 +108,9 @@ var init_api = __esm({
       static getDeliveryZoneDiscount(deliveryZoneId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
       }
+      static postOffersAddItemsByFilter(offerId, forceUpdate) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+      }
       static putOffersCustomerDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
       }
@@ -366,6 +369,7 @@ var init_token = __esm({
 // src/core/fetcher.ts
 var fetcher_exports = {};
 __export(fetcher_exports, {
+  ApiError: () => ApiError,
   apiFetch: () => apiFetch,
   deleteWithAuth: () => deleteWithAuth,
   deleteWithoutAuth: () => deleteWithoutAuth,
@@ -410,35 +414,20 @@ async function apiFetch(url, options = {}) {
     body
   });
   if (!response.ok) {
-    let defaultMessage = `Request failed with status ${response.status} ${response.statusText}`;
     try {
-      const errorData = await response.json();
-      const extractMessage = (data2) => {
-        if (!data2) return null;
-        if (typeof data2 === "string") return data2;
-        if (data2.message) return String(data2.message);
-        if (data2.Message) return String(data2.Message);
-        if (data2.error) {
-          if (typeof data2.error === "string") return data2.error;
-          if (data2.error.message) return String(data2.error.message);
-          if (data2.error.Message) return String(data2.error.Message);
-        }
-        if (data2.code && data2.name && data2.message) return String(data2.message);
-        if (Array.isArray(data2) && data2.length > 0) {
-          const first = data2[0];
-          if (first?.message) return String(first.message);
-        }
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
         try {
-          return JSON.stringify(data2);
+          const errorData = JSON.parse(text2);
+          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
         } catch {
-          return null;
+          throw new ApiError(response.status, text2, text2 || response.statusText);
         }
-      };
-      const msg = extractMessage(errorData) || defaultMessage;
-      throw new Error(msg);
+      }
+      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
     } catch (err) {
-      if (err instanceof Error) throw err;
-      throw new Error(defaultMessage);
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
     }
   }
   const contentType = response.headers.get("content-type");
@@ -452,15 +441,6 @@ async function apiFetch(url, options = {}) {
   }
   try {
     const parsed = JSON.parse(text);
-    if (parsed && typeof parsed === "object" && "code" in parsed && "message" in parsed && !("success" in parsed)) {
-      return {
-        success: true,
-        message: parsed.message || parsed.code,
-        code: parsed.code,
-        name: parsed.name,
-        ...parsed
-      };
-    }
     return parsed;
   } catch (err) {
     throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
@@ -501,7 +481,21 @@ async function postWithoutAuth(url, data, headers = {}) {
     body: data ? JSON.stringify(data) : void 0
   });
   if (!response.ok) {
-    throw new Error(`POST request failed: ${response.status} ${response.statusText}`);
+    try {
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
+        try {
+          const errorData = JSON.parse(text2);
+          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
+        } catch {
+          throw new ApiError(response.status, text2, text2 || response.statusText);
+        }
+      }
+      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+    }
   }
   const contentLength = response.headers.get("content-length");
   if (contentLength === "0") {
@@ -563,10 +557,40 @@ async function patchWithoutAuth(url, data, headers) {
     headers
   });
 }
+var ApiError;
 var init_fetcher = __esm({
   "src/core/fetcher.ts"() {
     "use strict";
     init_token();
+    ApiError = class _ApiError extends Error {
+      constructor(status, body, message) {
+        super(message || `Request failed with status ${status}`);
+        this.status = status;
+        this.body = body;
+        Object.setPrototypeOf(this, _ApiError.prototype);
+      }
+    };
+  }
+});
+
+// src/core/index.ts
+var core_exports = {};
+__export(core_exports, {
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
+});
+var init_core = __esm({
+  "src/core/index.ts"() {
+    "use strict";
+    init_fetcher();
   }
 });
 
@@ -574,22 +598,32 @@ var init_fetcher = __esm({
 var offers_exports = {};
 __export(offers_exports, {
   DeleteOfferDELETE: () => DELETE,
-  GetInvoiceDiscountGET: () => GET3,
-  GetOfferByIdGET: () => GET2,
-  GetOffersCouponsDropdownGET: () => GET5,
-  GetOffersCustomersGET: () => GET6,
-  GetOffersItemsDropdownGET: () => GET4,
+  GetCouponsGET: () => GET2,
+  GetInvoiceDiscountGET: () => GET4,
+  GetOfferByIdGET: () => GET3,
+  GetOffersCouponsDropdownGET: () => GET6,
+  GetOffersCustomersGET: () => GET7,
+  GetOffersItemsDropdownGET: () => GET5,
   GetOffersPagingGET: () => GET,
+  PostOffersAddItemsByFilterPOST: () => POST5,
+  PostOffersCustomerDiscountPOST: () => POST2,
+  PostOffersInvoiceDiscountPOST: () => POST3,
   PostOffersItemsDiscountPOST: () => POST,
+  PostOffersShippingDiscountPOST: () => POST4,
   PutOffersItemsDiscountPUT: () => PUT,
   deleteOffer: () => deleteOffer,
+  getCoupons: () => getCoupons,
   getInvoiceDiscount: () => getInvoiceDiscount,
   getOfferById: () => getOfferById,
   getOffersCouponsDropdown: () => getOffersCouponsDropdown,
   getOffersCustomers: () => getOffersCustomers,
   getOffersItemsDropdown: () => getOffersItemsDropdown,
   getOffersPaging: () => getOffersPaging,
+  postOffersAddItemsByFilter: () => postOffersAddItemsByFilter,
+  postOffersCustomerDiscount: () => postOffersCustomerDiscount,
+  postOffersInvoiceDiscount: () => postOffersInvoiceDiscount,
   postOffersItemsDiscount: () => postOffersItemsDiscount,
+  postOffersShippingDiscount: () => postOffersShippingDiscount,
   putOffersItemsDiscount: () => putOffersItemsDiscount
 });
 module.exports = __toCommonJS(offers_exports);
@@ -627,7 +661,16 @@ async function deleteOffer(id) {
     return deleteWithAuth2(Api2.deleteOffer(id));
   }
   const res = await fetch(`/api/offers/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Failed to delete offer ${id}: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -711,6 +754,84 @@ async function getOffersCustomers() {
   return res.json();
 }
 
+// src/inventory/offers/postOffersCustomerDiscount.ts
+async function postOffersCustomerDiscount(payload) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(Api2.postOffersCustomerDiscount, payload);
+  }
+  const res = await fetch(`/api/offers/customer-discount`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to post customer discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/postOffersInvoiceDiscount.ts
+async function postOffersInvoiceDiscount(payload) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(Api2.postOffersInvoiceDiscount, payload);
+  }
+  const res = await fetch(`/api/offers/invoice-discount`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to post invoice discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/postOffersShippingDiscount.ts
+async function postOffersShippingDiscount(payload) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(Api2.postOffersShippingDiscount, payload);
+  }
+  const res = await fetch(`/api/offers/shipping-discount`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to post shipping discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/postOffersAddItemsByFilter.ts
+async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(Api2.postOffersAddItemsByFilter(offerId, forceUpdate), payload);
+  }
+  const res = await fetch(`/api/offers/${offerId}/add-items-by-filter/${String(forceUpdate)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to add items by filter: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/getCoupons.ts
+async function getCoupons() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getCouponOffers);
+  }
+  const response = await fetch(`/api/offers/coupons`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch products: ${response.statusText}`);
+  }
+  return response.json();
+}
+
 // src/inventory/offers/handler/getOffersPaging.ts
 var import_server = require("next/server");
 async function GET(request) {
@@ -725,129 +846,192 @@ async function GET(request) {
   }
 }
 
-// src/inventory/offers/handler/getOfferById.ts
+// src/inventory/offers/handler/coupons.ts
 var import_server2 = require("next/server");
-async function GET2(request, { params }) {
+async function GET2(request) {
   try {
-    const result = await getOfferById((await params).id);
-    return import_server2.NextResponse.json(result);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch offer";
-    console.error("getOfferById error:", message);
+    const Coupons = await getCoupons();
+    return import_server2.NextResponse.json(Coupons);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch orders";
+    console.error("orders error:", message);
     return import_server2.NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// src/inventory/offers/handler/deleteOffer.ts
+// src/inventory/offers/handler/getOfferById.ts
 var import_server3 = require("next/server");
+async function GET3(request, { params }) {
+  try {
+    const result = await getOfferById((await params).id);
+    return import_server3.NextResponse.json(result);
+  } catch (err) {
+    return import_server3.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/deleteOffer.ts
+var import_server4 = require("next/server");
 async function DELETE(request, { params }) {
   try {
     const result = await deleteOffer((await params).id);
-    return import_server3.NextResponse.json(result);
+    return import_server4.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to delete offer";
-    console.error("deleteOffer error:", message);
-    return import_server3.NextResponse.json({ error: message }, { status: 500 });
+    return import_server4.NextResponse.json({ error: err }, { status: 500 });
   }
 }
 
 // src/inventory/offers/handler/getInvoiceDiscount.ts
-var import_server4 = require("next/server");
-async function GET3(request, { params }) {
+var import_server5 = require("next/server");
+async function GET4(request, { params }) {
   try {
     const result = await getInvoiceDiscount((await params).coupon);
-    return import_server4.NextResponse.json(result);
+    return import_server5.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch invoice discount";
-    console.error("getInvoiceDiscount error:", message);
-    return import_server4.NextResponse.json({ error: message }, { status: 500 });
+    return import_server5.NextResponse.json({ error: err }, { status: 500 });
   }
 }
 
 // src/inventory/offers/handler/getOffersItemsDropdown.ts
-var import_server5 = require("next/server");
-async function GET4() {
-  try {
-    const result = await getOffersItemsDropdown();
-    return import_server5.NextResponse.json(result);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch offers items dropdown";
-    console.error("getOffersItemsDropdown error:", message);
-    return import_server5.NextResponse.json({ error: message }, { status: 500 });
-  }
-}
-
-// src/inventory/offers/handler/getOffersCouponsDropdown.ts
 var import_server6 = require("next/server");
 async function GET5() {
   try {
-    const result = await getOffersCouponsDropdown();
+    const result = await getOffersItemsDropdown();
     return import_server6.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch offers coupons dropdown";
-    console.error("getOffersCouponsDropdown error:", message);
+    const message = err instanceof Error ? err.message : "Failed to fetch offers items dropdown";
+    console.error("getOffersItemsDropdown error:", message);
     return import_server6.NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// src/inventory/offers/handler/postOffersItemsDiscount.ts
+// src/inventory/offers/handler/getOffersCouponsDropdown.ts
 var import_server7 = require("next/server");
-async function POST(request) {
+async function GET6() {
   try {
-    const data = await request.json();
-    const result = await postOffersItemsDiscount(data);
+    const result = await getOffersCouponsDropdown();
     return import_server7.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to post items discount";
-    console.error("postOffersItemsDiscount error:", message);
+    const message = err instanceof Error ? err.message : "Failed to fetch offers coupons dropdown";
+    console.error("getOffersCouponsDropdown error:", message);
     return import_server7.NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// src/inventory/offers/handler/putOffersItemsDiscount.ts
+// src/inventory/offers/handler/postOffersItemsDiscount.ts
 var import_server8 = require("next/server");
+async function POST(request) {
+  try {
+    const data = await request.json();
+    const result = await postOffersItemsDiscount(data);
+    return import_server8.NextResponse.json(result);
+  } catch (err) {
+    return import_server8.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersItemsDiscount.ts
+var import_server9 = require("next/server");
 async function PUT(request, { params }) {
   try {
     const data = await request.json();
     const result = await putOffersItemsDiscount((await params).id, data);
-    return import_server8.NextResponse.json(result);
+    return import_server9.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to put items discount";
-    console.error("putOffersItemsDiscount error:", message);
-    return import_server8.NextResponse.json({ error: message }, { status: 500 });
+    return import_server9.NextResponse.json({ error: err }, { status: 500 });
   }
 }
 
 // src/inventory/offers/handler/getOffersCustomers.ts
-var import_server9 = require("next/server");
-async function GET6() {
+var import_server10 = require("next/server");
+async function GET7() {
   try {
     const result = await getOffersCustomers();
-    return import_server9.NextResponse.json(result);
+    return import_server10.NextResponse.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to fetch offers customers";
     console.error("getOffersCustomers error:", message);
-    return import_server9.NextResponse.json({ error: message }, { status: 500 });
+    return import_server10.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/postOffersCustomerDiscount.ts
+var import_server11 = require("next/server");
+async function POST2(request) {
+  try {
+    const data = await request.json();
+    const result = await postOffersCustomerDiscount(data);
+    return import_server11.NextResponse.json(result);
+  } catch (err) {
+    return import_server11.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/postOffersInvoiceDiscount.ts
+var import_server12 = require("next/server");
+async function POST3(request) {
+  try {
+    const data = await request.json();
+    const result = await postOffersInvoiceDiscount(data);
+    return import_server12.NextResponse.json(result);
+  } catch (err) {
+    return import_server12.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/postOffersShippingDiscount.ts
+var import_server13 = require("next/server");
+async function POST4(request) {
+  try {
+    const data = await request.json();
+    const result = await postOffersShippingDiscount(data);
+    return import_server13.NextResponse.json(result);
+  } catch (err) {
+    return import_server13.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/postOffersAddItemsByFilter.ts
+var import_server14 = require("next/server");
+async function POST5(request, { params }) {
+  try {
+    const body = await request.json();
+    const p = await params;
+    const force = p.forceUpdate === "true" || p.forceUpdate === "1";
+    const result = await postOffersAddItemsByFilter(p.id, force, body);
+    return import_server14.NextResponse.json(result);
+  } catch (err) {
+    return import_server14.NextResponse.json({ error: err }, { status: 500 });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DeleteOfferDELETE,
+  GetCouponsGET,
   GetInvoiceDiscountGET,
   GetOfferByIdGET,
   GetOffersCouponsDropdownGET,
   GetOffersCustomersGET,
   GetOffersItemsDropdownGET,
   GetOffersPagingGET,
+  PostOffersAddItemsByFilterPOST,
+  PostOffersCustomerDiscountPOST,
+  PostOffersInvoiceDiscountPOST,
   PostOffersItemsDiscountPOST,
+  PostOffersShippingDiscountPOST,
   PutOffersItemsDiscountPUT,
   deleteOffer,
+  getCoupons,
   getInvoiceDiscount,
   getOfferById,
   getOffersCouponsDropdown,
   getOffersCustomers,
   getOffersItemsDropdown,
   getOffersPaging,
+  postOffersAddItemsByFilter,
+  postOffersCustomerDiscount,
+  postOffersInvoiceDiscount,
   postOffersItemsDiscount,
+  postOffersShippingDiscount,
   putOffersItemsDiscount
 });
