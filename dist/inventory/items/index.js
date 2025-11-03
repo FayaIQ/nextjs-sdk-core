@@ -3,6 +3,13 @@ import {
   getProducts
 } from "../../chunk-U4NGO4DQ.js";
 import {
+  Api
+} from "../../chunk-CKBJVO52.js";
+import {
+  getWithAuth
+} from "../../chunk-G3RE74RT.js";
+import "../../chunk-7HFB7GTE.js";
+import {
   AgeGroup,
   Gender,
   ItemsFilterParameters,
@@ -10,13 +17,6 @@ import {
   PagingParameters,
   SortType
 } from "../../chunk-QPGSHSJO.js";
-import {
-  Api
-} from "../../chunk-CKBJVO52.js";
-import {
-  getWithAuth
-} from "../../chunk-G3RE74RT.js";
-import "../../chunk-7HFB7GTE.js";
 
 // src/inventory/items/getParentProducts.ts
 async function getParentProducts({
