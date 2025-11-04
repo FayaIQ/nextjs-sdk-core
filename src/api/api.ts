@@ -26,7 +26,7 @@ export class Api {
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-  static getItemsPaging: string = `${Api.INVENTORY_BASE}/v1/Items/Paging`;
+  static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }

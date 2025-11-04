@@ -3,10 +3,7 @@
  */
 export type Primitive = string | number | boolean | null | undefined;
 
-export type RequestData = Record<
-  string,
-  Primitive | Primitive[] | Record<string, Primitive>
->;
+export type RequestData = Record<string, any>;
 
 export type QueryParams = Record<string, Primitive>;
 

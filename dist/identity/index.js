@@ -3,11 +3,11 @@ import {
 } from "../chunk-ZRJIKYHV.js";
 import {
   Api
-} from "../chunk-CKBJVO52.js";
+} from "../chunk-42A257EX.js";
 import {
   postWithoutAuth
-} from "../chunk-G3RE74RT.js";
-import "../chunk-7HFB7GTE.js";
+} from "../chunk-JXHGVLUB.js";
+import "../chunk-ICGV7HSU.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -86,8 +86,8 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-53SEI2RB.js");
-    const { Api: Api2 } = await import("../api-ALZDPWU7.js");
+    const { getWithAuth } = await import("../fetcher-KXVTZLUJ.js");
+    const { Api: Api2 } = await import("../api-NLZGVKFO.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
     const fullNameTrimmed2 = FullName !== void 0 ? String(FullName).trim() : "";

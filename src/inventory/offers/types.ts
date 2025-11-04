@@ -14,6 +14,30 @@ export interface OfferPostRequest {
   unitLevel?: number
 }
 
+export interface postCustomerRequest extends OfferPostRequest {
+  minimumCartValue ?: number
+}
+export interface postOffersInvoiceDiscountRequest extends OfferPostRequest {
+  minimumCartValue ?: number,
+  couponCode ?: string,
+  useCouponMultipleTimesBySameUserCount ?: number
+}
+
+
+export interface OffersFilters {
+  Name?: string | null;
+  Start?: Date | null;
+  End?: Date | null;
+  DiscountType?: number | null;
+  IsActive?: boolean | null;
+  HasCouponCode?: boolean | null;
+  OfferFilterType?: number | null;
+  ItemId?: number | null;
+  Barcode?: string | null;
+}
+
+
+
 export interface Offer {
         id: string;
         name: string;
@@ -45,5 +69,7 @@ export interface Offer {
         currentSortField: string;
         currentSortOrder: string;
         nextSortOrder: string;
-        offers: Offer[];
+        results: Offer[];
     }
+
+

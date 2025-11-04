@@ -261,7 +261,7 @@ var init_api = __esm({
     _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-    _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v1/Items/Paging`;
+    _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
     _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
     _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
     // Offers endpoints
@@ -605,12 +605,19 @@ __export(offers_exports, {
   GetOffersCustomersGET: () => GET7,
   GetOffersItemsDropdownGET: () => GET5,
   GetOffersPagingGET: () => GET,
+  OfferPagingParameters: () => OfferPagingParameters,
+  OffersFilterParameters: () => OffersFilterParameters,
   PostOffersAddItemsByFilterPOST: () => POST5,
   PostOffersCustomerDiscountPOST: () => POST2,
   PostOffersInvoiceDiscountPOST: () => POST3,
   PostOffersItemsDiscountPOST: () => POST,
   PostOffersShippingDiscountPOST: () => POST4,
+  PutOffersCustomerDiscountPUT: () => PUT2,
+  PutOffersExtraItemDiscountPUT: () => PUT3,
+  PutOffersInvoiceDiscountPUT: () => PUT4,
+  PutOffersItemsDiscountCustomersPUT: () => PUT5,
   PutOffersItemsDiscountPUT: () => PUT,
+  PutOffersShippingDiscountPUT: () => PUT6,
   deleteOffer: () => deleteOffer,
   getCoupons: () => getCoupons,
   getInvoiceDiscount: () => getInvoiceDiscount,
@@ -619,12 +626,18 @@ __export(offers_exports, {
   getOffersCustomers: () => getOffersCustomers,
   getOffersItemsDropdown: () => getOffersItemsDropdown,
   getOffersPaging: () => getOffersPaging,
+  offerTypes: () => offerTypes,
   postOffersAddItemsByFilter: () => postOffersAddItemsByFilter,
   postOffersCustomerDiscount: () => postOffersCustomerDiscount,
   postOffersInvoiceDiscount: () => postOffersInvoiceDiscount,
   postOffersItemsDiscount: () => postOffersItemsDiscount,
   postOffersShippingDiscount: () => postOffersShippingDiscount,
-  putOffersItemsDiscount: () => putOffersItemsDiscount
+  putOffersCustomerDiscount: () => putOffersCustomerDiscount,
+  putOffersExtraItemDiscount: () => putOffersExtraItemDiscount,
+  putOffersInvoiceDiscount: () => putOffersInvoiceDiscount,
+  putOffersItemsDiscount: () => putOffersItemsDiscount,
+  putOffersItemsDiscountCustomers: () => putOffersItemsDiscountCustomers,
+  putOffersShippingDiscount: () => putOffersShippingDiscount
 });
 module.exports = __toCommonJS(offers_exports);
 
@@ -832,6 +845,197 @@ async function getCoupons() {
   return response.json();
 }
 
+// src/inventory/offers/putOffersCustomerDiscount.ts
+async function putOffersCustomerDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putOffersCustomerDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/customer-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put customer discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersExtraItemDiscount.ts
+async function putOffersExtraItemDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putOffersExtraItemDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/extra-item-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put extra item discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersInvoiceDiscount.ts
+async function putOffersInvoiceDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putOffersInvoiceDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/invoice-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put invoice discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersItemsDiscountCustomers.ts
+async function putOffersItemsDiscountCustomers(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putOffersItemsDiscountCustomers(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/items-discount/customers`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put items discount customers: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersShippingDiscount.ts
+async function putOffersShippingDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putOffersShippingDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/shipping-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put shipping discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/offer-model.ts
+var offerTypes = /* @__PURE__ */ ((offerTypes2) => {
+  offerTypes2[offerTypes2["ItemsDiscount"] = 1] = "ItemsDiscount";
+  offerTypes2[offerTypes2["InvoiceDiscount"] = 2] = "InvoiceDiscount";
+  offerTypes2[offerTypes2["ExtraItemDiscount"] = 3] = "ExtraItemDiscount";
+  offerTypes2[offerTypes2["ShippingDiscount"] = 4] = "ShippingDiscount";
+  offerTypes2[offerTypes2["CustomerDiscount"] = 5] = "CustomerDiscount";
+  offerTypes2[offerTypes2["CustomerItemsDiscount"] = 6] = "CustomerItemsDiscount";
+  return offerTypes2;
+})(offerTypes || {});
+var OfferPagingParameters = class {
+  constructor({
+    currentPage = 1,
+    pageSize = 20,
+    sortField = null,
+    currentSortField = null,
+    currentSortOrder = null
+  } = {}) {
+    this.currentPage = currentPage;
+    this.pageSize = pageSize;
+    this.sortField = sortField;
+    this.currentSortField = currentSortField;
+    this.currentSortOrder = currentSortOrder;
+  }
+  toURLParams() {
+    const params = {
+      CurrentPage: this.currentPage.toString(),
+      PageSize: this.pageSize.toString()
+    };
+    if (this.sortField) params.SortField = this.sortField;
+    if (this.currentSortField) params.CurrentSortField = this.currentSortField;
+    if (this.currentSortOrder) params.CurrentSortOrder = this.currentSortOrder;
+    return params;
+  }
+};
+var OffersFilterParameters = class _OffersFilterParameters {
+  constructor({
+    pagingParameters = new OfferPagingParameters(),
+    Name = null,
+    Start = null,
+    End = null,
+    DiscountType = null,
+    IsActive = null,
+    HasCouponCode = null,
+    OfferFilterType = null,
+    ItemId = null,
+    Barcode = null
+  } = {}) {
+    this.pagingParameters = pagingParameters;
+    this.Name = Name;
+    this.Start = Start;
+    this.End = End;
+    this.DiscountType = DiscountType;
+    this.IsActive = IsActive;
+    this.HasCouponCode = HasCouponCode;
+    this.OfferFilterType = OfferFilterType;
+    this.ItemId = ItemId;
+    this.Barcode = Barcode;
+  }
+  toURLSearchParams() {
+    const params = new URLSearchParams();
+    const paging = this.pagingParameters.toURLParams();
+    Object.entries(paging).forEach(([k, v]) => params.set(k, v));
+    if (this.Name !== null) params.set("Name", this.Name);
+    if (this.Start !== null) params.set("Start", this.Start);
+    if (this.End !== null) params.set("End", this.End);
+    if (this.DiscountType !== null) params.set("DiscountType", String(this.DiscountType));
+    if (this.IsActive !== null) params.set("IsActive", String(this.IsActive));
+    if (this.HasCouponCode !== null) params.set("HasCouponCode", String(this.HasCouponCode));
+    if (this.OfferFilterType !== null) params.set("OfferFilterType", String(this.OfferFilterType));
+    if (this.ItemId !== null) params.set("ItemId", String(this.ItemId));
+    if (this.Barcode !== null) params.set("Barcode", this.Barcode);
+    return params;
+  }
+  toMap() {
+    const map = {};
+    Object.assign(map, this.pagingParameters.toURLParams());
+    if (this.Name !== null) map.Name = this.Name;
+    if (this.Start !== null) map.Start = this.Start;
+    if (this.End !== null) map.End = this.End;
+    if (this.DiscountType !== null) map.DiscountType = this.DiscountType;
+    if (this.IsActive !== null) map.IsActive = this.IsActive;
+    if (this.HasCouponCode !== null) map.HasCouponCode = this.HasCouponCode;
+    if (this.OfferFilterType !== null) map.OfferFilterType = this.OfferFilterType;
+    if (this.ItemId !== null) map.ItemId = this.ItemId;
+    if (this.Barcode !== null) map.Barcode = this.Barcode;
+    return map;
+  }
+  static fromURLSearchParams(params) {
+    const paging = new OfferPagingParameters({
+      currentPage: params.get("CurrentPage") ? parseInt(params.get("CurrentPage")) : 1,
+      pageSize: params.get("PageSize") ? parseInt(params.get("PageSize")) : 20,
+      sortField: params.get("SortField") || null,
+      currentSortField: params.get("CurrentSortField") || null,
+      currentSortOrder: params.get("CurrentSortOrder") || null
+    });
+    return new _OffersFilterParameters({
+      pagingParameters: paging,
+      Name: params.get("Name") || null,
+      Start: params.get("Start") || null,
+      End: params.get("End") || null,
+      DiscountType: params.get("DiscountType") ? parseInt(params.get("DiscountType")) : null,
+      IsActive: params.get("IsActive") ? params.get("IsActive") === "true" : null,
+      HasCouponCode: params.get("HasCouponCode") ? params.get("HasCouponCode") === "true" : null,
+      OfferFilterType: params.get("OfferFilterType") ? parseInt(params.get("OfferFilterType")) : null,
+      ItemId: params.get("ItemId") ? parseInt(params.get("ItemId")) : null,
+      Barcode: params.get("Barcode") || null
+    });
+  }
+};
+
 // src/inventory/offers/handler/getOffersPaging.ts
 var import_server = require("next/server");
 async function GET(request) {
@@ -1004,6 +1208,66 @@ async function POST5(request, { params }) {
     return import_server14.NextResponse.json({ error: err }, { status: 500 });
   }
 }
+
+// src/inventory/offers/handler/putOffersCustomerDiscount.ts
+var import_server15 = require("next/server");
+async function PUT2(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersCustomerDiscount((await params).id, data);
+    return import_server15.NextResponse.json(result);
+  } catch (err) {
+    return import_server15.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersExtraItemDiscount.ts
+var import_server16 = require("next/server");
+async function PUT3(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersExtraItemDiscount((await params).id, data);
+    return import_server16.NextResponse.json(result);
+  } catch (err) {
+    return import_server16.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersInvoiceDiscount.ts
+var import_server17 = require("next/server");
+async function PUT4(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersInvoiceDiscount((await params).id, data);
+    return import_server17.NextResponse.json(result);
+  } catch (err) {
+    return import_server17.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersItemsDiscountCustomers.ts
+var import_server18 = require("next/server");
+async function PUT5(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersItemsDiscountCustomers((await params).id, data);
+    return import_server18.NextResponse.json(result);
+  } catch (err) {
+    return import_server18.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersShippingDiscount.ts
+var import_server19 = require("next/server");
+async function PUT6(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersShippingDiscount((await params).id, data);
+    return import_server19.NextResponse.json(result);
+  } catch (err) {
+    return import_server19.NextResponse.json({ error: err }, { status: 500 });
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DeleteOfferDELETE,
@@ -1014,12 +1278,19 @@ async function POST5(request, { params }) {
   GetOffersCustomersGET,
   GetOffersItemsDropdownGET,
   GetOffersPagingGET,
+  OfferPagingParameters,
+  OffersFilterParameters,
   PostOffersAddItemsByFilterPOST,
   PostOffersCustomerDiscountPOST,
   PostOffersInvoiceDiscountPOST,
   PostOffersItemsDiscountPOST,
   PostOffersShippingDiscountPOST,
+  PutOffersCustomerDiscountPUT,
+  PutOffersExtraItemDiscountPUT,
+  PutOffersInvoiceDiscountPUT,
+  PutOffersItemsDiscountCustomersPUT,
   PutOffersItemsDiscountPUT,
+  PutOffersShippingDiscountPUT,
   deleteOffer,
   getCoupons,
   getInvoiceDiscount,
@@ -1028,10 +1299,16 @@ async function POST5(request, { params }) {
   getOffersCustomers,
   getOffersItemsDropdown,
   getOffersPaging,
+  offerTypes,
   postOffersAddItemsByFilter,
   postOffersCustomerDiscount,
   postOffersInvoiceDiscount,
   postOffersItemsDiscount,
   postOffersShippingDiscount,
-  putOffersItemsDiscount
+  putOffersCustomerDiscount,
+  putOffersExtraItemDiscount,
+  putOffersInvoiceDiscount,
+  putOffersItemsDiscount,
+  putOffersItemsDiscountCustomers,
+  putOffersShippingDiscount
 });

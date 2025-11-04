@@ -1,8 +1,8 @@
 // src/inventory/offers/getOffersPaging.ts
 async function getOffersPaging(query) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { getWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return getWithAuth(Api.getOffersPaging, query);
   }
   const qs = query ? new URLSearchParams(query).toString() : "";
@@ -14,8 +14,8 @@ async function getOffersPaging(query) {
 // src/inventory/offers/getOfferById.ts
 async function getOfferById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { getWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return getWithAuth(Api.getOfferById(id));
   }
   const res = await fetch(`/api/offers/${id}`);
@@ -26,8 +26,8 @@ async function getOfferById(id) {
 // src/inventory/offers/deleteOffer.ts
 async function deleteOffer(id) {
   if (typeof window === "undefined") {
-    const { deleteWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { deleteWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return deleteWithAuth(Api.deleteOffer(id));
   }
   const res = await fetch(`/api/offers/${id}`, { method: "DELETE" });
@@ -47,8 +47,8 @@ async function deleteOffer(id) {
 // src/inventory/offers/getInvoiceDiscount.ts
 async function getInvoiceDiscount(coupon) {
   if (typeof window === "undefined") {
-    const { getWithoutAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { getWithoutAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return getWithoutAuth(Api.getInvoiceDiscount(coupon));
   }
   const res = await fetch(`/api/offers/invoice-discount/${encodeURIComponent(String(coupon))}`);
@@ -59,8 +59,8 @@ async function getInvoiceDiscount(coupon) {
 // src/inventory/offers/getOffersItemsDropdown.ts
 async function getOffersItemsDropdown() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { getWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return getWithAuth(Api.getOffersItemsDropdown);
   }
   const res = await fetch(`/api/offers/items/dropdown`);
@@ -71,8 +71,8 @@ async function getOffersItemsDropdown() {
 // src/inventory/offers/getOffersCouponsDropdown.ts
 async function getOffersCouponsDropdown() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { getWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return getWithAuth(Api.getOffersCouponsDropdown);
   }
   const res = await fetch(`/api/offers/coupons/dropdown`);
@@ -83,8 +83,8 @@ async function getOffersCouponsDropdown() {
 // src/inventory/offers/postOffersItemsDiscount.ts
 async function postOffersItemsDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { postWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return postWithAuth(Api.postOffersItemsDiscount, payload);
   }
   const res = await fetch(`/api/offers/items-discount`, {
@@ -99,8 +99,8 @@ async function postOffersItemsDiscount(payload) {
 // src/inventory/offers/putOffersItemsDiscount.ts
 async function putOffersItemsDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { putWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return putWithAuth(Api.putOffersItemsDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/items-discount`, {
@@ -115,8 +115,8 @@ async function putOffersItemsDiscount(id, payload) {
 // src/inventory/offers/getOffersCustomers.ts
 async function getOffersCustomers() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { getWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return getWithAuth(Api.getOffersCustomers);
   }
   const res = await fetch(`/api/offers/customers`);
@@ -127,8 +127,8 @@ async function getOffersCustomers() {
 // src/inventory/offers/postOffersCustomerDiscount.ts
 async function postOffersCustomerDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { postWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return postWithAuth(Api.postOffersCustomerDiscount, payload);
   }
   const res = await fetch(`/api/offers/customer-discount`, {
@@ -143,8 +143,8 @@ async function postOffersCustomerDiscount(payload) {
 // src/inventory/offers/postOffersInvoiceDiscount.ts
 async function postOffersInvoiceDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { postWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return postWithAuth(Api.postOffersInvoiceDiscount, payload);
   }
   const res = await fetch(`/api/offers/invoice-discount`, {
@@ -159,8 +159,8 @@ async function postOffersInvoiceDiscount(payload) {
 // src/inventory/offers/postOffersShippingDiscount.ts
 async function postOffersShippingDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { postWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return postWithAuth(Api.postOffersShippingDiscount, payload);
   }
   const res = await fetch(`/api/offers/shipping-discount`, {
@@ -175,8 +175,8 @@ async function postOffersShippingDiscount(payload) {
 // src/inventory/offers/postOffersAddItemsByFilter.ts
 async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-53SEI2RB.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { postWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return postWithAuth(Api.postOffersAddItemsByFilter(offerId, forceUpdate), payload);
   }
   const res = await fetch(`/api/offers/${offerId}/add-items-by-filter/${String(forceUpdate)}`, {
@@ -192,7 +192,7 @@ async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
 async function getCoupons() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-ALZDPWU7.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
     return getWithAuth(Api.getCouponOffers);
   }
   const response = await fetch(`/api/offers/coupons`);
@@ -201,6 +201,197 @@ async function getCoupons() {
   }
   return response.json();
 }
+
+// src/inventory/offers/putOffersCustomerDiscount.ts
+async function putOffersCustomerDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
+    return putWithAuth(Api.putOffersCustomerDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/customer-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put customer discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersExtraItemDiscount.ts
+async function putOffersExtraItemDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
+    return putWithAuth(Api.putOffersExtraItemDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/extra-item-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put extra item discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersInvoiceDiscount.ts
+async function putOffersInvoiceDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
+    return putWithAuth(Api.putOffersInvoiceDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/invoice-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put invoice discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersItemsDiscountCustomers.ts
+async function putOffersItemsDiscountCustomers(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
+    return putWithAuth(Api.putOffersItemsDiscountCustomers(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/items-discount/customers`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put items discount customers: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/putOffersShippingDiscount.ts
+async function putOffersShippingDiscount(id, payload) {
+  if (typeof window === "undefined") {
+    const { putWithAuth } = await import("../../fetcher-KXVTZLUJ.js");
+    const { Api } = await import("../../api-NLZGVKFO.js");
+    return putWithAuth(Api.putOffersShippingDiscount(id), payload);
+  }
+  const res = await fetch(`/api/offers/${id}/shipping-discount`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(`Failed to put shipping discount: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/offer-model.ts
+var offerTypes = /* @__PURE__ */ ((offerTypes2) => {
+  offerTypes2[offerTypes2["ItemsDiscount"] = 1] = "ItemsDiscount";
+  offerTypes2[offerTypes2["InvoiceDiscount"] = 2] = "InvoiceDiscount";
+  offerTypes2[offerTypes2["ExtraItemDiscount"] = 3] = "ExtraItemDiscount";
+  offerTypes2[offerTypes2["ShippingDiscount"] = 4] = "ShippingDiscount";
+  offerTypes2[offerTypes2["CustomerDiscount"] = 5] = "CustomerDiscount";
+  offerTypes2[offerTypes2["CustomerItemsDiscount"] = 6] = "CustomerItemsDiscount";
+  return offerTypes2;
+})(offerTypes || {});
+var OfferPagingParameters = class {
+  constructor({
+    currentPage = 1,
+    pageSize = 20,
+    sortField = null,
+    currentSortField = null,
+    currentSortOrder = null
+  } = {}) {
+    this.currentPage = currentPage;
+    this.pageSize = pageSize;
+    this.sortField = sortField;
+    this.currentSortField = currentSortField;
+    this.currentSortOrder = currentSortOrder;
+  }
+  toURLParams() {
+    const params = {
+      CurrentPage: this.currentPage.toString(),
+      PageSize: this.pageSize.toString()
+    };
+    if (this.sortField) params.SortField = this.sortField;
+    if (this.currentSortField) params.CurrentSortField = this.currentSortField;
+    if (this.currentSortOrder) params.CurrentSortOrder = this.currentSortOrder;
+    return params;
+  }
+};
+var OffersFilterParameters = class _OffersFilterParameters {
+  constructor({
+    pagingParameters = new OfferPagingParameters(),
+    Name = null,
+    Start = null,
+    End = null,
+    DiscountType = null,
+    IsActive = null,
+    HasCouponCode = null,
+    OfferFilterType = null,
+    ItemId = null,
+    Barcode = null
+  } = {}) {
+    this.pagingParameters = pagingParameters;
+    this.Name = Name;
+    this.Start = Start;
+    this.End = End;
+    this.DiscountType = DiscountType;
+    this.IsActive = IsActive;
+    this.HasCouponCode = HasCouponCode;
+    this.OfferFilterType = OfferFilterType;
+    this.ItemId = ItemId;
+    this.Barcode = Barcode;
+  }
+  toURLSearchParams() {
+    const params = new URLSearchParams();
+    const paging = this.pagingParameters.toURLParams();
+    Object.entries(paging).forEach(([k, v]) => params.set(k, v));
+    if (this.Name !== null) params.set("Name", this.Name);
+    if (this.Start !== null) params.set("Start", this.Start);
+    if (this.End !== null) params.set("End", this.End);
+    if (this.DiscountType !== null) params.set("DiscountType", String(this.DiscountType));
+    if (this.IsActive !== null) params.set("IsActive", String(this.IsActive));
+    if (this.HasCouponCode !== null) params.set("HasCouponCode", String(this.HasCouponCode));
+    if (this.OfferFilterType !== null) params.set("OfferFilterType", String(this.OfferFilterType));
+    if (this.ItemId !== null) params.set("ItemId", String(this.ItemId));
+    if (this.Barcode !== null) params.set("Barcode", this.Barcode);
+    return params;
+  }
+  toMap() {
+    const map = {};
+    Object.assign(map, this.pagingParameters.toURLParams());
+    if (this.Name !== null) map.Name = this.Name;
+    if (this.Start !== null) map.Start = this.Start;
+    if (this.End !== null) map.End = this.End;
+    if (this.DiscountType !== null) map.DiscountType = this.DiscountType;
+    if (this.IsActive !== null) map.IsActive = this.IsActive;
+    if (this.HasCouponCode !== null) map.HasCouponCode = this.HasCouponCode;
+    if (this.OfferFilterType !== null) map.OfferFilterType = this.OfferFilterType;
+    if (this.ItemId !== null) map.ItemId = this.ItemId;
+    if (this.Barcode !== null) map.Barcode = this.Barcode;
+    return map;
+  }
+  static fromURLSearchParams(params) {
+    const paging = new OfferPagingParameters({
+      currentPage: params.get("CurrentPage") ? parseInt(params.get("CurrentPage")) : 1,
+      pageSize: params.get("PageSize") ? parseInt(params.get("PageSize")) : 20,
+      sortField: params.get("SortField") || null,
+      currentSortField: params.get("CurrentSortField") || null,
+      currentSortOrder: params.get("CurrentSortOrder") || null
+    });
+    return new _OffersFilterParameters({
+      pagingParameters: paging,
+      Name: params.get("Name") || null,
+      Start: params.get("Start") || null,
+      End: params.get("End") || null,
+      DiscountType: params.get("DiscountType") ? parseInt(params.get("DiscountType")) : null,
+      IsActive: params.get("IsActive") ? params.get("IsActive") === "true" : null,
+      HasCouponCode: params.get("HasCouponCode") ? params.get("HasCouponCode") === "true" : null,
+      OfferFilterType: params.get("OfferFilterType") ? parseInt(params.get("OfferFilterType")) : null,
+      ItemId: params.get("ItemId") ? parseInt(params.get("ItemId")) : null,
+      Barcode: params.get("Barcode") || null
+    });
+  }
+};
 
 // src/inventory/offers/handler/getOffersPaging.ts
 import { NextResponse } from "next/server";
@@ -374,6 +565,66 @@ async function POST5(request, { params }) {
     return NextResponse14.json({ error: err }, { status: 500 });
   }
 }
+
+// src/inventory/offers/handler/putOffersCustomerDiscount.ts
+import { NextResponse as NextResponse15 } from "next/server";
+async function PUT2(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersCustomerDiscount((await params).id, data);
+    return NextResponse15.json(result);
+  } catch (err) {
+    return NextResponse15.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersExtraItemDiscount.ts
+import { NextResponse as NextResponse16 } from "next/server";
+async function PUT3(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersExtraItemDiscount((await params).id, data);
+    return NextResponse16.json(result);
+  } catch (err) {
+    return NextResponse16.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersInvoiceDiscount.ts
+import { NextResponse as NextResponse17 } from "next/server";
+async function PUT4(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersInvoiceDiscount((await params).id, data);
+    return NextResponse17.json(result);
+  } catch (err) {
+    return NextResponse17.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersItemsDiscountCustomers.ts
+import { NextResponse as NextResponse18 } from "next/server";
+async function PUT5(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersItemsDiscountCustomers((await params).id, data);
+    return NextResponse18.json(result);
+  } catch (err) {
+    return NextResponse18.json({ error: err }, { status: 500 });
+  }
+}
+
+// src/inventory/offers/handler/putOffersShippingDiscount.ts
+import { NextResponse as NextResponse19 } from "next/server";
+async function PUT6(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersShippingDiscount((await params).id, data);
+    return NextResponse19.json(result);
+  } catch (err) {
+    return NextResponse19.json({ error: err }, { status: 500 });
+  }
+}
 export {
   DELETE as DeleteOfferDELETE,
   GET2 as GetCouponsGET,
@@ -383,12 +634,19 @@ export {
   GET7 as GetOffersCustomersGET,
   GET5 as GetOffersItemsDropdownGET,
   GET as GetOffersPagingGET,
+  OfferPagingParameters,
+  OffersFilterParameters,
   POST5 as PostOffersAddItemsByFilterPOST,
   POST2 as PostOffersCustomerDiscountPOST,
   POST3 as PostOffersInvoiceDiscountPOST,
   POST as PostOffersItemsDiscountPOST,
   POST4 as PostOffersShippingDiscountPOST,
+  PUT2 as PutOffersCustomerDiscountPUT,
+  PUT3 as PutOffersExtraItemDiscountPUT,
+  PUT4 as PutOffersInvoiceDiscountPUT,
+  PUT5 as PutOffersItemsDiscountCustomersPUT,
   PUT as PutOffersItemsDiscountPUT,
+  PUT6 as PutOffersShippingDiscountPUT,
   deleteOffer,
   getCoupons,
   getInvoiceDiscount,
@@ -397,10 +655,16 @@ export {
   getOffersCustomers,
   getOffersItemsDropdown,
   getOffersPaging,
+  offerTypes,
   postOffersAddItemsByFilter,
   postOffersCustomerDiscount,
   postOffersInvoiceDiscount,
   postOffersItemsDiscount,
   postOffersShippingDiscount,
-  putOffersItemsDiscount
+  putOffersCustomerDiscount,
+  putOffersExtraItemDiscount,
+  putOffersInvoiceDiscount,
+  putOffersItemsDiscount,
+  putOffersItemsDiscountCustomers,
+  putOffersShippingDiscount
 };

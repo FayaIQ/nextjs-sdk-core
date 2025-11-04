@@ -12,7 +12,13 @@ export * from "./postOffersInvoiceDiscount";
 export * from "./postOffersShippingDiscount";
 export * from "./postOffersAddItemsByFilter";
 export * from "./getCoupons"
-
+export * from "./putOffersCustomerDiscount";
+export * from "./putOffersExtraItemDiscount";
+export * from "./putOffersInvoiceDiscount";
+export * from "./putOffersItemsDiscountCustomers";
+export * from "./putOffersShippingDiscount";
+export * from "./types";
+export * from "./offer-model";
 export { GET as GetOffersPagingGET } from "./handler/getOffersPaging";
 export { GET as GetCouponsGET } from "./handler/coupons";
 export { GET as GetOfferByIdGET } from "./handler/getOfferById";
@@ -27,3 +33,8 @@ export { POST as PostOffersCustomerDiscountPOST } from "./handler/postOffersCust
 export { POST as PostOffersInvoiceDiscountPOST } from "./handler/postOffersInvoiceDiscount";
 export { POST as PostOffersShippingDiscountPOST } from "./handler/postOffersShippingDiscount";
 export { POST as PostOffersAddItemsByFilterPOST } from "./handler/postOffersAddItemsByFilter";
+export { PUT as PutOffersCustomerDiscountPUT } from "./handler/putOffersCustomerDiscount";
+export { PUT as PutOffersExtraItemDiscountPUT } from "./handler/putOffersExtraItemDiscount";
+export { PUT as PutOffersInvoiceDiscountPUT } from "./handler/putOffersInvoiceDiscount";
+export { PUT as PutOffersItemsDiscountCustomersPUT } from "./handler/putOffersItemsDiscountCustomers";
+export { PUT as PutOffersShippingDiscountPUT } from "./handler/putOffersShippingDiscount";

@@ -1,8 +1,11 @@
-export async function postOffersInvoiceDiscount(payload: any): Promise<any> {
+import { postOffersInvoiceDiscountRequest } from "./types";
+
+export async function postOffersInvoiceDiscount(payload: postOffersInvoiceDiscountRequest): Promise<string> {
   if (typeof window === "undefined") {
     const { postWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
-    return postWithAuth<any>(Api.postOffersInvoiceDiscount, payload);
+  // payload may be a stricter typed object; cast to any to satisfy RequestData index signature
+  return postWithAuth<string>(Api.postOffersInvoiceDiscount, payload);
   }
 
   const res = await fetch(`/api/offers/invoice-discount`, {
