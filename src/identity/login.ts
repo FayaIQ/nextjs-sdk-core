@@ -87,8 +87,8 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
 
     const cookieStore = await cookies();
 
-    const expiresIn = response.expires || 7200; // 2 hours
-
+    const expiresIn = response.expires || 7200;
+    
     cookieStore.set("access_token", response.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

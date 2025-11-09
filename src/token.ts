@@ -36,8 +36,6 @@ if (AUTH_MODE === "strict" && typeof window === "undefined") {
   const requestBody = {
     clientId: authConfig.clientId,
     clientSecret: authConfig.clientSecret,
-    username: authConfig.username,
-    password: authConfig.password,
     Language: authConfig.language ?? 0,
     GMT: authConfig.gmt ?? 3,
     IsFromNotification: false,
