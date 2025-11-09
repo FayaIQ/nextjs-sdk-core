@@ -53,15 +53,29 @@ export interface CollectionItem {
 }
 
 export interface Packs {
-  unitLevel2: unknown | null;
-  unitLevel3: unknown | null;
+  unitLevel2: PackUnit | null;
+  unitLevel3: PackUnit | null;
 }
 
 export interface ItemColor {
   id: number;
   name: string;
-  secondaryName?: string;
+  secondaryName?: string | null;
   code: string;
+  index?: number;
+  defaultImages?: {
+    iconPath: string | null;
+    picturePath: string | null;
+    mobilePicturePath: string | null;
+  } | null;
+  pictures?: Array<{
+    id: number;
+    picturePath: string | null;
+    iconPath: string | null;
+    mobilePicturePath: string | null;
+    isDefault: boolean;
+    index: number;
+  }> | null;
 }
 
 export interface Product {
@@ -77,7 +91,7 @@ export interface Product {
   descriptionSecondary: string | null;
   currencyId: number;
   menu: object | null;
-  brand: unknown | null;
+  brand: Brand | null;
   sizeSet: SizeSet | null;
   unitInfo: UnitInfo;
   packs: Packs | null;
@@ -110,7 +124,7 @@ export interface Product {
   darkItemOffer: unknown | null;
   multipleMenus: MultipleMenu[] | null;
   colors: ItemColor[] | null;
-  generalPictures: unknown | null;
+  generalPictures: any[] | null;
   collections: CollectionItem[] | null;
   hasColors: boolean;
   hasSizes: boolean;
@@ -134,6 +148,22 @@ export interface Product {
   itemID: number | null;
   menuIds: number[] | null;
   menuID: number | null;
+}
+
+export interface Brand {
+  id: number;
+  name: string;
+  secondaryName?: string | null;
+  picturePath?: string | null;
+}
+
+export interface PackUnit {
+  id: number;
+  type: number;
+  name: string;
+  value: number;
+  price?: number | null;
+  isActive: boolean;
 }
 
 // Standard paginated response for product lists
