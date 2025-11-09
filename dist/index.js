@@ -14,9 +14,6 @@ import {
   SortType
 } from "./chunk-QPGSHSJO.js";
 import {
-  getSlides
-} from "./chunk-T77RVTGJ.js";
-import {
   DeleveryType,
   OrderPagingParameters,
   OrderType,
@@ -25,6 +22,9 @@ import {
   Sign,
   getOrders
 } from "./chunk-KNGLVTCF.js";
+import {
+  getSlides
+} from "./chunk-T77RVTGJ.js";
 import {
   Api
 } from "./chunk-KIHC3O2A.js";

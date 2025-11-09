@@ -1,5 +1,5 @@
-import { P as ProductResponse, b as Product, U as UpdateItemRequest } from '../../getProductInfo-Bzi-dXJO.js';
-export { B as Brand, C as CollectionItem, I as ItemColor, M as MultipleMenu, f as PackUnit, e as Packs, d as SizeSet, S as SizeValue, c as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-Bzi-dXJO.js';
+import { P as ProductResponse, b as Product, U as UpdateItemRequest } from '../../getProductInfo-CtlCVIKP.js';
+export { B as Brand, C as CollectionItem, I as ItemColor, M as MultipleMenu, f as PackUnit, e as Packs, d as SizeSet, S as SizeValue, c as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-CtlCVIKP.js';
 import { I as ItemsFilterParameters } from '../../filter-models-BrX8v95o.js';
 export { A as AgeGroup, G as Gender, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from '../../filter-models-BrX8v95o.js';
 import { NextRequest, NextResponse } from 'next/server';

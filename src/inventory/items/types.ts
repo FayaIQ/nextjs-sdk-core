@@ -185,7 +185,6 @@ export interface UpdateItemRequest {
   currencyID?: number;
   defaultPrice: number;
   imageBase64?: string | null;
-  categoryID?: number | null;
   subDescription?: string | null;
   description?: string | null;
   nameSecondary?: string | null;
