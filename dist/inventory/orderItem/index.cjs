@@ -111,6 +111,18 @@ var init_api = __esm({
       static postOffersAddItemsByFilter(offerId, forceUpdate) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
       }
+      static postOffersDeliveryZones(offerId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
+      }
+      static getOffersGroups(offerId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups`;
+      }
+      static putOffersGroup(offerId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+      }
+      static deleteOffersGroup(offerId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+      }
       static putOffersCustomerDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
       }
@@ -140,6 +152,19 @@ var init_api = __esm({
       }
       static putOffersDarkDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
+      // Payments endpoints
+      static getStorePayments(storeId) {
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+      }
+      static getPayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+      }
+      static putPayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+      }
+      static deletePayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
       }
       static getItemById(id) {
         return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
@@ -218,6 +243,9 @@ var init_api = __esm({
       static putItem(id) {
         return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
       }
+      static deleteItem(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${id}`;
+      }
       static getLocationChildren(parentId) {
         return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
       }
@@ -293,6 +321,11 @@ var init_api = __esm({
     _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
     _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
     _Api.getDeliveryZones = `${_Api.GPS_BASE}/v1/DeliveryZones`;
+    _Api.getReportsCustomerOrders = `${_Api.INVENTORY_BASE}/v1/Reports/CustomerOrders`;
+    _Api.getReportsOrderSales = `${_Api.INVENTORY_BASE}/v1/Reports/OrderSales`;
+    _Api.postPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
+    _Api.getPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
+    _Api.getPaymentsReport = `${_Api.INVENTORY_BASE}/v1/Payments/Report`;
     _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
     // orders endpoints
     _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
@@ -385,6 +418,43 @@ var ApiError = class _ApiError extends Error {
     Object.setPrototypeOf(this, _ApiError.prototype);
   }
 };
+function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()) {
+  if (obj == null || depth > 6) return null;
+  if (typeof obj === "string") {
+    const s = obj.trim();
+    if (s.startsWith("{") || s.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(s);
+        return findMessageInError(parsed, depth + 1, seen) || obj;
+      } catch {
+        return obj;
+      }
+    }
+    return obj;
+  }
+  if (typeof obj !== "object") return null;
+  if (seen.has(obj)) return null;
+  seen.add(obj);
+  if (typeof obj.message === "string" && obj.message) return obj.message;
+  if (typeof obj.code === "string" && obj.code) return obj.code;
+  if (typeof obj.error === "string" && obj.error) return obj.error;
+  const keysToCheck = ["message", "code", "error", "body", "data", "response", "errors"];
+  for (const k of keysToCheck) {
+    if (k in obj) {
+      const v = obj[k];
+      const found = findMessageInError(v, depth + 1, seen);
+      if (found) return found;
+    }
+  }
+  for (const k of Object.keys(obj)) {
+    try {
+      const found = findMessageInError(obj[k], depth + 1, seen);
+      if (found) return found;
+    } catch {
+    }
+  }
+  return null;
+}
 async function apiFetch(url, options = {}) {
   const { method = "GET", headers = {}, data, query, token } = options;
   let endpoint = url;
@@ -420,12 +490,23 @@ async function apiFetch(url, options = {}) {
     try {
       const text2 = await response.text();
       if (text2 && text2.trim()) {
+        let errorData;
         try {
-          const errorData = JSON.parse(text2);
-          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
+          errorData = JSON.parse(text2);
         } catch {
-          throw new ApiError(response.status, text2, text2 || response.statusText);
+          errorData = text2;
         }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
       }
       throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
     } catch (err) {

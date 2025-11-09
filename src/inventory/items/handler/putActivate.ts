@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { putActivateItem } from "../putActivate";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function PUT(
   request: NextRequest,
@@ -10,8 +11,6 @@ export async function PUT(
     const result = await putActivateItem(id);
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to activate item";
-    console.error("putActivate handler error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }

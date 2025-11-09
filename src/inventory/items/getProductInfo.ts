@@ -26,9 +26,8 @@ export async function getProductInfo(id: string): Promise<Product> {
 
   // Client-side: Use Next.js API route
   const response = await fetch(`/api/products/${id}`);
-
   if (!response.ok) {
-    throw new Error(`Failed to fetch product info: ${response.statusText}`);
+    throw new Error(`Failed to fetch order full info: ${response.statusText}`);
   }
 
   return response.json();

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { postOffersInvoiceDiscount } from "../postOffersInvoiceDiscount";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,6 +8,6 @@ export async function POST(request: NextRequest) {
     const result = await postOffersInvoiceDiscount(data);
     return NextResponse.json(result);
   } catch (err) {
-    return NextResponse.json({ error: err }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }

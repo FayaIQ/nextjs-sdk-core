@@ -60,6 +60,19 @@ export class Api {
   static postOffersAddItemsByFilter(offerId: string | number, forceUpdate: boolean | string): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
   }
+  static postOffersDeliveryZones(offerId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
+  }
+  static getOffersGroups(offerId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups`;
+  }
+  static putOffersGroup(offerId: string | number, id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+  }
+
+  static deleteOffersGroup(offerId: string | number, id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+  }
   static postOffersItemsDiscountCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
   static postOffersExtraItemDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
   static postOffersCustomerDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/CustomerDiscount`;
@@ -109,6 +122,24 @@ export class Api {
   static getStoreInfo: string = `${Api.STORES_BASE}/v1/Stores/Info`;
   static getCities: string = `${Api.GPS_BASE}/v1/Locations`;
   static getDeliveryZones: string = `${Api.GPS_BASE}/v1/DeliveryZones`;
+  static getReportsCustomerOrders: string = `${Api.INVENTORY_BASE}/v1/Reports/CustomerOrders`;
+  static getReportsOrderSales: string = `${Api.INVENTORY_BASE}/v1/Reports/OrderSales`;
+  // Payments endpoints
+  static getStorePayments(storeId: string | number): string {
+    return `${Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+  }
+  static getPayment(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Payments/${id}`;
+  }
+  static putPayment(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Payments/${id}`;
+  }
+  static deletePayment(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Payments/${id}`;
+  }
+  static postPayments: string = `${Api.INVENTORY_BASE}/v1/Payments`;
+  static getPayments: string = `${Api.INVENTORY_BASE}/v1/Payments`;
+  static getPaymentsReport: string = `${Api.INVENTORY_BASE}/v1/Payments/Report`;
   static getSlideShows: string = `${Api.THEME_BASE}/v1/SlideShows/Paging`;
 
   static getItemById(id: string | number): string {
@@ -245,6 +276,9 @@ static getParentProducts: string = `${Api.INVENTORY_BASE}/v1/Items/ParentStore/P
   // Item update endpoint
   static putItem(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v3/Items/${id}`;
+  }
+  static deleteItem(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${id}`;
   }
 
 

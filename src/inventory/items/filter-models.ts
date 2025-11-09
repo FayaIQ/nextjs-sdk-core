@@ -92,6 +92,7 @@ export class ItemsFilterParameters {
   gender: Gender | null;
   age: AgeGroup | null;
   // Brand/Source
+
   sourceId: number | null;
   // Offers
   offerId: number | null;

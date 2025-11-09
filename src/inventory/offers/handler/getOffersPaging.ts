@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOffersPaging } from "../getOffersPaging";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,8 +8,6 @@ export async function GET(request: NextRequest) {
     const result = await getOffersPaging(params);
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch offers";
-    console.error("getOffersPaging error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }

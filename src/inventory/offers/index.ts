@@ -12,6 +12,10 @@ export * from "./postOffersInvoiceDiscount";
 export * from "./postOffersShippingDiscount";
 export * from "./postOffersAddItemsByFilter";
 export * from "./getCoupons"
+export * from "./postOffersDeliveryZones";
+export * from "./getOffersGroups";
+export * from "./putOffersGroup";
+export * from "./deleteOffersGroup";
 export * from "./putOffersCustomerDiscount";
 export * from "./putOffersExtraItemDiscount";
 export * from "./putOffersInvoiceDiscount";
@@ -33,6 +37,10 @@ export { POST as PostOffersCustomerDiscountPOST } from "./handler/postOffersCust
 export { POST as PostOffersInvoiceDiscountPOST } from "./handler/postOffersInvoiceDiscount";
 export { POST as PostOffersShippingDiscountPOST } from "./handler/postOffersShippingDiscount";
 export { POST as PostOffersAddItemsByFilterPOST } from "./handler/postOffersAddItemsByFilter";
+export { POST as PostOffersDeliveryZonesPOST } from "./handler/postOffersDeliveryZones";
+export { GET as GetOffersGroupsGET } from "./handler/getOffersGroups";
+export { PUT as PutOffersGroupPUT } from "./handler/putOffersGroup";
+export { DELETE as DeleteOffersGroupDELETE } from "./handler/deleteOffersGroup";
 export { PUT as PutOffersCustomerDiscountPUT } from "./handler/putOffersCustomerDiscount";
 export { PUT as PutOffersExtraItemDiscountPUT } from "./handler/putOffersExtraItemDiscount";
 export { PUT as PutOffersInvoiceDiscountPUT } from "./handler/putOffersInvoiceDiscount";

@@ -1,5 +1,5 @@
 export { g as getStoreInfo } from './storeInfo-q3EctBMs.js';
-export { a as getProductInfo, g as getProducts } from './getProductInfo-Csj5t4Sh.js';
+export { a as getProductInfo, g as getProducts } from './getProductInfo-DoDiQlga.js';
 export { g as getMenus } from './getMenus-K5kP8uiL.js';
 export { g as getOrders } from './getOrders-DvAowZ5l.js';
 export { A as Address, C as Category, b as City, a as Country, D as District, S as StoreType } from './types-D0Xbpetb.js';
@@ -71,6 +71,10 @@ declare class Api {
     static getOffersCouponsDropdown: string;
     static postOffersItemsDiscount: string;
     static postOffersAddItemsByFilter(offerId: string | number, forceUpdate: boolean | string): string;
+    static postOffersDeliveryZones(offerId: string | number): string;
+    static getOffersGroups(offerId: string | number): string;
+    static putOffersGroup(offerId: string | number, id: string | number): string;
+    static deleteOffersGroup(offerId: string | number, id: string | number): string;
     static postOffersItemsDiscountCustomers: string;
     static postOffersExtraItemDiscount: string;
     static postOffersCustomerDiscount: string;
@@ -100,6 +104,15 @@ declare class Api {
     static getStoreInfo: string;
     static getCities: string;
     static getDeliveryZones: string;
+    static getReportsCustomerOrders: string;
+    static getReportsOrderSales: string;
+    static getStorePayments(storeId: string | number): string;
+    static getPayment(id: string | number): string;
+    static putPayment(id: string | number): string;
+    static deletePayment(id: string | number): string;
+    static postPayments: string;
+    static getPayments: string;
+    static getPaymentsReport: string;
     static getSlideShows: string;
     static getItemById(id: string | number): string;
     static postWish(id: string | number): string;
@@ -136,6 +149,7 @@ declare class Api {
     static putItemActivate(id: string | number): string;
     static putItemDeactivate(id: string | number): string;
     static putItem(id: string | number): string;
+    static deleteItem(id: string | number): string;
     static getLocationChildren(parentId: string | number): string;
     static getInvoiceDiscount(code: string): string;
     static getCheckoutQuote: string;

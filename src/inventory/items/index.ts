@@ -16,6 +16,8 @@ export { POST as CopyParentStorePOST } from "./handler/postCopyParentStore";
 export * from "./putActivate";
 export * from "./putDeactivate";
 export * from "./putItem";
+export * from "./deleteItem";
 export { PUT as PutItemActivatePUT } from "./handler/putActivate";
 export { PUT as PutItemDeactivatePUT } from "./handler/putDeactivate";
 export { PUT as PutItemPUT } from "./handler/putItem";
+export { DELETE as DeleteItemDELETE } from "./handler/deleteItem";

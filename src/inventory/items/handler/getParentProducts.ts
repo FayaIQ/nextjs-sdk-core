@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getParentProducts } from "../getParentProducts";
 import { ItemsFilterParameters } from "../filter-models";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 
 /**
@@ -20,9 +21,6 @@ export async function GET(request: NextRequest) {
     const  products = await getParentProducts({ filterParams });
     return NextResponse.json(products);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to fetch products";
-    console.error("Products error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(error);
   }
 }

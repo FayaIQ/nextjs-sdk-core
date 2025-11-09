@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getInvoiceDiscount } from "../getInvoiceDiscount";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function GET(
   request: NextRequest,
@@ -9,6 +10,6 @@ export async function GET(
     const result = await getInvoiceDiscount((await params).coupon);
     return NextResponse.json(result);
   } catch (err) {
-    return NextResponse.json({ error: err }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }

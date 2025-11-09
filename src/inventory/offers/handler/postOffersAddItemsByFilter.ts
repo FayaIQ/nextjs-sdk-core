@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { postOffersAddItemsByFilter } from "../postOffersAddItemsByFilter";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function POST(
   request: NextRequest,
@@ -12,6 +13,6 @@ export async function POST(
     const result = await postOffersAddItemsByFilter(p.id, force, body);
     return NextResponse.json(result);
   } catch (err) {
-    return NextResponse.json({ error: err }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }

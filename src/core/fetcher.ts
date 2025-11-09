@@ -32,6 +32,58 @@ export class ApiError extends Error {
 }
 
 /**
+ * Recursively search for a human-friendly message inside an error-like object.
+ * Looks for common fields: message, code, error, body, data, response.
+ */
+function findMessageInError(obj: any, depth = 0, seen = new WeakSet()): string | null {
+  if (obj == null || depth > 6) return null;
+  if (typeof obj === "string") {
+    // If it's a JSON string, try to parse and search inside
+    const s = obj.trim();
+    if ((s.startsWith("{") || s.startsWith("["))) {
+      try {
+        const parsed = JSON.parse(s);
+        return findMessageInError(parsed, depth + 1, seen) || obj;
+      } catch {
+        return obj;
+      }
+    }
+    return obj;
+  }
+
+  if (typeof obj !== "object") return null;
+  if (seen.has(obj)) return null;
+  seen.add(obj);
+
+  // Direct fields
+  if (typeof obj.message === "string" && obj.message) return obj.message;
+  if (typeof obj.code === "string" && obj.code) return obj.code;
+  if (typeof obj.error === "string" && obj.error) return obj.error;
+
+  // Recurse into known containers
+  const keysToCheck = ["message", "code", "error", "body", "data", "response", "errors"];
+  for (const k of keysToCheck) {
+    if (k in obj) {
+      const v = (obj as any)[k];
+      const found = findMessageInError(v, depth + 1, seen);
+      if (found) return found;
+    }
+  }
+
+  // Fallback: inspect object properties shallowly
+  for (const k of Object.keys(obj)) {
+    try {
+      const found = findMessageInError((obj as any)[k], depth + 1, seen);
+      if (found) return found;
+    } catch {
+      // ignore
+    }
+  }
+
+  return null;
+}
+
+/**
  * Generic API fetch wrapper with authentication and error handling
  * @param url - The API endpoint URL
  * @param options - Request configuration options
@@ -87,13 +139,31 @@ export async function apiFetch<T>(
     try {
       const text = await response.text();
       if (text && text.trim()) {
+        // Try to parse the response. Some backends wrap an object as a JSON string
+        // (e.g. '"{ ... }"'), so we attempt to parse twice when needed.
+        let errorData: any;
         try {
-          const errorData = JSON.parse(text);
-          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
+          errorData = JSON.parse(text);
         } catch {
-          // Not JSON - include raw text
-          throw new ApiError(response.status, text, text || response.statusText);
+          errorData = text;
         }
+
+        // If parsing produced a string that itself looks like JSON, try to parse it again
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+              // keep as string if second-parse fails
+            }
+          }
+        }
+
+        // Prefer a clear message coming from the backend body (search nested fields)
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+
+        throw new ApiError(response.status, errorData, derivedMessage);
       }
       // Empty error body
       throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
@@ -239,13 +309,27 @@ export async function postWithoutAuth<T>(
     try {
       const text = await response.text();
       if (text && text.trim()) {
+        let errorData: any;
         try {
-          const errorData = JSON.parse(text);
-          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
+          errorData = JSON.parse(text);
         } catch {
-          // Not JSON - include raw text
-          throw new ApiError(response.status, text, text || response.statusText);
+          errorData = text;
         }
+
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+              // keep as string if second-parse fails
+            }
+          }
+        }
+
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+
+        throw new ApiError(response.status, errorData, derivedMessage);
       }
       // Empty error body
       throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);

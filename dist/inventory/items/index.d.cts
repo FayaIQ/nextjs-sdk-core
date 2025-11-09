@@ -1,5 +1,5 @@
-import { P as ProductResponse, b as Product } from '../../getProductInfo-CYdJPSnS.cjs';
-export { C as CollectionItem, I as ItemColor, M as MultipleMenu, d as Packs, c as SizeSet, S as SizeValue, U as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-CYdJPSnS.cjs';
+import { P as ProductResponse, b as Product } from '../../getProductInfo-DS70gHKo.cjs';
+export { C as CollectionItem, I as ItemColor, M as MultipleMenu, d as Packs, c as SizeSet, S as SizeValue, U as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-DS70gHKo.cjs';
 import { I as ItemsFilterParameters } from '../../filter-models-BrX8v95o.cjs';
 export { A as AgeGroup, G as Gender, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from '../../filter-models-BrX8v95o.cjs';
 import { NextRequest, NextResponse } from 'next/server';
@@ -58,17 +58,13 @@ declare function getItemById(id: string | number): Promise<Product>;
  * @example
  * export { GET } from 'my-next-core/handlers/getProducts';
  */
-declare function GET$4(request: NextRequest): Promise<NextResponse<ProductResponse> | NextResponse<{
-    error: string;
-}>>;
+declare function GET$4(request: NextRequest): Promise<NextResponse<any>>;
 
 declare function GET$3(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
-}): Promise<NextResponse<Product> | NextResponse<{
-    error: string;
-}>>;
+}): Promise<NextResponse<any>>;
 
 /**
  * Ready-to-use API route handler for products
@@ -77,23 +73,19 @@ declare function GET$3(request: NextRequest, { params }: {
  * @example
  * export { GET } from 'my-next-core/handlers/getProducts';
  */
-declare function GET$2(request: NextRequest): Promise<NextResponse<ProductResponse> | NextResponse<{
-    error: string;
-}>>;
+declare function GET$2(request: NextRequest): Promise<NextResponse<any>>;
 
 /**
  * GET handler for items paging (v2 API)
  * Fetches items with pagination and filters, with GetMultipleMenu set to true
  */
-declare function GET$1(request: NextRequest): Promise<NextResponse<unknown>>;
+declare function GET$1(request: NextRequest): Promise<NextResponse<any>>;
 
 declare function GET(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
-}): Promise<NextResponse<Product> | NextResponse<{
-    error: string;
-}>>;
+}): Promise<NextResponse<any>>;
 
 interface CopyParentResponse {
     success: boolean;
@@ -105,9 +97,7 @@ interface CopyParentResponse {
  */
 declare function postCopyParentStore(itemIds: (number | string)[]): Promise<CopyParentResponse>;
 
-declare function POST(request: NextRequest): Promise<NextResponse<{
-    error: string;
-}> | NextResponse<CopyParentResponse>>;
+declare function POST(request: NextRequest): Promise<NextResponse<any>>;
 
 /**
  * Activate an item by id
@@ -149,6 +139,8 @@ interface UpdateItemResponse {
  */
 declare function putItem(id: string | number, data: UpdateItemRequest): Promise<UpdateItemResponse>;
 
+declare function deleteItem(id: string | number): Promise<any>;
+
 declare function PUT$2(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
@@ -165,8 +157,12 @@ declare function PUT(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
-}): Promise<NextResponse<UpdateItemResponse> | NextResponse<{
-    error: string;
-}>>;
+}): Promise<NextResponse<any>>;
 
-export { type CopyParentResponse, POST as CopyParentStorePOST, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$4 as GetProductsGET, ItemsFilterParameters, Product, GET$3 as ProductInfoGET, ProductResponse, PUT$2 as PutItemActivatePUT, PUT$1 as PutItemDeactivatePUT, PUT as PutItemPUT, type UpdateItemRequest, type UpdateItemResponse, getItemById, getItemsPaging, getParentProducts, postCopyParentStore, putActivateItem, putDeactivateItem, putItem };
+declare function DELETE(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<Response>;
+
+export { type CopyParentResponse, POST as CopyParentStorePOST, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$4 as GetProductsGET, ItemsFilterParameters, Product, GET$3 as ProductInfoGET, ProductResponse, PUT$2 as PutItemActivatePUT, PUT$1 as PutItemDeactivatePUT, PUT as PutItemPUT, type UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, postCopyParentStore, putActivateItem, putDeactivateItem, putItem };

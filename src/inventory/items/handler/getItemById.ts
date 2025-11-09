@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getItemById } from "../getItemById";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function GET(
   request: NextRequest,
@@ -10,8 +11,6 @@ export async function GET(
     const result = await getItemById(id);
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch item";
-    console.error("getItemById error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }

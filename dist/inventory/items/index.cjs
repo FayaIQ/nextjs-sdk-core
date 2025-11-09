@@ -111,6 +111,18 @@ var init_api = __esm({
       static postOffersAddItemsByFilter(offerId, forceUpdate) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
       }
+      static postOffersDeliveryZones(offerId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
+      }
+      static getOffersGroups(offerId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups`;
+      }
+      static putOffersGroup(offerId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+      }
+      static deleteOffersGroup(offerId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+      }
       static putOffersCustomerDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
       }
@@ -140,6 +152,19 @@ var init_api = __esm({
       }
       static putOffersDarkDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
+      // Payments endpoints
+      static getStorePayments(storeId) {
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+      }
+      static getPayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+      }
+      static putPayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+      }
+      static deletePayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
       }
       static getItemById(id) {
         return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
@@ -218,6 +243,9 @@ var init_api = __esm({
       static putItem(id) {
         return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
       }
+      static deleteItem(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${id}`;
+      }
       static getLocationChildren(parentId) {
         return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
       }
@@ -293,6 +321,11 @@ var init_api = __esm({
     _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
     _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
     _Api.getDeliveryZones = `${_Api.GPS_BASE}/v1/DeliveryZones`;
+    _Api.getReportsCustomerOrders = `${_Api.INVENTORY_BASE}/v1/Reports/CustomerOrders`;
+    _Api.getReportsOrderSales = `${_Api.INVENTORY_BASE}/v1/Reports/OrderSales`;
+    _Api.postPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
+    _Api.getPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
+    _Api.getPaymentsReport = `${_Api.INVENTORY_BASE}/v1/Payments/Report`;
     _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
     // orders endpoints
     _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
@@ -382,6 +415,43 @@ __export(fetcher_exports, {
   putWithAuth: () => putWithAuth,
   putWithoutAuth: () => putWithoutAuth
 });
+function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()) {
+  if (obj == null || depth > 6) return null;
+  if (typeof obj === "string") {
+    const s = obj.trim();
+    if (s.startsWith("{") || s.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(s);
+        return findMessageInError(parsed, depth + 1, seen) || obj;
+      } catch {
+        return obj;
+      }
+    }
+    return obj;
+  }
+  if (typeof obj !== "object") return null;
+  if (seen.has(obj)) return null;
+  seen.add(obj);
+  if (typeof obj.message === "string" && obj.message) return obj.message;
+  if (typeof obj.code === "string" && obj.code) return obj.code;
+  if (typeof obj.error === "string" && obj.error) return obj.error;
+  const keysToCheck = ["message", "code", "error", "body", "data", "response", "errors"];
+  for (const k of keysToCheck) {
+    if (k in obj) {
+      const v = obj[k];
+      const found = findMessageInError(v, depth + 1, seen);
+      if (found) return found;
+    }
+  }
+  for (const k of Object.keys(obj)) {
+    try {
+      const found = findMessageInError(obj[k], depth + 1, seen);
+      if (found) return found;
+    } catch {
+    }
+  }
+  return null;
+}
 async function apiFetch(url, options = {}) {
   const { method = "GET", headers = {}, data, query, token } = options;
   let endpoint = url;
@@ -417,12 +487,23 @@ async function apiFetch(url, options = {}) {
     try {
       const text2 = await response.text();
       if (text2 && text2.trim()) {
+        let errorData;
         try {
-          const errorData = JSON.parse(text2);
-          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
+          errorData = JSON.parse(text2);
         } catch {
-          throw new ApiError(response.status, text2, text2 || response.statusText);
+          errorData = text2;
         }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
       }
       throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
     } catch (err) {
@@ -484,12 +565,23 @@ async function postWithoutAuth(url, data, headers = {}) {
     try {
       const text2 = await response.text();
       if (text2 && text2.trim()) {
+        let errorData;
         try {
-          const errorData = JSON.parse(text2);
-          throw new ApiError(response.status, errorData, errorData?.message || response.statusText);
+          errorData = JSON.parse(text2);
         } catch {
-          throw new ApiError(response.status, text2, text2 || response.statusText);
+          errorData = text2;
         }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
       }
       throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
     } catch (err) {
@@ -599,6 +691,7 @@ var items_exports = {};
 __export(items_exports, {
   AgeGroup: () => AgeGroup,
   CopyParentStorePOST: () => POST,
+  DeleteItemDELETE: () => DELETE,
   Gender: () => Gender,
   GetItemByIdGET: () => GET5,
   GetItemsPagingGET: () => GET4,
@@ -612,6 +705,7 @@ __export(items_exports, {
   PutItemDeactivatePUT: () => PUT2,
   PutItemPUT: () => PUT3,
   SortType: () => SortType,
+  deleteItem: () => deleteItem,
   getItemById: () => getItemById,
   getItemsPaging: () => getItemsPaging,
   getParentProducts: () => getParentProducts,
@@ -652,7 +746,7 @@ async function getProductInfo(id) {
   }
   const response = await fetch(`/api/products/${id}`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch product info: ${response.statusText}`);
+    throw new Error(`Failed to fetch order full info: ${response.statusText}`);
   }
   return response.json();
 }
@@ -717,7 +811,7 @@ async function getItemById(id) {
 }
 
 // src/inventory/items/handler/getProducts.ts
-var import_server = require("next/server");
+var import_server2 = require("next/server");
 
 // src/inventory/items/filter-models.ts
 var SortType = /* @__PURE__ */ ((SortType2) => {
@@ -1182,51 +1276,64 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
   }
 };
 
+// src/core/errorResponse.ts
+var import_server = require("next/server");
+init_fetcher();
+function toNextResponseFromError(err) {
+  if (err instanceof ApiError) {
+    const body = err.body ?? { message: err.message };
+    const status = err.status && typeof err.status === "number" ? err.status : 500;
+    return import_server.NextResponse.json(body, { status });
+  }
+  if (err instanceof Error) {
+    return import_server.NextResponse.json({ message: err.message || "Internal server error" }, { status: 500 });
+  }
+  try {
+    return import_server.NextResponse.json(err, { status: 500 });
+  } catch {
+    return import_server.NextResponse.json({ message: String(err) }, { status: 500 });
+  }
+}
+
 // src/inventory/items/handler/getProducts.ts
 async function GET(request) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const filterParams = ItemsFilterParameters.fromURLSearchParams(searchParams);
     const products = await getProducts({ filterParams });
-    return import_server.NextResponse.json(products);
+    return import_server2.NextResponse.json(products);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch products";
-    console.error("Products error:", message);
-    return import_server.NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/items/handler/productInfo.ts
-var import_server2 = require("next/server");
+var import_server3 = require("next/server");
 async function GET2(request, { params }) {
   try {
     const { id } = await params;
     const product = await getProductInfo(id);
-    return import_server2.NextResponse.json(product);
+    return import_server3.NextResponse.json(product);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch product info";
-    console.error("Product info error:", message);
-    return import_server2.NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/items/handler/getParentProducts.ts
-var import_server3 = require("next/server");
+var import_server4 = require("next/server");
 async function GET3(request) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const filterParams = ItemsFilterParameters.fromURLSearchParams(searchParams);
     const products = await getParentProducts({ filterParams });
-    return import_server3.NextResponse.json(products);
+    return import_server4.NextResponse.json(products);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch products";
-    console.error("Products error:", message);
-    return import_server3.NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/items/handler/getItemsPaging.ts
-var import_server4 = require("next/server");
+var import_server5 = require("next/server");
 init_fetcher();
 init_api();
 async function GET4(request) {
@@ -1240,30 +1347,21 @@ async function GET4(request) {
     const queryString = params.toString();
     const url = queryString ? `${Api.getItemsPaging}?${queryString}` : `${Api.getItemsPaging}?GetMultipleMenu=true`;
     const data = await getWithAuth(url);
-    return import_server4.NextResponse.json(data, { status: 200 });
+    return import_server5.NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error("Error fetching items paging:", error);
-    return import_server4.NextResponse.json(
-      {
-        error: "Failed to fetch items paging",
-        message: error instanceof Error ? error.message : "Unknown error"
-      },
-      { status: 500 }
-    );
+    return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/items/handler/getItemById.ts
-var import_server5 = require("next/server");
+var import_server6 = require("next/server");
 async function GET5(request, { params }) {
   try {
     const { id } = await params;
     const result = await getItemById(id);
-    return import_server5.NextResponse.json(result);
+    return import_server6.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch item";
-    console.error("getItemById error:", message);
-    return import_server5.NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }
 
@@ -1294,19 +1392,17 @@ async function postCopyParentStore(itemIds) {
 }
 
 // src/inventory/items/handler/postCopyParentStore.ts
-var import_server6 = require("next/server");
+var import_server7 = require("next/server");
 async function POST(request) {
   try {
     const { itemIds } = await request.json();
     if (!itemIds) {
-      return import_server6.NextResponse.json({ error: "itemIds array is required" }, { status: 400 });
+      return import_server7.NextResponse.json({ error: "itemIds array is required" }, { status: 400 });
     }
     const result = await postCopyParentStore(itemIds);
-    return import_server6.NextResponse.json(result);
+    return import_server7.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to copy parent items";
-    console.error("postCopyParentStore error:", message);
-    return import_server6.NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }
 
@@ -1354,52 +1450,72 @@ async function putItem(id, data) {
   return res.json();
 }
 
+// src/inventory/items/deleteItem.ts
+async function deleteItem(id) {
+  if (typeof window === "undefined") {
+    const { deleteWithAuth: deleteWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return deleteWithAuth2(Api2.deleteItem(id));
+  }
+  const res = await fetch(`/api/items/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(`Failed to delete item: ${res.statusText}`);
+  return res.json();
+}
+
 // src/inventory/items/handler/putActivate.ts
-var import_server7 = require("next/server");
+var import_server8 = require("next/server");
 async function PUT(request, { params }) {
   try {
     const { id } = await params;
     const result = await putActivateItem(id);
-    return import_server7.NextResponse.json(result);
+    return import_server8.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to activate item";
-    console.error("putActivate handler error:", message);
-    return import_server7.NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }
 
 // src/inventory/items/handler/putDeactivate.ts
-var import_server8 = require("next/server");
+var import_server9 = require("next/server");
 async function PUT2(request, { params }) {
   try {
     const { id } = await params;
     const result = await putDeactivateItem(id);
-    return import_server8.NextResponse.json(result);
+    return import_server9.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to deactivate item";
-    console.error("putDeactivate handler error:", message);
-    return import_server8.NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }
 
 // src/inventory/items/handler/putItem.ts
-var import_server9 = require("next/server");
+var import_server10 = require("next/server");
 async function PUT3(request, { params }) {
   try {
     const data = await request.json();
     const { id } = await params;
     const result = await putItem(id, data);
-    return import_server9.NextResponse.json(result);
+    return import_server10.NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to update item";
-    console.error("putItem error:", message);
-    return import_server9.NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(err);
+  }
+}
+
+// src/inventory/items/handler/deleteItem.ts
+async function DELETE(request, { params }) {
+  try {
+    const result = await deleteItem((await params).id);
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    });
+  } catch (err) {
+    return toNextResponseFromError(err);
   }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AgeGroup,
   CopyParentStorePOST,
+  DeleteItemDELETE,
   Gender,
   GetItemByIdGET,
   GetItemsPagingGET,
@@ -1413,6 +1529,7 @@ async function PUT3(request, { params }) {
   PutItemDeactivatePUT,
   PutItemPUT,
   SortType,
+  deleteItem,
   getItemById,
   getItemsPaging,
   getParentProducts,

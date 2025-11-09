@@ -1,6 +1,6 @@
 import {
   getStoreInfo
-} from "../../chunk-AJYRB4GH.js";
+} from "../../chunk-GASTLNTX.js";
 
 // src/identity/application/handler/getStores.ts
 import { NextResponse } from "next/server";
@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 async function getStores() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-NLZGVKFO.js");
+    const { Api } = await import("../../api-PZO3QWDP.js");
     return getWithAuth(Api.getApplicationsStores);
   }
   const response = await fetch(`/api/stores`);

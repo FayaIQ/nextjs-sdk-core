@@ -1,11 +1,11 @@
 
 export enum offerTypes {
-  ItemsDiscount = 1,
-  InvoiceDiscount = 2,
-  ExtraItemDiscount = 3,
-  ShippingDiscount = 4,
-  CustomerDiscount = 5,
-  CustomerItemsDiscount = 6,
+  ItemsDiscount = 0,
+  InvoiceDiscount = 1,
+  ExtraItemDiscount = 2,
+  ShippingDiscount = 3,
+  CustomerDiscount = 4,
+  CustomerItemsDiscount = 5,
 }
 
 

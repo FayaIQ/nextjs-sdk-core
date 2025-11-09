@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { postCopyParentStore } from "../postCopyParentStore";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,9 +12,8 @@ export async function POST(request: NextRequest) {
     const result = await postCopyParentStore(itemIds);
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to copy parent items";
-    console.error("postCopyParentStore error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+
+    return toNextResponseFromError(err);
   }
 }
 

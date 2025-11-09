@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWithAuth } from "../../../core/fetcher";
 import { Api } from "../../../api/api";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 /**
  * GET handler for items paging (v2 API)
@@ -28,13 +29,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error("Error fetching items paging:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to fetch items paging",
-        message: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+    return toNextResponseFromError(error);
   }
 }

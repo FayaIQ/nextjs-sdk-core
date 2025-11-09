@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getCoupons } from "../getCoupons";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 /**
  * Ready-to-use API route handler for coupons
@@ -15,9 +16,6 @@ export async function GET(request: NextRequest) {
     const Coupons = await getCoupons();
     return NextResponse.json(Coupons);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to fetch orders";
-    console.error("orders error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return toNextResponseFromError(error);
   }
 }

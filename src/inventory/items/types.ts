@@ -101,6 +101,7 @@ export interface Product {
   favourites: number;
   isFavourite: boolean;
   rating: number;
+  sourceID: number | null;
   rejectionNote: string | null;
   offer: unknown | null;
   customerItemOffer: unknown | null;

@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { deleteOffer } from "../deleteOffer";
+import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function DELETE(
   request: NextRequest,
@@ -7,8 +8,11 @@ export async function DELETE(
 ) {
   try {
     const result = await deleteOffer((await params).id);
-    return NextResponse.json(result);
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
   } catch (err) {
-    return NextResponse.json({ error: err }, { status: 500 });
+    return toNextResponseFromError(err);
   }
 }

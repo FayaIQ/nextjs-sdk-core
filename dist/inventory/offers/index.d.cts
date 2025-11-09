@@ -125,6 +125,14 @@ declare function postOffersAddItemsByFilter(offerId: string | number, forceUpdat
  */
 declare function getCoupons(): Promise<any>;
 
+declare function postOffersDeliveryZones(offerId: string | number, payload: any): Promise<any>;
+
+declare function getOffersGroups(offerId: string | number): Promise<any>;
+
+declare function putOffersGroup(offerId: string | number, id: string | number, payload: any): Promise<any>;
+
+declare function deleteOffersGroup(offerId: string | number, id: string | number): Promise<any>;
+
 declare function putOffersCustomerDiscount(id: string | number, payload: any): Promise<any>;
 
 declare function putOffersExtraItemDiscount(id: string | number, payload: any): Promise<any>;
@@ -136,12 +144,12 @@ declare function putOffersItemsDiscountCustomers(id: string | number, payload: a
 declare function putOffersShippingDiscount(id: string | number, payload: any): Promise<any>;
 
 declare enum offerTypes {
-    ItemsDiscount = 1,
-    InvoiceDiscount = 2,
-    ExtraItemDiscount = 3,
-    ShippingDiscount = 4,
-    CustomerDiscount = 5,
-    CustomerItemsDiscount = 6
+    ItemsDiscount = 0,
+    InvoiceDiscount = 1,
+    ExtraItemDiscount = 2,
+    ShippingDiscount = 3,
+    CustomerDiscount = 4,
+    CustomerItemsDiscount = 5
 }
 /**
  * Paging parameters for offers listing
@@ -203,9 +211,7 @@ declare class OffersFilterParameters {
     static fromURLSearchParams(params: URLSearchParams): OffersFilterParameters;
 }
 
-declare function GET$6(request: NextRequest): Promise<NextResponse<OffersPagingResponse> | NextResponse<{
-    error: string;
-}>>;
+declare function GET$7(request: NextRequest): Promise<NextResponse<any>>;
 
 /**
  * Ready-to-use API route handler for coupons
@@ -214,52 +220,76 @@ declare function GET$6(request: NextRequest): Promise<NextResponse<OffersPagingR
  * @example
  * export { GET } from 'my-next-core/handlers/coupons';
  */
-declare function GET$5(request: NextRequest): Promise<NextResponse<any>>;
+declare function GET$6(request: NextRequest): Promise<NextResponse<any>>;
+
+declare function GET$5(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<NextResponse<any>>;
+
+declare function DELETE$1(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<Response>;
 
 declare function GET$4(request: NextRequest, { params }: {
-    params: Promise<{
-        id: string;
-    }>;
-}): Promise<NextResponse<any>>;
-
-declare function DELETE(request: NextRequest, { params }: {
-    params: Promise<{
-        id: string;
-    }>;
-}): Promise<NextResponse<any>>;
-
-declare function GET$3(request: NextRequest, { params }: {
     params: Promise<{
         coupon: string;
     }>;
 }): Promise<NextResponse<any>>;
 
+declare function GET$3(): Promise<NextResponse<any>>;
+
 declare function GET$2(): Promise<NextResponse<any>>;
 
-declare function GET$1(): Promise<NextResponse<any>>;
+declare function POST$5(request: NextRequest): Promise<NextResponse<any>>;
 
-declare function POST$4(request: NextRequest): Promise<NextResponse<any>>;
-
-declare function PUT$5(request: NextRequest, { params }: {
+declare function PUT$6(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
 }): Promise<NextResponse<any>>;
 
-declare function GET(): Promise<NextResponse<any>>;
+declare function GET$1(): Promise<NextResponse<any>>;
+
+declare function POST$4(request: NextRequest): Promise<NextResponse<any>>;
 
 declare function POST$3(request: NextRequest): Promise<NextResponse<any>>;
 
-declare function POST$2(request: NextRequest): Promise<NextResponse<string> | NextResponse<{
-    error: unknown;
-}>>;
+declare function POST$2(request: NextRequest): Promise<NextResponse<any>>;
 
-declare function POST$1(request: NextRequest): Promise<NextResponse<any>>;
+declare function POST$1(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+        forceUpdate: string;
+    }>;
+}): Promise<NextResponse<any>>;
 
 declare function POST(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
-        forceUpdate: string;
+    }>;
+}): Promise<Response>;
+
+declare function GET(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<Response>;
+
+declare function PUT$5(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+        offerGroupId: string;
+    }>;
+}): Promise<NextResponse<any>>;
+
+declare function DELETE(_request: Request, { params }: {
+    params: Promise<{
+        id: string;
+        offerGroupId: string;
     }>;
 }): Promise<NextResponse<any>>;
 
@@ -293,4 +323,4 @@ declare function PUT(request: NextRequest, { params }: {
     }>;
 }): Promise<NextResponse<any>>;
 
-export { DELETE as DeleteOfferDELETE, GET$5 as GetCouponsGET, GET$3 as GetInvoiceDiscountGET, GET$4 as GetOfferByIdGET, GET$1 as GetOffersCouponsDropdownGET, GET as GetOffersCustomersGET, GET$2 as GetOffersItemsDropdownGET, GET$6 as GetOffersPagingGET, type Offer, OfferPagingParameters, type OfferPostRequest, OffersFilterParameters, type OffersFilters, type OffersPagingResponse, POST as PostOffersAddItemsByFilterPOST, POST$3 as PostOffersCustomerDiscountPOST, POST$2 as PostOffersInvoiceDiscountPOST, POST$4 as PostOffersItemsDiscountPOST, POST$1 as PostOffersShippingDiscountPOST, PUT$4 as PutOffersCustomerDiscountPUT, PUT$3 as PutOffersExtraItemDiscountPUT, PUT$2 as PutOffersInvoiceDiscountPUT, PUT$1 as PutOffersItemsDiscountCustomersPUT, PUT$5 as PutOffersItemsDiscountPUT, PUT as PutOffersShippingDiscountPUT, deleteOffer, getCoupons, getInvoiceDiscount, getOfferById, getOffersCouponsDropdown, getOffersCustomers, getOffersItemsDropdown, getOffersPaging, offerTypes, type postCustomerRequest, postOffersAddItemsByFilter, postOffersCustomerDiscount, postOffersInvoiceDiscount, type postOffersInvoiceDiscountRequest, postOffersItemsDiscount, postOffersShippingDiscount, putOffersCustomerDiscount, putOffersExtraItemDiscount, putOffersInvoiceDiscount, putOffersItemsDiscount, putOffersItemsDiscountCustomers, putOffersShippingDiscount };
+export { DELETE$1 as DeleteOfferDELETE, DELETE as DeleteOffersGroupDELETE, GET$6 as GetCouponsGET, GET$4 as GetInvoiceDiscountGET, GET$5 as GetOfferByIdGET, GET$2 as GetOffersCouponsDropdownGET, GET$1 as GetOffersCustomersGET, GET as GetOffersGroupsGET, GET$3 as GetOffersItemsDropdownGET, GET$7 as GetOffersPagingGET, type Offer, OfferPagingParameters, type OfferPostRequest, OffersFilterParameters, type OffersFilters, type OffersPagingResponse, POST$1 as PostOffersAddItemsByFilterPOST, POST$4 as PostOffersCustomerDiscountPOST, POST as PostOffersDeliveryZonesPOST, POST$3 as PostOffersInvoiceDiscountPOST, POST$5 as PostOffersItemsDiscountPOST, POST$2 as PostOffersShippingDiscountPOST, PUT$4 as PutOffersCustomerDiscountPUT, PUT$3 as PutOffersExtraItemDiscountPUT, PUT$5 as PutOffersGroupPUT, PUT$2 as PutOffersInvoiceDiscountPUT, PUT$1 as PutOffersItemsDiscountCustomersPUT, PUT$6 as PutOffersItemsDiscountPUT, PUT as PutOffersShippingDiscountPUT, deleteOffer, deleteOffersGroup, getCoupons, getInvoiceDiscount, getOfferById, getOffersCouponsDropdown, getOffersCustomers, getOffersGroups, getOffersItemsDropdown, getOffersPaging, offerTypes, type postCustomerRequest, postOffersAddItemsByFilter, postOffersCustomerDiscount, postOffersDeliveryZones, postOffersInvoiceDiscount, type postOffersInvoiceDiscountRequest, postOffersItemsDiscount, postOffersShippingDiscount, putOffersCustomerDiscount, putOffersExtraItemDiscount, putOffersGroup, putOffersInvoiceDiscount, putOffersItemsDiscount, putOffersItemsDiscountCustomers, putOffersShippingDiscount };
