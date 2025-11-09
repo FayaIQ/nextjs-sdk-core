@@ -182,7 +182,7 @@ export interface ProductResponse {
 // Interface used for update requests (matches the example payload)
 export interface UpdateItemRequest {
   name: string;
-  currencyID: number;
+  currencyID?: number;
   defaultPrice: number;
   imageBase64?: string | null;
   categoryID?: number | null;

@@ -1,5 +1,5 @@
-import { P as ProductResponse, b as Product } from '../../getProductInfo-8TbRIDhc.cjs';
-export { B as Brand, C as CollectionItem, I as ItemColor, M as MultipleMenu, e as PackUnit, d as Packs, c as SizeSet, S as SizeValue, U as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-8TbRIDhc.cjs';
+import { P as ProductResponse, b as Product, U as UpdateItemRequest } from '../../getProductInfo-CvtVefeU.cjs';
+export { B as Brand, C as CollectionItem, I as ItemColor, M as MultipleMenu, f as PackUnit, e as Packs, d as SizeSet, S as SizeValue, c as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-CvtVefeU.cjs';
 import { I as ItemsFilterParameters } from '../../filter-models-BrX8v95o.cjs';
 export { A as AgeGroup, G as Gender, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from '../../filter-models-BrX8v95o.cjs';
 import { NextRequest, NextResponse } from 'next/server';
@@ -120,7 +120,7 @@ interface UpdateItemResponse {
  * @param id - Item ID
  * @param data - Fields to update
  */
-declare function putItem(id: string | number, data: Product): Promise<UpdateItemResponse>;
+declare function putItem(id: string | number, data: UpdateItemRequest): Promise<UpdateItemResponse>;
 
 declare function deleteItem(id: string | number): Promise<any>;
 
@@ -148,4 +148,4 @@ declare function DELETE(request: NextRequest, { params }: {
     }>;
 }): Promise<Response>;
 
-export { type CopyParentResponse, POST as CopyParentStorePOST, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$4 as GetProductsGET, ItemsFilterParameters, Product, GET$3 as ProductInfoGET, ProductResponse, PUT$2 as PutItemActivatePUT, PUT$1 as PutItemDeactivatePUT, PUT as PutItemPUT, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, postCopyParentStore, putActivateItem, putDeactivateItem, putItem };
+export { type CopyParentResponse, POST as CopyParentStorePOST, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$4 as GetProductsGET, ItemsFilterParameters, Product, GET$3 as ProductInfoGET, ProductResponse, PUT$2 as PutItemActivatePUT, PUT$1 as PutItemDeactivatePUT, PUT as PutItemPUT, UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, postCopyParentStore, putActivateItem, putDeactivateItem, putItem };
