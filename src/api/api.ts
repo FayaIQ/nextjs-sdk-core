@@ -44,8 +44,15 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Offers/${id}`;
   }
   static getOffersCustomerItemLoggedIn: string = `${Api.INVENTORY_BASE}/v1/Offers/CustomerItem/LoggedIn`;
-  static getStoreInvoiceDiscount(storeId: string | number, coupon: string): string {
-    return `${Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+  static getStoreInvoiceDiscount(
+    storeId: string | number,
+    coupon: string
+  ): string {
+    return `${
+      Api.STORES_BASE
+    }/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
+      String(coupon)
+    )}`;
   }
   static getDeliveryZoneDiscount(deliveryZoneId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
@@ -57,8 +64,15 @@ export class Api {
   static getOffersNewsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
   static getOffersCouponsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static postOffersItemsDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
-  static postOffersAddItemsByFilter(offerId: string | number, forceUpdate: boolean | string): string {
-    return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+  static postOffersAddItemsByFilter(
+    offerId: string | number,
+    forceUpdate: boolean | string
+  ): string {
+    return `${
+      Api.INVENTORY_BASE
+    }/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
+      String(forceUpdate)
+    )}`;
   }
   static postOffersDeliveryZones(offerId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
@@ -70,7 +84,10 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
 
-  static deleteOffersGroup(offerId: string | number, id: string | number): string {
+  static deleteOffersGroup(
+    offerId: string | number,
+    id: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
   static postOffersItemsDiscountCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
@@ -165,7 +182,10 @@ export class Api {
   }
 
   // Order item endpoints (v3)
-  static getOrderItem(orderId: string | number, itemId: string | number): string {
+  static getOrderItem(
+    orderId: string | number,
+    itemId: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
   }
 
@@ -173,15 +193,24 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems`;
   }
 
-  static putOrderItemCancel(orderId: string | number, itemId: string | number): string {
+  static putOrderItemCancel(
+    orderId: string | number,
+    itemId: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
   }
 
-  static putOrderItemUndoCancel(orderId: string | number, itemId: string | number): string {
+  static putOrderItemUndoCancel(
+    orderId: string | number,
+    itemId: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
   }
 
-  static putOrderItemUpdate(orderId: string | number, itemId: string | number): string {
+  static putOrderItemUpdate(
+    orderId: string | number,
+    itemId: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/update`;
   }
 
@@ -204,8 +233,6 @@ export class Api {
   static putChangeStatusOrder(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
   }
-
-
 
   static cancelOrder(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
@@ -244,25 +271,23 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
   }
 
-
-  // category 
+  // category
 
   static getCatigories: string = `${Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
-  // identity 
+  // identity
   static getApplicationsStores: string = `${Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
   static getCustomersDropdown: string = `${Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
 
   static getItemsSource: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
   /////////////////////////////////////////
-  //GPS 
-
+  //GPS
 
   static getCountries: string = `${Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
 
-static getParentProducts: string = `${Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
-  
+  static getParentProducts: string = `${Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
+
   // Items copy endpoints
-  static postCopyParentStore : string = `${Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
+  static postCopyParentStore: string = `${Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
 
   // Item activation endpoints
   static putItemActivate(id: string | number): string {
@@ -281,11 +306,9 @@ static getParentProducts: string = `${Api.INVENTORY_BASE}/v1/Items/ParentStore/P
     return `${Api.INVENTORY_BASE}/v1/Items/${id}`;
   }
 
-
-static getLocationChildren(parentId: string | number): string {
+  static getLocationChildren(parentId: string | number): string {
     return `${Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
   }
-
 
   //
   static getInvoiceDiscount(code: string): string {

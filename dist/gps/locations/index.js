@@ -2,7 +2,7 @@
 async function getCountries() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-PZO3QWDP.js");
+    const { Api } = await import("../../api-2XXZYWI5.js");
     return getWithAuth(Api.getCountries);
   }
   const response = await fetch(`/api/locations/countries`);
@@ -16,7 +16,7 @@ async function getCountries() {
 async function getLocationChildren(parentId) {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-PZO3QWDP.js");
+    const { Api } = await import("../../api-2XXZYWI5.js");
     return getWithAuth(
       `${Api.getLocationChildren(parentId)}`
     );

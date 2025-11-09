@@ -4,8 +4,8 @@ async function getProducts({
 }) {
   const params = filterParams.toURLSearchParams();
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-53SEI2RB.js");
-    const { Api } = await import("./api-ALZDPWU7.js");
+    const { getWithAuth } = await import("./fetcher-HKQGA2FY.js");
+    const { Api } = await import("./api-2XXZYWI5.js");
     return getWithAuth(
       `${Api.getProducts}?${params.toString()}`
     );
@@ -20,13 +20,13 @@ async function getProducts({
 // src/inventory/items/getProductInfo.ts
 async function getProductInfo(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-53SEI2RB.js");
-    const { Api } = await import("./api-ALZDPWU7.js");
+    const { getWithAuth } = await import("./fetcher-HKQGA2FY.js");
+    const { Api } = await import("./api-2XXZYWI5.js");
     return getWithAuth(`${Api.getProductInfo(id)}`);
   }
   const response = await fetch(`/api/products/${id}`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch product info: ${response.statusText}`);
+    throw new Error(`Failed to fetch order full info: ${response.statusText}`);
   }
   return response.json();
 }

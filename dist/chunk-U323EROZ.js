@@ -13,13 +13,29 @@ var _Api = class _Api {
     return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
   }
   static getStoreInvoiceDiscount(storeId, coupon) {
-    return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+    return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
+      String(coupon)
+    )}`;
   }
   static getDeliveryZoneDiscount(deliveryZoneId) {
     return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
   }
   static postOffersAddItemsByFilter(offerId, forceUpdate) {
-    return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+    return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
+      String(forceUpdate)
+    )}`;
+  }
+  static postOffersDeliveryZones(offerId) {
+    return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
+  }
+  static getOffersGroups(offerId) {
+    return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups`;
+  }
+  static putOffersGroup(offerId, id) {
+    return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+  }
+  static deleteOffersGroup(offerId, id) {
+    return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
   static putOffersCustomerDiscount(id) {
     return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
@@ -50,6 +66,19 @@ var _Api = class _Api {
   }
   static putOffersDarkDiscount(id) {
     return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+  }
+  // Payments endpoints
+  static getStorePayments(storeId) {
+    return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+  }
+  static getPayment(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+  }
+  static putPayment(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+  }
+  static deletePayment(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
   }
   static getItemById(id) {
     return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
@@ -128,6 +157,9 @@ var _Api = class _Api {
   static putItem(id) {
     return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
   }
+  static deleteItem(id) {
+    return `${_Api.INVENTORY_BASE}/v1/Items/${id}`;
+  }
   static getLocationChildren(parentId) {
     return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
   }
@@ -203,20 +235,25 @@ _Api.postOrders = `${_Api.INVENTORY_BASE}/v2/Orders`;
 _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
 _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
 _Api.getDeliveryZones = `${_Api.GPS_BASE}/v1/DeliveryZones`;
+_Api.getReportsCustomerOrders = `${_Api.INVENTORY_BASE}/v1/Reports/CustomerOrders`;
+_Api.getReportsOrderSales = `${_Api.INVENTORY_BASE}/v1/Reports/OrderSales`;
+_Api.postPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
+_Api.getPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
+_Api.getPaymentsReport = `${_Api.INVENTORY_BASE}/v1/Payments/Report`;
 _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
 // orders endpoints
 _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
 _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
 _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
 _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
-// category 
+// category
 _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
-// identity 
+// identity
 _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
 _Api.getCustomersDropdown = `${_Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
 _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
 /////////////////////////////////////////
-//GPS 
+//GPS
 _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
 _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
 // Items copy endpoints

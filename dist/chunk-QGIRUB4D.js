@@ -11,7 +11,7 @@ async function getToken() {
     throw new Error("Unauthorized: Access token missing (strict mode enabled)");
   }
   const { getAuthConfig } = await import("./config-EU6B2XSH.js");
-  const { Api } = await import("./api-NLZGVKFO.js");
+  const { Api } = await import("./api-2XXZYWI5.js");
   const authConfig = getAuthConfig();
   const requestBody = {
     clientId: authConfig.clientId,

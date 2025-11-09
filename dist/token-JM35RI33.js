@@ -1,6 +1,6 @@
 import {
   getToken
-} from "./chunk-XNEK5DJN.js";
+} from "./chunk-QGIRUB4D.js";
 export {
   getToken as default
 };
