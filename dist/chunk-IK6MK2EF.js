@@ -1,18 +1,17 @@
-export async function getSlides() {
-  // Server-side: Use direct API call with authentication
+// src/inventory/slides/getSlides.ts
+async function getSlides() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../core/fetcher");
-    const { Api } = await import("../../api/api");
-
+    const { getWithAuth } = await import("./fetcher-HKQGA2FY.js");
+    const { Api } = await import("./api-2XXZYWI5.js");
     return getWithAuth(Api.getSlideShows);
   }
-
-  // Client-side: Use Next.js API route
   const response = await fetch(`/api/slides?`);
-
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);
   }
-
   return response.json();
 }
+
+export {
+  getSlides
+};

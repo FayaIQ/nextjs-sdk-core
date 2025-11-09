@@ -7,10 +7,9 @@ const command = args[0];
 
 // API routes configuration
 const routes = [
-
   {
     name: "login",
-    path: [ "src" , "app", "api", "auth", "login"],
+    path: ["src", "app", "api", "auth", "login"],
     handler: "erp-core/identity",
     methods: ["POST"],
     exportName: "LoginPOST",
@@ -32,8 +31,8 @@ const routes = [
     exportName: "DeleteOfferDELETE",
     description: "Delete offer by id",
   },
-  
-    {
+
+  {
     name: "orders",
     path: ["src", "app", "api", "orders"],
     handler: "erp-core/inventory/orders",
@@ -211,7 +210,7 @@ const routes = [
   },
   {
     name: "locations",
-    path: ["src", "app", "api", "locations" , "countries"],
+    path: ["src", "app", "api", "locations", "countries"],
     handler: "erp-core/gps/locations",
     methods: ["GET"],
     exportName: "getCountriesHandler",
@@ -219,7 +218,7 @@ const routes = [
   },
   {
     name: "location",
-    path: ["src", "app", "api", "locations", "[parentId]" , "children"],
+    path: ["src", "app", "api", "locations", "[parentId]", "children"],
     handler: "erp-core/gps/locations",
     methods: ["GET"],
     exportName: "getLocationChildrenHandler",
@@ -266,7 +265,7 @@ const routes = [
     description: "Item sources listing endpoint",
   },
   {
-    name : "menusDropdown",
+    name: "menusDropdown",
     path: ["src", "app", "api", "menus", "dropdown"],
     handler: "erp-core/inventory/menus",
     methods: ["GET"],
@@ -274,7 +273,7 @@ const routes = [
     description: "Menus dropdown listing endpoint",
   },
   {
-    name : "itemsParent",
+    name: "itemsParent",
     path: ["src", "app", "api", "items", "parent"],
     handler: "erp-core/inventory/items",
     methods: ["GET"],
@@ -282,7 +281,7 @@ const routes = [
     description: "Parent products listing endpoint",
   },
   {
-    name : "itemsPaging",
+    name: "itemsPaging",
     path: ["src", "app", "api", "items", "paging"],
     handler: "erp-core/inventory/items",
     methods: ["GET"],
@@ -395,7 +394,15 @@ const routes = [
   },
   {
     name: "offersItemsDiscountCustomersPut",
-    path: ["src", "app", "api", "offers", "[id]", "items-discount", "customers"],
+    path: [
+      "src",
+      "app",
+      "api",
+      "offers",
+      "[id]",
+      "items-discount",
+      "customers",
+    ],
     handler: "erp-core/inventory/offers",
     methods: ["PUT"],
     exportName: "PutOffersItemsDiscountCustomersPUT",
@@ -411,7 +418,15 @@ const routes = [
   },
   {
     name: "offersAddItemsByFilter",
-    path: ["src", "app", "api", "offers", "[id]", "add-items-by-filter", "[forceUpdate]"],
+    path: [
+      "src",
+      "app",
+      "api",
+      "offers",
+      "[id]",
+      "add-items-by-filter",
+      "[forceUpdate]",
+    ],
     handler: "erp-core/inventory/offers",
     methods: ["POST"],
     exportName: "PostOffersAddItemsByFilterPOST",
@@ -435,7 +450,15 @@ const routes = [
   },
   {
     name: "offersGroupPut",
-    path: ["src", "app", "api", "offers", "[id]", "offer-groups", "[offerGroupId]"],
+    path: [
+      "src",
+      "app",
+      "api",
+      "offers",
+      "[id]",
+      "offer-groups",
+      "[offerGroupId]",
+    ],
     handler: "erp-core/inventory/offers",
     methods: ["PUT"],
     exportName: "PutOffersGroupPUT",
@@ -443,7 +466,15 @@ const routes = [
   },
   {
     name: "offersGroupDelete",
-    path: ["src", "app", "api", "offers", "[id]", "offer-groups", "[offerGroupId]"],
+    path: [
+      "src",
+      "app",
+      "api",
+      "offers",
+      "[id]",
+      "offer-groups",
+      "[offerGroupId]",
+    ],
     handler: "erp-core/inventory/offers",
     methods: ["DELETE"],
     exportName: "DeleteOffersGroupDELETE",
@@ -455,7 +486,8 @@ const routes = [
     handler: "erp-core/inventory/reports",
     methods: ["GET"],
     exportName: "GetReportsCustomerOrdersGET",
-    description: "Customer orders report (StoreAdmin, InventoryAdmin, DelagateAdmin)",
+    description:
+      "Customer orders report (StoreAdmin, InventoryAdmin, DelagateAdmin)",
   },
   {
     name: "reportsOrderSales",
@@ -548,7 +580,16 @@ const routes = [
   },
   {
     name: "orderItemCancel",
-    path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "cancel"],
+    path: [
+      "src",
+      "app",
+      "api",
+      "orders",
+      "[id]",
+      "orderItems",
+      "[itemId]",
+      "cancel",
+    ],
     handler: "erp-core/inventory/orderItem",
     methods: ["PUT"],
     exportName: "PutOrderItemCancelPUT",
@@ -556,7 +597,16 @@ const routes = [
   },
   {
     name: "orderItemUndoCancel",
-    path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "undo-cancel"],
+    path: [
+      "src",
+      "app",
+      "api",
+      "orders",
+      "[id]",
+      "orderItems",
+      "[itemId]",
+      "undo-cancel",
+    ],
     handler: "erp-core/inventory/orderItem",
     methods: ["PUT"],
     exportName: "PutOrderItemUndoCancelPUT",
@@ -564,17 +614,27 @@ const routes = [
   },
   {
     name: "orderItemUpdate",
-    path: ["src", "app", "api", "orders", "[id]", "orderItems", "[itemId]", "update"],
+    path: [
+      "src",
+      "app",
+      "api",
+      "orders",
+      "[id]",
+      "orderItems",
+      "[itemId]",
+      "update",
+    ],
     handler: "erp-core/inventory/orderItem",
     methods: ["PUT"],
     exportName: "PutOrderItemUpdatePUT",
     description: "Update an order item",
   },
-{
+  {
     name: "slides",
     path: ["src", "app", "api", "slides"],
-    handler: "erp-core/inventory/slides/getSlides",
+    handler: "erp-core/inventory/slides",
     methods: ["GET"],
+    exportName: "getSlidesGET",
     description: "Slides listing endpoint",
   },
 ];
@@ -586,29 +646,31 @@ function parseRouteFile(filePath) {
   if (!fs.existsSync(filePath)) {
     return { methods: new Map(), comments: [] };
   }
-  
+
   const content = fs.readFileSync(filePath, "utf8");
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const methods = new Map(); // method -> { exportName, handler, line }
   const comments = [];
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    
+
     // Capture comments
-    if (line.startsWith('//')) {
+    if (line.startsWith("//")) {
       comments.push(line);
       continue;
     }
-    
+
     // Match: export { SomeExport as METHOD } from "handler";
-    const match = line.match(/export\s*{\s*(\w+)\s+as\s+(\w+)\s*}\s*from\s*["']([^"']+)["']/);
+    const match = line.match(
+      /export\s*{\s*(\w+)\s+as\s+(\w+)\s*}\s*from\s*["']([^"']+)["']/
+    );
     if (match) {
       const [, exportName, method, handler] = match;
       methods.set(method, { exportName, handler, line: i });
     }
   }
-  
+
   return { methods, comments };
 }
 
@@ -617,33 +679,35 @@ function parseRouteFile(filePath) {
  */
 function mergeRouteContent(existingMethods, newRoute, description) {
   const merged = new Map(existingMethods);
-  
+
   // Add or update methods from the new route
-  newRoute.methods.forEach(method => {
+  newRoute.methods.forEach((method) => {
     const exportName = newRoute.exportName || method;
     merged.set(method, {
       exportName,
       handler: newRoute.handler,
-      description: newRoute.description
+      description: newRoute.description,
     });
   });
-  
+
   // Generate content
   const lines = [`// Auto-generated API route - ${description}`];
-  
+
   // Sort methods in standard order: GET, POST, PUT, PATCH, DELETE
-  const methodOrder = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+  const methodOrder = ["GET", "POST", "PUT", "PATCH", "DELETE"];
   const sortedMethods = Array.from(merged.entries()).sort((a, b) => {
     const aIdx = methodOrder.indexOf(a[0]);
     const bIdx = methodOrder.indexOf(b[0]);
     return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
   });
-  
+
   sortedMethods.forEach(([method, info]) => {
-    lines.push(`export { ${info.exportName} as ${method} } from "${info.handler}";`);
+    lines.push(
+      `export { ${info.exportName} as ${method} } from "${info.handler}";`
+    );
   });
-  
-  return lines.join('\n') + '\n';
+
+  return lines.join("\n") + "\n";
 }
 
 /**
@@ -664,11 +728,13 @@ function createRoute(route) {
 
   // Parse existing file if it exists
   const existing = parseRouteFile(routeFile);
-  const needsUpdate = route.methods.some(method => {
+  const needsUpdate = route.methods.some((method) => {
     const existingMethod = existing.methods.get(method);
-    return !existingMethod || 
-           existingMethod.handler !== route.handler || 
-           existingMethod.exportName !== (route.exportName || method);
+    return (
+      !existingMethod ||
+      existingMethod.handler !== route.handler ||
+      existingMethod.exportName !== (route.exportName || method)
+    );
   });
 
   if (fs.existsSync(routeFile) && !needsUpdate) {
@@ -683,12 +749,16 @@ function createRoute(route) {
   if (fs.existsSync(routeFile) && existing.methods.size > 0) {
     wasUpdated = true;
     console.log(
-      `🔄 Updated: ${route.path.join("/")}/route.ts (${route.methods.join(", ")})`
+      `🔄 Updated: ${route.path.join("/")}/route.ts (${route.methods.join(
+        ", "
+      )})`
     );
   } else {
     wasCreated = true;
     console.log(
-      `✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(", ")})`
+      `✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(
+        ", "
+      )})`
     );
   }
 
@@ -696,31 +766,41 @@ function createRoute(route) {
   if (route.path[0] === "src") {
     const altPath = path.join(process.cwd(), ...route.path.slice(1));
     const altFile = path.join(altPath, "route.ts");
-    
+
     if (!fs.existsSync(altPath)) {
       fs.mkdirSync(altPath, { recursive: true });
       console.log(`📁 Created folder: ${altPath}`);
     }
 
     const altExisting = parseRouteFile(altFile);
-    const altNeedsUpdate = route.methods.some(method => {
+    const altNeedsUpdate = route.methods.some((method) => {
       const existingMethod = altExisting.methods.get(method);
-      return !existingMethod || 
-             existingMethod.handler !== route.handler || 
-             existingMethod.exportName !== (route.exportName || method);
+      return (
+        !existingMethod ||
+        existingMethod.handler !== route.handler ||
+        existingMethod.exportName !== (route.exportName || method)
+      );
     });
 
     if (!fs.existsSync(altFile) || altNeedsUpdate) {
-      const altContent = mergeRouteContent(altExisting.methods, route, route.description);
+      const altContent = mergeRouteContent(
+        altExisting.methods,
+        route,
+        route.description
+      );
       fs.writeFileSync(altFile, altContent, "utf8");
-      
+
       if (fs.existsSync(altFile) && altExisting.methods.size > 0) {
         console.log(
-          `🔄 Updated (alt): ${route.path.slice(1).join("/")}/route.ts (${route.methods.join(", ")})`
+          `🔄 Updated (alt): ${route.path
+            .slice(1)
+            .join("/")}/route.ts (${route.methods.join(", ")})`
         );
       } else {
         console.log(
-          `✅ Created (alt): ${route.path.slice(1).join("/")}/route.ts (${route.methods.join(", ")})`
+          `✅ Created (alt): ${route.path
+            .slice(1)
+            .join("/")}/route.ts (${route.methods.join(", ")})`
         );
       }
     }
@@ -765,7 +845,5 @@ function setupRoutes() {
 if (command === "setup" || command === "init") {
   setupRoutes();
 } else {
-  console.log(
-    '⚠️  Unknown command.'
-  );
+  console.log("⚠️  Unknown command.");
 }
