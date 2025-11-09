@@ -1,7 +1,18 @@
 import {
+  getMenus
+} from "./chunk-RYQWNGV2.js";
+import {
   getProductInfo,
   getProducts
 } from "./chunk-SCGWGFKY.js";
+import {
+  AgeGroup,
+  Gender,
+  ItemsFilterParameters,
+  NewArrivalPeriod,
+  PagingParameters,
+  SortType
+} from "./chunk-QPGSHSJO.js";
 import {
   DeleveryType,
   OrderPagingParameters,
@@ -11,6 +22,9 @@ import {
   Sign,
   getOrders
 } from "./chunk-3EOJGG5L.js";
+import {
+  getSlides
+} from "./chunk-KXSHMTYM.js";
 import {
   Api
 } from "./chunk-KIHC3O2A.js";
@@ -23,31 +37,6 @@ import {
 import {
   getStoreInfo
 } from "./chunk-GASTLNTX.js";
-import {
-  getMenus
-} from "./chunk-RYQWNGV2.js";
-import {
-  AgeGroup,
-  Gender,
-  ItemsFilterParameters,
-  NewArrivalPeriod,
-  PagingParameters,
-  SortType
-} from "./chunk-QPGSHSJO.js";
-
-// src/inventory/slides/getSlides.ts
-async function getSlides() {
-  if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-M5RQ6SLN.js");
-    const { Api: Api2 } = await import("./api-PZO3QWDP.js");
-    return getWithAuth(Api2.getSlideShows);
-  }
-  const response = await fetch(`/api/slides?`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch products: ${response.statusText}`);
-  }
-  return response.json();
-}
 export {
   AgeGroup,
   Api,

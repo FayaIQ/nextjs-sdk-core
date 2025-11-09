@@ -1,17 +1,7 @@
 import {
-  toNextResponseFromError
-} from "../../chunk-N2AO2VZC.js";
-import {
   getProductInfo,
   getProducts
 } from "../../chunk-SCGWGFKY.js";
-import {
-  Api
-} from "../../chunk-KIHC3O2A.js";
-import {
-  getWithAuth
-} from "../../chunk-PQAOJ3ST.js";
-import "../../chunk-XNEK5DJN.js";
 import {
   AgeGroup,
   Gender,
@@ -20,6 +10,16 @@ import {
   PagingParameters,
   SortType
 } from "../../chunk-QPGSHSJO.js";
+import {
+  toNextResponseFromError
+} from "../../chunk-N2AO2VZC.js";
+import {
+  Api
+} from "../../chunk-KIHC3O2A.js";
+import {
+  getWithAuth
+} from "../../chunk-PQAOJ3ST.js";
+import "../../chunk-XNEK5DJN.js";
 
 // src/inventory/items/getParentProducts.ts
 async function getParentProducts({

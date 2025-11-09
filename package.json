@@ -26,8 +26,8 @@
     "QUICK_START.md"
   ],
   "scripts": {
-  "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/gps/locations/index.ts src/identity/application/index.ts  --format cjs,esm --dts",
-  "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/identity/application/index.ts src/gps/locations/index.ts  --format cjs,esm --dts --watch",
+  "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/gps/locations/index.ts src/identity/application/index.ts  src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts --format cjs,esm --dts",
+  "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts --format cjs,esm --dts --watch",
     "prepublishOnly": "npm run build"
   },
   "exports": {
@@ -41,15 +41,25 @@
       "import": "./dist/core/index.js",
       "require": "./dist/core/index.cjs"
     },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js",
+      "require": "./dist/api/index.cjs"
+    },
+    "./api/*": {
+      "types": "./dist/api/*.d.ts",
+      "import": "./dist/api/*.js",
+      "require": "./dist/api/*.cjs"
+    },
     "./gps": {
-      "types": "./dist/identity/index.d.ts",
-      "import": "./dist/identity/index.js",
-      "require": "./dist/identity/index.cjs"
+      "types": "./dist/gps/index.d.ts",
+      "import": "./dist/gps/index.js",
+      "require": "./dist/gps/index.cjs"
     },
     "./gps/*": {
-      "types": "./dist/identity/*.d.ts",
-      "import": "./dist/identity/*.js",
-      "require": "./dist/identity/*.cjs"
+      "types": "./dist/gps/*.d.ts",
+      "import": "./dist/gps/*.js",
+      "require": "./dist/gps/*.cjs"
     },
 
     "./gps/locations": {
@@ -154,6 +164,37 @@
       "types": "./dist/inventory/orderItem/*.d.ts",
       "import": "./dist/inventory/orderItem/*.js",
       "require": "./dist/inventory/orderItem/*.cjs"
+    }
+    ,
+    "./inventory/payments": {
+      "types": "./dist/inventory/payments/index.d.ts",
+      "import": "./dist/inventory/payments/index.js",
+      "require": "./dist/inventory/payments/index.cjs"
+    },
+    "./inventory/payments/*": {
+      "types": "./dist/inventory/payments/*.d.ts",
+      "import": "./dist/inventory/payments/*.js",
+      "require": "./dist/inventory/payments/*.cjs"
+    },
+    "./inventory/reports": {
+      "types": "./dist/inventory/reports/index.d.ts",
+      "import": "./dist/inventory/reports/index.js",
+      "require": "./dist/inventory/reports/index.cjs"
+    },
+    "./inventory/reports/*": {
+      "types": "./dist/inventory/reports/*.d.ts",
+      "import": "./dist/inventory/reports/*.js",
+      "require": "./dist/inventory/reports/*.cjs"
+    },
+    "./inventory/slides": {
+      "types": "./dist/inventory/slides/index.d.ts",
+      "import": "./dist/inventory/slides/index.js",
+      "require": "./dist/inventory/slides/index.cjs"
+    },
+    "./inventory/slides/*": {
+      "types": "./dist/inventory/slides/*.d.ts",
+      "import": "./dist/inventory/slides/*.js",
+      "require": "./dist/inventory/slides/*.cjs"
     }
   },
   "peerDependencies": {

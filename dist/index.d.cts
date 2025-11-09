@@ -2,31 +2,11 @@ export { g as getStoreInfo } from './storeInfo-DjUhUpxm.cjs';
 export { a as getProductInfo, g as getProducts } from './getProductInfo-DS70gHKo.cjs';
 export { g as getMenus } from './getMenus-jUDQWR__.cjs';
 export { g as getOrders } from './getOrders-DRGRR3-D.cjs';
+export { g as getSlides } from './getSlides-qgW_IuIC.cjs';
 export { A as Address, C as Category, b as City, a as Country, D as District, S as StoreType } from './types-D0Xbpetb.cjs';
 export { A as AgeGroup, G as Gender, I as ItemsFilterParameters, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from './filter-models-BrX8v95o.cjs';
 export { C as CurrentPhase, D as DeleveryType, h as Order, d as OrderAddress, f as OrderClient, e as OrderCustomer, i as OrderDetail, g as OrderItem, c as OrderPagingParameters, b as OrderType, a as OrdersApiResponse, O as OrdersFilterParameters, P as PayType, S as Sign } from './order-models-DdD4MxCq.cjs';
 export { a as apiFetch } from './index-BRffoVUg.cjs';
-
-/**
- * Fetches a list of products with optional filtering and pagination
- * Works in both server and client components
- *
- * @param filterParams - Filter parameters for products (pagination, sorting, etc.)
- * @returns Promise with product data
- *
- * @example
- * // Server component
- * const products = await getProducts({
- *   filterParams: new ItemsFilterParameters({ currentPage: 1, pageSize: 20 })
- * });
- *
- * @example
- * // Client component
- * const products = await getProducts({
- *   filterParams: new ItemsFilterParameters({ sortType: SortType.Newest })
- * });
- */
-declare function getSlides(): Promise<any>;
 
 declare class Api {
     private static LOCAL_BASE;
@@ -183,4 +163,4 @@ type TokenResponse = {
  */
 declare function getToken(): Promise<string>;
 
-export { Api, type AuthConfig, type TokenResponse, getSlides, getToken };
+export { Api, type AuthConfig, type TokenResponse, getToken };

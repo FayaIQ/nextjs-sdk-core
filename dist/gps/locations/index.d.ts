@@ -1,10 +1,5 @@
+export { b as getCities, g as getCountries, c as getDistricts, a as getLocationChildren } from '../../getLocationChildren-E8z6W9gy.js';
 import { NextRequest, NextResponse } from 'next/server';
-
-declare function getCountries(): Promise<any>;
-
-declare function getLocationChildren(parentId: number): Promise<any>;
-declare function getCities(countryId: number): Promise<any>;
-declare function getDistricts(cityId: number): Promise<any>;
 
 interface Location {
     id: number;
@@ -37,4 +32,4 @@ declare function GET(request: NextRequest, { params }: {
     }>;
 }): Promise<NextResponse<any>>;
 
-export { type City, type Country, type District, type Location, getCities, getCountries, GET$1 as getCountriesHandler, getDistricts, getLocationChildren, GET as getLocationChildrenHandler };
+export { type City, type Country, type District, type Location, GET$1 as getCountriesHandler, GET as getLocationChildrenHandler };
