@@ -178,6 +178,14 @@ const routes = [
     description: "Update an item",
   },
   {
+    name: "itemDelete",
+    path: ["src", "app", "api", "items", "[id]"],
+    handler: "erp-core/inventory/items",
+    methods: ["DELETE"],
+    exportName: "DeleteItemDELETE",
+    description: "Delete an item",
+  },
+  {
     name: "itemById",
     path: ["src", "app", "api", "items", "[id]", "info"],
     handler: "erp-core/inventory/items",
@@ -216,6 +224,14 @@ const routes = [
     methods: ["GET"],
     exportName: "getLocationChildrenHandler",
     description: "Location details endpoint",
+  },
+  {
+    name: "gpsDeliveryZones",
+    path: ["src", "app", "api", "gps", "delivery-zones"],
+    handler: "erp-core/gps",
+    methods: ["GET"],
+    exportName: "GetDeliveryZonesGET",
+    description: "Delivery zones (from GPS service)",
   },
   {
     name: "stores",
@@ -402,12 +418,116 @@ const routes = [
     description: "Add items to offer by filter with force update flag",
   },
   {
+    name: "offersDeliveryZones",
+    path: ["src", "app", "api", "offers", "[id]", "delivery-zones"],
+    handler: "erp-core/inventory/offers",
+    methods: ["POST"],
+    exportName: "PostOffersDeliveryZonesPOST",
+    description: "Add delivery zones to an offer (StoreAdmin)",
+  },
+  {
+    name: "offersGroups",
+    path: ["src", "app", "api", "offers", "[id]", "offer-groups"],
+    handler: "erp-core/inventory/offers",
+    methods: ["GET"],
+    exportName: "GetOffersGroupsGET",
+    description: "Get offer groups for an offer",
+  },
+  {
+    name: "offersGroupPut",
+    path: ["src", "app", "api", "offers", "[id]", "offer-groups", "[offerGroupId]"],
+    handler: "erp-core/inventory/offers",
+    methods: ["PUT"],
+    exportName: "PutOffersGroupPUT",
+    description: "Update an offer group (StoreAdmin)",
+  },
+  {
+    name: "offersGroupDelete",
+    path: ["src", "app", "api", "offers", "[id]", "offer-groups", "[offerGroupId]"],
+    handler: "erp-core/inventory/offers",
+    methods: ["DELETE"],
+    exportName: "DeleteOffersGroupDELETE",
+    description: "Delete an offer group (StoreAdmin)",
+  },
+  {
+    name: "reportsCustomerOrders",
+    path: ["src", "app", "api", "reports", "customer-orders"],
+    handler: "erp-core/inventory/reports",
+    methods: ["GET"],
+    exportName: "GetReportsCustomerOrdersGET",
+    description: "Customer orders report (StoreAdmin, InventoryAdmin, DelagateAdmin)",
+  },
+  {
+    name: "reportsOrderSales",
+    path: ["src", "app", "api", "reports", "order-sales"],
+    handler: "erp-core/inventory/reports",
+    methods: ["GET"],
+    exportName: "GetReportsOrderSalesGET",
+    description: "Order sales report (StoreAdmin, InventoryAdmin)",
+  },
+  {
     name: "offersCustomers",
     path: ["src", "app", "api", "offers", "customers"],
     handler: "erp-core/inventory/offers",
     methods: ["GET"],
     exportName: "GetOffersCustomersGET",
     description: "Offers customers endpoint",
+  },
+  {
+    name: "payments",
+    path: ["src", "app", "api", "payments"],
+    handler: "erp-core/inventory/payments",
+    methods: ["GET"],
+    exportName: "GetPaymentsGET",
+    description: "Payments listing endpoint",
+  },
+  {
+    name: "paymentsPost",
+    path: ["src", "app", "api", "payments"],
+    handler: "erp-core/inventory/payments",
+    methods: ["POST"],
+    exportName: "PostPaymentPOST",
+    description: "Create payment",
+  },
+  {
+    name: "paymentsReport",
+    path: ["src", "app", "api", "payments", "report"],
+    handler: "erp-core/inventory/payments",
+    methods: ["GET"],
+    exportName: "GetPaymentsReportGET",
+    description: "Payments report",
+  },
+  {
+    name: "paymentByIdGet",
+    path: ["src", "app", "api", "payments", "[id]"],
+    handler: "erp-core/inventory/payments",
+    methods: ["GET"],
+    exportName: "GetPaymentByIdGET",
+    description: "Get payment by id",
+  },
+  {
+    name: "paymentByIdPut",
+    path: ["src", "app", "api", "payments", "[id]"],
+    handler: "erp-core/inventory/payments",
+    methods: ["PUT"],
+    exportName: "PutPaymentPUT",
+    description: "Update payment by id",
+  },
+  {
+    name: "paymentByIdDelete",
+    path: ["src", "app", "api", "payments", "[id]"],
+    handler: "erp-core/inventory/payments",
+    methods: ["DELETE"],
+    exportName: "DeletePaymentDELETE",
+    description: "Delete payment by id",
+  },
+  {
+    name: "storePayments",
+    path: ["src", "app", "api", "stores", "[storeId]", "payments"],
+    handler: "erp-core/inventory/payments",
+    methods: ["GET"],
+    exportName: "GetStorePaymentsGET",
+    description: "Store-specific payments listing",
   },
   // Order item endpoints under orders
   {
@@ -460,7 +580,74 @@ const routes = [
 ];
 
 /**
- * Create a single API route
+ * Parse existing route file to extract methods and their export info
+ */
+function parseRouteFile(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return { methods: new Map(), comments: [] };
+  }
+  
+  const content = fs.readFileSync(filePath, "utf8");
+  const lines = content.split('\n');
+  const methods = new Map(); // method -> { exportName, handler, line }
+  const comments = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Capture comments
+    if (line.startsWith('//')) {
+      comments.push(line);
+      continue;
+    }
+    
+    // Match: export { SomeExport as METHOD } from "handler";
+    const match = line.match(/export\s*{\s*(\w+)\s+as\s+(\w+)\s*}\s*from\s*["']([^"']+)["']/);
+    if (match) {
+      const [, exportName, method, handler] = match;
+      methods.set(method, { exportName, handler, line: i });
+    }
+  }
+  
+  return { methods, comments };
+}
+
+/**
+ * Merge new route methods with existing ones
+ */
+function mergeRouteContent(existingMethods, newRoute, description) {
+  const merged = new Map(existingMethods);
+  
+  // Add or update methods from the new route
+  newRoute.methods.forEach(method => {
+    const exportName = newRoute.exportName || method;
+    merged.set(method, {
+      exportName,
+      handler: newRoute.handler,
+      description: newRoute.description
+    });
+  });
+  
+  // Generate content
+  const lines = [`// Auto-generated API route - ${description}`];
+  
+  // Sort methods in standard order: GET, POST, PUT, PATCH, DELETE
+  const methodOrder = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+  const sortedMethods = Array.from(merged.entries()).sort((a, b) => {
+    const aIdx = methodOrder.indexOf(a[0]);
+    const bIdx = methodOrder.indexOf(b[0]);
+    return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
+  });
+  
+  sortedMethods.forEach(([method, info]) => {
+    lines.push(`export { ${info.exportName} as ${method} } from "${info.handler}";`);
+  });
+  
+  return lines.join('\n') + '\n';
+}
+
+/**
+ * Create or update a single API route
  */
 function createRoute(route) {
   const routePath = path.join(process.cwd(), ...route.path);
@@ -472,46 +659,74 @@ function createRoute(route) {
     console.log(`📁 Created folder: ${routePath}`);
   }
 
-  // Check if file already exists
-  if (fs.existsSync(routeFile)) {
-    console.log(`⚠️  Route file already exists: ${routeFile}`);
-    return false;
-  } else {
-    // Generate export statement for methods
-    const methodExports = route.methods.map(method => {
-      const exportName = route.exportName || method;
-      return `export { ${exportName} as ${method} } from "${route.handler}";`;
-    }).join('\n');
-    
-    const content = `// Auto-generated API route - ${route.description}\n${methodExports}\n`;
-    fs.writeFileSync(routeFile, content, "utf8");
+  let wasUpdated = false;
+  let wasCreated = false;
+
+  // Parse existing file if it exists
+  const existing = parseRouteFile(routeFile);
+  const needsUpdate = route.methods.some(method => {
+    const existingMethod = existing.methods.get(method);
+    return !existingMethod || 
+           existingMethod.handler !== route.handler || 
+           existingMethod.exportName !== (route.exportName || method);
+  });
+
+  if (fs.existsSync(routeFile) && !needsUpdate) {
+    // File exists and has all methods already - no changes needed
+    return { created: false, updated: false };
+  }
+
+  // Generate merged content
+  const content = mergeRouteContent(existing.methods, route, route.description);
+  fs.writeFileSync(routeFile, content, "utf8");
+
+  if (fs.existsSync(routeFile) && existing.methods.size > 0) {
+    wasUpdated = true;
     console.log(
-      `✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(
-        ", "
-      )})`
+      `🔄 Updated: ${route.path.join("/")}/route.ts (${route.methods.join(", ")})`
     );
-    // Also create a route file without the leading 'src' if present so apps
-    // using the top-level `app/` directory receive the same generated route.
-    if (route.path[0] === "src") {
-      const altPath = path.join(process.cwd(), ...route.path.slice(1));
-      const altFile = path.join(altPath, "route.ts");
-      if (!fs.existsSync(altPath)) {
-        fs.mkdirSync(altPath, { recursive: true });
-        console.log(`📁 Created folder: ${altPath}`);
-      }
-      if (!fs.existsSync(altFile)) {
-        fs.writeFileSync(altFile, content, "utf8");
+  } else {
+    wasCreated = true;
+    console.log(
+      `✅ Created: ${route.path.join("/")}/route.ts (${route.methods.join(", ")})`
+    );
+  }
+
+  // Also create/update route file without the leading 'src' if present
+  if (route.path[0] === "src") {
+    const altPath = path.join(process.cwd(), ...route.path.slice(1));
+    const altFile = path.join(altPath, "route.ts");
+    
+    if (!fs.existsSync(altPath)) {
+      fs.mkdirSync(altPath, { recursive: true });
+      console.log(`📁 Created folder: ${altPath}`);
+    }
+
+    const altExisting = parseRouteFile(altFile);
+    const altNeedsUpdate = route.methods.some(method => {
+      const existingMethod = altExisting.methods.get(method);
+      return !existingMethod || 
+             existingMethod.handler !== route.handler || 
+             existingMethod.exportName !== (route.exportName || method);
+    });
+
+    if (!fs.existsSync(altFile) || altNeedsUpdate) {
+      const altContent = mergeRouteContent(altExisting.methods, route, route.description);
+      fs.writeFileSync(altFile, altContent, "utf8");
+      
+      if (fs.existsSync(altFile) && altExisting.methods.size > 0) {
         console.log(
-          `✅ Created (alt): ${route.path.slice(1).join("/")}/route.ts (${route.methods.join(
-            ", "
-          )})`
+          `🔄 Updated (alt): ${route.path.slice(1).join("/")}/route.ts (${route.methods.join(", ")})`
         );
       } else {
-        console.log(`⚠️  Route file already exists: ${altFile}`);
+        console.log(
+          `✅ Created (alt): ${route.path.slice(1).join("/")}/route.ts (${route.methods.join(", ")})`
+        );
       }
     }
-    return true;
   }
+
+  return { created: wasCreated, updated: wasUpdated };
 }
 
 /**
@@ -521,11 +736,15 @@ function setupRoutes() {
   console.log("\n🚀 Setting up API routes for erp-core...\n");
 
   let created = 0;
+  let updated = 0;
   let skipped = 0;
 
   routes.forEach((route) => {
-    if (createRoute(route)) {
+    const result = createRoute(route);
+    if (result.created) {
       created++;
+    } else if (result.updated) {
+      updated++;
     } else {
       skipped++;
     }
@@ -534,40 +753,19 @@ function setupRoutes() {
   console.log("\n" + "=".repeat(50));
   console.log(`✨ Setup complete!`);
   console.log(`   Created: ${created} route(s)`);
-  if (skipped > 0) {
-    console.log(`   Skipped: ${skipped} (already exists)`);
+  if (updated > 0) {
+    console.log(`   Updated: ${updated} route(s)`);
   }
-  console.log("=".repeat(50) + "\n");
-  console.log("📖 Next steps:");
-  console.log("   1. Configure your environment variables in .env.local");
-  console.log("   2. Import functions in your components:");
-  console.log("   3. Start your development server: npm run dev\n");
-}
-
-/**
- * Show help
- */
-function showHelp() {
-  console.log("\n📦 erp-core CLI\n");
-  console.log("Usage:");
-  console.log("  npx erp-core setup    Create all API route files\n");
-  console.log("Available routes:");
-  routes.forEach((route) => {
-    const methods = route.methods.join(", ");
-    console.log(
-      `  - ${route.path.join("/")} [${methods}] (${route.description})`
-    );
-  });
-  console.log();
+  if (skipped > 0) {
+    console.log(`   Skipped: ${skipped} (no changes needed)`);
+  }
 }
 
 // Command handler
 if (command === "setup" || command === "init") {
   setupRoutes();
-} else if (command === "help" || command === "--help" || command === "-h") {
-  showHelp();
 } else {
   console.log(
-    '⚠️  Unknown command. Use "npx erp-core setup" or "npx erp-core help"'
+    '⚠️  Unknown command.'
   );
 }
