@@ -179,3 +179,53 @@ export interface ProductResponse {
   results: Product[];
 }
 
+// Interface used for update requests (matches the example payload)
+export interface UpdateItemRequest {
+  name: string;
+  currencyID: number;
+  defaultPrice: number;
+  imageBase64?: string | null;
+  categoryID?: number | null;
+  subDescription?: string | null;
+  description?: string | null;
+  nameSecondary?: string | null;
+  subDescriptionSecondary?: string | null;
+  descriptionSecondary?: string | null;
+  isFeatured?: boolean;
+  minimumOrderQuantity?: number | null;
+  maximumOrderQuantity?: number | null;
+  unitType?: number;
+  unitValue?: number;
+  gender?: number;
+  age?: number;
+  smallUnitItemID?: number | null;
+  barcode?: string | null;
+  code?: string | null;
+  videoURL?: string | null;
+  preparation?: number;
+  calories?: number;
+  sizeTypeID?: number | null;
+  sourceID?: number | null;
+  checkQuantitiesBeforeSale?: boolean;
+  deliverable?: boolean;
+  isAvailable?: boolean;
+  isActive?: boolean;
+  syncThirdPartyId?: string | null;
+  currentOfferId?: string | null;
+  pointOfferId?: string | null;
+  unit2?: {
+    value: number;
+    price: number;
+    isActive: boolean;
+  } | null;
+  unit3?: {
+    value: number;
+    price: number;
+    isActive: boolean;
+  } | null;
+  menuIds?: number[] | null;
+  categoryId2?: number | null;
+  categoryId3?: number | null;
+  categoryId4?: number | null;
+}
+

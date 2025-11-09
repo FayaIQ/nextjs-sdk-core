@@ -1,4 +1,4 @@
-import { Product } from "./types";
+import { Product, UpdateItemRequest } from "./types";
 
 
 
@@ -16,7 +16,7 @@ export interface UpdateItemResponse {
  */
 export async function putItem(
   id: string | number,
-  data: Product
+  data: UpdateItemRequest
 ): Promise<UpdateItemResponse> {
   // Server-side: call inventory API with auth
   if (typeof window === "undefined") {
