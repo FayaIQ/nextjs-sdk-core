@@ -1,5 +1,5 @@
 export { g as getStoreInfo } from './storeInfo-DjUhUpxm.cjs';
-export { a as getProductInfo, g as getProducts } from './getProductInfo-DS70gHKo.cjs';
+export { a as getProductInfo, g as getProducts } from './getProductInfo-8TbRIDhc.cjs';
 export { g as getMenus } from './getMenus-jUDQWR__.cjs';
 export { g as getOrders } from './getOrders-DRGRR3-D.cjs';
 export { g as getSlides } from './getSlides-qgW_IuIC.cjs';

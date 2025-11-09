@@ -12,9 +12,6 @@ import {
   getOrders
 } from "./chunk-KNGLVTCF.js";
 import {
-  getStoreInfo
-} from "./chunk-P2VKGLXN.js";
-import {
   getSlides
 } from "./chunk-T77RVTGJ.js";
 import {
@@ -26,6 +23,9 @@ import {
 import {
   getToken
 } from "./chunk-VIQ7XIV2.js";
+import {
+  getStoreInfo
+} from "./chunk-P2VKGLXN.js";
 import {
   getMenus
 } from "./chunk-HCR3VZBJ.js";
