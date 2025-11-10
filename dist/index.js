@@ -1,10 +1,10 @@
 import {
+  getMenus
+} from "./chunk-HCR3VZBJ.js";
+import {
   getProductInfo,
   getProducts
 } from "./chunk-DEIAYH3T.js";
-import {
-  getMenus
-} from "./chunk-HCR3VZBJ.js";
 import {
   AgeGroup,
   Gender,
@@ -12,7 +12,10 @@ import {
   NewArrivalPeriod,
   PagingParameters,
   SortType
-} from "./chunk-QPGSHSJO.js";
+} from "./chunk-TVNN3ZKK.js";
+import {
+  getSlides
+} from "./chunk-T77RVTGJ.js";
 import {
   DeleveryType,
   OrderPagingParameters,
@@ -22,9 +25,6 @@ import {
   Sign,
   getOrders
 } from "./chunk-KNGLVTCF.js";
-import {
-  getSlides
-} from "./chunk-T77RVTGJ.js";
 import {
   Api
 } from "./chunk-KIHC3O2A.js";

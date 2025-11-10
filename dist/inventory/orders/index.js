@@ -8,6 +8,9 @@ import {
   getOrders
 } from "../../chunk-KNGLVTCF.js";
 import {
+  toNextResponseFromError
+} from "../../chunk-3FYIJ73H.js";
+import {
   Api
 } from "../../chunk-KIHC3O2A.js";
 import {
@@ -378,10 +381,7 @@ async function PUT5(request, { params }) {
     const result = await putOrderChangeStatus(id, body);
     return NextResponse8.json(result);
   } catch (error) {
-    return NextResponse8.json(
-      { error: error.message || "Failed to change order status" },
-      { status: 500 }
-    );
+    return toNextResponseFromError(error);
   }
 }
 

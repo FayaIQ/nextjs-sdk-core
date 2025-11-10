@@ -1401,31 +1401,49 @@ async function GET2(request, { params }) {
 }
 
 // src/inventory/orders/handler/change-status.ts
+var import_server9 = require("next/server");
+
+// src/core/errorResponse.ts
 var import_server8 = require("next/server");
+init_fetcher();
+function toNextResponseFromError(err) {
+  if (err instanceof ApiError) {
+    const body = err.body ?? { message: err.message };
+    const status = err.status && typeof err.status === "number" ? err.status : 500;
+    return import_server8.NextResponse.json(body, { status });
+  }
+  if (err instanceof Error) {
+    return import_server8.NextResponse.json({ message: err.message || "Internal server error" }, { status: 500 });
+  }
+  try {
+    return import_server8.NextResponse.json(err, { status: 500 });
+  } catch {
+    return import_server8.NextResponse.json({ message: String(err) }, { status: 500 });
+  }
+}
+
+// src/inventory/orders/handler/change-status.ts
 async function PUT5(request, { params }) {
   try {
     const { id } = await params;
     const body = await request.json();
     const result = await putOrderChangeStatus(id, body);
-    return import_server8.NextResponse.json(result);
+    return import_server9.NextResponse.json(result);
   } catch (error) {
-    return import_server8.NextResponse.json(
-      { error: error.message || "Failed to change order status" },
-      { status: 500 }
-    );
+    return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/orders/handler/discount.ts
-var import_server9 = require("next/server");
+var import_server10 = require("next/server");
 async function PUT6(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderDiscount(id, body);
-    return import_server9.NextResponse.json(result);
+    return import_server10.NextResponse.json(result);
   } catch (error) {
-    return import_server9.NextResponse.json(
+    return import_server10.NextResponse.json(
       { error: error.message || "Failed to apply order discount" },
       { status: 500 }
     );
@@ -1433,15 +1451,15 @@ async function PUT6(request, { params }) {
 }
 
 // src/inventory/orders/handler/reference-id.ts
-var import_server10 = require("next/server");
+var import_server11 = require("next/server");
 async function PUT7(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderReferenceId(id, body);
-    return import_server10.NextResponse.json(result);
+    return import_server11.NextResponse.json(result);
   } catch (error) {
-    return import_server10.NextResponse.json(
+    return import_server11.NextResponse.json(
       { error: error.message || "Failed to update order reference ID" },
       { status: 500 }
     );
@@ -1449,15 +1467,15 @@ async function PUT7(request, { params }) {
 }
 
 // src/inventory/orders/handler/reference-delivery-id.ts
-var import_server11 = require("next/server");
+var import_server12 = require("next/server");
 async function PUT8(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderReferenceDeliveryId(id, body);
-    return import_server11.NextResponse.json(result);
+    return import_server12.NextResponse.json(result);
   } catch (error) {
-    return import_server11.NextResponse.json(
+    return import_server12.NextResponse.json(
       { error: error.message || "Failed to update order reference delivery ID" },
       { status: 500 }
     );

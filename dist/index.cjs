@@ -883,7 +883,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     sourceId = null,
     offerId = null,
     newArrival = null,
-    getBrand = false,
+    GetBrand = false,
     getColors = false,
     getColorsDefaultPictures = null,
     getOffer = false,
@@ -929,7 +929,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     this.sourceId = sourceId;
     this.offerId = offerId;
     this.newArrival = newArrival;
-    this.getBrand = getBrand;
+    this.GetBrand = GetBrand;
     this.getColors = getColors;
     this.getColorsDefaultPictures = getColorsDefaultPictures;
     this.getOffer = getOffer;
@@ -980,7 +980,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       sourceId: updates.sourceId !== void 0 ? updates.sourceId : this.sourceId,
       offerId: updates.offerId !== void 0 ? updates.offerId : this.offerId,
       newArrival: updates.newArrival !== void 0 ? updates.newArrival : this.newArrival,
-      getBrand: updates.getBrand !== void 0 ? updates.getBrand : this.getBrand,
+      GetBrand: updates.GetBrand !== void 0 ? updates.GetBrand : this.GetBrand,
       getColors: updates.getColors !== void 0 ? updates.getColors : this.getColors,
       getColorsDefaultPictures: updates.getColorsDefaultPictures !== void 0 ? updates.getColorsDefaultPictures : this.getColorsDefaultPictures,
       getOffer: updates.getOffer !== void 0 ? updates.getOffer : this.getOffer,
@@ -1059,8 +1059,8 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     if (this.newArrival !== null) {
       params.set("newArrival", this.newArrival);
     }
-    if (this.getBrand) {
-      params.set("getBrand", "true");
+    if (this.GetBrand) {
+      params.set("GetBrand", "true");
     }
     if (this.getColors) {
       params.set("getColors", "true");
@@ -1182,7 +1182,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     if (this.sourceId !== null) map.sourceId = this.sourceId;
     if (this.offerId !== null) map.offerId = this.offerId;
     if (this.newArrival !== null) map.newArrival = this.newArrival;
-    if (this.getBrand) map.getBrand = true;
+    if (this.GetBrand) map.GetBrand = true;
     if (this.getColors) map.getColors = true;
     if (this.getColorsDefaultPictures) map.getColorsDefaultPictures = true;
     if (this.getOffer) map.getOffer = true;
@@ -1262,7 +1262,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       sourceId: params.get("sourceId") ? parseInt(params.get("sourceId")) : null,
       offerId: params.get("offerId") ? parseInt(params.get("offerId")) : null,
       newArrival: params.get("newArrival") || null,
-      getBrand: params.get("getBrand") === "true",
+      GetBrand: params.get("GetBrand") === "true",
       getColors: params.get("getColors") === "true",
       getColorsDefaultPictures: params.get("getColorsDefaultPictures") === "true" || null,
       getOffer: params.get("getOffer") === "true",

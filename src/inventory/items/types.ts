@@ -166,7 +166,6 @@ export interface PackUnit {
   isActive: boolean;
 }
 
-// Standard paginated response for product lists
 export interface ProductResponse {
   currentPage: number;
   pageCount: number;
@@ -179,7 +178,6 @@ export interface ProductResponse {
   results: Product[];
 }
 
-// Interface used for update requests (matches the example payload)
 export interface UpdateItemRequest {
   name: string;
   currencyID?: number;
