@@ -6,6 +6,6 @@ export async function deleteOffersGroup(offerId: string | number, id: string | n
   }
 
   const res = await fetch(`/api/offers/${offerId}/offer-groups/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Failed to delete offer group: ${res.statusText}`);
+  if (!res.ok) throw new Error(`Failed to delete offer group: ${res}`);
   return res.json();
 }
