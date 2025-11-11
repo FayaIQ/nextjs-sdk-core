@@ -98,7 +98,12 @@ async function postOffersItemsDiscount(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to post items discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -114,7 +119,12 @@ async function putOffersItemsDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put items discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -142,7 +152,12 @@ async function postOffersCustomerDiscount(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to post customer discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -158,7 +173,12 @@ async function postOffersInvoiceDiscount(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to post invoice discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -174,7 +194,12 @@ async function postOffersShippingDiscount(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to post shipping discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -190,7 +215,12 @@ async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to add items by filter: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -221,8 +251,10 @@ async function postOffersDeliveryZones(offerId, payload) {
     body: JSON.stringify(payload)
   });
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(`${err.message || res.statusText}`);
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
   }
   return res.json();
 }
@@ -251,7 +283,12 @@ async function putOffersGroup(offerId, id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to update offer group: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -263,7 +300,16 @@ async function deleteOffersGroup(offerId, id) {
     return deleteWithAuth(Api.deleteOffersGroup(offerId, id));
   }
   const res = await fetch(`/api/offers/${offerId}/offer-groups/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Failed to delete offer group: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -279,7 +325,12 @@ async function putOffersCustomerDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put customer discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -295,7 +346,12 @@ async function putOffersExtraItemDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put extra item discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -311,7 +367,12 @@ async function putOffersInvoiceDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put invoice discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -343,7 +404,12 @@ async function putOffersShippingDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put shipping discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
