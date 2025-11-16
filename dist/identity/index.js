@@ -6,8 +6,8 @@ import {
 } from "../chunk-KIHC3O2A.js";
 import {
   postWithoutAuth
-} from "../chunk-DVKBEBTB.js";
-import "../chunk-VIQ7XIV2.js";
+} from "../chunk-7FWR72GZ.js";
+import "../chunk-XPCFAA76.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -55,6 +55,15 @@ async function loginUser(credentials) {
         maxAge: expiresIn
       });
     }
+    if (response.user?.username) {
+      cookieStore.set("username", response.user.username, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: expiresIn
+      });
+    }
     return response;
   }
   const res = await fetch(`/api/auth/login`, {
@@ -86,7 +95,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-LHUGJW23.js");
+    const { getWithAuth } = await import("../fetcher-BHV33BYO.js");
     const { Api: Api2 } = await import("../api-PZO3QWDP.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";

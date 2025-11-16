@@ -25,7 +25,10 @@ if (AUTH_MODE === "strict" && typeof window === "undefined") {
     if (accessTokenCookie) {
       return accessTokenCookie;
     }
-    throw new Error("Unauthorized: Access token missing (strict mode enabled)");
+    const err = new Error("Unauthorized: Access token missing (strict mode enabled)");
+    // attach HTTP status for callers that inspect it
+    (err as any).status = 401;
+    throw err;
   }
 
   const { getAuthConfig } = await import("./core/config");

@@ -222,7 +222,20 @@ export async function getWithAuth<T>(
   query?: QueryParams,
   headers?: Record<string, string>
 ): Promise<T> {
-  const token = await getToken();
+  let token: string | null = null;
+  try {
+    token = await getToken();
+  } catch (err: any) {
+    // Normalize token-related unauthorized errors to ApiError(401)
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    // No token found — treat as unauthorized
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch<T>(url, {
     method: "GET",
     token,
@@ -270,7 +283,18 @@ export async function postWithAuth<T>(
   data?: RequestData,
   headers?: Record<string, string>
 ): Promise<T> {
-  const token = await getToken();
+  let token: string | null = null;
+  try {
+    token = await getToken();
+  } catch (err: any) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch<T>(url, {
     method: "POST",
     token,
@@ -375,7 +399,18 @@ export async function putWithAuth<T>(
   data?: RequestData,
   headers?: Record<string, string>
 ): Promise<T> {
-  const token = await getToken();
+  let token: string | null = null;
+  try {
+    token = await getToken();
+  } catch (err: any) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch<T>(url, {
     method: "PUT",
     token,
@@ -421,7 +456,18 @@ export async function deleteWithAuth<T>(
   url: string,
   headers?: Record<string, string>
 ): Promise<T> {
-  const token = await getToken();
+  let token: string | null = null;
+  try {
+    token = await getToken();
+  } catch (err: any) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch<T>(url, {
     method: "DELETE",
     token,
@@ -465,7 +511,18 @@ export async function patchWithAuth<T>(
   data?: RequestData,
   headers?: Record<string, string>
 ): Promise<T> {
-  const token = await getToken();
+  let token: string | null = null;
+  try {
+    token = await getToken();
+  } catch (err: any) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch<T>(url, {
     method: "PATCH",
     token,

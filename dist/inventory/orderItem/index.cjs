@@ -378,7 +378,9 @@ async function getToken() {
     if (accessTokenCookie) {
       return accessTokenCookie;
     }
-    throw new Error("Unauthorized: Access token missing (strict mode enabled)");
+    const err = new Error("Unauthorized: Access token missing (strict mode enabled)");
+    err.status = 401;
+    throw err;
   }
   const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
@@ -529,7 +531,18 @@ async function apiFetch(url, options = {}) {
   }
 }
 async function getWithAuth(url, query, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "GET",
     token,
@@ -538,7 +551,18 @@ async function getWithAuth(url, query, headers) {
   });
 }
 async function postWithAuth(url, data, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "POST",
     token,
@@ -547,7 +571,18 @@ async function postWithAuth(url, data, headers) {
   });
 }
 async function putWithAuth(url, data, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "PUT",
     token,

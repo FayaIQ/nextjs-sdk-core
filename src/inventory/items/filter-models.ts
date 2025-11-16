@@ -719,13 +719,65 @@ export class ItemsFilterParameters {
         ? params.get("availability") === "true"
         : null,
       minRating: params.get("minRating")
-        ? parseFloat(params.get("minRatin g")!)
+        ? parseFloat(params.get("minRating")!)
         : null,
       hasDiscount: params.get("hasDiscount")
         ? params.get("hasDiscount") === "true"
         : null,
       minDiscountPercentage: params.get("minDiscountPercentage")
         ? parseFloat(params.get("minDiscountPercentage")!)
+        : null,
+      ItemQuantityStatus: params.get("ItemQuantityStatus")
+        ? parseInt(params.get("ItemQuantityStatus")!)
+        : null,
+      SyncThirdPartyIds: params.get("SyncThirdPartyIds") || null,
+      SyncThirdPartyId: params.get("SyncThirdPartyId") || null,
+      RejectionNote: params.get("RejectionNote") || null,
+      Deliveryability: params.get("Deliveryability")
+        ? params.get("Deliveryability") === "true"
+        : null,
+      Availability: params.get("Availability")
+        ? params.get("Availability") === "true"
+        : null,
+      IsMultiMenuStore: params.get("IsMultiMenuStore")
+        ? params.get("IsMultiMenuStore") === "true"
+        : null,
+      UseApprovalSystem: params.get("UseApprovalSystem")
+        ? params.get("UseApprovalSystem") === "true"
+        : null,
+      CurrentSortField: params.get("CurrentSortField") || null,
+      CurrentSortOrder: params.get("CurrentSortOrder") || null,
+      Code: params.get("Code") || null,
+      barcode: params.get("barcode") || null,
+      IsFeatured: params.get("IsFeatured")
+        ? params.get("IsFeatured") === "true"
+        : null,
+      IsActive: params.get("IsActive")
+        ? params.get("IsActive") === "true"
+        : null,
+      ApprovedStatus: params.get("ApprovedStatus")
+        ? parseInt(params.get("ApprovedStatus")!)
+        : null,
+      HavePicture: params.get("HavePicture")
+        ? params.get("HavePicture") === "true"
+        : null,
+      HaveDescription: params.get("HaveDescription")
+        ? params.get("HaveDescription") === "true"
+        : null,
+      HaveColor: params.get("HaveColor")
+        ? params.get("HaveColor") === "true"
+        : null,
+      HaveOffer: params.get("HaveOffer")
+        ? params.get("HaveOffer") === "true"
+        : null,
+      HaveItemCollectionOffer: params.get("HaveItemCollectionOffer")
+        ? params.get("HaveItemCollectionOffer") === "true"
+        : null,
+      IsDeleted: params.get("IsDeleted")
+        ? params.get("IsDeleted") === "true"
+        : null,
+      CheckQuantityBeforeSale: params.get("CheckQuantityBeforeSale")
+        ? params.get("CheckQuantityBeforeSale") === "true"
         : null,
     });
   }
