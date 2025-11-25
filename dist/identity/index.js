@@ -6,8 +6,8 @@ import {
 } from "../chunk-WZTOPMWG.js";
 import {
   postWithoutAuth
-} from "../chunk-PIGVTWVO.js";
-import "../chunk-ZAQXIQEL.js";
+} from "../chunk-3K4CRJFB.js";
+import "../chunk-Y7DKXAVF.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -95,7 +95,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-4LH54I5A.js");
+    const { getWithAuth } = await import("../fetcher-AJXAI5P7.js");
     const { Api: Api2 } = await import("../api-XKV6O6PD.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";

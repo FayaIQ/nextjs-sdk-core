@@ -1,6 +1,6 @@
 import {
   getStoreInfo
-} from "../../chunk-TTLUA3O6.js";
+} from "../../chunk-RDZMP3FQ.js";
 
 // src/identity/application/handler/getStores.ts
 import { NextResponse } from "next/server";

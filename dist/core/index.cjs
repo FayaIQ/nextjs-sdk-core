@@ -392,6 +392,15 @@ async function getToken() {
     err.status = 401;
     throw err;
   }
+  try {
+    if (typeof window === "undefined") {
+      const { cookies } = await import("next/headers");
+      const cookie = await cookies();
+      const accessTokenCookie = cookie.get("access_token")?.value;
+      if (accessTokenCookie) return accessTokenCookie;
+    }
+  } catch (e) {
+  }
   const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
   const authConfig = getAuthConfig2();
