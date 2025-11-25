@@ -874,12 +874,15 @@ async function deleteOffer(id) {
 // src/inventory/offers/getInvoiceDiscount.ts
 async function getInvoiceDiscount(coupon) {
   if (typeof window === "undefined") {
-    const { getWithoutAuth: getWithoutAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithoutAuth2(Api2.getInvoiceDiscount(coupon));
+    return getWithAuth2(Api2.getInvoiceDiscount(coupon));
   }
-  const res = await fetch(`/api/offers/invoice-discount/${encodeURIComponent(String(coupon))}`);
-  if (!res.ok) throw new Error(`Failed to fetch invoice discount: ${res.statusText}`);
+  const res = await fetch(
+    `/api/offers/invoice-discount/${encodeURIComponent(String(coupon))}`
+  );
+  if (!res.ok)
+    throw new Error(`Failed to fetch invoice discount: ${res.statusText}`);
   return res.json();
 }
 

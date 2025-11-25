@@ -29,4 +29,3 @@ export { PUT as PUTOrderChangeStatus } from "./handler/change-status";
 export { PUT as PUTOrderDiscount } from "./handler/discount";
 export { PUT as PUTOrderReferenceId } from "./handler/reference-id";
 export { PUT as PUTOrderReferenceDeliveryId } from "./handler/reference-delivery-id";
-export { POST as POSTOrder } from "./handler/post-order"

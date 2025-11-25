@@ -1,15 +1,15 @@
 import {
   toNextResponseFromError
-} from "../chunk-PCIBAALY.js";
-import "../chunk-3K4CRJFB.js";
-import "../chunk-Y7DKXAVF.js";
+} from "../chunk-UVGXKRVD.js";
+import "../chunk-AXTX3LZI.js";
+import "../chunk-ROYJHVLJ.js";
 
 // src/crm/clients/getClientsPaging.ts
 async function getClientsPaging(query) {
   const qs = query ? `?${new URLSearchParams(query).toString()}` : "";
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-AJXAI5P7.js");
-    const { Api } = await import("../api-XKV6O6PD.js");
+    const { getWithAuth } = await import("../fetcher-ZET5K2UJ.js");
+    const { Api } = await import("../api-HI3ED3LJ.js");
     return getWithAuth(`${Api.getClientsPaging}${qs}`);
   }
   const res = await fetch(`/api/crm/clients/paging${qs}`);
@@ -37,8 +37,8 @@ function buildQuery(params) {
 async function getClients(params) {
   const qs = buildQuery(params);
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-AJXAI5P7.js");
-    const { Api } = await import("../api-XKV6O6PD.js");
+    const { getWithAuth } = await import("../fetcher-ZET5K2UJ.js");
+    const { Api } = await import("../api-HI3ED3LJ.js");
     const url = Api.getClients + (qs || "");
     return getWithAuth(url);
   }
@@ -50,8 +50,8 @@ async function getClients(params) {
 // src/crm/clients/postClient.ts
 async function postClient(data) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../fetcher-AJXAI5P7.js");
-    const { Api } = await import("../api-XKV6O6PD.js");
+    const { postWithAuth } = await import("../fetcher-ZET5K2UJ.js");
+    const { Api } = await import("../api-HI3ED3LJ.js");
     return postWithAuth(Api.postClients, data);
   }
   const res = await fetch(`/api/crm/clients`, {
