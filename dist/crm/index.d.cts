@@ -48,7 +48,8 @@ interface ClientsPagingResponse {
  */
 declare function getClientsPaging(query?: Record<string, any>): Promise<ClientsPagingResponse>;
 
-declare function getClients(): Promise<Client[]>;
+type Params = Record<string, unknown> | URLSearchParams | string | undefined;
+declare function getClients(params?: Params): Promise<Client[]>;
 
 declare function postClient(data: PostClientRequest): Promise<Client>;
 

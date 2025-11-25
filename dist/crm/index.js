@@ -18,13 +18,31 @@ async function getClientsPaging(query) {
 }
 
 // src/crm/clients/getClients.ts
-async function getClients() {
+function buildQuery(params) {
+  if (!params) return "";
+  if (typeof params === "string") return params.startsWith("?") ? params : `?${params}`;
+  if (params instanceof URLSearchParams) return `?${params.toString()}`;
+  const usp = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === void 0 || v === null) return;
+    if (Array.isArray(v)) {
+      v.forEach((item) => usp.append(k, String(item)));
+    } else {
+      usp.append(k, String(v));
+    }
+  });
+  const qs = usp.toString();
+  return qs ? `?${qs}` : "";
+}
+async function getClients(params) {
+  const qs = buildQuery(params);
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../fetcher-4LH54I5A.js");
     const { Api } = await import("../api-XKV6O6PD.js");
-    return getWithAuth(Api.getClients);
+    const url = Api.getClients + (qs || "");
+    return getWithAuth(url);
   }
-  const res = await fetch(`/api/crm/clients`);
+  const res = await fetch(`/api/crm/clients${qs}`);
   if (!res.ok) throw new Error(`Failed to fetch clients: ${res.statusText}`);
   return res.json();
 }
@@ -52,7 +70,9 @@ async function postClient(data) {
 import { NextResponse } from "next/server";
 async function GET(request) {
   try {
-    const clients = await getClients();
+    const url = new URL(request.url);
+    const qs = url.search ? url.search : "";
+    const clients = await getClients(qs);
     return NextResponse.json(clients);
   } catch (err) {
     return toNextResponseFromError(err);

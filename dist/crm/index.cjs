@@ -756,13 +756,31 @@ async function getClientsPaging(query) {
 }
 
 // src/crm/clients/getClients.ts
-async function getClients() {
+function buildQuery(params) {
+  if (!params) return "";
+  if (typeof params === "string") return params.startsWith("?") ? params : `?${params}`;
+  if (params instanceof URLSearchParams) return `?${params.toString()}`;
+  const usp = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === void 0 || v === null) return;
+    if (Array.isArray(v)) {
+      v.forEach((item) => usp.append(k, String(item)));
+    } else {
+      usp.append(k, String(v));
+    }
+  });
+  const qs = usp.toString();
+  return qs ? `?${qs}` : "";
+}
+async function getClients(params) {
+  const qs = buildQuery(params);
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(Api2.getClients);
+    const url = Api2.getClients + (qs || "");
+    return getWithAuth2(url);
   }
-  const res = await fetch(`/api/crm/clients`);
+  const res = await fetch(`/api/crm/clients${qs}`);
   if (!res.ok) throw new Error(`Failed to fetch clients: ${res.statusText}`);
   return res.json();
 }
@@ -811,7 +829,9 @@ function toNextResponseFromError(err) {
 // src/crm/clients/handler/getClients.ts
 async function GET(request) {
   try {
-    const clients = await getClients();
+    const url = new URL(request.url);
+    const qs = url.search ? url.search : "";
+    const clients = await getClients(qs);
     return import_server2.NextResponse.json(clients);
   } catch (err) {
     return toNextResponseFromError(err);
