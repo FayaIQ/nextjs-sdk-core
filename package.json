@@ -26,8 +26,8 @@
     "QUICK_START.md"
   ],
   "scripts": {
-  "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/gps/locations/index.ts src/identity/application/index.ts  src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts --format cjs,esm --dts",
-  "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/gps/locations/index.ts src/identity/application/index.ts  src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts --format cjs,esm --dts --watch",
     "prepublishOnly": "npm run build"
   },
   "exports": {
@@ -90,6 +90,16 @@
       "types": "./dist/identity/application/*.d.ts",
       "import": "./dist/identity/application/*.js",
       "require": "./dist/identity/application/*.cjs"
+    },
+    "./identity/users": {
+      "types": "./dist/identity/users/index.d.ts",
+      "import": "./dist/identity/users/index.js",
+      "require": "./dist/identity/users/index.cjs"
+    },
+    "./identity/users/*": {
+      "types": "./dist/identity/users/*.d.ts",
+      "import": "./dist/identity/users/*.js",
+      "require": "./dist/identity/users/*.cjs"
     },
     "./inventory/orders": {
       "types": "./dist/inventory/orders/index.d.ts",
@@ -185,8 +195,7 @@
       "types": "./dist/inventory/orderItem/*.d.ts",
       "import": "./dist/inventory/orderItem/*.js",
       "require": "./dist/inventory/orderItem/*.cjs"
-    }
-    ,
+    },
     "./inventory/payments": {
       "types": "./dist/inventory/payments/index.d.ts",
       "import": "./dist/inventory/payments/index.js",

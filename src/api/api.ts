@@ -136,6 +136,12 @@ export class Api {
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
+  static putOrderPayment(orderId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
+  }
+  static putOrderPaymentStatus(orderId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment/Status`;
+  }
   static getStoreInfo: string = `${Api.STORES_BASE}/v1/Stores/Info`;
   static getCities: string = `${Api.GPS_BASE}/v1/Locations`;
   static getDeliveryZones: string = `${Api.GPS_BASE}/v1/DeliveryZones`;

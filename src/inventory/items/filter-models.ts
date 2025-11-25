@@ -119,11 +119,11 @@ export class ItemsFilterParameters {
   ItemQuantityStatus: number | null;
   SyncThirdPartyIds: string | null;
   SyncThirdPartyId: string | null;
-  
+
   RejectionNote: string | null;
   Deliveryability: boolean | null;
   Availability: boolean | null;
-  
+
   // New parameters
   IsMultiMenuStore: boolean | null;
   UseApprovalSystem: boolean | null;
@@ -141,8 +141,6 @@ export class ItemsFilterParameters {
   HaveItemCollectionOffer: boolean | null;
   IsDeleted: boolean | null;
   CheckQuantityBeforeSale: boolean | null;
-
-
 
   constructor({
     pagingParameters = new PagingParameters(),
@@ -377,22 +375,12 @@ export class ItemsFilterParameters {
         updates.CurrentSortOrder !== undefined
           ? updates.CurrentSortOrder
           : this.CurrentSortOrder,
-      Code:
-        updates.Code !== undefined
-          ? updates.Code
-          : this.Code,
-      barcode:
-        updates.barcode !== undefined
-          ? updates.barcode
-          : this.barcode,
+      Code: updates.Code !== undefined ? updates.Code : this.Code,
+      barcode: updates.barcode !== undefined ? updates.barcode : this.barcode,
       IsFeatured:
-        updates.IsFeatured !== undefined
-          ? updates.IsFeatured
-          : this.IsFeatured,
+        updates.IsFeatured !== undefined ? updates.IsFeatured : this.IsFeatured,
       IsActive:
-        updates.IsActive !== undefined
-          ? updates.IsActive
-          : this.IsActive,
+        updates.IsActive !== undefined ? updates.IsActive : this.IsActive,
       ApprovedStatus:
         updates.ApprovedStatus !== undefined
           ? updates.ApprovedStatus
@@ -406,27 +394,20 @@ export class ItemsFilterParameters {
           ? updates.HaveDescription
           : this.HaveDescription,
       HaveColor:
-        updates.HaveColor !== undefined
-          ? updates.HaveColor
-          : this.HaveColor,
+        updates.HaveColor !== undefined ? updates.HaveColor : this.HaveColor,
       HaveOffer:
-        updates.HaveOffer !== undefined
-          ? updates.HaveOffer
-          : this.HaveOffer,
+        updates.HaveOffer !== undefined ? updates.HaveOffer : this.HaveOffer,
       HaveItemCollectionOffer:
         updates.HaveItemCollectionOffer !== undefined
           ? updates.HaveItemCollectionOffer
           : this.HaveItemCollectionOffer,
       IsDeleted:
-        updates.IsDeleted !== undefined
-          ? updates.IsDeleted
-          : this.IsDeleted,
+        updates.IsDeleted !== undefined ? updates.IsDeleted : this.IsDeleted,
       CheckQuantityBeforeSale:
         updates.CheckQuantityBeforeSale !== undefined
           ? updates.CheckQuantityBeforeSale
           : this.CheckQuantityBeforeSale,
     });
-
   }
   /**
    * Convert filter parameters to URL search parameters
@@ -579,13 +560,19 @@ export class ItemsFilterParameters {
       params.set("HaveOffer", String(this.HaveOffer));
     }
     if (this.HaveItemCollectionOffer !== null) {
-      params.set("HaveItemCollectionOffer", String(this.HaveItemCollectionOffer));
+      params.set(
+        "HaveItemCollectionOffer",
+        String(this.HaveItemCollectionOffer)
+      );
     }
     if (this.IsDeleted !== null) {
       params.set("IsDeleted", String(this.IsDeleted));
     }
     if (this.CheckQuantityBeforeSale !== null) {
-      params.set("CheckQuantityBeforeSale", String(this.CheckQuantityBeforeSale));
+      params.set(
+        "CheckQuantityBeforeSale",
+        String(this.CheckQuantityBeforeSale)
+      );
     }
     return params;
   }
@@ -628,12 +615,10 @@ export class ItemsFilterParameters {
       map.SyncThirdPartyIds = this.SyncThirdPartyIds;
     if (this.SyncThirdPartyId !== null)
       map.SyncThirdPartyId = this.SyncThirdPartyId;
-    if (this.RejectionNote !== null)
-      map.RejectionNote = this.RejectionNote;
+    if (this.RejectionNote !== null) map.RejectionNote = this.RejectionNote;
     if (this.Deliveryability !== null)
       map.Deliveryability = this.Deliveryability;
-    if (this.Availability !== null)
-      map.Availability = this.Availability;
+    if (this.Availability !== null) map.Availability = this.Availability;
     if (this.IsMultiMenuStore !== null)
       map.IsMultiMenuStore = this.IsMultiMenuStore;
     if (this.UseApprovalSystem !== null)
@@ -646,27 +631,20 @@ export class ItemsFilterParameters {
       map.Code = this.Code.trim();
     if (this.barcode !== null && this.barcode.trim() !== "")
       map.barcode = this.barcode.trim();
-    if (this.IsFeatured !== null)
-      map.IsFeatured = this.IsFeatured;
-    if (this.IsActive !== null)
-      map.IsActive = this.IsActive;
-    if (this.ApprovedStatus !== null)
-      map.ApprovedStatus = this.ApprovedStatus;
-    if (this.HavePicture !== null)
-      map.HavePicture = this.HavePicture;
+    if (this.IsFeatured !== null) map.IsFeatured = this.IsFeatured;
+    if (this.IsActive !== null) map.IsActive = this.IsActive;
+    if (this.ApprovedStatus !== null) map.ApprovedStatus = this.ApprovedStatus;
+    if (this.HavePicture !== null) map.HavePicture = this.HavePicture;
     if (this.HaveDescription !== null)
       map.HaveDescription = this.HaveDescription;
-    if (this.HaveColor !== null)
-      map.HaveColor = this.HaveColor;
-    if (this.HaveOffer !== null)
-      map.HaveOffer = this.HaveOffer;
+    if (this.HaveColor !== null) map.HaveColor = this.HaveColor;
+    if (this.HaveOffer !== null) map.HaveOffer = this.HaveOffer;
     if (this.HaveItemCollectionOffer !== null)
       map.HaveItemCollectionOffer = this.HaveItemCollectionOffer;
-    if (this.IsDeleted !== null)
-      map.IsDeleted = this.IsDeleted;
+    if (this.IsDeleted !== null) map.IsDeleted = this.IsDeleted;
     if (this.CheckQuantityBeforeSale !== null)
       map.CheckQuantityBeforeSale = this.CheckQuantityBeforeSale;
-      
+
     return map;
   }
   /**
@@ -730,9 +708,3 @@ export class ItemsFilterParameters {
     });
   }
 }
-
-
-
-
-
-
