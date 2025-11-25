@@ -1,10 +1,13 @@
 import {
-  getMenus
-} from "./chunk-MIYAGA2E.js";
+  getSlides
+} from "./chunk-YQWCMYTR.js";
 import {
   getProductInfo,
   getProducts
 } from "./chunk-RQSB333Z.js";
+import {
+  getMenus
+} from "./chunk-MIYAGA2E.js";
 import {
   AgeGroup,
   Gender,
@@ -22,9 +25,6 @@ import {
   Sign,
   getOrders
 } from "./chunk-YGKBZUD6.js";
-import {
-  getSlides
-} from "./chunk-YQWCMYTR.js";
 import {
   Api
 } from "./chunk-WZTOPMWG.js";

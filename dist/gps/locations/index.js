@@ -1,4 +1,7 @@
 import {
+  getAddressById
+} from "../../chunk-J6IPDLIK.js";
+import {
   getCities,
   getCountries,
   getDistricts,
@@ -39,6 +42,7 @@ async function GET2(request, { params }) {
   }
 }
 export {
+  getAddressById,
   getCities,
   getCountries,
   GET as getCountriesHandler,

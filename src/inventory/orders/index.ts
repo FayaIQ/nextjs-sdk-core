@@ -9,7 +9,7 @@ export * from "./putOrderDiscount";
 export * from "./putOrderReferenceId";
 export * from "./putOrderReferenceDeliveryId";
 export * from "./postOrder";
-export * from "./getAddressById";
+// address lookup moved to gps/locations
 
 // Re-export handlers for Next.js API routes
 export { POST as POSTOrderFullInfo } from "./handler/full-info";

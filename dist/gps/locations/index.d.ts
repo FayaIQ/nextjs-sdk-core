@@ -1,5 +1,6 @@
 export { b as getCities, g as getCountries, c as getDistricts, a as getLocationChildren } from '../../getLocationChildren-E8z6W9gy.js';
 import { NextRequest, NextResponse } from 'next/server';
+import { d as OrderAddress } from '../../order-models-nbgqiu1i.js';
 
 interface Location {
     id: number;
@@ -32,4 +33,6 @@ declare function GET(request: NextRequest, { params }: {
     }>;
 }): Promise<NextResponse<any>>;
 
-export { type City, type Country, type District, type Location, GET$1 as getCountriesHandler, GET as getLocationChildrenHandler };
+declare function getAddressById(id: string | number): Promise<OrderAddress>;
+
+export { type City, type Country, type District, type Location, getAddressById, GET$1 as getCountriesHandler, GET as getLocationChildrenHandler };

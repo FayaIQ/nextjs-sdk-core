@@ -17,6 +17,9 @@ import {
   putWithAuth
 } from "../../chunk-PIGVTWVO.js";
 import "../../chunk-ZAQXIQEL.js";
+import {
+  getAddressById
+} from "../../chunk-J6IPDLIK.js";
 
 // src/inventory/orders/getOrder.ts
 async function getOrder(id) {
@@ -236,20 +239,6 @@ async function postOrder(data) {
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(`Create order failed: ${errorData.error || res.statusText}`);
-  }
-  return res.json();
-}
-
-// src/inventory/orders/getAddressById.ts
-async function getAddressById(id) {
-  if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../core/index.js");
-    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
-    return getWithAuth(Api2.getAddress(id));
-  }
-  const res = await fetch(`/api/addresses/${id}`);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch address ${id}: ${res.statusText}`);
   }
   return res.json();
 }
@@ -516,7 +505,6 @@ export {
   PUT7 as PUTOrderReferenceId,
   PayType,
   Sign,
-  getAddressById,
   getOrder,
   getOrders,
   getOrdersFullInfo,

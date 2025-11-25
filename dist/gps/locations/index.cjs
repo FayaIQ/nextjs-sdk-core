@@ -739,6 +739,7 @@ var init_core = __esm({
 // src/gps/locations/index.ts
 var locations_exports = {};
 __export(locations_exports, {
+  getAddressById: () => getAddressById,
   getCities: () => getCities,
   getCountries: () => getCountries,
   getCountriesHandler: () => GET,
@@ -817,8 +818,23 @@ async function GET2(request, { params }) {
     return import_server2.NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+// src/gps/locations/getAddressById.ts
+async function getAddressById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getAddress(id));
+  }
+  const res = await fetch(`/api/addresses/${id}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch address ${id}: ${res.statusText}`);
+  }
+  return res.json();
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  getAddressById,
   getCities,
   getCountries,
   getCountriesHandler,

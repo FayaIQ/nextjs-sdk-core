@@ -777,7 +777,6 @@ __export(orders_exports, {
   PUTOrderReferenceId: () => PUT7,
   PayType: () => PayType,
   Sign: () => Sign,
-  getAddressById: () => getAddressById,
   getOrder: () => getOrder,
   getOrders: () => getOrders,
   getOrdersFullInfo: () => getOrdersFullInfo,
@@ -1360,20 +1359,6 @@ async function postOrder(data) {
   return res.json();
 }
 
-// src/inventory/orders/getAddressById.ts
-async function getAddressById(id) {
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(Api2.getAddress(id));
-  }
-  const res = await fetch(`/api/addresses/${id}`);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch address ${id}: ${res.statusText}`);
-  }
-  return res.json();
-}
-
 // src/inventory/orders/handler/full-info.ts
 var import_server = require("next/server");
 async function POST(request) {
@@ -1527,6 +1512,22 @@ async function GET2(request, { params }) {
 
 // src/inventory/orders/handler/getAddressById.ts
 var import_server8 = require("next/server");
+
+// src/gps/locations/getAddressById.ts
+async function getAddressById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getAddress(id));
+  }
+  const res = await fetch(`/api/addresses/${id}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch address ${id}: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+// src/inventory/orders/handler/getAddressById.ts
 async function GET3(request) {
   try {
     const url = new URL(request.url);
@@ -1658,7 +1659,6 @@ async function POST2(request) {
   PUTOrderReferenceId,
   PayType,
   Sign,
-  getAddressById,
   getOrder,
   getOrders,
   getOrdersFullInfo,

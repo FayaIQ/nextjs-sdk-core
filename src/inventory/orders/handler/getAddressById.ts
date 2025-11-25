@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAddressById } from "../getAddressById";
+import { getAddressById } from "../../../gps/locations/getAddressById";
 
 export async function GET(request: NextRequest) {
   try {
