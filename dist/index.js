@@ -1,4 +1,11 @@
 import {
+  getSlides
+} from "./chunk-YQWCMYTR.js";
+import {
+  getProductInfo,
+  getProducts
+} from "./chunk-RQSB333Z.js";
+import {
   DeleveryType,
   OrderPagingParameters,
   OrderType,
@@ -11,10 +18,6 @@ import {
   getMenus
 } from "./chunk-MIYAGA2E.js";
 import {
-  getProductInfo,
-  getProducts
-} from "./chunk-RQSB333Z.js";
-import {
   AgeGroup,
   Gender,
   ItemsFilterParameters,
@@ -22,9 +25,6 @@ import {
   PagingParameters,
   SortType
 } from "./chunk-T4IEAKR3.js";
-import {
-  getSlides
-} from "./chunk-YQWCMYTR.js";
 import {
   Api
 } from "./chunk-WZTOPMWG.js";
