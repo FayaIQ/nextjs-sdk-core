@@ -93,6 +93,9 @@ var init_api = __esm({
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
+      static getProductInfoV2(id) {
+        return `${_Api.INVENTORY_BASE}/v2/Items/${id}/FullInfo`;
+      }
       static getMenuById(id) {
         return `${_Api.INVENTORY_BASE}/v1/Menus/${id}`;
       }
@@ -192,6 +195,9 @@ var init_api = __esm({
       }
       static getOrder(id) {
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
+      }
+      static getAddress(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Addresses/${id}`;
       }
       // Order item endpoints (v3)
       static getOrderItem(orderId, itemId) {
@@ -327,6 +333,10 @@ var init_api = __esm({
     _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
     _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
     _Api.getOrders = `${_Api.INVENTORY_BASE}/v1/Orders/Paging`;
+    // CRM - Clients
+    _Api.getClientsPaging = `${_Api.INVENTORY_BASE}/v1/Clients/Paging`;
+    _Api.getClients = `${_Api.INVENTORY_BASE}/v1/Clients`;
+    _Api.postClients = `${_Api.INVENTORY_BASE}/v1/Clients`;
     _Api.postOrders = `${_Api.INVENTORY_BASE}/v2/Orders`;
     _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
     _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
@@ -371,7 +381,18 @@ async function getToken() {
     if (accessTokenCookie) {
       return accessTokenCookie;
     }
-    throw new Error("Unauthorized: Access token missing (strict mode enabled)");
+    const err = new Error("Unauthorized: Access token missing (strict mode enabled)");
+    err.status = 401;
+    throw err;
+  }
+  try {
+    if (typeof window === "undefined") {
+      const { cookies } = await import("next/headers");
+      const cookie = await cookies();
+      const accessTokenCookie = cookie.get("access_token")?.value;
+      if (accessTokenCookie) return accessTokenCookie;
+    }
+  } catch (e) {
   }
   const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
@@ -536,7 +557,18 @@ async function apiFetch(url, options = {}) {
   }
 }
 async function getWithAuth(url, query, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "GET",
     token,
@@ -552,7 +584,18 @@ async function getWithoutAuth(url, query, headers) {
   });
 }
 async function postWithAuth(url, data, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "POST",
     token,
@@ -612,7 +655,18 @@ async function postWithoutAuth(url, data, headers = {}) {
   }
 }
 async function putWithAuth(url, data, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "PUT",
     token,
@@ -628,7 +682,18 @@ async function putWithoutAuth(url, data, headers) {
   });
 }
 async function deleteWithAuth(url, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "DELETE",
     token,
@@ -642,7 +707,18 @@ async function deleteWithoutAuth(url, headers) {
   });
 }
 async function patchWithAuth(url, data, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "PATCH",
     token,
@@ -843,7 +919,12 @@ async function postOffersItemsDiscount(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to post items discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -859,7 +940,12 @@ async function putOffersItemsDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put items discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -887,7 +973,12 @@ async function postOffersCustomerDiscount(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to post customer discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -903,7 +994,12 @@ async function postOffersInvoiceDiscount(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to post invoice discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -919,7 +1015,12 @@ async function postOffersShippingDiscount(payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to post shipping discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -935,7 +1036,12 @@ async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to add items by filter: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -966,8 +1072,10 @@ async function postOffersDeliveryZones(offerId, payload) {
     body: JSON.stringify(payload)
   });
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(`${err.message || res.statusText}`);
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
   }
   return res.json();
 }
@@ -996,7 +1104,12 @@ async function putOffersGroup(offerId, id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to update offer group: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -1008,7 +1121,16 @@ async function deleteOffersGroup(offerId, id) {
     return deleteWithAuth2(Api2.deleteOffersGroup(offerId, id));
   }
   const res = await fetch(`/api/offers/${offerId}/offer-groups/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Failed to delete offer group: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -1024,7 +1146,12 @@ async function putOffersCustomerDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put customer discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -1040,7 +1167,12 @@ async function putOffersExtraItemDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put extra item discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -1056,7 +1188,12 @@ async function putOffersInvoiceDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put invoice discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -1088,7 +1225,12 @@ async function putOffersShippingDiscount(id, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`Failed to put shipping discount: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    const errorBody = await res.json();
+    errorMessage = errorBody.error || errorBody.message || errorMessage;
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 

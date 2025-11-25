@@ -10,12 +10,26 @@ import '../../types-BlK7R_r9.js';
  * @example
  * export { GET } from 'my-next-core/applications/handler/stores';
  */
-declare function GET$1(request: NextRequest): Promise<NextResponse<any>>;
+declare function GET$2(request: NextRequest): Promise<NextResponse<any>>;
 
-declare function GET(): Promise<NextResponse<StoreInfo> | NextResponse<{
+declare function GET$1(): Promise<NextResponse<StoreInfo> | NextResponse<{
+    error: string;
+}>>;
+
+interface ApplicationStoreDropdownItem {
+    id: string;
+    name: string;
+    clientType: string;
+}
+declare function getApplicationsStoreDropdown(): Promise<ApplicationStoreDropdownItem[]>;
+
+/**
+ * Handler for application stores dropdown
+ */
+declare function GET(request: NextRequest): Promise<NextResponse<ApplicationStoreDropdownItem[]> | NextResponse<{
     error: string;
 }>>;
 
 declare function getStores(): Promise<any>;
 
-export { GET as GETStoreInfo, GET$1 as GETStores, StoreInfo, getStores };
+export { type ApplicationStoreDropdownItem, GET as GETApplicationsStoreDropDown, GET$1 as GETStoreInfo, GET$2 as GETStores, StoreInfo, getApplicationsStoreDropdown, getStores };

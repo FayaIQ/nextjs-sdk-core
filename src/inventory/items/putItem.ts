@@ -1,24 +1,5 @@
-export interface UpdateItemRequest {
-  // Add the fields that can be updated based on your API requirements
-  name?: string;
-  nameSecondary?: string;
-  description?: string;
-  descriptionSecondary?: string;
-  defaultPrice: number;
-  menuIds?: number[];
-  minimumOrderQuantity: number;
-  maximumOrderQuantity: number;
+import { Product, UpdateItemRequest } from "./types";
 
-  
-  price?: number;
-  barcode?: string;
-  code?: string;
-  isActive?: boolean;
-  isFeatured?: boolean;
-  isDeliverable?: boolean;
-  // Add more fields as needed
-  [key: string]: any;
-}
 
 
 export interface UpdateItemResponse {

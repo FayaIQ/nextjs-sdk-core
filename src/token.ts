@@ -24,12 +24,27 @@ export default async function getToken(): Promise<string> {
     if (accessTokenCookie) {
       return accessTokenCookie;
     }
-    throw new Error("Unauthorized: Access token missing (strict mode enabled)");
+    const err = new Error("Unauthorized: Access token missing (strict mode enabled)");
+    // attach HTTP status for callers that inspect it
+    (err as any).status = 401;
+    throw err;
+  }
+  // AUTO MODE: check existing token first (server cookies)
+  try {
+    if (typeof window === "undefined") {
+      // server: read cookie via next/headers
+      const { cookies } = await import("next/headers");
+      const cookie = await cookies();
+      const accessTokenCookie = cookie.get("access_token")?.value;
+      if (accessTokenCookie) return accessTokenCookie;
+    }
+  } catch (e) {
+    // ignore errors while probing for existing token and fall back to sign-in below
   }
 
+  // No existing token found — perform signin to fetch a new token
   const { getAuthConfig } = await import("./core/config");
   const { Api } = await import("./api/api");
-  // AUTO MODE: perform login to fetch a new token
   const authConfig = getAuthConfig();
 
   const requestBody = {

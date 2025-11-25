@@ -10,9 +10,14 @@ export async function postOffersDeliveryZones(offerId: string | number, payload:
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(`${err.message || res.statusText}`);
+ if (!res.ok) {
+    // Extract error message from response body before throwing
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+      const errorBody = await res.json();
+      // Use the error message from the API response
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+  
+    throw new Error(errorMessage);
   }
   return res.json();
 }

@@ -226,6 +226,17 @@
       "import": "./dist/inventory/slides/*.js",
       "require": "./dist/inventory/slides/*.cjs"
     }
+    ,
+    "./crm": {
+      "types": "./dist/crm/index.d.ts",
+      "import": "./dist/crm/index.js",
+      "require": "./dist/crm/index.cjs"
+    },
+    "./crm/*": {
+      "types": "./dist/crm/*.d.ts",
+      "import": "./dist/crm/*.js",
+      "require": "./dist/crm/*.cjs"
+    }
   },
   "peerDependencies": {
     "next": "^14.0.0 || ^15.0.0 || ^16.0.0",

@@ -53,15 +53,29 @@ export interface CollectionItem {
 }
 
 export interface Packs {
-  unitLevel2: unknown | null;
-  unitLevel3: unknown | null;
+  unitLevel2: PackUnit | null;
+  unitLevel3: PackUnit | null;
 }
 
 export interface ItemColor {
   id: number;
   name: string;
-  secondaryName?: string;
+  secondaryName?: string | null;
   code: string;
+  index?: number;
+  defaultImages?: {
+    iconPath: string | null;
+    picturePath: string | null;
+    mobilePicturePath: string | null;
+  } | null;
+  pictures?: Array<{
+    id: number;
+    picturePath: string | null;
+    iconPath: string | null;
+    mobilePicturePath: string | null;
+    isDefault: boolean;
+    index: number;
+  }> | null;
 }
 
 export interface Product {
@@ -77,7 +91,7 @@ export interface Product {
   descriptionSecondary: string | null;
   currencyId: number;
   menu: object | null;
-  brand: unknown | null;
+  brand: Brand | null;
   sizeSet: SizeSet | null;
   unitInfo: UnitInfo;
   packs: Packs | null;
@@ -110,7 +124,7 @@ export interface Product {
   darkItemOffer: unknown | null;
   multipleMenus: MultipleMenu[] | null;
   colors: ItemColor[] | null;
-  generalPictures: unknown | null;
+  generalPictures: any[] | null;
   collections: CollectionItem[] | null;
   hasColors: boolean;
   hasSizes: boolean;
@@ -136,7 +150,22 @@ export interface Product {
   menuID: number | null;
 }
 
-// Standard paginated response for product lists
+export interface Brand {
+  id: number;
+  name: string;
+  secondaryName?: string | null;
+  picturePath?: string | null;
+}
+
+export interface PackUnit {
+  id: number;
+  type: number;
+  name: string;
+  value: number;
+  price?: number | null;
+  isActive: boolean;
+}
+
 export interface ProductResponse {
   currentPage: number;
   pageCount: number;
@@ -147,5 +176,53 @@ export interface ProductResponse {
   currentSortOrder: string | null;
   nextSortOrder: string | null;
   results: Product[];
+}
+
+export interface UpdateItemRequest {
+  name: string;
+  currencyID?: number;
+  defaultPrice: number;
+  imageBase64?: string | null;
+  subDescription?: string | null;
+  description?: string | null;
+  nameSecondary?: string | null;
+  subDescriptionSecondary?: string | null;
+  descriptionSecondary?: string | null;
+  isFeatured?: boolean;
+  minimumOrderQuantity?: number | null;
+  maximumOrderQuantity?: number | null;
+  unitType?: number;
+  unitValue?: number;
+  gender?: number;
+  age?: number;
+  smallUnitItemID?: number | null;
+  barcode?: string | null;
+  code?: string | null;
+  videoURL?: string | null;
+  preparation?: number;
+  calories?: number;
+  sizeTypeID?: number | null;
+  sourceID?: number | null;
+  checkQuantitiesBeforeSale?: boolean;
+  deliverable?: boolean;
+  isAvailable?: boolean;
+  isActive?: boolean;
+  syncThirdPartyId?: string | null;
+  currentOfferId?: string | null;
+  pointOfferId?: string | null;
+  unit2?: {
+    value: number;
+    price: number;
+    isActive: boolean;
+  } | null;
+  unit3?: {
+    value: number;
+    price: number;
+    isActive: boolean;
+  } | null;
+  menuIds?: number[] | null;
+  categoryId2?: number | null;
+  categoryId3?: number | null;
+  categoryId4?: number | null;
 }
 

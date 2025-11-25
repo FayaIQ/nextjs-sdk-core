@@ -99,7 +99,7 @@ export class ItemsFilterParameters {
   // Time-based filtering
   newArrival: NewArrivalPeriod | null;
   // Additional data flags
-  getBrand: boolean;
+  GetBrand: boolean;
   getColors: boolean;
   getColorsDefaultPictures: boolean | null;
   getOffer: boolean;
@@ -155,7 +155,7 @@ export class ItemsFilterParameters {
     sourceId = null,
     offerId = null,
     newArrival = null,
-    getBrand = false,
+    GetBrand = false,
     getColors = false,
     getColorsDefaultPictures = null,
     getOffer = false,
@@ -201,7 +201,7 @@ export class ItemsFilterParameters {
     sourceId?: number | null;
     offerId?: number | null;
     newArrival?: NewArrivalPeriod | null;
-    getBrand?: boolean;
+    GetBrand?: boolean;
     getColors?: boolean;
     getColorsDefaultPictures?: boolean | null;
     getOffer?: boolean;
@@ -247,7 +247,7 @@ export class ItemsFilterParameters {
     this.sourceId = sourceId;
     this.offerId = offerId;
     this.newArrival = newArrival;
-    this.getBrand = getBrand;
+    this.GetBrand = GetBrand;
     this.getColors = getColors;
     this.getColorsDefaultPictures = getColorsDefaultPictures;
     this.getOffer = getOffer;
@@ -304,8 +304,8 @@ export class ItemsFilterParameters {
       offerId: updates.offerId !== undefined ? updates.offerId : this.offerId,
       newArrival:
         updates.newArrival !== undefined ? updates.newArrival : this.newArrival,
-      getBrand:
-        updates.getBrand !== undefined ? updates.getBrand : this.getBrand,
+      GetBrand:
+        updates.GetBrand !== undefined ? updates.GetBrand : this.GetBrand,
       getColors:
         updates.getColors !== undefined ? updates.getColors : this.getColors,
       getColorsDefaultPictures:
@@ -462,8 +462,8 @@ export class ItemsFilterParameters {
       params.set("newArrival", this.newArrival);
     }
     // Add additional data flags
-    if (this.getBrand) {
-      params.set("getBrand", "true");
+    if (this.GetBrand) {
+      params.set("GetBrand", "true");
     }
     if (this.getColors) {
       params.set("getColors", "true");
@@ -597,7 +597,7 @@ export class ItemsFilterParameters {
     if (this.sourceId !== null) map.sourceId = this.sourceId;
     if (this.offerId !== null) map.offerId = this.offerId;
     if (this.newArrival !== null) map.newArrival = this.newArrival;
-    if (this.getBrand) map.getBrand = true;
+    if (this.GetBrand) map.GetBrand = true;
     if (this.getColors) map.getColors = true;
     if (this.getColorsDefaultPictures) map.getColorsDefaultPictures = true;
     if (this.getOffer) map.getOffer = true;
@@ -683,7 +683,7 @@ export class ItemsFilterParameters {
         : null,
       offerId: params.get("offerId") ? parseInt(params.get("offerId")!) : null,
       newArrival: (params.get("newArrival") as NewArrivalPeriod) || null,
-      getBrand: params.get("getBrand") === "true",
+      GetBrand: params.get("GetBrand") === "true",
       getColors: params.get("getColors") === "true",
       getColorsDefaultPictures:
         params.get("getColorsDefaultPictures") === "true" || null,
@@ -697,13 +697,65 @@ export class ItemsFilterParameters {
         ? params.get("availability") === "true"
         : null,
       minRating: params.get("minRating")
-        ? parseFloat(params.get("minRatin g")!)
+        ? parseFloat(params.get("minRating")!)
         : null,
       hasDiscount: params.get("hasDiscount")
         ? params.get("hasDiscount") === "true"
         : null,
       minDiscountPercentage: params.get("minDiscountPercentage")
         ? parseFloat(params.get("minDiscountPercentage")!)
+        : null,
+      ItemQuantityStatus: params.get("ItemQuantityStatus")
+        ? parseInt(params.get("ItemQuantityStatus")!)
+        : null,
+      SyncThirdPartyIds: params.get("SyncThirdPartyIds") || null,
+      SyncThirdPartyId: params.get("SyncThirdPartyId") || null,
+      RejectionNote: params.get("RejectionNote") || null,
+      Deliveryability: params.get("Deliveryability")
+        ? params.get("Deliveryability") === "true"
+        : null,
+      Availability: params.get("Availability")
+        ? params.get("Availability") === "true"
+        : null,
+      IsMultiMenuStore: params.get("IsMultiMenuStore")
+        ? params.get("IsMultiMenuStore") === "true"
+        : null,
+      UseApprovalSystem: params.get("UseApprovalSystem")
+        ? params.get("UseApprovalSystem") === "true"
+        : null,
+      CurrentSortField: params.get("CurrentSortField") || null,
+      CurrentSortOrder: params.get("CurrentSortOrder") || null,
+      Code: params.get("Code") || null,
+      barcode: params.get("barcode") || null,
+      IsFeatured: params.get("IsFeatured")
+        ? params.get("IsFeatured") === "true"
+        : null,
+      IsActive: params.get("IsActive")
+        ? params.get("IsActive") === "true"
+        : null,
+      ApprovedStatus: params.get("ApprovedStatus")
+        ? parseInt(params.get("ApprovedStatus")!)
+        : null,
+      HavePicture: params.get("HavePicture")
+        ? params.get("HavePicture") === "true"
+        : null,
+      HaveDescription: params.get("HaveDescription")
+        ? params.get("HaveDescription") === "true"
+        : null,
+      HaveColor: params.get("HaveColor")
+        ? params.get("HaveColor") === "true"
+        : null,
+      HaveOffer: params.get("HaveOffer")
+        ? params.get("HaveOffer") === "true"
+        : null,
+      HaveItemCollectionOffer: params.get("HaveItemCollectionOffer")
+        ? params.get("HaveItemCollectionOffer") === "true"
+        : null,
+      IsDeleted: params.get("IsDeleted")
+        ? params.get("IsDeleted") === "true"
+        : null,
+      CheckQuantityBeforeSale: params.get("CheckQuantityBeforeSale")
+        ? params.get("CheckQuantityBeforeSale") === "true"
         : null,
     });
   }

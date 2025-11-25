@@ -93,6 +93,9 @@ var init_api = __esm({
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
+      static getProductInfoV2(id) {
+        return `${_Api.INVENTORY_BASE}/v2/Items/${id}/FullInfo`;
+      }
       static getMenuById(id) {
         return `${_Api.INVENTORY_BASE}/v1/Menus/${id}`;
       }
@@ -192,6 +195,9 @@ var init_api = __esm({
       }
       static getOrder(id) {
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
+      }
+      static getAddress(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Addresses/${id}`;
       }
       // Order item endpoints (v3)
       static getOrderItem(orderId, itemId) {
@@ -327,6 +333,10 @@ var init_api = __esm({
     _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
     _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
     _Api.getOrders = `${_Api.INVENTORY_BASE}/v1/Orders/Paging`;
+    // CRM - Clients
+    _Api.getClientsPaging = `${_Api.INVENTORY_BASE}/v1/Clients/Paging`;
+    _Api.getClients = `${_Api.INVENTORY_BASE}/v1/Clients`;
+    _Api.postClients = `${_Api.INVENTORY_BASE}/v1/Clients`;
     _Api.postOrders = `${_Api.INVENTORY_BASE}/v2/Orders`;
     _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
     _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
@@ -371,7 +381,18 @@ async function getToken() {
     if (accessTokenCookie) {
       return accessTokenCookie;
     }
-    throw new Error("Unauthorized: Access token missing (strict mode enabled)");
+    const err = new Error("Unauthorized: Access token missing (strict mode enabled)");
+    err.status = 401;
+    throw err;
+  }
+  try {
+    if (typeof window === "undefined") {
+      const { cookies } = await import("next/headers");
+      const cookie = await cookies();
+      const accessTokenCookie = cookie.get("access_token")?.value;
+      if (accessTokenCookie) return accessTokenCookie;
+    }
+  } catch (e) {
   }
   const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
@@ -536,7 +557,18 @@ async function apiFetch(url, options = {}) {
   }
 }
 async function getWithAuth(url, query, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "GET",
     token,
@@ -552,7 +584,18 @@ async function getWithoutAuth(url, query, headers) {
   });
 }
 async function postWithAuth(url, data, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "POST",
     token,
@@ -612,7 +655,18 @@ async function postWithoutAuth(url, data, headers = {}) {
   }
 }
 async function putWithAuth(url, data, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "PUT",
     token,
@@ -628,7 +682,18 @@ async function putWithoutAuth(url, data, headers) {
   });
 }
 async function deleteWithAuth(url, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "DELETE",
     token,
@@ -642,7 +707,18 @@ async function deleteWithoutAuth(url, headers) {
   });
 }
 async function patchWithAuth(url, data, headers) {
-  const token = await getToken();
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
   return apiFetch(url, {
     method: "PATCH",
     token,
@@ -701,14 +777,15 @@ __export(items_exports, {
   CopyParentStorePOST: () => POST,
   DeleteItemDELETE: () => DELETE,
   Gender: () => Gender,
-  GetItemByIdGET: () => GET5,
-  GetItemsPagingGET: () => GET4,
-  GetParentProductsGET: () => GET3,
+  GetItemByIdGET: () => GET6,
+  GetItemsPagingGET: () => GET5,
+  GetParentProductsGET: () => GET4,
   GetProductsGET: () => GET,
   ItemsFilterParameters: () => ItemsFilterParameters,
   NewArrivalPeriod: () => NewArrivalPeriod,
   PagingParameters: () => PagingParameters,
   ProductInfoGET: () => GET2,
+  ProductInfoV2GET: () => GET3,
   PutItemActivatePUT: () => PUT,
   PutItemDeactivatePUT: () => PUT2,
   PutItemPUT: () => PUT3,
@@ -718,6 +795,7 @@ __export(items_exports, {
   getItemsPaging: () => getItemsPaging,
   getParentProducts: () => getParentProducts,
   getProductInfo: () => getProductInfo,
+  getProductInfoV2: () => getProductInfoV2,
   getProducts: () => getProducts,
   postCopyParentStore: () => postCopyParentStore,
   putActivateItem: () => putActivateItem,
@@ -755,6 +833,20 @@ async function getProductInfo(id) {
   const response = await fetch(`/api/products/${id}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch order full info: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/items/getProductInfoV2.ts
+async function getProductInfoV2(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(`${Api2.getProductInfoV2(id)}`);
+  }
+  const response = await fetch(`/api/products/v2/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch product info v2: ${response.statusText}`);
   }
   return response.json();
 }
@@ -890,7 +982,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     sourceId = null,
     offerId = null,
     newArrival = null,
-    getBrand = false,
+    GetBrand = false,
     getColors = false,
     getColorsDefaultPictures = null,
     getOffer = false,
@@ -936,7 +1028,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     this.sourceId = sourceId;
     this.offerId = offerId;
     this.newArrival = newArrival;
-    this.getBrand = getBrand;
+    this.GetBrand = GetBrand;
     this.getColors = getColors;
     this.getColorsDefaultPictures = getColorsDefaultPictures;
     this.getOffer = getOffer;
@@ -987,7 +1079,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       sourceId: updates.sourceId !== void 0 ? updates.sourceId : this.sourceId,
       offerId: updates.offerId !== void 0 ? updates.offerId : this.offerId,
       newArrival: updates.newArrival !== void 0 ? updates.newArrival : this.newArrival,
-      getBrand: updates.getBrand !== void 0 ? updates.getBrand : this.getBrand,
+      GetBrand: updates.GetBrand !== void 0 ? updates.GetBrand : this.GetBrand,
       getColors: updates.getColors !== void 0 ? updates.getColors : this.getColors,
       getColorsDefaultPictures: updates.getColorsDefaultPictures !== void 0 ? updates.getColorsDefaultPictures : this.getColorsDefaultPictures,
       getOffer: updates.getOffer !== void 0 ? updates.getOffer : this.getOffer,
@@ -1066,8 +1158,8 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     if (this.newArrival !== null) {
       params.set("newArrival", this.newArrival);
     }
-    if (this.getBrand) {
-      params.set("getBrand", "true");
+    if (this.GetBrand) {
+      params.set("GetBrand", "true");
     }
     if (this.getColors) {
       params.set("getColors", "true");
@@ -1195,7 +1287,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     if (this.sourceId !== null) map.sourceId = this.sourceId;
     if (this.offerId !== null) map.offerId = this.offerId;
     if (this.newArrival !== null) map.newArrival = this.newArrival;
-    if (this.getBrand) map.getBrand = true;
+    if (this.GetBrand) map.GetBrand = true;
     if (this.getColors) map.getColors = true;
     if (this.getColorsDefaultPictures) map.getColorsDefaultPictures = true;
     if (this.getOffer) map.getOffer = true;
@@ -1266,7 +1358,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       sourceId: params.get("sourceId") ? parseInt(params.get("sourceId")) : null,
       offerId: params.get("offerId") ? parseInt(params.get("offerId")) : null,
       newArrival: params.get("newArrival") || null,
-      getBrand: params.get("getBrand") === "true",
+      GetBrand: params.get("GetBrand") === "true",
       getColors: params.get("getColors") === "true",
       getColorsDefaultPictures: params.get("getColorsDefaultPictures") === "true" || null,
       getOffer: params.get("getOffer") === "true",
@@ -1274,9 +1366,31 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       getCollections: params.get("getCollections") === "true",
       branchId: params.get("branchId") ? parseInt(params.get("branchId")) : null,
       availability: params.get("availability") ? params.get("availability") === "true" : null,
-      minRating: params.get("minRating") ? parseFloat(params.get("minRatin g")) : null,
+      minRating: params.get("minRating") ? parseFloat(params.get("minRating")) : null,
       hasDiscount: params.get("hasDiscount") ? params.get("hasDiscount") === "true" : null,
-      minDiscountPercentage: params.get("minDiscountPercentage") ? parseFloat(params.get("minDiscountPercentage")) : null
+      minDiscountPercentage: params.get("minDiscountPercentage") ? parseFloat(params.get("minDiscountPercentage")) : null,
+      ItemQuantityStatus: params.get("ItemQuantityStatus") ? parseInt(params.get("ItemQuantityStatus")) : null,
+      SyncThirdPartyIds: params.get("SyncThirdPartyIds") || null,
+      SyncThirdPartyId: params.get("SyncThirdPartyId") || null,
+      RejectionNote: params.get("RejectionNote") || null,
+      Deliveryability: params.get("Deliveryability") ? params.get("Deliveryability") === "true" : null,
+      Availability: params.get("Availability") ? params.get("Availability") === "true" : null,
+      IsMultiMenuStore: params.get("IsMultiMenuStore") ? params.get("IsMultiMenuStore") === "true" : null,
+      UseApprovalSystem: params.get("UseApprovalSystem") ? params.get("UseApprovalSystem") === "true" : null,
+      CurrentSortField: params.get("CurrentSortField") || null,
+      CurrentSortOrder: params.get("CurrentSortOrder") || null,
+      Code: params.get("Code") || null,
+      barcode: params.get("barcode") || null,
+      IsFeatured: params.get("IsFeatured") ? params.get("IsFeatured") === "true" : null,
+      IsActive: params.get("IsActive") ? params.get("IsActive") === "true" : null,
+      ApprovedStatus: params.get("ApprovedStatus") ? parseInt(params.get("ApprovedStatus")) : null,
+      HavePicture: params.get("HavePicture") ? params.get("HavePicture") === "true" : null,
+      HaveDescription: params.get("HaveDescription") ? params.get("HaveDescription") === "true" : null,
+      HaveColor: params.get("HaveColor") ? params.get("HaveColor") === "true" : null,
+      HaveOffer: params.get("HaveOffer") ? params.get("HaveOffer") === "true" : null,
+      HaveItemCollectionOffer: params.get("HaveItemCollectionOffer") ? params.get("HaveItemCollectionOffer") === "true" : null,
+      IsDeleted: params.get("IsDeleted") ? params.get("IsDeleted") === "true" : null,
+      CheckQuantityBeforeSale: params.get("CheckQuantityBeforeSale") ? params.get("CheckQuantityBeforeSale") === "true" : null
     });
   }
 };
@@ -1324,24 +1438,36 @@ async function GET2(request, { params }) {
   }
 }
 
-// src/inventory/items/handler/getParentProducts.ts
+// src/inventory/items/handler/productInfoV2.ts
 var import_server4 = require("next/server");
-async function GET3(request) {
+async function GET3(request, { params }) {
+  try {
+    const { id } = await params;
+    const product = await getProductInfoV2(id);
+    return import_server4.NextResponse.json(product);
+  } catch (error) {
+    return toNextResponseFromError(error);
+  }
+}
+
+// src/inventory/items/handler/getParentProducts.ts
+var import_server5 = require("next/server");
+async function GET4(request) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const filterParams = ItemsFilterParameters.fromURLSearchParams(searchParams);
     const products = await getParentProducts({ filterParams });
-    return import_server4.NextResponse.json(products);
+    return import_server5.NextResponse.json(products);
   } catch (error) {
     return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/items/handler/getItemsPaging.ts
-var import_server5 = require("next/server");
+var import_server6 = require("next/server");
 init_fetcher();
 init_api();
-async function GET4(request) {
+async function GET5(request) {
   try {
     const { searchParams } = new URL(request.url);
     const params = new URLSearchParams();
@@ -1352,19 +1478,19 @@ async function GET4(request) {
     const queryString = params.toString();
     const url = queryString ? `${Api.getItemsPaging}?${queryString}` : `${Api.getItemsPaging}?GetMultipleMenu=true`;
     const data = await getWithAuth(url);
-    return import_server5.NextResponse.json(data, { status: 200 });
+    return import_server6.NextResponse.json(data, { status: 200 });
   } catch (error) {
     return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/items/handler/getItemById.ts
-var import_server6 = require("next/server");
-async function GET5(request, { params }) {
+var import_server7 = require("next/server");
+async function GET6(request, { params }) {
   try {
     const { id } = await params;
     const result = await getItemById(id);
-    return import_server6.NextResponse.json(result);
+    return import_server7.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -1397,15 +1523,15 @@ async function postCopyParentStore(itemIds) {
 }
 
 // src/inventory/items/handler/postCopyParentStore.ts
-var import_server7 = require("next/server");
+var import_server8 = require("next/server");
 async function POST(request) {
   try {
     const { itemIds } = await request.json();
     if (!itemIds) {
-      return import_server7.NextResponse.json({ error: "itemIds array is required" }, { status: 400 });
+      return import_server8.NextResponse.json({ error: "itemIds array is required" }, { status: 400 });
     }
     const result = await postCopyParentStore(itemIds);
-    return import_server7.NextResponse.json(result);
+    return import_server8.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -1468,37 +1594,37 @@ async function deleteItem(id) {
 }
 
 // src/inventory/items/handler/putActivate.ts
-var import_server8 = require("next/server");
+var import_server9 = require("next/server");
 async function PUT(request, { params }) {
   try {
     const { id } = await params;
     const result = await putActivateItem(id);
-    return import_server8.NextResponse.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/items/handler/putDeactivate.ts
-var import_server9 = require("next/server");
-async function PUT2(request, { params }) {
-  try {
-    const { id } = await params;
-    const result = await putDeactivateItem(id);
     return import_server9.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/items/handler/putItem.ts
+// src/inventory/items/handler/putDeactivate.ts
 var import_server10 = require("next/server");
+async function PUT2(request, { params }) {
+  try {
+    const { id } = await params;
+    const result = await putDeactivateItem(id);
+    return import_server10.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
+// src/inventory/items/handler/putItem.ts
+var import_server11 = require("next/server");
 async function PUT3(request, { params }) {
   try {
     const data = await request.json();
     const { id } = await params;
     const result = await putItem(id, data);
-    return import_server10.NextResponse.json(result);
+    return import_server11.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -1530,6 +1656,7 @@ async function DELETE(request, { params }) {
   NewArrivalPeriod,
   PagingParameters,
   ProductInfoGET,
+  ProductInfoV2GET,
   PutItemActivatePUT,
   PutItemDeactivatePUT,
   PutItemPUT,
@@ -1539,6 +1666,7 @@ async function DELETE(request, { params }) {
   getItemsPaging,
   getParentProducts,
   getProductInfo,
+  getProductInfoV2,
   getProducts,
   postCopyParentStore,
   putActivateItem,

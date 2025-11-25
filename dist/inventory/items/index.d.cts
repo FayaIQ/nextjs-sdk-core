@@ -1,8 +1,14 @@
-import { P as ProductResponse, b as Product } from '../../getProductInfo-DS70gHKo.cjs';
-export { C as CollectionItem, I as ItemColor, M as MultipleMenu, d as Packs, c as SizeSet, S as SizeValue, U as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-DS70gHKo.cjs';
-import { I as ItemsFilterParameters } from '../../filter-models-BrX8v95o.cjs';
-export { A as AgeGroup, G as Gender, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from '../../filter-models-BrX8v95o.cjs';
+import { P as Product, b as ProductResponse, U as UpdateItemRequest } from '../../getProductInfo-DqdckrpB.cjs';
+export { B as Brand, C as CollectionItem, I as ItemColor, M as MultipleMenu, f as PackUnit, e as Packs, d as SizeSet, S as SizeValue, c as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-DqdckrpB.cjs';
+import { I as ItemsFilterParameters } from '../../filter-models-B4kRw7Xr.cjs';
+export { A as AgeGroup, G as Gender, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from '../../filter-models-B4kRw7Xr.cjs';
 import { NextRequest, NextResponse } from 'next/server';
+
+/**
+ * Fetches detailed information for a specific product (v2) by ID
+ * Works in both server and client components
+ */
+declare function getProductInfoV2(id: string): Promise<Product>;
 
 /**
  * Fetches a list of products with optional filtering and pagination
@@ -58,7 +64,13 @@ declare function getItemById(id: string | number): Promise<Product>;
  * @example
  * export { GET } from 'my-next-core/handlers/getProducts';
  */
-declare function GET$4(request: NextRequest): Promise<NextResponse<any>>;
+declare function GET$5(request: NextRequest): Promise<NextResponse<any>>;
+
+declare function GET$4(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<NextResponse<any>>;
 
 declare function GET$3(request: NextRequest, { params }: {
     params: Promise<{
@@ -109,23 +121,6 @@ declare function putActivateItem(id: string | number): Promise<any>;
  */
 declare function putDeactivateItem(id: string | number): Promise<any>;
 
-interface UpdateItemRequest {
-    name?: string;
-    nameSecondary?: string;
-    description?: string;
-    descriptionSecondary?: string;
-    defaultPrice: number;
-    menuIds?: number[];
-    minimumOrderQuantity: number;
-    maximumOrderQuantity: number;
-    price?: number;
-    barcode?: string;
-    code?: string;
-    isActive?: boolean;
-    isFeatured?: boolean;
-    isDeliverable?: boolean;
-    [key: string]: any;
-}
 interface UpdateItemResponse {
     success: boolean;
     message?: string;
@@ -165,4 +160,4 @@ declare function DELETE(request: NextRequest, { params }: {
     }>;
 }): Promise<Response>;
 
-export { type CopyParentResponse, POST as CopyParentStorePOST, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$4 as GetProductsGET, ItemsFilterParameters, Product, GET$3 as ProductInfoGET, ProductResponse, PUT$2 as PutItemActivatePUT, PUT$1 as PutItemDeactivatePUT, PUT as PutItemPUT, type UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, postCopyParentStore, putActivateItem, putDeactivateItem, putItem };
+export { type CopyParentResponse, POST as CopyParentStorePOST, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$5 as GetProductsGET, ItemsFilterParameters, Product, GET$4 as ProductInfoGET, GET$3 as ProductInfoV2GET, ProductResponse, PUT$2 as PutItemActivatePUT, PUT$1 as PutItemDeactivatePUT, PUT as PutItemPUT, UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, getProductInfoV2, postCopyParentStore, putActivateItem, putDeactivateItem, putItem };

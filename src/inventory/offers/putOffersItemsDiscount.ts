@@ -10,6 +10,14 @@ export async function putOffersItemsDiscount(id: string | number, payload: any):
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`Failed to put items discount: ${res.statusText}`);
+  if (!res.ok) {
+    // Extract error message from response body before throwing
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+      const errorBody = await res.json();
+      // Use the error message from the API response
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+  
+    throw new Error(errorMessage);
+  }
   return res.json();
 }

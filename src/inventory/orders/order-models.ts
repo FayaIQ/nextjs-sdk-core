@@ -647,3 +647,46 @@ export interface OrderDetail {
     discountValue?: number;
   };
 }
+
+// === POST Order request models ===
+export interface PostOrderItemRequest {
+  itemId: number;
+  quantity: number;
+  freeQuantity?: number;
+  discount?: number;
+  colorId?: number | null;
+  sizeId?: number | null;
+  unitLevel?: number;
+  note?: string | null;
+  costPrice?: number | null;
+  price?: number | null;
+  pricePack1?: number | null;
+  pricePack2?: number | null;
+}
+
+export interface PostOrderAddressRequest {
+  gps?: string | null;
+  districtId?: number | null;
+  note?: string | null;
+  appartmentId?: number | null;
+}
+
+export interface PostOrderRequest {
+  storeId?: number;
+  address?: PostOrderAddressRequest | null;
+  orderType?: number;
+  payType?: number;
+  gatewayType?: number;
+  deleveryType?: number;
+  orderDeleveryDate?: string | null;
+  note?: string | null;
+  currencyId?: number;
+  couponCode?: string | null;
+  laserNote?: string | null;
+  giftNote?: string | null;
+  clientId?: string | null;
+  paymentTokenId?: string | null;
+  points?: number;
+  applyDarkOffer?: boolean;
+  orderItems?: PostOrderItemRequest[];
+}

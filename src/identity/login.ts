@@ -117,6 +117,16 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
       });
     }
 
+    if (response.user?.username) {
+      cookieStore.set("username", response.user.username, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: expiresIn,
+      });
+    }
+
     return response;
   }
 
