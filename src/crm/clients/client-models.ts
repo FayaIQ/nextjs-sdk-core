@@ -24,6 +24,7 @@ export interface Client {
   email?: string | null;
   phoneCode?: string | null;
   phoneNumber?: string | null;
+  addressId: number ;
   isApproved?: boolean;
   isAddedByAdmin?: boolean;
   address?: {
@@ -41,4 +42,9 @@ export interface ClientsPagingResponse {
   pageSize: number;
   rowCount: number;
   results: Client[];
+}
+
+// Raw API response for list endpoints that wrap items under `data`.
+export interface ClientsApiResponse {
+  data: Client[];
 }
