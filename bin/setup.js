@@ -276,7 +276,7 @@ const routes = [
   },
   {
     name: "clients",
-    path: ["src", "app", "api", "clients"],
+    path: ["src", "app", "api", "crm", "clients"],
     handler: "erp-core/crm",
     methods: ["GET"],
     exportName: "GETClients",
@@ -284,7 +284,7 @@ const routes = [
   },
   {
     name: "clientsPost",
-    path: ["src", "app", "api", "clients"],
+    path: ["src", "app", "api", "crm", "clients"],
     handler: "erp-core/crm",
     methods: ["POST"],
     exportName: "POSTClient",
