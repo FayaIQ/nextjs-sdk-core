@@ -1,0 +1,243 @@
+{
+  "name": "erp-core",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A Next.js SDK for server and client components with simple API functions",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FayaIQ/nextjs-sdk-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FayaIQ/nextjs-sdk-core/issues"
+  },
+  "homepage": "https://github.com/FayaIQ/nextjs-sdk-core#readme",
+  "bin": {
+    "my-next-core": "./bin/setup.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README_PACKAGE.md",
+    "QUICK_START.md"
+  ],
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/gps/locations/index.ts src/identity/application/index.ts  src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts --format cjs,esm --dts --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js",
+      "require": "./dist/api/index.cjs"
+    },
+    "./api/*": {
+      "types": "./dist/api/*.d.ts",
+      "import": "./dist/api/*.js",
+      "require": "./dist/api/*.cjs"
+    },
+    "./gps": {
+      "types": "./dist/gps/index.d.ts",
+      "import": "./dist/gps/index.js",
+      "require": "./dist/gps/index.cjs"
+    },
+    "./gps/*": {
+      "types": "./dist/gps/*.d.ts",
+      "import": "./dist/gps/*.js",
+      "require": "./dist/gps/*.cjs"
+    },
+    "./gps/locations": {
+      "types": "./dist/gps/locations/index.d.ts",
+      "import": "./dist/gps/locations/index.js",
+      "require": "./dist/gps/locations/index.cjs"
+    },
+    "./gps/locations/*": {
+      "types": "./dist/gps/locations/*.d.ts",
+      "import": "./dist/gps/locations/*.js",
+      "require": "./dist/gps/locations/*.cjs"
+    },
+    "./identity": {
+      "types": "./dist/identity/index.d.ts",
+      "import": "./dist/identity/index.js",
+      "require": "./dist/identity/index.cjs"
+    },
+    "./identity/*": {
+      "types": "./dist/identity/*.d.ts",
+      "import": "./dist/identity/*.js",
+      "require": "./dist/identity/*.cjs"
+    },
+    "./identity/application": {
+      "types": "./dist/identity/application/index.d.ts",
+      "import": "./dist/identity/application/index.js",
+      "require": "./dist/identity/application/index.cjs"
+    },
+    "./identity/application/*": {
+      "types": "./dist/identity/application/*.d.ts",
+      "import": "./dist/identity/application/*.js",
+      "require": "./dist/identity/application/*.cjs"
+    },
+    "./identity/users": {
+      "types": "./dist/identity/users/index.d.ts",
+      "import": "./dist/identity/users/index.js",
+      "require": "./dist/identity/users/index.cjs"
+    },
+    "./identity/users/*": {
+      "types": "./dist/identity/users/*.d.ts",
+      "import": "./dist/identity/users/*.js",
+      "require": "./dist/identity/users/*.cjs"
+    },
+    "./inventory/orders": {
+      "types": "./dist/inventory/orders/index.d.ts",
+      "import": "./dist/inventory/orders/index.js",
+      "require": "./dist/inventory/orders/index.cjs"
+    },
+    "./inventory/orders/*": {
+      "types": "./dist/inventory/orders/*.d.ts",
+      "import": "./dist/inventory/orders/*.js",
+      "require": "./dist/inventory/orders/*.cjs"
+    },
+    "./inventory/payments": {
+      "types": "./dist/inventory/payments/index.d.ts",
+      "import": "./dist/inventory/payments/index.js",
+      "require": "./dist/inventory/payments/index.cjs"
+    },
+    "./inventory/payments/*": {
+      "types": "./dist/inventory/payments/*.d.ts",
+      "import": "./dist/inventory/payments/*.js",
+      "require": "./dist/inventory/payments/*.cjs"
+    },
+    "./inventory/reports": {
+      "types": "./dist/inventory/reports/index.d.ts",
+      "import": "./dist/inventory/reports/index.js",
+      "require": "./dist/inventory/reports/index.cjs"
+    },
+    "./inventory/reports/*": {
+      "types": "./dist/inventory/reports/*.d.ts",
+      "import": "./dist/inventory/reports/*.js",
+      "require": "./dist/inventory/reports/*.cjs"
+    },
+    "./inventory/slides/getSlides": {
+      "types": "./dist/inventory/slides/getSlides.d.ts",
+      "import": "./dist/inventory/slides/getSlides.js",
+      "require": "./dist/inventory/slides/getSlides.cjs"
+    },
+    "./inventory/items": {
+      "types": "./dist/inventory/items/index.d.ts",
+      "import": "./dist/inventory/items/index.js",
+      "require": "./dist/inventory/items/index.cjs"
+    },
+    "./inventory/items/*": {
+      "types": "./dist/inventory/items/*.d.ts",
+      "import": "./dist/inventory/items/*.js",
+      "require": "./dist/inventory/items/*.cjs"
+    },
+    "./inventory/menus": {
+      "types": "./dist/inventory/menus/index.d.ts",
+      "import": "./dist/inventory/menus/index.js",
+      "require": "./dist/inventory/menus/index.cjs"
+    },
+    "./inventory/menus/*": {
+      "types": "./dist/inventory/menus/*.d.ts",
+      "import": "./dist/inventory/menus/*.js",
+      "require": "./dist/inventory/menus/*.cjs"
+    },
+    "./inventory/offers": {
+      "types": "./dist/inventory/offers/index.d.ts",
+      "import": "./dist/inventory/offers/index.js",
+      "require": "./dist/inventory/offers/index.cjs"
+    },
+    "./inventory/offers/*": {
+      "types": "./dist/inventory/offers/*.d.ts",
+      "import": "./dist/inventory/offers/*.js",
+      "require": "./dist/inventory/offers/*.cjs"
+    },
+    "./inventory/category": {
+      "types": "./dist/inventory/category/index.d.ts",
+      "import": "./dist/inventory/category/index.js",
+      "require": "./dist/inventory/category/index.cjs"
+    },
+    "./inventory/category/*": {
+      "types": "./dist/inventory/category/*.d.ts",
+      "import": "./dist/inventory/category/*.js",
+      "require": "./dist/inventory/category/*.cjs"
+    },
+    "./inventory/itemSource": {
+      "types": "./dist/inventory/itemSource/index.d.ts",
+      "import": "./dist/inventory/itemSource/index.js",
+      "require": "./dist/inventory/itemSource/index.cjs"
+    },
+    "./inventory/itemSource/*": {
+      "types": "./dist/inventory/itemSource/*.d.ts",
+      "import": "./dist/inventory/itemSource/*.js",
+      "require": "./dist/inventory/itemSource/*.cjs"
+    },
+    "./inventory/orderItem": {
+      "types": "./dist/inventory/orderItem/index.d.ts",
+      "import": "./dist/inventory/orderItem/index.js",
+      "require": "./dist/inventory/orderItem/index.cjs"
+    },
+    "./inventory/orderItem/*": {
+      "types": "./dist/inventory/orderItem/*.d.ts",
+      "import": "./dist/inventory/orderItem/*.js",
+      "require": "./dist/inventory/orderItem/*.cjs"
+    },
+    "./inventory/slides": {
+      "types": "./dist/inventory/slides/index.d.ts",
+      "import": "./dist/inventory/slides/index.js",
+      "require": "./dist/inventory/slides/index.cjs"
+    },
+    "./inventory/slides/*": {
+      "types": "./dist/inventory/slides/*.d.ts",
+      "import": "./dist/inventory/slides/*.js",
+      "require": "./dist/inventory/slides/*.cjs"
+    },
+    "./crm": {
+      "types": "./dist/crm/index.d.ts",
+      "import": "./dist/crm/index.js",
+      "require": "./dist/crm/index.cjs"
+    },
+    "./crm/*": {
+      "types": "./dist/crm/*.d.ts",
+      "import": "./dist/crm/*.js",
+      "require": "./dist/crm/*.cjs"
+    }
+  },
+  "peerDependencies": {
+    "next": "^14.0.0 || ^15.0.0 || ^16.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "cross-env": "^10.1.0",
+    "next": "^16.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "nextjs",
+    "sdk",
+    "storeak",
+    "api",
+    "server-components",
+    "client-components",
+    "react",
+    "typescript"
+  ]
+}
