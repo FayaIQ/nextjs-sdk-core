@@ -268,7 +268,7 @@ const routes = [
   // CRM - clients endpoints
   {
     name: "clientsPaging",
-    path: ["src", "app", "api", "clients", "paging"],
+    path: ["src", "app", "api", "crm" ,"clients", "paging"],
     handler: "erp-core/crm",
     methods: ["GET"],
     exportName: "GETClientsPaging",
