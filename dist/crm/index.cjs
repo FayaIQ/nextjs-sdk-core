@@ -278,6 +278,7 @@ var init_api = __esm({
     _Api.GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
     _Api.THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
     _Api.INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
+    _Api.CRM_BASE = `https://storeak-crm-service.azurewebsites.net/api`;
     _Api.IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
     _Api.signIn = `${_Api.IDENTITY_BASE}/v1/token`;
     _Api.refreshToken = `${_Api.IDENTITY_BASE}/v1/token/refresh`;
@@ -324,9 +325,9 @@ var init_api = __esm({
     _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
     _Api.getOrders = `${_Api.INVENTORY_BASE}/v1/Orders/Paging`;
     // CRM - Clients
-    _Api.getClientsPaging = `${_Api.INVENTORY_BASE}/v1/Clients/Paging`;
-    _Api.getClients = `${_Api.INVENTORY_BASE}/v1/Clients`;
-    _Api.postClients = `${_Api.INVENTORY_BASE}/v1/Clients`;
+    _Api.getClientsPaging = `${_Api.CRM_BASE}/v1/Clients/Paging`;
+    _Api.getClients = `${_Api.CRM_BASE}/v1/Clients`;
+    _Api.postClients = `${_Api.CRM_BASE}/v1/Clients`;
     _Api.postOrders = `${_Api.INVENTORY_BASE}/v2/Orders`;
     _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
     _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
@@ -783,10 +784,12 @@ function buildQuery(params) {
 }
 async function getClients(params) {
   const qs = buildQuery(params);
+  console.log("QS:", qs);
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
     const url = Api2.getClients + (qs || "");
+    console.log("URL:", url);
     return getWithAuth2(url);
   }
   const res = await fetch(`/api/crm/clients${qs}`);

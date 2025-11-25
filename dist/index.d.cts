@@ -16,6 +16,7 @@ declare class Api {
     private static GPS_BASE;
     private static THEME_BASE;
     private static INVENTORY_BASE;
+    private static CRM_BASE;
     static IDENTITY_URL: string;
     static signIn: string;
     static refreshToken: string;
