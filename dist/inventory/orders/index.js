@@ -6,23 +6,23 @@ import {
   PayType,
   Sign,
   getOrders
-} from "../../chunk-WAQCLHER.js";
+} from "../../chunk-YGKBZUD6.js";
 import {
   toNextResponseFromError
-} from "../../chunk-KB2TWTWF.js";
+} from "../../chunk-33LBUEAG.js";
 import {
   Api
-} from "../../chunk-JITYJSY7.js";
+} from "../../chunk-WZTOPMWG.js";
 import {
   putWithAuth
-} from "../../chunk-GSRLK2ER.js";
-import "../../chunk-STGFLJUY.js";
+} from "../../chunk-PIGVTWVO.js";
+import "../../chunk-ZAQXIQEL.js";
 
 // src/inventory/orders/getOrder.ts
 async function getOrder(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { getWithAuth } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return getWithAuth(
       `${Api2.getOrder(id)}`
     );
@@ -37,8 +37,8 @@ async function getOrder(id) {
 // src/inventory/orders/putOrderApprove.ts
 async function putOrderApprove(id, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return putWithAuth2(
       Api2.putOrderApprove(id),
       { note: note || "" }
@@ -58,8 +58,8 @@ async function putOrderApprove(id, note) {
 }
 async function putOrderApproveList(ids, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return putWithAuth2(
       Api2.putOrderApproveList,
       { orderIds: ids, note: note || "" }
@@ -81,8 +81,8 @@ async function putOrderApproveList(ids, note) {
 // src/inventory/orders/putOrderDisapprove.ts
 async function putOrderDisapprove(id, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return putWithAuth2(
       Api2.putOrderDisapprove(id),
       { note }
@@ -102,8 +102,8 @@ async function putOrderDisapprove(id, note) {
 }
 async function putOrderDisapproveList(ids, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return putWithAuth2(
       Api2.putOrderDisapproveList,
       { orderIds: ids, note: note || "" }
@@ -126,8 +126,8 @@ async function putOrderDisapproveList(ids, note) {
 async function getOrdersFullInfo(input) {
   const orderIds = Array.isArray(input) ? input : input.orderIds ?? input.body ?? [];
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { postWithAuth } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return postWithAuth(Api2.getOrderFullInfo, { orderIds });
   }
   const response = await fetch("/api/orders/full-info", {
@@ -146,8 +146,8 @@ async function getOrdersFullInfo(input) {
 // src/inventory/orders/putOrderChangeStatus.ts
 async function putOrderChangeStatus(orderId, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return await putWithAuth2(Api2.putChangeStatusOrder(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/change-status`, {
@@ -184,8 +184,8 @@ async function putOrderDiscount(orderId, data) {
 // src/inventory/orders/putOrderReferenceId.ts
 async function putOrderReferenceId(orderId, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return await putWithAuth2(Api2.putOrderReferenceId(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/referenceId`, {
@@ -204,8 +204,8 @@ async function putOrderReferenceId(orderId, data) {
 // src/inventory/orders/putOrderReferenceDeliveryId.ts
 async function putOrderReferenceDeliveryId(orderId, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return await putWithAuth2(Api2.putOrderReferenceDeliveryId(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/referenceDeliveryId`, {
@@ -224,8 +224,8 @@ async function putOrderReferenceDeliveryId(orderId, data) {
 // src/inventory/orders/postOrder.ts
 async function postOrder(data) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-VDHJ2PDP.js");
-    const { Api: Api2 } = await import("../../api-L2SUK2GT.js");
+    const { postWithAuth } = await import("../../fetcher-4LH54I5A.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
     return postWithAuth(Api2.postOrders, data);
   }
   const res = await fetch(`/api/orders`, {
@@ -236,6 +236,20 @@ async function postOrder(data) {
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(`Create order failed: ${errorData.error || res.statusText}`);
+  }
+  return res.json();
+}
+
+// src/inventory/orders/getAddressById.ts
+async function getAddressById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth } = await import("../../core/index.js");
+    const { Api: Api2 } = await import("../../api-XKV6O6PD.js");
+    return getWithAuth(Api2.getAddress(id));
+  }
+  const res = await fetch(`/api/addresses/${id}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch address ${id}: ${res.statusText}`);
   }
   return res.json();
 }
@@ -391,29 +405,45 @@ async function GET2(request, { params }) {
   }
 }
 
-// src/inventory/orders/handler/change-status.ts
+// src/inventory/orders/handler/getAddressById.ts
 import { NextResponse as NextResponse8 } from "next/server";
+async function GET3(request) {
+  try {
+    const url = new URL(request.url);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const id = parts[parts.length - 1];
+    const address = await getAddressById(id);
+    return NextResponse8.json(address);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch address";
+    console.error("address error:", message);
+    return NextResponse8.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/orders/handler/change-status.ts
+import { NextResponse as NextResponse9 } from "next/server";
 async function PUT5(request, { params }) {
   try {
     const { id } = await params;
     const body = await request.json();
     const result = await putOrderChangeStatus(id, body);
-    return NextResponse8.json(result);
+    return NextResponse9.json(result);
   } catch (error) {
     return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/orders/handler/discount.ts
-import { NextResponse as NextResponse9 } from "next/server";
+import { NextResponse as NextResponse10 } from "next/server";
 async function PUT6(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderDiscount(id, body);
-    return NextResponse9.json(result);
+    return NextResponse10.json(result);
   } catch (error) {
-    return NextResponse9.json(
+    return NextResponse10.json(
       { error: error.message || "Failed to apply order discount" },
       { status: 500 }
     );
@@ -421,15 +451,15 @@ async function PUT6(request, { params }) {
 }
 
 // src/inventory/orders/handler/reference-id.ts
-import { NextResponse as NextResponse10 } from "next/server";
+import { NextResponse as NextResponse11 } from "next/server";
 async function PUT7(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderReferenceId(id, body);
-    return NextResponse10.json(result);
+    return NextResponse11.json(result);
   } catch (error) {
-    return NextResponse10.json(
+    return NextResponse11.json(
       { error: error.message || "Failed to update order reference ID" },
       { status: 500 }
     );
@@ -437,15 +467,15 @@ async function PUT7(request, { params }) {
 }
 
 // src/inventory/orders/handler/reference-delivery-id.ts
-import { NextResponse as NextResponse11 } from "next/server";
+import { NextResponse as NextResponse12 } from "next/server";
 async function PUT8(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderReferenceDeliveryId(id, body);
-    return NextResponse11.json(result);
+    return NextResponse12.json(result);
   } catch (error) {
-    return NextResponse11.json(
+    return NextResponse12.json(
       { error: error.message || "Failed to update order reference delivery ID" },
       { status: 500 }
     );
@@ -453,21 +483,22 @@ async function PUT8(request, { params }) {
 }
 
 // src/inventory/orders/handler/post-order.ts
-import { NextResponse as NextResponse12 } from "next/server";
+import { NextResponse as NextResponse13 } from "next/server";
 async function POST2(request) {
   try {
     const body = await request.json().catch(() => ({}));
     const result = await postOrder(body);
-    return NextResponse12.json(result, { status: 201 });
+    return NextResponse13.json(result, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to create order";
     console.error("post order error:", message);
     const status = err?.status ?? 500;
-    return NextResponse12.json({ error: message }, { status });
+    return NextResponse13.json({ error: message }, { status });
   }
 }
 export {
   DeleveryType,
+  GET3 as GETAddress,
   GET2 as GETOrder,
   GET as GETOrders,
   OrderPagingParameters,
@@ -485,6 +516,7 @@ export {
   PUT7 as PUTOrderReferenceId,
   PayType,
   Sign,
+  getAddressById,
   getOrder,
   getOrders,
   getOrdersFullInfo,

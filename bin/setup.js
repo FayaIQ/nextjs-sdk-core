@@ -25,6 +25,14 @@ const routes = [
     description: "Get offer by id",
   },
   {
+    name: "addressById",
+    path: ["src", "app", "api", "addresses", "[id]"],
+    handler: "erp-core/inventory/orders",
+    methods: ["GET"],
+    exportName: "GETAddress",
+    description: "Get address by id",
+  },
+  {
     name: "offerByIdDelete",
     path: ["src", "app", "api", "offers", "[id]"],
     handler: "erp-core/inventory/offers",

@@ -1,6 +1,6 @@
 export { g as getOrders } from '../../getOrders-C67REgTj.js';
-import { i as OrderDetail, l as PostOrderRequest, a as OrdersApiResponse } from '../../order-models-nbgqiu1i.js';
-export { C as CurrentPhase, D as DeleveryType, h as Order, d as OrderAddress, f as OrderClient, e as OrderCustomer, g as OrderItem, c as OrderPagingParameters, b as OrderType, O as OrdersFilterParameters, P as PayType, k as PostOrderAddressRequest, j as PostOrderItemRequest, S as Sign } from '../../order-models-nbgqiu1i.js';
+import { i as OrderDetail, l as PostOrderRequest, d as OrderAddress, a as OrdersApiResponse } from '../../order-models-nbgqiu1i.js';
+export { C as CurrentPhase, D as DeleveryType, h as Order, f as OrderClient, e as OrderCustomer, g as OrderItem, c as OrderPagingParameters, b as OrderType, O as OrdersFilterParameters, P as PayType, k as PostOrderAddressRequest, j as PostOrderItemRequest, S as Sign } from '../../order-models-nbgqiu1i.js';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -76,6 +76,8 @@ declare function putOrderReferenceDeliveryId(orderId: string | number, data: Ord
  */
 declare function postOrder(data: PostOrderRequest): Promise<OrderDetail>;
 
+declare function getAddressById(id: string | number): Promise<OrderAddress>;
+
 /**
  * Ready-to-use API route handler for order full info
  * Users can simply re-export this in their app/api/orders/full-info/route.ts:
@@ -139,18 +141,22 @@ declare function PUT$4(request: NextRequest): Promise<NextResponse<DisapproveOrd
     * @example
     * export { GET } from 'my-next-core/handlers/getOrders';
  */
-declare function GET$1(request: NextRequest): Promise<NextResponse<OrdersApiResponse> | NextResponse<{
+declare function GET$2(request: NextRequest): Promise<NextResponse<OrdersApiResponse> | NextResponse<{
     error: string;
 }>>;
 
 /**
  * GET /api/orders/[id]
  */
-declare function GET(request: NextRequest, { params }: {
+declare function GET$1(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
 }): Promise<NextResponse<any>>;
+
+declare function GET(request: NextRequest): Promise<NextResponse<OrderAddress> | NextResponse<{
+    error: string;
+}>>;
 
 /**
  * PUT /api/orders/[id]/change-status
@@ -192,4 +198,4 @@ declare function POST(request: NextRequest): Promise<NextResponse<OrderDetail> |
     error: string;
 }>>;
 
-export { type ApproveOrderResponse, type ChangeOrderStatusRequest, type DisapproveOrderResponse, GET as GETOrder, GET$1 as GETOrders, OrderDetail, type OrderDiscountRequest, type OrderReferenceDeliveryIdRequest, type OrderReferenceIdRequest, OrdersApiResponse, POST as POSTOrder, POST$1 as POSTOrderFullInfo, PUT$7 as PUTOrderApprove, PUT$5 as PUTOrderApproveList, PUT$3 as PUTOrderChangeStatus, PUT$6 as PUTOrderDisapprove, PUT$4 as PUTOrderDisapproveList, PUT$2 as PUTOrderDiscount, PUT as PUTOrderReferenceDeliveryId, PUT$1 as PUTOrderReferenceId, PostOrderRequest, getOrder, getOrdersFullInfo, postOrder, putOrderApprove, putOrderApproveList, putOrderChangeStatus, putOrderDisapprove, putOrderDisapproveList, putOrderDiscount, putOrderReferenceDeliveryId, putOrderReferenceId };
+export { type ApproveOrderResponse, type ChangeOrderStatusRequest, type DisapproveOrderResponse, GET as GETAddress, GET$1 as GETOrder, GET$2 as GETOrders, OrderAddress, OrderDetail, type OrderDiscountRequest, type OrderReferenceDeliveryIdRequest, type OrderReferenceIdRequest, OrdersApiResponse, POST as POSTOrder, POST$1 as POSTOrderFullInfo, PUT$7 as PUTOrderApprove, PUT$5 as PUTOrderApproveList, PUT$3 as PUTOrderChangeStatus, PUT$6 as PUTOrderDisapprove, PUT$4 as PUTOrderDisapproveList, PUT$2 as PUTOrderDiscount, PUT as PUTOrderReferenceDeliveryId, PUT$1 as PUTOrderReferenceId, PostOrderRequest, getAddressById, getOrder, getOrdersFullInfo, postOrder, putOrderApprove, putOrderApproveList, putOrderChangeStatus, putOrderDisapprove, putOrderDisapproveList, putOrderDiscount, putOrderReferenceDeliveryId, putOrderReferenceId };

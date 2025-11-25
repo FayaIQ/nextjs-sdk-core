@@ -171,6 +171,10 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v3/Orders/${id}`;
   }
 
+  static getAddress(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Addresses/${id}`;
+  }
+
   // Order item endpoints (v3)
   static getOrderItem(orderId: string | number, itemId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;

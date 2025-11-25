@@ -103,6 +103,7 @@ declare class Api {
     static deleteWish(id: string | number): string;
     static getCategoryProducts(id: string): string;
     static getOrder(id: string): string;
+    static getAddress(id: string | number): string;
     static getOrderItem(orderId: string | number, itemId: string | number): string;
     static postOrderItem(orderId: string | number): string;
     static putOrderItemCancel(orderId: string | number, itemId: string | number): string;

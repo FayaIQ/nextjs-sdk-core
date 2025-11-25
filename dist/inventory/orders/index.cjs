@@ -186,6 +186,9 @@ var init_api = __esm({
       static getOrder(id) {
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
       }
+      static getAddress(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Addresses/${id}`;
+      }
       // Order item endpoints (v3)
       static getOrderItem(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
@@ -731,10 +734,32 @@ var init_fetcher = __esm({
   }
 });
 
+// src/core/index.ts
+var core_exports = {};
+__export(core_exports, {
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
+});
+var init_core = __esm({
+  "src/core/index.ts"() {
+    "use strict";
+    init_fetcher();
+  }
+});
+
 // src/inventory/orders/index.ts
 var orders_exports = {};
 __export(orders_exports, {
   DeleveryType: () => DeleveryType,
+  GETAddress: () => GET3,
   GETOrder: () => GET2,
   GETOrders: () => GET,
   OrderPagingParameters: () => OrderPagingParameters,
@@ -752,6 +777,7 @@ __export(orders_exports, {
   PUTOrderReferenceId: () => PUT7,
   PayType: () => PayType,
   Sign: () => Sign,
+  getAddressById: () => getAddressById,
   getOrder: () => getOrder,
   getOrders: () => getOrders,
   getOrdersFullInfo: () => getOrdersFullInfo,
@@ -1334,6 +1360,20 @@ async function postOrder(data) {
   return res.json();
 }
 
+// src/inventory/orders/getAddressById.ts
+async function getAddressById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getAddress(id));
+  }
+  const res = await fetch(`/api/addresses/${id}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch address ${id}: ${res.statusText}`);
+  }
+  return res.json();
+}
+
 // src/inventory/orders/handler/full-info.ts
 var import_server = require("next/server");
 async function POST(request) {
@@ -1485,25 +1525,41 @@ async function GET2(request, { params }) {
   }
 }
 
+// src/inventory/orders/handler/getAddressById.ts
+var import_server8 = require("next/server");
+async function GET3(request) {
+  try {
+    const url = new URL(request.url);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const id = parts[parts.length - 1];
+    const address = await getAddressById(id);
+    return import_server8.NextResponse.json(address);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch address";
+    console.error("address error:", message);
+    return import_server8.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
 // src/inventory/orders/handler/change-status.ts
-var import_server9 = require("next/server");
+var import_server10 = require("next/server");
 
 // src/core/errorResponse.ts
-var import_server8 = require("next/server");
+var import_server9 = require("next/server");
 init_fetcher();
 function toNextResponseFromError(err) {
   if (err instanceof ApiError) {
     const body = err.body ?? { message: err.message };
     const status = err.status && typeof err.status === "number" ? err.status : 500;
-    return import_server8.NextResponse.json(body, { status });
+    return import_server9.NextResponse.json(body, { status });
   }
   if (err instanceof Error) {
-    return import_server8.NextResponse.json({ message: err.message || "Internal server error" }, { status: 500 });
+    return import_server9.NextResponse.json({ message: err.message || "Internal server error" }, { status: 500 });
   }
   try {
-    return import_server8.NextResponse.json(err, { status: 500 });
+    return import_server9.NextResponse.json(err, { status: 500 });
   } catch {
-    return import_server8.NextResponse.json({ message: String(err) }, { status: 500 });
+    return import_server9.NextResponse.json({ message: String(err) }, { status: 500 });
   }
 }
 
@@ -1513,22 +1569,22 @@ async function PUT5(request, { params }) {
     const { id } = await params;
     const body = await request.json();
     const result = await putOrderChangeStatus(id, body);
-    return import_server9.NextResponse.json(result);
+    return import_server10.NextResponse.json(result);
   } catch (error) {
     return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/orders/handler/discount.ts
-var import_server10 = require("next/server");
+var import_server11 = require("next/server");
 async function PUT6(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderDiscount(id, body);
-    return import_server10.NextResponse.json(result);
+    return import_server11.NextResponse.json(result);
   } catch (error) {
-    return import_server10.NextResponse.json(
+    return import_server11.NextResponse.json(
       { error: error.message || "Failed to apply order discount" },
       { status: 500 }
     );
@@ -1536,15 +1592,15 @@ async function PUT6(request, { params }) {
 }
 
 // src/inventory/orders/handler/reference-id.ts
-var import_server11 = require("next/server");
+var import_server12 = require("next/server");
 async function PUT7(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderReferenceId(id, body);
-    return import_server11.NextResponse.json(result);
+    return import_server12.NextResponse.json(result);
   } catch (error) {
-    return import_server11.NextResponse.json(
+    return import_server12.NextResponse.json(
       { error: error.message || "Failed to update order reference ID" },
       { status: 500 }
     );
@@ -1552,15 +1608,15 @@ async function PUT7(request, { params }) {
 }
 
 // src/inventory/orders/handler/reference-delivery-id.ts
-var import_server12 = require("next/server");
+var import_server13 = require("next/server");
 async function PUT8(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderReferenceDeliveryId(id, body);
-    return import_server12.NextResponse.json(result);
+    return import_server13.NextResponse.json(result);
   } catch (error) {
-    return import_server12.NextResponse.json(
+    return import_server13.NextResponse.json(
       { error: error.message || "Failed to update order reference delivery ID" },
       { status: 500 }
     );
@@ -1568,22 +1624,23 @@ async function PUT8(request, { params }) {
 }
 
 // src/inventory/orders/handler/post-order.ts
-var import_server13 = require("next/server");
+var import_server14 = require("next/server");
 async function POST2(request) {
   try {
     const body = await request.json().catch(() => ({}));
     const result = await postOrder(body);
-    return import_server13.NextResponse.json(result, { status: 201 });
+    return import_server14.NextResponse.json(result, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to create order";
     console.error("post order error:", message);
     const status = err?.status ?? 500;
-    return import_server13.NextResponse.json({ error: message }, { status });
+    return import_server14.NextResponse.json({ error: message }, { status });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DeleveryType,
+  GETAddress,
   GETOrder,
   GETOrders,
   OrderPagingParameters,
@@ -1601,6 +1658,7 @@ async function POST2(request) {
   PUTOrderReferenceId,
   PayType,
   Sign,
+  getAddressById,
   getOrder,
   getOrders,
   getOrdersFullInfo,

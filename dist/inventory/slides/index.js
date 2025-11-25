@@ -1,6 +1,6 @@
 import {
   getSlides
-} from "../../chunk-4X5T2Z7V.js";
+} from "../../chunk-YQWCMYTR.js";
 
 // src/inventory/slides/handler/slides.ts
 import { NextResponse } from "next/server";

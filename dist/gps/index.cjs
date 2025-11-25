@@ -186,6 +186,9 @@ var init_api = __esm({
       static getOrder(id) {
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
       }
+      static getAddress(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Addresses/${id}`;
+      }
       // Order item endpoints (v3)
       static getOrderItem(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
