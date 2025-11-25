@@ -23,11 +23,14 @@ function buildQuery(params?: Params): string {
 export async function getClients(params?: Params): Promise<Client[]> {
   const qs = buildQuery(params);
 
+  console.log("QS:", qs);
+
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
     // server: call the backend directly, append query string if present
     const url = Api.getClients + (qs || "");
+    console.log("URL:", url);
     return getWithAuth<Client[]>(url);
   }
 

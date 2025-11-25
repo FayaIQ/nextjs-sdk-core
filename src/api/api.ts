@@ -6,6 +6,7 @@ export class Api {
   private static GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
   private static THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
   private static INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
+  private static CRM_BASE = `https://storeak-crm-service.azurewebsites.net/api`;
   public static IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
 
   static signIn: string = `${Api.IDENTITY_BASE}/v1/token`;
@@ -122,9 +123,9 @@ export class Api {
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
   // CRM - Clients
-  static getClientsPaging: string = `${Api.INVENTORY_BASE}/v1/Clients/Paging`;
-  static getClients: string = `${Api.INVENTORY_BASE}/v1/Clients`;
-  static postClients: string = `${Api.INVENTORY_BASE}/v1/Clients`;
+  static getClientsPaging: string = `${Api.CRM_BASE}/v1/Clients/Paging`;
+  static getClients: string = `${Api.CRM_BASE}/v1/Clients`;
+  static postClients: string = `${Api.CRM_BASE}/v1/Clients`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
   static getStoreInfo: string = `${Api.STORES_BASE}/v1/Stores/Info`;
   static getCities: string = `${Api.GPS_BASE}/v1/Locations`;
