@@ -8,6 +8,7 @@ export * from "./putOrderChangeStatus";
 export * from "./putOrderDiscount";
 export * from "./putOrderReferenceId";
 export * from "./putOrderReferenceDeliveryId";
+export * from "./postOrder";
 
 // Re-export handlers for Next.js API routes
 export { POST as POSTOrderFullInfo } from "./handler/full-info";
@@ -21,3 +22,4 @@ export { PUT as PUTOrderChangeStatus } from "./handler/change-status";
 export { PUT as PUTOrderDiscount } from "./handler/discount";
 export { PUT as PUTOrderReferenceId } from "./handler/reference-id";
 export { PUT as PUTOrderReferenceDeliveryId } from "./handler/reference-delivery-id";
+export { POST as POSTOrder } from "./handler/post-order"

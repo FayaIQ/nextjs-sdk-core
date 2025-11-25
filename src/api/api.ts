@@ -30,6 +30,9 @@ export class Api {
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
+    static getProductInfoV2(id: string): string {
+    return `${Api.INVENTORY_BASE}/v2/Items/${id}/FullInfo`;
+  }
   static getMenus: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
   static getMenusDropdown: string = `${Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
   static getMenuById(id: string | number): string {
@@ -118,6 +121,10 @@ export class Api {
   static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
+  // CRM - Clients
+  static getClientsPaging: string = `${Api.INVENTORY_BASE}/v1/Clients/Paging`;
+  static getClients: string = `${Api.INVENTORY_BASE}/v1/Clients`;
+  static postClients: string = `${Api.INVENTORY_BASE}/v1/Clients`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
   static getStoreInfo: string = `${Api.STORES_BASE}/v1/Stores/Info`;
   static getCities: string = `${Api.GPS_BASE}/v1/Locations`;
