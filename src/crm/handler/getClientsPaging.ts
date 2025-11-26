@@ -4,7 +4,7 @@ import { toNextResponseFromError } from "../../core/errorResponse";
 
 export async function GET(request: NextRequest) {
   try {
-    const params = request.nextUrl.searchParams;
+    const params = new URL(request.url).searchParams;
     const obj: Record<string, string> = {};
     console.log("GET clients paging request url:", request.url);
     params.forEach((v, k) => (obj[k] = v));
