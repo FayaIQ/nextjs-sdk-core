@@ -1,14 +1,14 @@
 import {
   toNextResponseFromError
-} from "../../chunk-I2UEIWLH.js";
-import "../../chunk-HJ7BD7D3.js";
-import "../../chunk-TA6JZYYA.js";
+} from "../../chunk-2MRUSURF.js";
+import "../../chunk-UEYGZNEP.js";
+import "../../chunk-CRASKSJL.js";
 
 // src/inventory/offers/getOffersPaging.ts
 async function getOffersPaging(query) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getOffersPaging, query);
   }
   const qs = query ? new URLSearchParams(query).toString() : "";
@@ -20,8 +20,8 @@ async function getOffersPaging(query) {
 // src/inventory/offers/getOfferById.ts
 async function getOfferById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getOfferById(id));
   }
   const res = await fetch(`/api/offers/${id}`);
@@ -32,8 +32,8 @@ async function getOfferById(id) {
 // src/inventory/offers/deleteOffer.ts
 async function deleteOffer(id) {
   if (typeof window === "undefined") {
-    const { deleteWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { deleteWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return deleteWithAuth(Api.deleteOffer(id));
   }
   const res = await fetch(`/api/offers/${id}`, { method: "DELETE" });
@@ -53,20 +53,23 @@ async function deleteOffer(id) {
 // src/inventory/offers/getInvoiceDiscount.ts
 async function getInvoiceDiscount(coupon) {
   if (typeof window === "undefined") {
-    const { getWithoutAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
-    return getWithoutAuth(Api.getInvoiceDiscount(coupon));
+    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
+    return getWithAuth(Api.getInvoiceDiscount(coupon));
   }
-  const res = await fetch(`/api/offers/invoice-discount/${encodeURIComponent(String(coupon))}`);
-  if (!res.ok) throw new Error(`Failed to fetch invoice discount: ${res.statusText}`);
+  const res = await fetch(
+    `/api/offers/invoice-discount/${encodeURIComponent(String(coupon))}`
+  );
+  if (!res.ok)
+    throw new Error(`Failed to fetch invoice discount: ${res.statusText}`);
   return res.json();
 }
 
 // src/inventory/offers/getOffersItemsDropdown.ts
 async function getOffersItemsDropdown() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getOffersItemsDropdown);
   }
   const res = await fetch(`/api/offers/items/dropdown`);
@@ -77,8 +80,8 @@ async function getOffersItemsDropdown() {
 // src/inventory/offers/getOffersCouponsDropdown.ts
 async function getOffersCouponsDropdown() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getOffersCouponsDropdown);
   }
   const res = await fetch(`/api/offers/coupons/dropdown`);
@@ -89,8 +92,8 @@ async function getOffersCouponsDropdown() {
 // src/inventory/offers/postOffersItemsDiscount.ts
 async function postOffersItemsDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { postWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return postWithAuth(Api.postOffersItemsDiscount, payload);
   }
   const res = await fetch(`/api/offers/items-discount`, {
@@ -110,8 +113,8 @@ async function postOffersItemsDiscount(payload) {
 // src/inventory/offers/putOffersItemsDiscount.ts
 async function putOffersItemsDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { putWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return putWithAuth(Api.putOffersItemsDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/items-discount`, {
@@ -131,8 +134,8 @@ async function putOffersItemsDiscount(id, payload) {
 // src/inventory/offers/getOffersCustomers.ts
 async function getOffersCustomers() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getOffersCustomers);
   }
   const res = await fetch(`/api/offers/customers`);
@@ -143,8 +146,8 @@ async function getOffersCustomers() {
 // src/inventory/offers/postOffersCustomerDiscount.ts
 async function postOffersCustomerDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { postWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return postWithAuth(Api.postOffersCustomerDiscount, payload);
   }
   const res = await fetch(`/api/offers/customer-discount`, {
@@ -164,8 +167,8 @@ async function postOffersCustomerDiscount(payload) {
 // src/inventory/offers/postOffersInvoiceDiscount.ts
 async function postOffersInvoiceDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { postWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return postWithAuth(Api.postOffersInvoiceDiscount, payload);
   }
   const res = await fetch(`/api/offers/invoice-discount`, {
@@ -185,8 +188,8 @@ async function postOffersInvoiceDiscount(payload) {
 // src/inventory/offers/postOffersShippingDiscount.ts
 async function postOffersShippingDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { postWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return postWithAuth(Api.postOffersShippingDiscount, payload);
   }
   const res = await fetch(`/api/offers/shipping-discount`, {
@@ -206,8 +209,8 @@ async function postOffersShippingDiscount(payload) {
 // src/inventory/offers/postOffersAddItemsByFilter.ts
 async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { postWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return postWithAuth(Api.postOffersAddItemsByFilter(offerId, forceUpdate), payload);
   }
   const res = await fetch(`/api/offers/${offerId}/add-items-by-filter/${String(forceUpdate)}`, {
@@ -228,7 +231,7 @@ async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
 async function getCoupons() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getCouponOffers);
   }
   const response = await fetch(`/api/offers/coupons`);
@@ -241,8 +244,8 @@ async function getCoupons() {
 // src/inventory/offers/postOffersDeliveryZones.ts
 async function postOffersDeliveryZones(offerId, payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { postWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return postWithAuth(Api.postOffersDeliveryZones(offerId), payload);
   }
   const res = await fetch(`/api/offers/${offerId}/delivery-zones`, {
@@ -262,8 +265,8 @@ async function postOffersDeliveryZones(offerId, payload) {
 // src/inventory/offers/getOffersGroups.ts
 async function getOffersGroups(offerId) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getOffersGroups(offerId));
   }
   const res = await fetch(`/api/offers/${offerId}/offer-groups`);
@@ -274,8 +277,8 @@ async function getOffersGroups(offerId) {
 // src/inventory/offers/putOffersGroup.ts
 async function putOffersGroup(offerId, id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { putWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return putWithAuth(Api.putOffersGroup(offerId, id), payload);
   }
   const res = await fetch(`/api/offers/${offerId}/offer-groups/${id}`, {
@@ -295,8 +298,8 @@ async function putOffersGroup(offerId, id, payload) {
 // src/inventory/offers/deleteOffersGroup.ts
 async function deleteOffersGroup(offerId, id) {
   if (typeof window === "undefined") {
-    const { deleteWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { deleteWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return deleteWithAuth(Api.deleteOffersGroup(offerId, id));
   }
   const res = await fetch(`/api/offers/${offerId}/offer-groups/${id}`, { method: "DELETE" });
@@ -316,8 +319,8 @@ async function deleteOffersGroup(offerId, id) {
 // src/inventory/offers/putOffersCustomerDiscount.ts
 async function putOffersCustomerDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { putWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return putWithAuth(Api.putOffersCustomerDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/customer-discount`, {
@@ -337,8 +340,8 @@ async function putOffersCustomerDiscount(id, payload) {
 // src/inventory/offers/putOffersExtraItemDiscount.ts
 async function putOffersExtraItemDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { putWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return putWithAuth(Api.putOffersExtraItemDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/extra-item-discount`, {
@@ -358,8 +361,8 @@ async function putOffersExtraItemDiscount(id, payload) {
 // src/inventory/offers/putOffersInvoiceDiscount.ts
 async function putOffersInvoiceDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { putWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return putWithAuth(Api.putOffersInvoiceDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/invoice-discount`, {
@@ -379,8 +382,8 @@ async function putOffersInvoiceDiscount(id, payload) {
 // src/inventory/offers/putOffersItemsDiscountCustomers.ts
 async function putOffersItemsDiscountCustomers(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { putWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return putWithAuth(Api.putOffersItemsDiscountCustomers(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/items-discount/customers`, {
@@ -395,8 +398,8 @@ async function putOffersItemsDiscountCustomers(id, payload) {
 // src/inventory/offers/putOffersShippingDiscount.ts
 async function putOffersShippingDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-HF5W5PJ3.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { putWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return putWithAuth(Api.putOffersShippingDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/shipping-discount`, {

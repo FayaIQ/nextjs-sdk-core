@@ -56,13 +56,17 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
       }
       static getStoreInvoiceDiscount(storeId, coupon) {
-        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
+          String(coupon)
+        )}`;
       }
       static getDeliveryZoneDiscount(deliveryZoneId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
       }
       static postOffersAddItemsByFilter(offerId, forceUpdate) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
+          String(forceUpdate)
+        )}`;
       }
       static postOffersDeliveryZones(offerId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
@@ -105,6 +109,12 @@ var init_api = __esm({
       }
       static putOffersDarkDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
+      static putOrderPayment(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
+      }
+      static putOrderPaymentStatus(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment/Status`;
       }
       // Payments endpoints
       static getStorePayments(storeId) {
@@ -295,14 +305,14 @@ var init_api = __esm({
     _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
     _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
     _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
-    // category 
+    // category
     _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
-    // identity 
+    // identity
     _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
     _Api.getCustomersDropdown = `${_Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
     _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
     /////////////////////////////////////////
-    //GPS 
+    //GPS
     _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
     _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
     // Items copy endpoints
@@ -748,9 +758,12 @@ __export(identity_exports, {
   CustomersDropdownGET: () => GET,
   LoginPOST: () => POST,
   LogoutPOST: () => POST2,
+  PutUserInfoPUT: () => PUT,
   getCustomersDropdown: () => getCustomersDropdown,
   loginUser: () => loginUser,
-  logoutUser: () => logoutUser
+  logoutUser: () => logoutUser,
+  putUserInfo: () => putUserInfo,
+  toIsoBirthdate: () => toIsoBirthdate
 });
 module.exports = __toCommonJS(identity_exports);
 
@@ -863,8 +876,69 @@ async function getCustomersDropdown(username, FullName) {
   return res.json();
 }
 
-// src/identity/handler/login.ts
+// src/identity/users/putUserInfo.ts
+init_fetcher();
+init_api();
+var toIsoBirthdate = (value) => {
+  const v = (value || "").trim();
+  if (!v) return void 0;
+  const m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(v);
+  if (m) {
+    const [_, y, mo, d] = m;
+    const date2 = new Date(Date.UTC(Number(y), Number(mo) - 1, Number(d)));
+    if (!isNaN(date2.getTime())) return date2.toISOString();
+    return void 0;
+  }
+  const date = new Date(v);
+  if (!isNaN(date.getTime())) return date.toISOString();
+  return void 0;
+};
+async function putUserInfo(userInfo) {
+  if (typeof window === "undefined") {
+    return putWithAuth(Api.putUserInfo, userInfo);
+  }
+  const res = await fetch(`/api/users`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userInfo)
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error(
+      error.message || `Failed to update user info: ${res.statusText}`
+    );
+  }
+  return res.json();
+}
+
+// src/identity/users/handler/put-user-info.ts
 var import_server = require("next/server");
+async function PUT(request) {
+  try {
+    const userInfo = await request.json();
+    if (!userInfo.FullName || !userInfo.Email || !userInfo.Phone || userInfo.Gender === void 0) {
+      return import_server.NextResponse.json(
+        { error: "FullName, Email, Phone, and Gender are required fields" },
+        { status: 400 }
+      );
+    }
+    if (!userInfo.Address || !userInfo.Address.DistrictId) {
+      return import_server.NextResponse.json(
+        { error: "Address with DistrictId is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putUserInfo(userInfo);
+    return import_server.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update user info";
+    console.error("User info update error:", message);
+    return import_server.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/identity/handler/login.ts
+var import_server2 = require("next/server");
 init_config();
 async function POST(request) {
   try {
@@ -880,7 +954,7 @@ async function POST(request) {
       IsFromNotification: false
     };
     const response = await loginUser(credentials);
-    return import_server.NextResponse.json(
+    return import_server2.NextResponse.json(
       {
         success: true,
         message: "Login successful",
@@ -893,7 +967,7 @@ async function POST(request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Login failed unexpectedly";
     console.error("Login error:", message);
-    return import_server.NextResponse.json(
+    return import_server2.NextResponse.json(
       { success: false, error: message },
       { status: 401 }
     );
@@ -901,18 +975,18 @@ async function POST(request) {
 }
 
 // src/identity/handler/logout.ts
-var import_server2 = require("next/server");
+var import_server3 = require("next/server");
 async function POST2() {
   try {
     await logoutUser();
-    return import_server2.NextResponse.json(
+    return import_server3.NextResponse.json(
       { success: true, message: "Logged out successfully" },
       { status: 200 }
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Logout failed";
     console.error("Logout error:", message);
-    return import_server2.NextResponse.json(
+    return import_server3.NextResponse.json(
       { success: false, error: message },
       { status: 500 }
     );
@@ -920,7 +994,7 @@ async function POST2() {
 }
 
 // src/identity/handler/getCustomersDropdown.ts
-var import_server3 = require("next/server");
+var import_server4 = require("next/server");
 async function GET(request) {
   try {
     const url = new URL(request.url);
@@ -929,11 +1003,11 @@ async function GET(request) {
     const username = usernameRaw !== null && usernameRaw.trim() !== "" ? usernameRaw.trim() : void 0;
     const FullName = fullNameRaw !== null && fullNameRaw.trim() !== "" ? fullNameRaw.trim() : void 0;
     const data = await getCustomersDropdown(username, FullName);
-    return import_server3.NextResponse.json({ success: true, data }, { status: 200 });
+    return import_server4.NextResponse.json({ success: true, data }, { status: 200 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch customers";
     console.error("getCustomersDropdown handler error:", message);
-    return import_server3.NextResponse.json({ success: false, error: message }, { status: 500 });
+    return import_server4.NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:
@@ -941,7 +1015,10 @@ async function GET(request) {
   CustomersDropdownGET,
   LoginPOST,
   LogoutPOST,
+  PutUserInfoPUT,
   getCustomersDropdown,
   loginUser,
-  logoutUser
+  logoutUser,
+  putUserInfo,
+  toIsoBirthdate
 });

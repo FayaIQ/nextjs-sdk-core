@@ -1,5 +1,5 @@
 export { g as getOrders } from '../../getOrders-C67REgTj.js';
-import { i as OrderDetail, l as PostOrderRequest, a as OrdersApiResponse, d as OrderAddress } from '../../order-models-nbgqiu1i.js';
+import { l as PostOrderRequest, i as OrderDetail, a as OrdersApiResponse, d as OrderAddress } from '../../order-models-nbgqiu1i.js';
 export { C as CurrentPhase, D as DeleveryType, h as Order, f as OrderClient, e as OrderCustomer, g as OrderItem, c as OrderPagingParameters, b as OrderType, O as OrdersFilterParameters, P as PayType, k as PostOrderAddressRequest, j as PostOrderItemRequest, S as Sign } from '../../order-models-nbgqiu1i.js';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -7,6 +7,11 @@ import { NextRequest, NextResponse } from 'next/server';
  * Get single order details by ID
  */
 declare function getOrder(id: string): Promise<any>;
+
+/**
+ * Create a new order (v2)
+ */
+declare function postOrder(data: PostOrderRequest): Promise<OrderDetail>;
 
 interface ApproveOrderResponse {
     success: boolean;
@@ -21,6 +26,61 @@ interface DisapproveOrderResponse {
 }
 declare function putOrderDisapprove(id: string | number, note: string): Promise<DisapproveOrderResponse>;
 declare function putOrderDisapproveList(ids: (string | number)[], note?: string): Promise<DisapproveOrderResponse>;
+
+/**
+ * Response from payment update operations
+ */
+interface PutOrderPaymentResponse {
+    success?: boolean;
+    message?: string;
+    [key: string]: any;
+}
+/**
+ * Update order payment status (server-side only)
+ *
+ * @param orderId - The ID of the order to update payment for
+ * @returns Promise with the payment update response
+ *
+ * @example Server Component:
+ * ```typescript
+ * import { putOrderPayment } from 'erp-core/inventory/orders';
+ *
+ * const result = await putOrderPayment(12345);
+ * ```
+ *
+ * @example Client Component (using API route):
+ * ```typescript
+ * const response = await fetch(`/api/orders/${orderId}/payment`, {
+ *   method: 'PUT',
+ *   headers: { 'Content-Type': 'application/json' }
+ * });
+ * const result = await response.json();
+ * ```
+ */
+declare function putOrderPayment(orderId: number | string): Promise<PutOrderPaymentResponse>;
+/**
+ * Update order payment status (server-side only)
+ *
+ * @param orderId - The ID of the order to update payment status for
+ * @returns Promise with the payment status update response
+ *
+ * @example Server Component:
+ * ```typescript
+ * import { putOrderPaymentStatus } from 'erp-core/inventory/orders';
+ *
+ * const result = await putOrderPaymentStatus(12345);
+ * ```
+ *
+ * @example Client Component (using API route):
+ * ```typescript
+ * const response = await fetch(`/api/orders/${orderId}/payment/status`, {
+ *   method: 'PUT',
+ *   headers: { 'Content-Type': 'application/json' }
+ * });
+ * const result = await response.json();
+ * ```
+ */
+declare function putOrderPaymentStatus(orderId: number | string): Promise<PutOrderPaymentResponse>;
 
 type OrderIdsInput = number[] | {
     orderIds?: number[];
@@ -71,10 +131,9 @@ interface OrderReferenceDeliveryIdRequest {
  */
 declare function putOrderReferenceDeliveryId(orderId: string | number, data: OrderReferenceDeliveryIdRequest): Promise<any>;
 
-/**
- * Create a new order (v2)
- */
-declare function postOrder(data: PostOrderRequest): Promise<OrderDetail>;
+declare function POST$1(request: NextRequest): Promise<NextResponse<OrderDetail> | NextResponse<{
+    error: string;
+}>>;
 
 /**
  * Ready-to-use API route handler for order full info
@@ -83,11 +142,11 @@ declare function postOrder(data: PostOrderRequest): Promise<OrderDetail>;
  * @example
  * export { GET } from 'my-next-core/inventory/orders/handler/full-info';
  */
-declare function POST$1(request: NextRequest): Promise<NextResponse<{
+declare function POST(request: NextRequest): Promise<NextResponse<{
     error: string;
 }> | NextResponse<OrderDetail[]>>;
 
-declare function PUT$7(request: NextRequest, { params }: {
+declare function PUT$9(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -102,7 +161,7 @@ declare function PUT$7(request: NextRequest, { params }: {
  * @example
  * export { PUT } from 'my-next-core/inventory/orders/handler/disapprove';
  */
-declare function PUT$6(request: NextRequest, { params }: {
+declare function PUT$8(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -117,7 +176,7 @@ declare function PUT$6(request: NextRequest, { params }: {
  * @example
  * export { PUT } from 'my-next-core/inventory/orders/handler/approve-list';
  */
-declare function PUT$5(request: NextRequest): Promise<NextResponse<ApproveOrderResponse> | NextResponse<{
+declare function PUT$7(request: NextRequest): Promise<NextResponse<ApproveOrderResponse> | NextResponse<{
     error: string;
 }>>;
 
@@ -128,7 +187,37 @@ declare function PUT$5(request: NextRequest): Promise<NextResponse<ApproveOrderR
  * @example
  * export { PUT } from 'my-next-core/inventory/orders/handler/disapprove-list';
  */
-declare function PUT$4(request: NextRequest): Promise<NextResponse<DisapproveOrderResponse> | NextResponse<{
+declare function PUT$6(request: NextRequest): Promise<NextResponse<DisapproveOrderResponse> | NextResponse<{
+    error: string;
+}>>;
+
+/**
+ * Ready-to-use API route handler for updating order payment
+ * Users can simply re-export this in their app/api/orders/[id]/payment/route.ts:
+ *
+ * @example
+ * export { PUT } from 'erp-core/inventory/orders';
+ */
+declare function PUT$5(request: NextRequest, { params }: {
+    params: {
+        id: string;
+    };
+}): Promise<NextResponse<{
+    error: string;
+}> | NextResponse<PutOrderPaymentResponse>>;
+
+/**
+ * Ready-to-use API route handler for updating order payment status
+ * Users can simply re-export this in their app/api/orders/[id]/payment/status/route.ts:
+ *
+ * @example
+ * export { PUT } from 'erp-core/inventory/orders';
+ */
+declare function PUT$4(request: NextRequest, { params }: {
+    params: {
+        id: string;
+    };
+}): Promise<NextResponse<PutOrderPaymentResponse> | NextResponse<{
     error: string;
 }>>;
 
@@ -192,8 +281,4 @@ declare function PUT(request: NextRequest, { params }: {
     }>;
 }): Promise<NextResponse<any>>;
 
-declare function POST(request: NextRequest): Promise<NextResponse<OrderDetail> | NextResponse<{
-    error: string;
-}>>;
-
-export { type ApproveOrderResponse, type ChangeOrderStatusRequest, type DisapproveOrderResponse, GET as GETAddress, GET$1 as GETOrder, GET$2 as GETOrders, OrderAddress, OrderDetail, type OrderDiscountRequest, type OrderReferenceDeliveryIdRequest, type OrderReferenceIdRequest, OrdersApiResponse, POST as POSTOrder, POST$1 as POSTOrderFullInfo, PUT$7 as PUTOrderApprove, PUT$5 as PUTOrderApproveList, PUT$3 as PUTOrderChangeStatus, PUT$6 as PUTOrderDisapprove, PUT$4 as PUTOrderDisapproveList, PUT$2 as PUTOrderDiscount, PUT as PUTOrderReferenceDeliveryId, PUT$1 as PUTOrderReferenceId, PostOrderRequest, getOrder, getOrdersFullInfo, postOrder, putOrderApprove, putOrderApproveList, putOrderChangeStatus, putOrderDisapprove, putOrderDisapproveList, putOrderDiscount, putOrderReferenceDeliveryId, putOrderReferenceId };
+export { type ApproveOrderResponse, type ChangeOrderStatusRequest, type DisapproveOrderResponse, GET as GETAddress, GET$1 as GETOrder, GET$2 as GETOrders, OrderAddress, OrderDetail, type OrderDiscountRequest, type OrderReferenceDeliveryIdRequest, type OrderReferenceIdRequest, OrdersApiResponse, POST$1 as POSTOrder, POST as POSTOrderFullInfo, PUT$9 as PUTOrderApprove, PUT$7 as PUTOrderApproveList, PUT$3 as PUTOrderChangeStatus, PUT$8 as PUTOrderDisapprove, PUT$6 as PUTOrderDisapproveList, PUT$2 as PUTOrderDiscount, PUT$5 as PUTOrderPayment, PUT$4 as PUTOrderPaymentStatus, PUT as PUTOrderReferenceDeliveryId, PUT$1 as PUTOrderReferenceId, PostOrderRequest, type PutOrderPaymentResponse, getOrder, getOrdersFullInfo, postOrder, putOrderApprove, putOrderApproveList, putOrderChangeStatus, putOrderDisapprove, putOrderDisapproveList, putOrderDiscount, putOrderPayment, putOrderPaymentStatus, putOrderReferenceDeliveryId, putOrderReferenceId };

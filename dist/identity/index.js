@@ -2,12 +2,17 @@ import {
   getAuthConfig
 } from "../chunk-ZRJIKYHV.js";
 import {
+  PUT,
+  putUserInfo,
+  toIsoBirthdate
+} from "../chunk-HKHDHN4H.js";
+import {
   Api
-} from "../chunk-I4SXUFKS.js";
+} from "../chunk-4D7LFOTQ.js";
 import {
   postWithoutAuth
-} from "../chunk-HJ7BD7D3.js";
-import "../chunk-TA6JZYYA.js";
+} from "../chunk-UEYGZNEP.js";
+import "../chunk-CRASKSJL.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -95,8 +100,8 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-HF5W5PJ3.js");
-    const { Api: Api2 } = await import("../api-HF64SQC2.js");
+    const { getWithAuth } = await import("../fetcher-CX4XI7JJ.js");
+    const { Api: Api2 } = await import("../api-VEZZ6GU2.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
     const fullNameTrimmed2 = FullName !== void 0 ? String(FullName).trim() : "";
@@ -191,7 +196,10 @@ export {
   GET as CustomersDropdownGET,
   POST as LoginPOST,
   POST2 as LogoutPOST,
+  PUT as PutUserInfoPUT,
   getCustomersDropdown,
   loginUser,
-  logoutUser
+  logoutUser,
+  putUserInfo,
+  toIsoBirthdate
 };

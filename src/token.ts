@@ -1,4 +1,3 @@
-
 export type TokenResponse = {
   access_token: string;
   token_type?: string;
@@ -17,8 +16,8 @@ const AUTH_MODE = process.env.AUTH_MODE || "auto"; // "auto" | "strict"
  * - "strict": throws Unauthorized error if no token exists
  */
 export default async function getToken(): Promise<string> {
-if (AUTH_MODE === "strict" && typeof window === "undefined") {
- const { cookies } = await import("next/headers");
+  if (AUTH_MODE === "strict" && typeof window === "undefined") {
+    const { cookies } = await import("next/headers");
 
     const cookie = await cookies();
     const accessTokenCookie = cookie.get("access_token")?.value;

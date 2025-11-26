@@ -106,13 +106,17 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
       }
       static getStoreInvoiceDiscount(storeId, coupon) {
-        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
+          String(coupon)
+        )}`;
       }
       static getDeliveryZoneDiscount(deliveryZoneId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
       }
       static postOffersAddItemsByFilter(offerId, forceUpdate) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
+          String(forceUpdate)
+        )}`;
       }
       static postOffersDeliveryZones(offerId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
@@ -155,6 +159,12 @@ var init_api = __esm({
       }
       static putOffersDarkDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
+      static putOrderPayment(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
+      }
+      static putOrderPaymentStatus(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment/Status`;
       }
       // Payments endpoints
       static getStorePayments(storeId) {
@@ -345,14 +355,14 @@ var init_api = __esm({
     _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
     _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
     _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
-    // category 
+    // category
     _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
-    // identity 
+    // identity
     _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
     _Api.getCustomersDropdown = `${_Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
     _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
     /////////////////////////////////////////
-    //GPS 
+    //GPS
     _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
     _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
     // Items copy endpoints
@@ -745,8 +755,8 @@ var init_fetcher = __esm({
 // src/inventory/slides/index.ts
 var slides_exports = {};
 __export(slides_exports, {
-  GET: () => GET,
-  getSlides: () => getSlides
+  getSlides: () => getSlides,
+  getSlidesGET: () => GET
 });
 module.exports = __toCommonJS(slides_exports);
 
@@ -771,13 +781,13 @@ async function GET(request) {
     const Slides = await getSlides();
     return import_server.NextResponse.json(Slides);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch orders";
-    console.error("orders error:", message);
+    const message = error instanceof Error ? error.message : "Failed to fetch slides";
+    console.error("slides error:", message);
     return import_server.NextResponse.json({ error: message }, { status: 500 });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  GET,
-  getSlides
+  getSlides,
+  getSlidesGET
 });

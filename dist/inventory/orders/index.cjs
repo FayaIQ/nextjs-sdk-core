@@ -106,13 +106,17 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
       }
       static getStoreInvoiceDiscount(storeId, coupon) {
-        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
+          String(coupon)
+        )}`;
       }
       static getDeliveryZoneDiscount(deliveryZoneId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
       }
       static postOffersAddItemsByFilter(offerId, forceUpdate) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
+          String(forceUpdate)
+        )}`;
       }
       static postOffersDeliveryZones(offerId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
@@ -155,6 +159,12 @@ var init_api = __esm({
       }
       static putOffersDarkDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
+      static putOrderPayment(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
+      }
+      static putOrderPaymentStatus(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment/Status`;
       }
       // Payments endpoints
       static getStorePayments(storeId) {
@@ -345,14 +355,14 @@ var init_api = __esm({
     _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
     _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
     _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
-    // category 
+    // category
     _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
-    // identity 
+    // identity
     _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
     _Api.getCustomersDropdown = `${_Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
     _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
     /////////////////////////////////////////
-    //GPS 
+    //GPS
     _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
     _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
     // Items copy endpoints
@@ -777,16 +787,18 @@ __export(orders_exports, {
   OrderPagingParameters: () => OrderPagingParameters,
   OrderType: () => OrderType,
   OrdersFilterParameters: () => OrdersFilterParameters,
-  POSTOrder: () => POST2,
-  POSTOrderFullInfo: () => POST,
+  POSTOrder: () => POST,
+  POSTOrderFullInfo: () => POST2,
   PUTOrderApprove: () => PUT,
   PUTOrderApproveList: () => PUT3,
-  PUTOrderChangeStatus: () => PUT5,
+  PUTOrderChangeStatus: () => PUT7,
   PUTOrderDisapprove: () => PUT2,
   PUTOrderDisapproveList: () => PUT4,
-  PUTOrderDiscount: () => PUT6,
-  PUTOrderReferenceDeliveryId: () => PUT8,
-  PUTOrderReferenceId: () => PUT7,
+  PUTOrderDiscount: () => PUT8,
+  PUTOrderPayment: () => PUT5,
+  PUTOrderPaymentStatus: () => PUT6,
+  PUTOrderReferenceDeliveryId: () => PUT10,
+  PUTOrderReferenceId: () => PUT9,
   PayType: () => PayType,
   Sign: () => Sign,
   getOrder: () => getOrder,
@@ -799,6 +811,8 @@ __export(orders_exports, {
   putOrderDisapprove: () => putOrderDisapprove,
   putOrderDisapproveList: () => putOrderDisapproveList,
   putOrderDiscount: () => putOrderDiscount,
+  putOrderPayment: () => putOrderPayment,
+  putOrderPaymentStatus: () => putOrderPaymentStatus,
   putOrderReferenceDeliveryId: () => putOrderReferenceDeliveryId,
   putOrderReferenceId: () => putOrderReferenceId
 });
@@ -1163,6 +1177,31 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
   }
 };
 
+// src/inventory/orders/postOrder.ts
+async function postOrder(data) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(Api2.postOrders, data);
+  }
+  const res = await fetch(`/api/orders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
 // src/inventory/orders/putOrderApprove.ts
 async function putOrderApprove(id, note) {
   if (typeof window === "undefined") {
@@ -1249,6 +1288,54 @@ async function putOrderDisapproveList(ids, note) {
     throw new Error(`Failed to disapprove orders: ${response.statusText}`);
   }
   return response.json();
+}
+
+// src/inventory/orders/putOrderPayment.ts
+init_fetcher();
+init_api();
+async function putOrderPayment(orderId) {
+  const normalizedId = typeof orderId === "string" ? orderId.trim() : String(orderId);
+  if (!normalizedId) {
+    throw new Error("Invalid order id");
+  }
+  if (typeof window === "undefined") {
+    return putWithAuth(
+      Api.putOrderPayment(normalizedId)
+    );
+  }
+  const res = await fetch(`/api/orders/${normalizedId}/payment`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" }
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error(
+      error.message || `Failed to update order payment: ${res.statusText}`
+    );
+  }
+  return res.json();
+}
+async function putOrderPaymentStatus(orderId) {
+  const normalizedId = typeof orderId === "string" ? orderId.trim() : String(orderId);
+  if (!normalizedId) {
+    throw new Error("Invalid order id");
+  }
+  if (typeof window === "undefined") {
+    return putWithAuth(
+      Api.putOrderPaymentStatus(normalizedId)
+    );
+  }
+  const res = await fetch(`/api/orders/${normalizedId}/payment/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" }
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error(
+      error.message || `Failed to update order payment status: ${res.statusText}`
+    );
+  }
+  return res.json();
 }
 
 // src/inventory/orders/getOrdersFullInfo.ts
@@ -1352,70 +1439,36 @@ async function putOrderReferenceDeliveryId(orderId, data) {
   return res.json();
 }
 
-// src/inventory/orders/postOrder.ts
-async function postOrder(data) {
-  if (typeof window === "undefined") {
-    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return postWithAuth2(Api2.postOrders, data);
+// src/inventory/orders/handler/post-order.ts
+var import_server = require("next/server");
+async function POST(request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const result = await postOrder(body);
+    return import_server.NextResponse.json(result, { status: 201 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to create order";
+    console.error("post order error:", message);
+    const status = err?.status ?? 500;
+    return import_server.NextResponse.json({ error: message }, { status });
   }
-  const res = await fetch(`/api/orders`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) {
-    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
-    try {
-      const errorBody = await res.json();
-      errorMessage = errorBody.error || errorBody.message || errorMessage;
-    } catch (parseErr) {
-      console.error("Failed to parse error response:", parseErr);
-    }
-    throw new Error(errorMessage);
-  }
-  return res.json();
 }
 
 // src/inventory/orders/handler/full-info.ts
-var import_server = require("next/server");
-async function POST(request) {
+var import_server2 = require("next/server");
+async function POST2(request) {
   try {
     const payload = await request.json().catch(() => ({}));
     const orderIds = Array.isArray(payload) ? payload : payload.orderIds ?? payload.body ?? [];
     console.log("Received body for full info:", payload);
     if (!Array.isArray(orderIds) || orderIds.length === 0) {
-      return import_server.NextResponse.json({ error: "orderIds array is required" }, { status: 400 });
+      return import_server2.NextResponse.json({ error: "orderIds array is required" }, { status: 400 });
     }
     const result = await getOrdersFullInfo(orderIds);
-    return import_server.NextResponse.json(result);
+    return import_server2.NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch order full info";
     console.error("Order full info error:", message);
-    return import_server.NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
-  }
-}
-
-// src/inventory/orders/handler/approve.ts
-var import_server2 = require("next/server");
-async function PUT(request, { params }) {
-  try {
-    const { id } = await params;
-    const body = await request.json();
-    if (!id) {
-      return import_server2.NextResponse.json(
-        { error: "Order ID is required" },
-        { status: 400 }
-      );
-    }
-    const result = await putOrderApprove(id, body?.note);
-    return import_server2.NextResponse.json(result);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to approve order";
-    console.error("Order approve error:", message);
     return import_server2.NextResponse.json(
       { error: message },
       { status: 500 }
@@ -1423,9 +1476,9 @@ async function PUT(request, { params }) {
   }
 }
 
-// src/inventory/orders/handler/disapprove.ts
+// src/inventory/orders/handler/approve.ts
 var import_server3 = require("next/server");
-async function PUT2(request, { params }) {
+async function PUT(request, { params }) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -1435,11 +1488,11 @@ async function PUT2(request, { params }) {
         { status: 400 }
       );
     }
-    const result = await putOrderDisapprove(id, body?.note);
+    const result = await putOrderApprove(id, body?.note);
     return import_server3.NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to disapprove order";
-    console.error("Order disapprove error:", message);
+    const message = error instanceof Error ? error.message : "Failed to approve order";
+    console.error("Order approve error:", message);
     return import_server3.NextResponse.json(
       { error: message },
       { status: 500 }
@@ -1447,23 +1500,23 @@ async function PUT2(request, { params }) {
   }
 }
 
-// src/inventory/orders/handler/approve-list.ts
+// src/inventory/orders/handler/disapprove.ts
 var import_server4 = require("next/server");
-async function PUT3(request) {
+async function PUT2(request, { params }) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    const { orderIds, note } = body;
-    if (!orderIds || !Array.isArray(orderIds)) {
+    if (!id) {
       return import_server4.NextResponse.json(
-        { error: "orderIds array is required" },
+        { error: "Order ID is required" },
         { status: 400 }
       );
     }
-    const result = await putOrderApproveList(orderIds, note);
+    const result = await putOrderDisapprove(id, body?.note);
     return import_server4.NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to approve orders";
-    console.error("Order approve list error:", message);
+    const message = error instanceof Error ? error.message : "Failed to disapprove order";
+    console.error("Order disapprove error:", message);
     return import_server4.NextResponse.json(
       { error: message },
       { status: 500 }
@@ -1471,9 +1524,9 @@ async function PUT3(request) {
   }
 }
 
-// src/inventory/orders/handler/disapprove-list.ts
+// src/inventory/orders/handler/approve-list.ts
 var import_server5 = require("next/server");
-async function PUT4(request) {
+async function PUT3(request) {
   try {
     const body = await request.json();
     const { orderIds, note } = body;
@@ -1483,11 +1536,11 @@ async function PUT4(request) {
         { status: 400 }
       );
     }
-    const result = await putOrderDisapproveList(orderIds, note);
+    const result = await putOrderApproveList(orderIds, note);
     return import_server5.NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to disapprove orders";
-    console.error("Order disapprove list error:", message);
+    const message = error instanceof Error ? error.message : "Failed to approve orders";
+    console.error("Order approve list error:", message);
     return import_server5.NextResponse.json(
       { error: message },
       { status: 500 }
@@ -1495,17 +1548,23 @@ async function PUT4(request) {
   }
 }
 
-// src/inventory/orders/handler/orders.ts
+// src/inventory/orders/handler/disapprove-list.ts
 var import_server6 = require("next/server");
-async function GET(request) {
+async function PUT4(request) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const filterParams = OrdersFilterParameters.fromURLSearchParams(searchParams);
-    const orders = await getOrders({ filterParams });
-    return import_server6.NextResponse.json(orders);
+    const body = await request.json();
+    const { orderIds, note } = body;
+    if (!orderIds || !Array.isArray(orderIds)) {
+      return import_server6.NextResponse.json(
+        { error: "orderIds array is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderDisapproveList(orderIds, note);
+    return import_server6.NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch orders";
-    console.error("orders error:", message);
+    const message = error instanceof Error ? error.message : "Failed to disapprove orders";
+    console.error("Order disapprove list error:", message);
     return import_server6.NextResponse.json(
       { error: message },
       { status: 500 }
@@ -1513,15 +1572,73 @@ async function GET(request) {
   }
 }
 
-// src/inventory/orders/handler/order.ts
+// src/inventory/orders/handler/payment.ts
 var import_server7 = require("next/server");
+async function PUT5(request, { params }) {
+  try {
+    const orderId = params.id;
+    if (!orderId) {
+      return import_server7.NextResponse.json(
+        { error: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderPayment(orderId);
+    return import_server7.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update order payment";
+    console.error("Order payment update error:", message);
+    return import_server7.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/orders/handler/payment-status.ts
+var import_server8 = require("next/server");
+async function PUT6(request, { params }) {
+  try {
+    const orderId = params.id;
+    if (!orderId) {
+      return import_server8.NextResponse.json(
+        { error: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderPaymentStatus(orderId);
+    return import_server8.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update order payment status";
+    console.error("Order payment status update error:", message);
+    return import_server8.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// src/inventory/orders/handler/orders.ts
+var import_server9 = require("next/server");
+async function GET(request) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const filterParams = OrdersFilterParameters.fromURLSearchParams(searchParams);
+    const orders = await getOrders({ filterParams });
+    return import_server9.NextResponse.json(orders);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch orders";
+    console.error("orders error:", message);
+    return import_server9.NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
+  }
+}
+
+// src/inventory/orders/handler/order.ts
+var import_server10 = require("next/server");
 async function GET2(request, { params }) {
   try {
     const { id } = await params;
     const result = await getOrder(id);
-    return import_server7.NextResponse.json(result);
+    return import_server10.NextResponse.json(result);
   } catch (error) {
-    return import_server7.NextResponse.json(
+    return import_server10.NextResponse.json(
       { error: error.message || "Failed to fetch order" },
       { status: 500 }
     );
@@ -1529,7 +1646,7 @@ async function GET2(request, { params }) {
 }
 
 // src/inventory/orders/handler/getAddressById.ts
-var import_server8 = require("next/server");
+var import_server11 = require("next/server");
 
 // src/gps/locations/getAddressById.ts
 async function getAddressById(id) {
@@ -1552,58 +1669,58 @@ async function GET3(request) {
     const parts = url.pathname.split("/").filter(Boolean);
     const id = parts[parts.length - 1];
     const address = await getAddressById(id);
-    return import_server8.NextResponse.json(address);
+    return import_server11.NextResponse.json(address);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to fetch address";
     console.error("address error:", message);
-    return import_server8.NextResponse.json({ error: message }, { status: 500 });
+    return import_server11.NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 // src/inventory/orders/handler/change-status.ts
-var import_server10 = require("next/server");
+var import_server13 = require("next/server");
 
 // src/core/errorResponse.ts
-var import_server9 = require("next/server");
+var import_server12 = require("next/server");
 init_fetcher();
 function toNextResponseFromError(err) {
   if (err instanceof ApiError) {
     const body = err.body ?? { message: err.message };
     const status = err.status && typeof err.status === "number" ? err.status : 500;
-    return import_server9.NextResponse.json(body, { status });
+    return import_server12.NextResponse.json(body, { status });
   }
   if (err instanceof Error) {
-    return import_server9.NextResponse.json({ message: err.message || "Internal server error" }, { status: 500 });
+    return import_server12.NextResponse.json({ message: err.message || "Internal server error" }, { status: 500 });
   }
   try {
-    return import_server9.NextResponse.json(err, { status: 500 });
+    return import_server12.NextResponse.json(err, { status: 500 });
   } catch {
-    return import_server9.NextResponse.json({ message: String(err) }, { status: 500 });
+    return import_server12.NextResponse.json({ message: String(err) }, { status: 500 });
   }
 }
 
 // src/inventory/orders/handler/change-status.ts
-async function PUT5(request, { params }) {
+async function PUT7(request, { params }) {
   try {
     const { id } = await params;
     const body = await request.json();
     const result = await putOrderChangeStatus(id, body);
-    return import_server10.NextResponse.json(result);
+    return import_server13.NextResponse.json(result);
   } catch (error) {
     return toNextResponseFromError(error);
   }
 }
 
 // src/inventory/orders/handler/discount.ts
-var import_server11 = require("next/server");
-async function PUT6(request, { params }) {
+var import_server14 = require("next/server");
+async function PUT8(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderDiscount(id, body);
-    return import_server11.NextResponse.json(result);
+    return import_server14.NextResponse.json(result);
   } catch (error) {
-    return import_server11.NextResponse.json(
+    return import_server14.NextResponse.json(
       { error: error.message || "Failed to apply order discount" },
       { status: 500 }
     );
@@ -1611,15 +1728,15 @@ async function PUT6(request, { params }) {
 }
 
 // src/inventory/orders/handler/reference-id.ts
-var import_server12 = require("next/server");
-async function PUT7(request, { params }) {
+var import_server15 = require("next/server");
+async function PUT9(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderReferenceId(id, body);
-    return import_server12.NextResponse.json(result);
+    return import_server15.NextResponse.json(result);
   } catch (error) {
-    return import_server12.NextResponse.json(
+    return import_server15.NextResponse.json(
       { error: error.message || "Failed to update order reference ID" },
       { status: 500 }
     );
@@ -1627,33 +1744,18 @@ async function PUT7(request, { params }) {
 }
 
 // src/inventory/orders/handler/reference-delivery-id.ts
-var import_server13 = require("next/server");
-async function PUT8(request, { params }) {
+var import_server16 = require("next/server");
+async function PUT10(request, { params }) {
   try {
     const body = await request.json();
     const { id } = await params;
     const result = await putOrderReferenceDeliveryId(id, body);
-    return import_server13.NextResponse.json(result);
+    return import_server16.NextResponse.json(result);
   } catch (error) {
-    return import_server13.NextResponse.json(
+    return import_server16.NextResponse.json(
       { error: error.message || "Failed to update order reference delivery ID" },
       { status: 500 }
     );
-  }
-}
-
-// src/inventory/orders/handler/post-order.ts
-var import_server14 = require("next/server");
-async function POST2(request) {
-  try {
-    const body = await request.json().catch(() => ({}));
-    const result = await postOrder(body);
-    return import_server14.NextResponse.json(result, { status: 201 });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to create order";
-    console.error("post order error:", message);
-    const status = err?.status ?? 500;
-    return import_server14.NextResponse.json({ error: message }, { status });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:
@@ -1673,6 +1775,8 @@ async function POST2(request) {
   PUTOrderDisapprove,
   PUTOrderDisapproveList,
   PUTOrderDiscount,
+  PUTOrderPayment,
+  PUTOrderPaymentStatus,
   PUTOrderReferenceDeliveryId,
   PUTOrderReferenceId,
   PayType,
@@ -1687,6 +1791,8 @@ async function POST2(request) {
   putOrderDisapprove,
   putOrderDisapproveList,
   putOrderDiscount,
+  putOrderPayment,
+  putOrderPaymentStatus,
   putOrderReferenceDeliveryId,
   putOrderReferenceId
 });

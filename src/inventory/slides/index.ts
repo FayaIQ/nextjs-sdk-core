@@ -1,2 +1,2 @@
 export * from "./getSlides";
-export { GET } from "./handler/slides";
+export { GET as getSlidesGET } from "./handler/slides";

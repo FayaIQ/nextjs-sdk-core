@@ -1,6 +1,16 @@
-import {
-  getSlides
-} from "../../chunk-7ZECH7ZJ.js";
+// src/inventory/slides/getSlides.ts
+async function getSlides() {
+  if (typeof window === "undefined") {
+    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
+    return getWithAuth(Api.getSlideShows);
+  }
+  const response = await fetch(`/api/slides?`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch products: ${response.statusText}`);
+  }
+  return response.json();
+}
 
 // src/inventory/slides/handler/slides.ts
 import { NextResponse } from "next/server";
@@ -9,12 +19,12 @@ async function GET(request) {
     const Slides = await getSlides();
     return NextResponse.json(Slides);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch orders";
-    console.error("orders error:", message);
+    const message = error instanceof Error ? error.message : "Failed to fetch slides";
+    console.error("slides error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 export {
-  GET,
-  getSlides
+  getSlides,
+  GET as getSlidesGET
 };

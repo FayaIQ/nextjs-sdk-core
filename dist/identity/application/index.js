@@ -1,6 +1,6 @@
 import {
   getStoreInfo
-} from "../../chunk-CCLC3WFV.js";
+} from "../../chunk-5GOHAITQ.js";
 
 // src/identity/application/handler/getStores.ts
 import { NextResponse } from "next/server";
@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 async function getStores() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getApplicationsStores);
   }
   const response = await fetch(`/api/stores`);
@@ -54,7 +54,7 @@ import { NextResponse as NextResponse3 } from "next/server";
 async function getApplicationsStoreDropdown() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-HF64SQC2.js");
+    const { Api } = await import("../../api-VEZZ6GU2.js");
     return getWithAuth(Api.getApplicationsStores);
   }
   const res = await fetch(`/api/applications/store/dropdown`);

@@ -1,3 +1,4 @@
+export { PutUserInfoPUT, PutUserInfoRequest, PutUserInfoResponse, UserAddress, putUserInfo, toIsoBirthdate } from './users/index.js';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**

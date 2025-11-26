@@ -1,9 +1,8 @@
-export { g as getStoreInfo } from './storeInfo-q3EctBMs.js';
+export { g as getStoreInfo } from './storeInfo-eCjXU8NH.js';
 export { a as getProductInfo, g as getProducts } from './getProductInfo-DOIZZ2AG.js';
-export { g as getMenus } from './getMenus-D5ZQbF0p.js';
+export { g as getMenus } from './getMenus-BU2KdRFd.js';
 export { g as getOrders } from './getOrders-C67REgTj.js';
-export { g as getSlides } from './getSlides-qgW_IuIC.js';
-export { A as Address, C as Category, b as City, a as Country, D as District, S as StoreType } from './types-D0Xbpetb.js';
+export { A as Address, C as Category, b as City, c as ColorType, a as Country, D as District, P as Product, S as SizeType, d as StoreType, U as UnitInfo } from './types-BlK7R_r9.js';
 export { A as AgeGroup, G as Gender, I as ItemsFilterParameters, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from './filter-models-B4kRw7Xr.js';
 export { C as CurrentPhase, D as DeleveryType, h as Order, d as OrderAddress, f as OrderClient, e as OrderCustomer, i as OrderDetail, g as OrderItem, c as OrderPagingParameters, b as OrderType, a as OrdersApiResponse, O as OrdersFilterParameters, P as PayType, k as PostOrderAddressRequest, j as PostOrderItemRequest, l as PostOrderRequest, S as Sign } from './order-models-nbgqiu1i.js';
 export { a as apiFetch } from './index-BRffoVUg.js';
@@ -87,6 +86,8 @@ declare class Api {
     static getClients: string;
     static postClients: string;
     static postOrders: string;
+    static putOrderPayment(orderId: string | number): string;
+    static putOrderPaymentStatus(orderId: string | number): string;
     static getStoreInfo: string;
     static getCities: string;
     static getDeliveryZones: string;

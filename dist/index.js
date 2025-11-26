@@ -1,19 +1,4 @@
 import {
-  getMenus
-} from "./chunk-FZYVEOZE.js";
-import {
-  getProductInfo,
-  getProducts
-} from "./chunk-FDZ53KLG.js";
-import {
-  AgeGroup,
-  Gender,
-  ItemsFilterParameters,
-  NewArrivalPeriod,
-  PagingParameters,
-  SortType
-} from "./chunk-T4IEAKR3.js";
-import {
   DeleveryType,
   OrderPagingParameters,
   OrderType,
@@ -21,22 +6,34 @@ import {
   PayType,
   Sign,
   getOrders
-} from "./chunk-RTQXZLPC.js";
+} from "./chunk-OY4VLQUC.js";
 import {
-  getSlides
-} from "./chunk-7ZECH7ZJ.js";
+  getProductInfo,
+  getProducts
+} from "./chunk-F7NUPOLE.js";
+import {
+  getMenus
+} from "./chunk-TMEZGPTT.js";
+import {
+  AgeGroup,
+  Gender,
+  ItemsFilterParameters,
+  NewArrivalPeriod,
+  PagingParameters,
+  SortType
+} from "./chunk-Q2Y4LIEU.js";
 import {
   Api
-} from "./chunk-I4SXUFKS.js";
+} from "./chunk-4D7LFOTQ.js";
 import {
   apiFetch
-} from "./chunk-HJ7BD7D3.js";
+} from "./chunk-UEYGZNEP.js";
 import {
   getToken
-} from "./chunk-TA6JZYYA.js";
+} from "./chunk-CRASKSJL.js";
 import {
   getStoreInfo
-} from "./chunk-CCLC3WFV.js";
+} from "./chunk-5GOHAITQ.js";
 export {
   AgeGroup,
   Api,
@@ -56,7 +53,6 @@ export {
   getOrders,
   getProductInfo,
   getProducts,
-  getSlides,
   getStoreInfo,
   getToken
 };

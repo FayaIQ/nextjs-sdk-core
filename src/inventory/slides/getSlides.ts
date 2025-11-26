@@ -1,22 +1,3 @@
-/**
- * Fetches a list of products with optional filtering and pagination
- * Works in both server and client components
- *
- * @param filterParams - Filter parameters for products (pagination, sorting, etc.)
- * @returns Promise with product data
- *
- * @example
- * // Server component
- * const products = await getProducts({
- *   filterParams: new ItemsFilterParameters({ currentPage: 1, pageSize: 20 })
- * });
- *
- * @example
- * // Client component
- * const products = await getProducts({
- *   filterParams: new ItemsFilterParameters({ sortType: SortType.Newest })
- * });
- */
 export async function getSlides() {
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {

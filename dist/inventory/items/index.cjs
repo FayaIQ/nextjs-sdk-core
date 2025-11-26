@@ -106,13 +106,17 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
       }
       static getStoreInvoiceDiscount(storeId, coupon) {
-        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(String(coupon))}`;
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
+          String(coupon)
+        )}`;
       }
       static getDeliveryZoneDiscount(deliveryZoneId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
       }
       static postOffersAddItemsByFilter(offerId, forceUpdate) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(String(forceUpdate))}`;
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
+          String(forceUpdate)
+        )}`;
       }
       static postOffersDeliveryZones(offerId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
@@ -155,6 +159,12 @@ var init_api = __esm({
       }
       static putOffersDarkDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
+      static putOrderPayment(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
+      }
+      static putOrderPaymentStatus(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment/Status`;
       }
       // Payments endpoints
       static getStorePayments(storeId) {
@@ -345,14 +355,14 @@ var init_api = __esm({
     _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
     _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
     _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
-    // category 
+    // category
     _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
-    // identity 
+    // identity
     _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
     _Api.getCustomersDropdown = `${_Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
     _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
     /////////////////////////////////////////
-    //GPS 
+    //GPS
     _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
     _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
     // Items copy endpoints
@@ -1245,13 +1255,19 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       params.set("HaveOffer", String(this.HaveOffer));
     }
     if (this.HaveItemCollectionOffer !== null) {
-      params.set("HaveItemCollectionOffer", String(this.HaveItemCollectionOffer));
+      params.set(
+        "HaveItemCollectionOffer",
+        String(this.HaveItemCollectionOffer)
+      );
     }
     if (this.IsDeleted !== null) {
       params.set("IsDeleted", String(this.IsDeleted));
     }
     if (this.CheckQuantityBeforeSale !== null) {
-      params.set("CheckQuantityBeforeSale", String(this.CheckQuantityBeforeSale));
+      params.set(
+        "CheckQuantityBeforeSale",
+        String(this.CheckQuantityBeforeSale)
+      );
     }
     return params;
   }
@@ -1292,12 +1308,10 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       map.SyncThirdPartyIds = this.SyncThirdPartyIds;
     if (this.SyncThirdPartyId !== null)
       map.SyncThirdPartyId = this.SyncThirdPartyId;
-    if (this.RejectionNote !== null)
-      map.RejectionNote = this.RejectionNote;
+    if (this.RejectionNote !== null) map.RejectionNote = this.RejectionNote;
     if (this.Deliveryability !== null)
       map.Deliveryability = this.Deliveryability;
-    if (this.Availability !== null)
-      map.Availability = this.Availability;
+    if (this.Availability !== null) map.Availability = this.Availability;
     if (this.IsMultiMenuStore !== null)
       map.IsMultiMenuStore = this.IsMultiMenuStore;
     if (this.UseApprovalSystem !== null)
@@ -1310,24 +1324,17 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       map.Code = this.Code.trim();
     if (this.barcode !== null && this.barcode.trim() !== "")
       map.barcode = this.barcode.trim();
-    if (this.IsFeatured !== null)
-      map.IsFeatured = this.IsFeatured;
-    if (this.IsActive !== null)
-      map.IsActive = this.IsActive;
-    if (this.ApprovedStatus !== null)
-      map.ApprovedStatus = this.ApprovedStatus;
-    if (this.HavePicture !== null)
-      map.HavePicture = this.HavePicture;
+    if (this.IsFeatured !== null) map.IsFeatured = this.IsFeatured;
+    if (this.IsActive !== null) map.IsActive = this.IsActive;
+    if (this.ApprovedStatus !== null) map.ApprovedStatus = this.ApprovedStatus;
+    if (this.HavePicture !== null) map.HavePicture = this.HavePicture;
     if (this.HaveDescription !== null)
       map.HaveDescription = this.HaveDescription;
-    if (this.HaveColor !== null)
-      map.HaveColor = this.HaveColor;
-    if (this.HaveOffer !== null)
-      map.HaveOffer = this.HaveOffer;
+    if (this.HaveColor !== null) map.HaveColor = this.HaveColor;
+    if (this.HaveOffer !== null) map.HaveOffer = this.HaveOffer;
     if (this.HaveItemCollectionOffer !== null)
       map.HaveItemCollectionOffer = this.HaveItemCollectionOffer;
-    if (this.IsDeleted !== null)
-      map.IsDeleted = this.IsDeleted;
+    if (this.IsDeleted !== null) map.IsDeleted = this.IsDeleted;
     if (this.CheckQuantityBeforeSale !== null)
       map.CheckQuantityBeforeSale = this.CheckQuantityBeforeSale;
     return map;
