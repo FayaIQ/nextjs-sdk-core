@@ -1,53 +1,46 @@
 import { Client } from "./client-models";
 
-type Params = Record<string, unknown> | URLSearchParams | string | undefined;
+type FilterLike = { toURLSearchParams(): URLSearchParams } | Record<string, any> | URLSearchParams | string;
 
-function buildQuery(params?: Params): string {
-  if (!params) return "";
-  if (typeof params === "string") return params.startsWith("?") ? params : `?${params}`;
-  if (params instanceof URLSearchParams) return `?${params.toString()}`;
-  // Record
+function toQueryString(filter?: FilterLike): string {
+  if (!filter) return "";
+  if (typeof filter === "string") return filter.startsWith("?") ? filter : `?${filter}`;
+  if (filter instanceof URLSearchParams) return `?${filter.toString()}`;
+  if (typeof (filter as any).toURLSearchParams === "function") {
+    return `?${(filter as any).toURLSearchParams().toString()}`;
+  }
   const usp = new URLSearchParams();
-  Object.entries(params as Record<string, unknown>).forEach(([k, v]) => {
+  Object.entries(filter as Record<string, any>).forEach(([k, v]) => {
     if (v === undefined || v === null) return;
-    if (Array.isArray(v)) {
-      v.forEach(item => usp.append(k, String(item)));
-    } else {
-      usp.append(k, String(v));
-    }
+    if (Array.isArray(v)) v.forEach(item => usp.append(k, String(item)));
+    else usp.append(k, String(v));
   });
   const qs = usp.toString();
   return qs ? `?${qs}` : "";
 }
 
-export async function getClients(params?: Params): Promise<Client[]> {
-  const qs = buildQuery(params);
-
-  console.log("QS:", qs);
-
+export async function getClients({ filterParams } : { filterParams?: FilterLike } = {}): Promise<Client[]> {
+  const qs = toQueryString(filterParams);
+console.log("getClients query string:", qs);
+  // Server-side: call the backend directly with auth
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
-    // server: call the backend directly, append query string if present
-    const url = Api.getClients + (qs || "");
-    console.log("URL:", url);
-    return getWithAuth<Client[]>(url);
+    return getWithAuth<Client[]>(`${Api.getClients}${qs}`);
   }
 
-  // client: call local API proxy and forward query string
+  // Client-side: proxy to local API route
   const res = await fetch(`/api/crm/clients${qs}`);
-if (!res.ok) {
-    // Extract error message from response body before throwing
-    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+  if (!res.ok) {
+    let msg = `Failed to fetch clients: ${res.status} ${res.statusText}`;
     try {
-      const errorBody = await res.json();
-      errorMessage = errorBody.error || errorBody.message || errorMessage;
-    } catch (parseErr) {
-      // If parsing fails, use the default message
-      console.error("Failed to parse error response:", parseErr);
+      const body = await res.json();
+      msg = body?.error || body?.message || msg;
+    } catch (_) {
+      // ignore parse errors
     }
-    throw new Error(errorMessage);
+    throw new Error(msg);
   }
-  
+
   return res.json();
 }

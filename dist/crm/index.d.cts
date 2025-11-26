@@ -49,8 +49,12 @@ interface ClientsPagingResponse {
  */
 declare function getClientsPaging(query?: Record<string, any>): Promise<ClientsPagingResponse>;
 
-type Params = Record<string, unknown> | URLSearchParams | string | undefined;
-declare function getClients(params?: Params): Promise<Client[]>;
+type FilterLike = {
+    toURLSearchParams(): URLSearchParams;
+} | Record<string, any> | URLSearchParams | string;
+declare function getClients({ filterParams }?: {
+    filterParams?: FilterLike;
+}): Promise<Client[]>;
 
 declare function postClient(data: PostClientRequest): Promise<Client>;
 

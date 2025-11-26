@@ -18,42 +18,39 @@ async function getClientsPaging(query) {
 }
 
 // src/crm/clients/getClients.ts
-function buildQuery(params) {
-  if (!params) return "";
-  if (typeof params === "string") return params.startsWith("?") ? params : `?${params}`;
-  if (params instanceof URLSearchParams) return `?${params.toString()}`;
+function toQueryString(filter) {
+  if (!filter) return "";
+  if (typeof filter === "string") return filter.startsWith("?") ? filter : `?${filter}`;
+  if (filter instanceof URLSearchParams) return `?${filter.toString()}`;
+  if (typeof filter.toURLSearchParams === "function") {
+    return `?${filter.toURLSearchParams().toString()}`;
+  }
   const usp = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
+  Object.entries(filter).forEach(([k, v]) => {
     if (v === void 0 || v === null) return;
-    if (Array.isArray(v)) {
-      v.forEach((item) => usp.append(k, String(item)));
-    } else {
-      usp.append(k, String(v));
-    }
+    if (Array.isArray(v)) v.forEach((item) => usp.append(k, String(item)));
+    else usp.append(k, String(v));
   });
   const qs = usp.toString();
   return qs ? `?${qs}` : "";
 }
-async function getClients(params) {
-  const qs = buildQuery(params);
-  console.log("QS:", qs);
+async function getClients({ filterParams } = {}) {
+  const qs = toQueryString(filterParams);
+  console.log("getClients query string:", qs);
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../fetcher-CX4XI7JJ.js");
     const { Api } = await import("../api-VEZZ6GU2.js");
-    const url = Api.getClients + (qs || "");
-    console.log("URL:", url);
-    return getWithAuth(url);
+    return getWithAuth(`${Api.getClients}${qs}`);
   }
   const res = await fetch(`/api/crm/clients${qs}`);
   if (!res.ok) {
-    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    let msg = `Failed to fetch clients: ${res.status} ${res.statusText}`;
     try {
-      const errorBody = await res.json();
-      errorMessage = errorBody.error || errorBody.message || errorMessage;
-    } catch (parseErr) {
-      console.error("Failed to parse error response:", parseErr);
+      const body = await res.json();
+      msg = body?.error || body?.message || msg;
+    } catch (_) {
     }
-    throw new Error(errorMessage);
+    throw new Error(msg);
   }
   return res.json();
 }
@@ -88,8 +85,7 @@ import { NextResponse } from "next/server";
 async function GET(request) {
   try {
     const url = new URL(request.url);
-    const qs = url.search ? url.search : "";
-    const clients = await getClients(qs);
+    const clients = await getClients({ filterParams: url.searchParams });
     return NextResponse.json(clients);
   } catch (err) {
     return toNextResponseFromError(err);
