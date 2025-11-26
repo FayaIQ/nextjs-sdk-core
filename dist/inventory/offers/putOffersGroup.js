@@ -1,6 +1,6 @@
 import {
   putOffersGroup
-} from "../../chunk-XD5GVKW6.js";
+} from "../../chunk-BRWIVHNU.js";
 export {
   putOffersGroup
 };

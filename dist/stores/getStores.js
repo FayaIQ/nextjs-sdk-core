@@ -1,6 +1,6 @@
 import {
   getStores
-} from "../chunk-SWCCOLR7.js";
+} from "../chunk-RE63XO54.js";
 export {
   getStores
 };

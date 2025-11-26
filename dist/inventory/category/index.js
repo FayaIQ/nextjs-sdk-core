@@ -1,10 +1,10 @@
 import {
   GET
-} from "../../chunk-EC66IC2T.js";
+} from "../../chunk-UOBA7XCA.js";
+import "../../chunk-DQLIRP6S.js";
 import {
   getCatigories
-} from "../../chunk-GDDJ6AM2.js";
-import "../../chunk-DQLIRP6S.js";
+} from "../../chunk-4VJU4YMF.js";
 export {
   GET as CategoriesGET,
   getCatigories

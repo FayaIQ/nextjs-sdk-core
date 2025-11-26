@@ -1,6 +1,6 @@
 import {
   getClientsPaging
-} from "../chunk-NKVF66PC.js";
+} from "../chunk-GYQHJ3DY.js";
 export {
   getClientsPaging
 };

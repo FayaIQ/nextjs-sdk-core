@@ -1,6 +1,6 @@
 import {
   getOffersCouponsDropdown
-} from "../../chunk-M7NSDICV.js";
+} from "../../chunk-VOQPNYV4.js";
 export {
   getOffersCouponsDropdown
 };

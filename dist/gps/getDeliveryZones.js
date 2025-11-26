@@ -1,6 +1,6 @@
 import {
   getDeliveryZones
-} from "../chunk-FG5OVNAJ.js";
+} from "../chunk-I42VAG5T.js";
 export {
   getDeliveryZones
 };

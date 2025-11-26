@@ -795,7 +795,7 @@ function toNextResponseFromError(err) {
 // src/crm/handler/getClientsPaging.ts
 async function GET(request) {
   try {
-    const params = request.nextUrl.searchParams;
+    const params = new URL(request.url).searchParams;
     const obj = {};
     console.log("GET clients paging request url:", request.url);
     params.forEach((v, k) => obj[k] = v);

@@ -1,6 +1,6 @@
 import {
   getParentProducts
-} from "../../chunk-F54NLJVS.js";
+} from "../../chunk-RVWK3L3B.js";
 export {
   getParentProducts
 };

@@ -1,6 +1,6 @@
 import {
   postClient
-} from "../chunk-DQ3YYXNV.js";
+} from "../chunk-O5CRIGTE.js";
 export {
   postClient
 };

@@ -1,6 +1,6 @@
 import {
   getPayments
-} from "../../chunk-W63TU653.js";
+} from "../../chunk-2NOSWNFC.js";
 export {
   getPayments
 };

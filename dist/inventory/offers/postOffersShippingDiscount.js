@@ -1,6 +1,6 @@
 import {
   postOffersShippingDiscount
-} from "../../chunk-733WOL5Y.js";
+} from "../../chunk-MWAU76YG.js";
 export {
   postOffersShippingDiscount
 };

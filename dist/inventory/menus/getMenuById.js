@@ -1,6 +1,6 @@
 import {
   getMenuById
-} from "../../chunk-PCFD6LBG.js";
+} from "../../chunk-ABJ5GVWS.js";
 export {
   getMenuById
 };

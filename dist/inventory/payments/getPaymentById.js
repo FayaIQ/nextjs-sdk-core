@@ -1,6 +1,6 @@
 import {
   getPaymentById
-} from "../../chunk-7H4E4LRP.js";
+} from "../../chunk-RUXMFMBY.js";
 export {
   getPaymentById
 };

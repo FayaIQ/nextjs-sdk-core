@@ -1,24 +1,24 @@
 import {
-  GET
-} from "../chunk-2PJBS6OE.js";
-import {
   GET as GET2
-} from "../chunk-ALAJSQAG.js";
+} from "../chunk-TNEH4C5W.js";
 import {
   POST
-} from "../chunk-CFNSUA72.js";
+} from "../chunk-OZWTSX63.js";
 import {
-  getClients
-} from "../chunk-TFCE4YSI.js";
-import {
-  getClientsPaging
-} from "../chunk-NKVF66PC.js";
+  GET
+} from "../chunk-MU5XDTUX.js";
 import {
   postClient
-} from "../chunk-DQ3YYXNV.js";
-import "../chunk-PKBQJMK6.js";
-import "../chunk-54PNX2EJ.js";
-import "../chunk-KCWJBPU3.js";
+} from "../chunk-O5CRIGTE.js";
+import "../chunk-VVG47CF2.js";
+import "../chunk-67SISKBJ.js";
+import "../chunk-IW7URUFC.js";
+import {
+  getClients
+} from "../chunk-6MTEIG3Y.js";
+import {
+  getClientsPaging
+} from "../chunk-GYQHJ3DY.js";
 export {
   GET as GETClients,
   GET2 as GETClientsPaging,

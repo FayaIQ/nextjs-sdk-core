@@ -11,7 +11,6 @@ export * from "./putOrderDiscount";
 export * from "./putOrderReferenceId";
 export * from "./putOrderReferenceDeliveryId";
 export * from "./postOrder";
-// address lookup moved to gps/locations
 
 // Re-export handlers for Next.js API routes
 export { POST as POSTOrder } from "./handler/post-order";

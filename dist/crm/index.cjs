@@ -877,7 +877,7 @@ async function GET(request) {
 var import_server3 = require("next/server");
 async function GET2(request) {
   try {
-    const params = request.nextUrl.searchParams;
+    const params = new URL(request.url).searchParams;
     const obj = {};
     console.log("GET clients paging request url:", request.url);
     params.forEach((v, k) => obj[k] = v);

@@ -1,6 +1,6 @@
 import {
   getOffersGroups
-} from "../../chunk-RSQ3MYVU.js";
+} from "../../chunk-SLN5FKCZ.js";
 export {
   getOffersGroups
 };

@@ -1,6 +1,6 @@
 import {
   getInvoiceDiscount
-} from "../../chunk-DZK5262Y.js";
+} from "../../chunk-52AYJZ7U.js";
 export {
   getInvoiceDiscount
 };

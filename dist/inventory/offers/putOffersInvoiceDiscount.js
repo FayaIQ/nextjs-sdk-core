@@ -1,6 +1,6 @@
 import {
   putOffersInvoiceDiscount
-} from "../../chunk-MX56D2O3.js";
+} from "../../chunk-NSIHCYF6.js";
 export {
   putOffersInvoiceDiscount
 };
