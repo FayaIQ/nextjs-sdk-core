@@ -1,193 +1,48 @@
 import {
-  toNextResponseFromError
-} from "../../chunk-2MRUSURF.js";
-import "../../chunk-UEYGZNEP.js";
-import "../../chunk-CRASKSJL.js";
-
-// src/inventory/payments/getPayments.ts
-async function getPayments(query) {
-  if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
-    const { Api } = await import("../../api-VEZZ6GU2.js");
-    return getWithAuth(Api.getPayments, query);
-  }
-  const params = new URLSearchParams();
-  if (query) Object.entries(query).forEach(([k, v]) => {
-    if (v !== void 0 && v !== null) params.append(k, String(v));
-  });
-  const res = await fetch(`/api/payments?${params.toString()}`);
-  if (!res.ok) throw new Error(`Failed to fetch payments: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/payments/getPaymentById.ts
-async function getPaymentById(id) {
-  if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
-    const { Api } = await import("../../api-VEZZ6GU2.js");
-    return getWithAuth(Api.getPayment(id));
-  }
-  const res = await fetch(`/api/payments/${id}`);
-  if (!res.ok) throw new Error(`Failed to fetch payment: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/payments/postPayment.ts
-async function postPayment(payload) {
-  if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
-    const { Api } = await import("../../api-VEZZ6GU2.js");
-    return postWithAuth(Api.postPayments, payload);
-  }
-  const res = await fetch(`/api/payments`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) throw new Error(`Failed to create payment: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/payments/putPayment.ts
-async function putPayment(id, payload) {
-  if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
-    const { Api } = await import("../../api-VEZZ6GU2.js");
-    return putWithAuth(Api.putPayment(id), payload);
-  }
-  const res = await fetch(`/api/payments/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) throw new Error(`Failed to update payment: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/payments/deletePayment.ts
-async function deletePayment(id) {
-  if (typeof window === "undefined") {
-    const { deleteWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
-    const { Api } = await import("../../api-VEZZ6GU2.js");
-    return deleteWithAuth(Api.deletePayment(id));
-  }
-  const res = await fetch(`/api/payments/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`Failed to delete payment: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/payments/getStorePayments.ts
-async function getStorePayments(storeId) {
-  if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
-    const { Api } = await import("../../api-VEZZ6GU2.js");
-    return getWithAuth(Api.getStorePayments(storeId));
-  }
-  const res = await fetch(`/api/stores/${storeId}/payments`);
-  if (!res.ok) throw new Error(`Failed to fetch store payments: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/payments/getPaymentsReport.ts
-async function getPaymentsReport(query) {
-  if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-CX4XI7JJ.js");
-    const { Api } = await import("../../api-VEZZ6GU2.js");
-    return getWithAuth(Api.getPaymentsReport, query);
-  }
-  const params = new URLSearchParams();
-  if (query) Object.entries(query).forEach(([k, v]) => {
-    if (v !== void 0 && v !== null) params.append(k, String(v));
-  });
-  const res = await fetch(`/api/payments/report?${params.toString()}`);
-  if (!res.ok) throw new Error(`Failed to fetch payments report: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/payments/handler/getPayments.ts
-import { NextResponse } from "next/server";
-async function GET(request) {
-  try {
-    const params = Object.fromEntries(new URL(request.url).searchParams.entries());
-    const result = await getPayments(params);
-    return NextResponse.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/payments/handler/getPaymentsReport.ts
-import { NextResponse as NextResponse2 } from "next/server";
-async function GET2(request) {
-  try {
-    const params = Object.fromEntries(new URL(request.url).searchParams.entries());
-    const result = await getPaymentsReport(params);
-    return NextResponse2.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/payments/handler/getPaymentById.ts
-import { NextResponse as NextResponse3 } from "next/server";
-async function GET3(request, { params }) {
-  try {
-    const { id } = await params;
-    const result = await getPaymentById(id);
-    return NextResponse3.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/payments/handler/postPayment.ts
-import { NextResponse as NextResponse4 } from "next/server";
-async function POST(request) {
-  try {
-    const body = await request.json();
-    const result = await postPayment(body);
-    return NextResponse4.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/payments/handler/putPayment.ts
-import { NextResponse as NextResponse5 } from "next/server";
-async function PUT(request, { params }) {
-  try {
-    const { id } = await params;
-    const body = await request.json();
-    const result = await putPayment(id, body);
-    return NextResponse5.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/payments/handler/deletePayment.ts
-import { NextResponse as NextResponse6 } from "next/server";
-async function DELETE(request, { params }) {
-  try {
-    const { id } = await params;
-    const result = await deletePayment(id);
-    return NextResponse6.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/payments/handler/getStorePayments.ts
-import { NextResponse as NextResponse7 } from "next/server";
-async function GET4(request, { params }) {
-  try {
-    const { storeId } = await params;
-    const result = await getStorePayments(storeId);
-    return NextResponse7.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
+  GET as GET2
+} from "../../chunk-XBMHT3S6.js";
+import {
+  GET as GET4
+} from "../../chunk-CGS2A4OF.js";
+import {
+  POST
+} from "../../chunk-2RGN4HU2.js";
+import {
+  PUT
+} from "../../chunk-R46OMTXO.js";
+import {
+  DELETE
+} from "../../chunk-OU7K6HR3.js";
+import {
+  GET as GET3
+} from "../../chunk-DLMR6LUT.js";
+import {
+  GET
+} from "../../chunk-WVVB7JT5.js";
+import {
+  getStorePayments
+} from "../../chunk-3WZEJIHS.js";
+import {
+  postPayment
+} from "../../chunk-6OTKTNYI.js";
+import {
+  putPayment
+} from "../../chunk-GLOIQKGY.js";
+import {
+  deletePayment
+} from "../../chunk-2QP5YORE.js";
+import {
+  getPaymentById
+} from "../../chunk-7H4E4LRP.js";
+import {
+  getPayments
+} from "../../chunk-W63TU653.js";
+import {
+  getPaymentsReport
+} from "../../chunk-WDQNDPEG.js";
+import "../../chunk-PKBQJMK6.js";
+import "../../chunk-54PNX2EJ.js";
+import "../../chunk-KCWJBPU3.js";
 export {
   DELETE as DeletePaymentDELETE,
   GET3 as GetPaymentByIdGET,

@@ -777,6 +777,7 @@ var init_core = __esm({
 var gps_exports = {};
 __export(gps_exports, {
   GetDeliveryZonesGET: () => GET,
+  getAddressById: () => getAddressById,
   getCities: () => getCities,
   getCountries: () => getCountries,
   getDeliveryZones: () => getDeliveryZones,
@@ -833,6 +834,20 @@ async function getDistricts(cityId) {
   return getLocationChildren(cityId);
 }
 
+// src/gps/locations/getAddressById.ts
+async function getAddressById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getAddress(id));
+  }
+  const res = await fetch(`/api/addresses/${id}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch address ${id}: ${res.statusText}`);
+  }
+  return res.json();
+}
+
 // src/core/errorResponse.ts
 var import_server = require("next/server");
 init_fetcher();
@@ -867,6 +882,7 @@ async function GET(request) {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   GetDeliveryZonesGET,
+  getAddressById,
   getCities,
   getCountries,
   getDeliveryZones,

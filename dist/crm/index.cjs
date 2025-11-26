@@ -764,7 +764,7 @@ __export(crm_exports, {
 });
 module.exports = __toCommonJS(crm_exports);
 
-// src/crm/clients/getClientsPaging.ts
+// src/crm/getClientsPaging.ts
 async function getClientsPaging(query) {
   const qs = query ? `?${new URLSearchParams(query).toString()}` : "";
   if (typeof window === "undefined") {
@@ -777,7 +777,7 @@ async function getClientsPaging(query) {
   return res.json();
 }
 
-// src/crm/clients/getClients.ts
+// src/crm/getClients.ts
 function toQueryString(filter) {
   if (!filter) return "";
   if (typeof filter === "string") return filter.startsWith("?") ? filter : `?${filter}`;
@@ -815,7 +815,7 @@ async function getClients({ filterParams } = {}) {
   return res.json();
 }
 
-// src/crm/clients/postClient.ts
+// src/crm/postClient.ts
 async function postClient(data) {
   if (typeof window === "undefined") {
     const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
@@ -840,7 +840,7 @@ async function postClient(data) {
   return res.json();
 }
 
-// src/crm/clients/handler/getClients.ts
+// src/crm/handler/getClients.ts
 var import_server2 = require("next/server");
 
 // src/core/errorResponse.ts
@@ -862,7 +862,7 @@ function toNextResponseFromError(err) {
   }
 }
 
-// src/crm/clients/handler/getClients.ts
+// src/crm/handler/getClients.ts
 async function GET(request) {
   try {
     const url = new URL(request.url);
@@ -873,7 +873,7 @@ async function GET(request) {
   }
 }
 
-// src/crm/clients/handler/getClientsPaging.ts
+// src/crm/handler/getClientsPaging.ts
 var import_server3 = require("next/server");
 async function GET2(request) {
   try {
@@ -890,7 +890,7 @@ async function GET2(request) {
   }
 }
 
-// src/crm/clients/handler/postClient.ts
+// src/crm/handler/postClient.ts
 var import_server4 = require("next/server");
 async function POST(request) {
   try {
