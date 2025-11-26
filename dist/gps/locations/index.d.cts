@@ -18,7 +18,7 @@ type District = Location;
  * @example
  * export { GET } from 'my-next-core/locations/handler/countries';
  */
-declare function GET$1(request: NextRequest): Promise<NextResponse<any>>;
+declare function GET$2(request: NextRequest): Promise<NextResponse<any>>;
 
 /**
  * Ready-to-use API route handler for location children (cities/districts)
@@ -27,7 +27,7 @@ declare function GET$1(request: NextRequest): Promise<NextResponse<any>>;
  * @example
  * export { GET } from 'my-next-core/locations/handler/children';
  */
-declare function GET(request: NextRequest, { params }: {
+declare function GET$1(request: NextRequest, { params }: {
     params: Promise<{
         parentId: string;
     }>;
@@ -35,4 +35,6 @@ declare function GET(request: NextRequest, { params }: {
 
 declare function getAddressById(id: string | number): Promise<OrderAddress>;
 
-export { type City, type Country, type District, type Location, getAddressById, GET$1 as getCountriesHandler, GET as getLocationChildrenHandler };
+declare function GET(request: NextRequest): Promise<NextResponse<any>>;
+
+export { type City, type Country, type District, type Location, getAddressById, GET as getAddressByIdHandler, GET$2 as getCountriesHandler, GET$1 as getLocationChildrenHandler };

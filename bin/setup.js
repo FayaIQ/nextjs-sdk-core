@@ -27,10 +27,10 @@ const routes = [
   {
     name: "addressById",
     path: ["src", "app", "api", "addresses", "[id]"],
-    handler: "erp-core/inventory/orders",
+    handler: "erp-core/gps/locations",
     methods: ["GET"],
-    exportName: "GETAddress",
-    description: "Get address by id",
+    exportName: "getAddressByIdHandler",
+    description: "Get address by id (GPS service)",
   },
   {
     name: "offerByIdDelete",
@@ -49,6 +49,14 @@ const routes = [
     exportName: "GETOrders",
     description: "Orders listing endpoint",
   },
+    {
+      name: "createOrder",
+      path: ["src", "app", "api", "orders"],
+      handler: "erp-core/inventory/orders",
+      methods: ["POST"],
+      exportName: "POSTOrder",
+      description: "Create an order (POST /api/orders)",
+    },
   {
     name: "orderFullInfo",
     path: ["src", "app", "api", "orders", "full-info"],
@@ -244,7 +252,7 @@ const routes = [
   {
     name: "stores",
     path: ["src", "app", "api", "stores"],
-    handler: "erp-core/identity/application",
+    handler: "erp-core/stores",
     methods: ["GET"],
     exportName: "GETStores",
     description: "Stores listing endpoint",

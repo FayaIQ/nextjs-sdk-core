@@ -1,15 +1,15 @@
 import {
   toNextResponseFromError
-} from "../chunk-6Q4MVTH3.js";
-import "../chunk-65OOENEZ.js";
-import "../chunk-O4AXB2WX.js";
+} from "../chunk-I2UEIWLH.js";
+import "../chunk-HJ7BD7D3.js";
+import "../chunk-TA6JZYYA.js";
 
 // src/crm/clients/getClientsPaging.ts
 async function getClientsPaging(query) {
   const qs = query ? `?${new URLSearchParams(query).toString()}` : "";
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-W2IDYART.js");
-    const { Api } = await import("../api-RRRXOPVN.js");
+    const { getWithAuth } = await import("../fetcher-HF5W5PJ3.js");
+    const { Api } = await import("../api-HF64SQC2.js");
     return getWithAuth(`${Api.getClientsPaging}${qs}`);
   }
   const res = await fetch(`/api/crm/clients/paging${qs}`);
@@ -38,22 +38,31 @@ async function getClients(params) {
   const qs = buildQuery(params);
   console.log("QS:", qs);
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-W2IDYART.js");
-    const { Api } = await import("../api-RRRXOPVN.js");
+    const { getWithAuth } = await import("../fetcher-HF5W5PJ3.js");
+    const { Api } = await import("../api-HF64SQC2.js");
     const url = Api.getClients + (qs || "");
     console.log("URL:", url);
     return getWithAuth(url);
   }
   const res = await fetch(`/api/crm/clients${qs}`);
-  if (!res.ok) throw new Error(`Failed to fetch clients: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
 // src/crm/clients/postClient.ts
 async function postClient(data) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../fetcher-W2IDYART.js");
-    const { Api } = await import("../api-RRRXOPVN.js");
+    const { postWithAuth } = await import("../fetcher-HF5W5PJ3.js");
+    const { Api } = await import("../api-HF64SQC2.js");
     return postWithAuth(Api.postClients, data);
   }
   const res = await fetch(`/api/crm/clients`, {
@@ -62,8 +71,14 @@ async function postClient(data) {
     body: JSON.stringify(data)
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(`Create client failed: ${err.error || res.statusText}`);
+    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
   }
   return res.json();
 }

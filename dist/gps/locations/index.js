@@ -1,12 +1,17 @@
 import {
   getAddressById
-} from "../../chunk-NAXEGYHR.js";
+} from "../../chunk-S5KDYZXT.js";
 import {
   getCities,
   getCountries,
   getDistricts,
   getLocationChildren
-} from "../../chunk-AUONPSML.js";
+} from "../../chunk-ZSAQD7CN.js";
+import {
+  toNextResponseFromError
+} from "../../chunk-I2UEIWLH.js";
+import "../../chunk-HJ7BD7D3.js";
+import "../../chunk-TA6JZYYA.js";
 
 // src/gps/locations/handler/countries.ts
 import { NextResponse } from "next/server";
@@ -41,8 +46,23 @@ async function GET2(request, { params }) {
     return NextResponse2.json({ error: message }, { status: 500 });
   }
 }
+
+// src/gps/locations/handler/getAddressById.ts
+import { NextResponse as NextResponse3 } from "next/server";
+async function GET3(request) {
+  try {
+    const url = new URL(request.url);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const id = parts[parts.length - 1];
+    const address = await getAddressById(id);
+    return NextResponse3.json(address);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
 export {
   getAddressById,
+  GET3 as getAddressByIdHandler,
   getCities,
   getCountries,
   GET as getCountriesHandler,

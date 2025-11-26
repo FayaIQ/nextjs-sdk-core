@@ -25,6 +25,11 @@ export class Api {
   static phoneVerificationSend: string = `${Api.IDENTITY_BASE}/v1/verification/phone/send`;
   static phoneVerificationVerify: string = `${Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 
+
+
+  // stores
+  static getStores: string = `${Api.STORES_BASE}/v1/Stores/Dropdown`;
+
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
   static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
@@ -134,7 +139,7 @@ export class Api {
   static getReportsOrderSales: string = `${Api.INVENTORY_BASE}/v1/Reports/OrderSales`;
   // Payments endpoints
   static getStorePayments(storeId: string | number): string {
-    return `${Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+    return `${Api.INVENTORY_BASE}/v1/Stores/${storeId}/Payments`;
   }
   static getPayment(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Payments/${id}`;
@@ -173,7 +178,7 @@ export class Api {
   }
 
   static getAddress(id: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Addresses/${id}`;
+    return `${Api.GPS_BASE}/v1/Addresses/${id}`;
   }
 
   // Order item endpoints (v3)

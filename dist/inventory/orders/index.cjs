@@ -158,7 +158,7 @@ var init_api = __esm({
       }
       // Payments endpoints
       static getStorePayments(storeId) {
-        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+        return `${_Api.INVENTORY_BASE}/v1/Stores/${storeId}/Payments`;
       }
       static getPayment(id) {
         return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
@@ -187,7 +187,7 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
       }
       static getAddress(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Addresses/${id}`;
+        return `${_Api.GPS_BASE}/v1/Addresses/${id}`;
       }
       // Order item endpoints (v3)
       static getOrderItem(orderId, itemId) {
@@ -294,6 +294,8 @@ var init_api = __esm({
     _Api.putUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
     _Api.phoneVerificationSend = `${_Api.IDENTITY_BASE}/v1/verification/phone/send`;
     _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
+    // stores
+    _Api.getStores = `${_Api.STORES_BASE}/v1/Stores/Dropdown`;
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
     _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
@@ -1363,8 +1365,14 @@ async function postOrder(data) {
     body: JSON.stringify(data)
   });
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(`Create order failed: ${errorData.error || res.statusText}`);
+    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
   }
   return res.json();
 }

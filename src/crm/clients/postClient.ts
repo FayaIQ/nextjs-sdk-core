@@ -13,11 +13,18 @@ export async function postClient(data: PostClientRequest): Promise<Client> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(`Create client failed: ${err.error || res.statusText}`);
+if (!res.ok) {
+    // Extract error message from response body before throwing
+    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      // If parsing fails, use the default message
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
   }
-
+  
   return res.json();
 }

@@ -32,6 +32,7 @@ declare class Api {
     static putUserPreferences: string;
     static phoneVerificationSend: string;
     static phoneVerificationVerify: string;
+    static getStores: string;
     static getProducts: string;
     static getItemsPaging: string;
     static getProductInfo(id: string): string;

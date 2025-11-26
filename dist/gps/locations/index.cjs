@@ -158,7 +158,7 @@ var init_api = __esm({
       }
       // Payments endpoints
       static getStorePayments(storeId) {
-        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+        return `${_Api.INVENTORY_BASE}/v1/Stores/${storeId}/Payments`;
       }
       static getPayment(id) {
         return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
@@ -187,7 +187,7 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
       }
       static getAddress(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Addresses/${id}`;
+        return `${_Api.GPS_BASE}/v1/Addresses/${id}`;
       }
       // Order item endpoints (v3)
       static getOrderItem(orderId, itemId) {
@@ -294,6 +294,8 @@ var init_api = __esm({
     _Api.putUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
     _Api.phoneVerificationSend = `${_Api.IDENTITY_BASE}/v1/verification/phone/send`;
     _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
+    // stores
+    _Api.getStores = `${_Api.STORES_BASE}/v1/Stores/Dropdown`;
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
     _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
@@ -750,6 +752,7 @@ var init_core = __esm({
 var locations_exports = {};
 __export(locations_exports, {
   getAddressById: () => getAddressById,
+  getAddressByIdHandler: () => GET3,
   getCities: () => getCities,
   getCountries: () => getCountries,
   getCountriesHandler: () => GET,
@@ -842,9 +845,45 @@ async function getAddressById(id) {
   }
   return res.json();
 }
+
+// src/gps/locations/handler/getAddressById.ts
+var import_server4 = require("next/server");
+
+// src/core/errorResponse.ts
+var import_server3 = require("next/server");
+init_fetcher();
+function toNextResponseFromError(err) {
+  if (err instanceof ApiError) {
+    const body = err.body ?? { message: err.message };
+    const status = err.status && typeof err.status === "number" ? err.status : 500;
+    return import_server3.NextResponse.json(body, { status });
+  }
+  if (err instanceof Error) {
+    return import_server3.NextResponse.json({ message: err.message || "Internal server error" }, { status: 500 });
+  }
+  try {
+    return import_server3.NextResponse.json(err, { status: 500 });
+  } catch {
+    return import_server3.NextResponse.json({ message: String(err) }, { status: 500 });
+  }
+}
+
+// src/gps/locations/handler/getAddressById.ts
+async function GET3(request) {
+  try {
+    const url = new URL(request.url);
+    const parts = url.pathname.split("/").filter(Boolean);
+    const id = parts[parts.length - 1];
+    const address = await getAddressById(id);
+    return import_server4.NextResponse.json(address);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   getAddressById,
+  getAddressByIdHandler,
   getCities,
   getCountries,
   getCountriesHandler,
