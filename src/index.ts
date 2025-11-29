@@ -4,6 +4,7 @@ export { getProducts } from "./inventory/items/getProducts";
 export { getProductInfo } from "./inventory/items/getProductInfo";
 export { getMenus } from "./inventory/menus/getMenus";
 export { getOrders } from "./inventory/orders/getOrders";
+export { getBrands } from "./inventory/brands/getBrands";
 // Type exports
 export * from "./types";
 export * from "./inventory/items/filter-models";

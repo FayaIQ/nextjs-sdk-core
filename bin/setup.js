@@ -702,6 +702,14 @@ const routes = [
     exportName: "getSlidesGET",
     description: "Slides listing endpoint",
   },
+  {
+    name: "brands",
+    path: ["src", "app", "api", "brands"],
+    handler: "erp-core/inventory/brands",
+    methods: ["GET"],
+    exportName: "GET",
+    description: "Menu brands listing endpoint",
+  },
 ];
 
 /**
