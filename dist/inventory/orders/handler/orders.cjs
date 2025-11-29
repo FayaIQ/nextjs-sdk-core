@@ -1,0 +1,1107 @@
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/core/config.ts
+var config_exports = {};
+__export(config_exports, {
+  getAuthConfig: () => getAuthConfig
+});
+var getEnvVar, getAuthConfig;
+var init_config = __esm({
+  "src/core/config.ts"() {
+    "use strict";
+    getEnvVar = (key, brand) => {
+      if (typeof process === "undefined" || !process.env) return void 0;
+      if (brand) {
+        const brandKey = `${brand.toUpperCase()}_${key}`;
+        if (process.env[brandKey]) return process.env[brandKey];
+      }
+      return process.env[key];
+    };
+    getAuthConfig = () => {
+      if (typeof process !== "undefined" && process.env) {
+        const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
+        const envConfig = {
+          clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
+          clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
+          username: getEnvVar("STOREAK_USERNAME", brand2),
+          password: getEnvVar("STOREAK_PASSWORD", brand2)
+        };
+        if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
+          return {
+            ...envConfig,
+            language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
+            gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
+          };
+        }
+      }
+      const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
+      const prefix = brand ? `${brand.toUpperCase()}_` : "";
+      const missing = [];
+      const required = [
+        `${prefix}STOREAK_CLIENT_ID`,
+        `${prefix}STOREAK_CLIENT_SECRET`
+      ];
+      required.forEach((name) => {
+        if (!process.env?.[name]) missing.push(name);
+      });
+      if (missing.length > 0) {
+        const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
+        throw new Error(
+          `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
+        );
+      }
+      return {
+        clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
+        clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
+        username: getEnvVar("STOREAK_USERNAME", brand),
+        password: getEnvVar("STOREAK_PASSWORD", brand),
+        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
+        gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
+      };
+    };
+  }
+});
+
+// src/api/api.ts
+var api_exports = {};
+__export(api_exports, {
+  Api: () => Api
+});
+var _Api, Api;
+var init_api = __esm({
+  "src/api/api.ts"() {
+    "use strict";
+    _Api = class _Api {
+      static getProductInfo(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
+      }
+      static getProductInfoV2(id) {
+        return `${_Api.INVENTORY_BASE}/v2/Items/${id}/FullInfo`;
+      }
+      static getMenuById(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Menus/${id}`;
+      }
+      static getOfferById(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
+      }
+      static deleteOffer(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
+      }
+      static getStoreInvoiceDiscount(storeId, coupon) {
+        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
+          String(coupon)
+        )}`;
+      }
+      static getDeliveryZoneDiscount(deliveryZoneId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
+      }
+      static postOffersAddItemsByFilter(offerId, forceUpdate) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
+          String(forceUpdate)
+        )}`;
+      }
+      static postOffersDeliveryZones(offerId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
+      }
+      static getOffersGroups(offerId) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups`;
+      }
+      static putOffersGroup(offerId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+      }
+      static deleteOffersGroup(offerId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
+      }
+      static putOffersCustomerDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
+      }
+      static putOffersExtraItemDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ExtraItemDiscount`;
+      }
+      static putOffersInvoiceDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/InvoiceDiscount`;
+      }
+      static putOffersItemsDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount`;
+      }
+      static putOffersItemsDiscountCustomers(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount/Customers`;
+      }
+      static putOffersShippingDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ShippingDiscount`;
+      }
+      static putOffersPointDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/PointDiscount`;
+      }
+      static putOffersItemCollectionDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemCollectionDiscount`;
+      }
+      static putOffersMultiCouponDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/MultiCouponDiscount`;
+      }
+      static putOffersDarkDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
+      }
+      static putOrderPayment(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
+      }
+      static putOrderPaymentStatus(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment/Status`;
+      }
+      // Payments endpoints
+      static getStorePayments(storeId) {
+        return `${_Api.INVENTORY_BASE}/v1/Stores/${storeId}/Payments`;
+      }
+      static getPayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+      }
+      static putPayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+      }
+      static deletePayment(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
+      }
+      static getItemById(id) {
+        return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
+      }
+      // Dynamic endpoints with IDs
+      // Wishlist endpoints (lowercase per spec)
+      static postWish(id) {
+        return `${_Api.INVENTORY_BASE}/v1/items/${id}/wish`;
+      }
+      static deleteWish(id) {
+        return `${_Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
+      }
+      static getCategoryProducts(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile?CurrentPage=1&PageSize=1000&menuId=${id}`;
+      }
+      static getOrder(id) {
+        return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
+      }
+      static getAddress(id) {
+        return `${_Api.GPS_BASE}/v1/Addresses/${id}`;
+      }
+      // Order item endpoints (v3)
+      static getOrderItem(orderId, itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
+      }
+      static postOrderItem(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems`;
+      }
+      static putOrderItemCancel(orderId, itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
+      }
+      static putOrderItemUndoCancel(orderId, itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
+      }
+      static putOrderItemUpdate(orderId, itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/update`;
+      }
+      static putOrderApprove(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ApproveDeliveryOrder`;
+      }
+      static putOrderDisapprove(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/DisapproveDeliveryOrder`;
+      }
+      static putChangeStatusOrder(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
+      }
+      static cancelOrder(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
+      }
+      static getOrdersDelagates(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates`;
+      }
+      static postOrdersDelagates(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates`;
+      }
+      static putOrdersDelagatesLoggedIn(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates/LoggedInUser`;
+      }
+      static deleteDelagate(orderId, delegateId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
+      }
+      static putOrderDiscount(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
+      }
+      static putOrderReferenceId(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
+      }
+      static putOrderReferenceDeliveryId(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
+      }
+      // Item activation endpoints
+      static putItemActivate(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Activate`;
+      }
+      static putItemDeactivate(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Deactivate`;
+      }
+      // Item update endpoint
+      static putItem(id) {
+        return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
+      }
+      static deleteItem(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${id}`;
+      }
+      static getLocationChildren(parentId) {
+        return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
+      }
+      //
+      static getInvoiceDiscount(code) {
+        const clean = encodeURIComponent(code);
+        return `${_Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount/${clean}`;
+      }
+      static patchCartItem(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
+          String(id)
+        )}`;
+      }
+      static deleteCartItem(id) {
+        return `${_Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
+          String(id)
+        )}`;
+      }
+    };
+    _Api.LOCAL_BASE = "http://localhost:3000";
+    _Api.IDENTITY_BASE = `https://storeak-identity-service.azurewebsites.net/api`;
+    _Api.NEWS_BASE = `https://storeak-news-service.azurewebsites.net/api`;
+    _Api.STORES_BASE = `https://storeak-stores-service.azurewebsites.net/api`;
+    _Api.GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
+    _Api.THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
+    _Api.INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
+    _Api.CRM_BASE = `https://storeak-crm-service.azurewebsites.net/api`;
+    _Api.IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
+    _Api.signIn = `${_Api.IDENTITY_BASE}/v1/token`;
+    _Api.refreshToken = `${_Api.IDENTITY_BASE}/v1/token/refresh`;
+    _Api.sessionLogout = `${_Api.IDENTITY_BASE}/v1/session/logout`;
+    _Api.clearCart = `${_Api.INVENTORY_BASE}/v1/Carts/Clear`;
+    _Api.getUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
+    _Api.postUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
+    _Api.putUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
+    _Api.patchUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
+    _Api.putUserAvatar = `${_Api.IDENTITY_BASE}/v1/Users/avatar`;
+    _Api.putUserPassword = `${_Api.IDENTITY_BASE}/v1/Users/password`;
+    _Api.getUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
+    _Api.putUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
+    _Api.phoneVerificationSend = `${_Api.IDENTITY_BASE}/v1/verification/phone/send`;
+    _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
+    // stores
+    _Api.getStores = `${_Api.STORES_BASE}/v1/Stores/Dropdown`;
+    // Other services
+    _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
+    _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
+    _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
+    _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
+    // Offers endpoints
+    _Api.getOffersPaging = `${_Api.INVENTORY_BASE}/v1/Offers/Paging`;
+    _Api.getOffersCustomerItemLoggedIn = `${_Api.INVENTORY_BASE}/v1/Offers/CustomerItem/LoggedIn`;
+    _Api.getOffersItemsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Items/DropDown`;
+    _Api.getOffersSlideShowsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/SlideShows/DropDown`;
+    _Api.getOffersItemsStores = `${_Api.INVENTORY_BASE}/v1/Offers/Items/Stores`;
+    _Api.getOffersPointsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
+    _Api.getOffersNewsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
+    _Api.getOffersCouponsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
+    _Api.postOffersItemsDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
+    _Api.postOffersItemsDiscountCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
+    _Api.postOffersExtraItemDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
+    _Api.postOffersCustomerDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/CustomerDiscount`;
+    _Api.postOffersInvoiceDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount`;
+    _Api.postOffersMultiCouponDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/MultiCouponDiscount`;
+    _Api.postOffersShippingDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ShippingDiscount`;
+    _Api.postOffersPointDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/PointDiscount`;
+    _Api.postOffersItemCollectionDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemCollectionDiscount`;
+    _Api.postOffersDarkDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/DarkDiscount`;
+    _Api.getOffersCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/Customers`;
+    _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
+    _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
+    _Api.getBrands = `${_Api.STORES_BASE}/api/v1/Complex/MenuBrand`;
+    _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
+    _Api.getOrders = `${_Api.INVENTORY_BASE}/v1/Orders/Paging`;
+    // CRM - Clients
+    _Api.getClientsPaging = `${_Api.CRM_BASE}/v1/Clients/Paging`;
+    _Api.getClients = `${_Api.CRM_BASE}/v1/Clients`;
+    _Api.postClients = `${_Api.CRM_BASE}/v1/Clients`;
+    _Api.postOrders = `${_Api.INVENTORY_BASE}/v2/Orders`;
+    _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
+    _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
+    _Api.getDeliveryZones = `${_Api.GPS_BASE}/v1/DeliveryZones`;
+    _Api.getReportsCustomerOrders = `${_Api.INVENTORY_BASE}/v1/Reports/CustomerOrders`;
+    _Api.getReportsOrderSales = `${_Api.INVENTORY_BASE}/v1/Reports/OrderSales`;
+    _Api.postPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
+    _Api.getPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
+    _Api.getPaymentsReport = `${_Api.INVENTORY_BASE}/v1/Payments/Report`;
+    _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
+    // orders endpoints
+    _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
+    _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
+    _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
+    _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+    // category
+    _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
+    // identity
+    _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
+    _Api.getCustomersDropdown = `${_Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
+    _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
+    /////////////////////////////////////////
+    //GPS
+    _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
+    _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
+    // Items copy endpoints
+    _Api.postCopyParentStore = `${_Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
+    _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
+    // Cart endpoints
+    _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
+    _Api.postCartItems = `${_Api.INVENTORY_BASE}/v1/Carts/Items`;
+    Api = _Api;
+  }
+});
+
+// src/token.ts
+var token_exports = {};
+__export(token_exports, {
+  default: () => getToken
+});
+async function getToken() {
+  if (AUTH_MODE === "strict" && typeof window === "undefined") {
+    const { cookies } = await import("next/headers");
+    const cookie = await cookies();
+    const accessTokenCookie = cookie.get("access_token")?.value;
+    if (accessTokenCookie) {
+      return accessTokenCookie;
+    }
+    const err = new Error("Unauthorized: Access token missing (strict mode enabled)");
+    err.status = 401;
+    throw err;
+  }
+  try {
+    if (typeof window === "undefined") {
+      const { cookies } = await import("next/headers");
+      const cookie = await cookies();
+      const accessTokenCookie = cookie.get("access_token")?.value;
+      if (accessTokenCookie) return accessTokenCookie;
+    }
+  } catch (e) {
+  }
+  const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
+  const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+  const authConfig = getAuthConfig2();
+  const requestBody = {
+    clientId: authConfig.clientId,
+    clientSecret: authConfig.clientSecret,
+    Language: authConfig.language ?? 0,
+    GMT: authConfig.gmt ?? 3,
+    IsFromNotification: false
+  };
+  const response = await fetch(Api2.signIn, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(requestBody)
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Authentication failed: ${response.status} ${response.statusText}`
+    );
+  }
+  const data = await response.json();
+  if (!data.access_token) {
+    throw new Error("Token missing in authentication response");
+  }
+  return data.access_token;
+}
+var AUTH_MODE;
+var init_token = __esm({
+  "src/token.ts"() {
+    "use strict";
+    AUTH_MODE = process.env.AUTH_MODE || "auto";
+  }
+});
+
+// src/core/fetcher.ts
+var fetcher_exports = {};
+__export(fetcher_exports, {
+  ApiError: () => ApiError,
+  apiFetch: () => apiFetch,
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
+});
+function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()) {
+  if (obj == null || depth > 6) return null;
+  if (typeof obj === "string") {
+    const s = obj.trim();
+    if (s.startsWith("{") || s.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(s);
+        return findMessageInError(parsed, depth + 1, seen) || obj;
+      } catch {
+        return obj;
+      }
+    }
+    return obj;
+  }
+  if (typeof obj !== "object") return null;
+  if (seen.has(obj)) return null;
+  seen.add(obj);
+  if (typeof obj.message === "string" && obj.message) return obj.message;
+  if (typeof obj.code === "string" && obj.code) return obj.code;
+  if (typeof obj.error === "string" && obj.error) return obj.error;
+  const keysToCheck = ["message", "code", "error", "body", "data", "response", "errors"];
+  for (const k of keysToCheck) {
+    if (k in obj) {
+      const v = obj[k];
+      const found = findMessageInError(v, depth + 1, seen);
+      if (found) return found;
+    }
+  }
+  for (const k of Object.keys(obj)) {
+    try {
+      const found = findMessageInError(obj[k], depth + 1, seen);
+      if (found) return found;
+    } catch {
+    }
+  }
+  return null;
+}
+async function apiFetch(url, options = {}) {
+  const { method = "GET", headers = {}, data, query, token } = options;
+  let endpoint = url;
+  if (query) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== void 0 && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+    const queryString = params.toString();
+    if (queryString) {
+      endpoint += `?${queryString}`;
+    }
+  }
+  const requestHeaders = { ...headers };
+  if (token) {
+    requestHeaders["Authorization"] = `Bearer ${token}`;
+  }
+  if (data && !(data instanceof FormData)) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
+  let body;
+  if (data) {
+    body = data instanceof FormData ? data : JSON.stringify(data);
+  }
+  const response = await fetch(endpoint, {
+    method,
+    headers: requestHeaders,
+    body
+  });
+  if (!response.ok) {
+    try {
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
+        let errorData;
+        try {
+          errorData = JSON.parse(text2);
+        } catch {
+          errorData = text2;
+        }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
+      }
+      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
+    }
+  }
+  const contentType = response.headers.get("content-type");
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0" || !contentType && response.status === 200) {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(text);
+    return parsed;
+  } catch (err) {
+    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+  }
+}
+async function getWithAuth(url, query, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "GET",
+    token,
+    query,
+    headers
+  });
+}
+async function getWithoutAuth(url, query, headers) {
+  return apiFetch(url, {
+    method: "GET",
+    query,
+    headers
+  });
+}
+async function postWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "POST",
+    token,
+    data,
+    headers
+  });
+}
+async function postWithoutAuth(url, data, headers = {}) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers
+    },
+    body: data ? JSON.stringify(data) : void 0
+  });
+  if (!response.ok) {
+    try {
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
+        let errorData;
+        try {
+          errorData = JSON.parse(text2);
+        } catch {
+          errorData = text2;
+        }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
+      }
+      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+    }
+  }
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0") {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+  }
+}
+async function putWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "PUT",
+    token,
+    data,
+    headers
+  });
+}
+async function putWithoutAuth(url, data, headers) {
+  return apiFetch(url, {
+    method: "PUT",
+    data,
+    headers
+  });
+}
+async function deleteWithAuth(url, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "DELETE",
+    token,
+    headers
+  });
+}
+async function deleteWithoutAuth(url, headers) {
+  return apiFetch(url, {
+    method: "DELETE",
+    headers
+  });
+}
+async function patchWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "PATCH",
+    token,
+    data,
+    headers
+  });
+}
+async function patchWithoutAuth(url, data, headers) {
+  return apiFetch(url, {
+    method: "PATCH",
+    data,
+    headers
+  });
+}
+var ApiError;
+var init_fetcher = __esm({
+  "src/core/fetcher.ts"() {
+    "use strict";
+    init_token();
+    ApiError = class _ApiError extends Error {
+      constructor(status, body, message) {
+        super(message || `Request failed with status ${status}`);
+        this.status = status;
+        this.body = body;
+        Object.setPrototypeOf(this, _ApiError.prototype);
+      }
+    };
+  }
+});
+
+// src/inventory/orders/handler/orders.ts
+var orders_exports = {};
+__export(orders_exports, {
+  GET: () => GET
+});
+module.exports = __toCommonJS(orders_exports);
+var import_server = require("next/server");
+
+// src/inventory/orders/order-models.ts
+var OrderPagingParameters = class {
+  constructor({
+    currentPage = 1,
+    pageSize = 20,
+    sortField = null,
+    currentSortField = null,
+    currentSortOrder = null
+  } = {}) {
+    this.currentPage = currentPage;
+    this.pageSize = pageSize;
+    this.sortField = sortField;
+    this.currentSortField = currentSortField;
+    this.currentSortOrder = currentSortOrder;
+  }
+  toURLParams() {
+    const params = {
+      CurrentPage: this.currentPage.toString(),
+      PageSize: this.pageSize.toString()
+    };
+    if (this.sortField) params.SortField = this.sortField;
+    if (this.currentSortField) params.CurrentSortField = this.currentSortField;
+    if (this.currentSortOrder) params.CurrentSortOrder = this.currentSortOrder;
+    return params;
+  }
+};
+var OrdersFilterParameters = class _OrdersFilterParameters {
+  // UUID
+  constructor({
+    pagingParameters = new OrderPagingParameters(),
+    storeId = null,
+    menuId = null,
+    dateFrom = null,
+    dateTo = null,
+    startTime = null,
+    endTime = null,
+    orderStatusId = null,
+    orderStatusIds = null,
+    isCanceled = null,
+    isConfirmed = null,
+    isRejected = null,
+    isPrint = null,
+    number = null,
+    referenceId = null,
+    referenceDeliveryId = null,
+    locationId = null,
+    countryId = null,
+    cityId = null,
+    districtId = null,
+    buildingId = null,
+    apartmentId = null,
+    orderType = null,
+    payType = null,
+    DeleveryType = null,
+    username = null,
+    customerId = null,
+    delegateId = null,
+    delegateWithCustomerId = null,
+    statusChangedBy = null,
+    viewInMainCurrency = null,
+    totalAmount = null,
+    sign = null,
+    couponOfferId = null,
+    applicationId = null
+  } = {}) {
+    this.pagingParameters = pagingParameters;
+    this.storeId = storeId;
+    this.menuId = menuId;
+    this.dateFrom = dateFrom;
+    this.dateTo = dateTo;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.orderStatusId = orderStatusId;
+    this.orderStatusIds = orderStatusIds;
+    this.isCanceled = isCanceled;
+    this.isConfirmed = isConfirmed;
+    this.isRejected = isRejected;
+    this.isPrint = isPrint;
+    this.number = number;
+    this.referenceId = referenceId;
+    this.referenceDeliveryId = referenceDeliveryId;
+    this.locationId = locationId;
+    this.countryId = countryId;
+    this.cityId = cityId;
+    this.districtId = districtId;
+    this.buildingId = buildingId;
+    this.apartmentId = apartmentId;
+    this.orderType = orderType;
+    this.payType = payType;
+    this.DeleveryType = DeleveryType;
+    this.username = username;
+    this.customerId = customerId;
+    this.delegateId = delegateId;
+    this.delegateWithCustomerId = delegateWithCustomerId;
+    this.statusChangedBy = statusChangedBy;
+    this.viewInMainCurrency = viewInMainCurrency;
+    this.totalAmount = totalAmount;
+    this.sign = sign;
+    this.couponOfferId = couponOfferId;
+    this.applicationId = applicationId;
+  }
+  /**
+   * Create a copy with updated parameters
+   */
+  copyWith(updates) {
+    return new _OrdersFilterParameters({
+      pagingParameters: updates.pagingParameters || this.pagingParameters,
+      storeId: updates.storeId !== void 0 ? updates.storeId : this.storeId,
+      menuId: updates.menuId !== void 0 ? updates.menuId : this.menuId,
+      dateFrom: updates.dateFrom !== void 0 ? updates.dateFrom : this.dateFrom,
+      dateTo: updates.dateTo !== void 0 ? updates.dateTo : this.dateTo,
+      startTime: updates.startTime !== void 0 ? updates.startTime : this.startTime,
+      endTime: updates.endTime !== void 0 ? updates.endTime : this.endTime,
+      orderStatusId: updates.orderStatusId !== void 0 ? updates.orderStatusId : this.orderStatusId,
+      orderStatusIds: updates.orderStatusIds !== void 0 ? updates.orderStatusIds : this.orderStatusIds,
+      isCanceled: updates.isCanceled !== void 0 ? updates.isCanceled : this.isCanceled,
+      isConfirmed: updates.isConfirmed !== void 0 ? updates.isConfirmed : this.isConfirmed,
+      isRejected: updates.isRejected !== void 0 ? updates.isRejected : this.isRejected,
+      isPrint: updates.isPrint !== void 0 ? updates.isPrint : this.isPrint,
+      number: updates.number !== void 0 ? updates.number : this.number,
+      referenceId: updates.referenceId !== void 0 ? updates.referenceId : this.referenceId,
+      referenceDeliveryId: updates.referenceDeliveryId !== void 0 ? updates.referenceDeliveryId : this.referenceDeliveryId,
+      locationId: updates.locationId !== void 0 ? updates.locationId : this.locationId,
+      countryId: updates.countryId !== void 0 ? updates.countryId : this.countryId,
+      cityId: updates.cityId !== void 0 ? updates.cityId : this.cityId,
+      districtId: updates.districtId !== void 0 ? updates.districtId : this.districtId,
+      buildingId: updates.buildingId !== void 0 ? updates.buildingId : this.buildingId,
+      apartmentId: updates.apartmentId !== void 0 ? updates.apartmentId : this.apartmentId,
+      orderType: updates.orderType !== void 0 ? updates.orderType : this.orderType,
+      payType: updates.payType !== void 0 ? updates.payType : this.payType,
+      DeleveryType: updates.DeleveryType !== void 0 ? updates.DeleveryType : this.DeleveryType,
+      username: updates.username !== void 0 ? updates.username : this.username,
+      customerId: updates.customerId !== void 0 ? updates.customerId : this.customerId,
+      delegateId: updates.delegateId !== void 0 ? updates.delegateId : this.delegateId,
+      delegateWithCustomerId: updates.delegateWithCustomerId !== void 0 ? updates.delegateWithCustomerId : this.delegateWithCustomerId,
+      statusChangedBy: updates.statusChangedBy !== void 0 ? updates.statusChangedBy : this.statusChangedBy,
+      viewInMainCurrency: updates.viewInMainCurrency !== void 0 ? updates.viewInMainCurrency : this.viewInMainCurrency,
+      totalAmount: updates.totalAmount !== void 0 ? updates.totalAmount : this.totalAmount,
+      sign: updates.sign !== void 0 ? updates.sign : this.sign,
+      couponOfferId: updates.couponOfferId !== void 0 ? updates.couponOfferId : this.couponOfferId,
+      applicationId: updates.applicationId !== void 0 ? updates.applicationId : this.applicationId
+    });
+  }
+  /**
+   * Convert to URL search parameters
+   * FIXED: This is the key method that was causing the issue
+   */
+  toURLSearchParams() {
+    const params = new URLSearchParams();
+    const pagingParams = this.pagingParameters.toURLParams();
+    Object.entries(pagingParams).forEach(([key, value]) => {
+      if (value !== null && value !== void 0) {
+        params.set(key, value);
+      }
+    });
+    if (this.storeId !== null) params.set("StoreId", this.storeId.toString());
+    if (this.menuId !== null) params.set("MenuId", this.menuId.toString());
+    if (this.dateFrom !== null) params.set("DateFrom", this.dateFrom);
+    if (this.dateTo !== null) params.set("DateTo", this.dateTo);
+    if (this.startTime !== null) params.set("StartTime", this.startTime);
+    if (this.endTime !== null) params.set("EndTime", this.endTime);
+    if (this.orderStatusId !== null) params.set("OrderStatusId", this.orderStatusId.toString());
+    if (this.orderStatusIds !== null && this.orderStatusIds.length > 0) {
+      this.orderStatusIds.forEach((id) => params.append("OrderStatusIds", id.toString()));
+    }
+    if (this.isCanceled !== null) params.set("IsCancled", this.isCanceled.toString());
+    if (this.isConfirmed !== null) params.set("IsConformed", this.isConfirmed.toString());
+    if (this.isRejected !== null) params.set("IsRejected", this.isRejected.toString());
+    if (this.isPrint !== null) params.set("IsPrint", this.isPrint.toString());
+    if (this.number !== null) params.set("Number", this.number.toString());
+    if (this.referenceId !== null) params.set("ReferenceId", this.referenceId);
+    if (this.referenceDeliveryId !== null) params.set("ReferenceDeliveryId", this.referenceDeliveryId);
+    if (this.locationId !== null) params.set("LocationId", this.locationId.toString());
+    if (this.countryId !== null) params.set("CountryId", this.countryId.toString());
+    if (this.cityId !== null) params.set("CityId", this.cityId.toString());
+    if (this.districtId !== null) params.set("DistrictId", this.districtId.toString());
+    if (this.buildingId !== null) params.set("BuildingId", this.buildingId.toString());
+    if (this.apartmentId !== null) params.set("AppartmentId", this.apartmentId.toString());
+    if (this.orderType !== null) params.set("OrderType", this.orderType.toString());
+    if (this.payType !== null) params.set("PayType", this.payType.toString());
+    if (this.DeleveryType !== null) params.set("DeleveryType", this.DeleveryType.toString());
+    if (this.username !== null) params.set("Username", this.username);
+    if (this.customerId !== null) params.set("CustomerId", this.customerId);
+    if (this.delegateId !== null) params.set("DelagateId", this.delegateId);
+    if (this.delegateWithCustomerId !== null) params.set("DelegateWithCustomerId", this.delegateWithCustomerId);
+    if (this.statusChangedBy !== null) params.set("StatusChangedBy", this.statusChangedBy);
+    if (this.viewInMainCurrency !== null) params.set("ViewInMainCurrency", this.viewInMainCurrency.toString());
+    if (this.totalAmount !== null) params.set("TotalAmount", this.totalAmount.toString());
+    if (this.sign !== null) params.set("Sign", this.sign.toString());
+    if (this.couponOfferId !== null) params.set("CouponOfferId", this.couponOfferId);
+    if (this.applicationId !== null) params.set("ApplicationId", this.applicationId);
+    return params;
+  }
+  /**
+   * Convert to plain object map
+   */
+  toMap() {
+    const map = {};
+    const pagingParams = this.pagingParameters.toURLParams();
+    Object.assign(map, pagingParams);
+    if (this.storeId !== null) map.StoreId = this.storeId;
+    if (this.menuId !== null) map.MenuId = this.menuId;
+    if (this.dateFrom !== null) map.DateFrom = this.dateFrom;
+    if (this.dateTo !== null) map.DateTo = this.dateTo;
+    if (this.startTime !== null) map.StartTime = this.startTime;
+    if (this.endTime !== null) map.EndTime = this.endTime;
+    if (this.orderStatusId !== null) map.OrderStatusId = this.orderStatusId;
+    if (this.orderStatusIds !== null) map.OrderStatusIds = this.orderStatusIds;
+    if (this.isCanceled !== null) map.IsCancled = this.isCanceled;
+    if (this.isConfirmed !== null) map.IsConformed = this.isConfirmed;
+    if (this.isRejected !== null) map.IsRejected = this.isRejected;
+    if (this.isPrint !== null) map.IsPrint = this.isPrint;
+    if (this.number !== null) map.Number = this.number;
+    if (this.referenceId !== null) map.ReferenceId = this.referenceId;
+    if (this.referenceDeliveryId !== null) map.ReferenceDeliveryId = this.referenceDeliveryId;
+    if (this.locationId !== null) map.LocationId = this.locationId;
+    if (this.countryId !== null) map.CountryId = this.countryId;
+    if (this.cityId !== null) map.CityId = this.cityId;
+    if (this.districtId !== null) map.DistrictId = this.districtId;
+    if (this.buildingId !== null) map.BuildingId = this.buildingId;
+    if (this.apartmentId !== null) map.AppartmentId = this.apartmentId;
+    if (this.orderType !== null) map.OrderType = this.orderType;
+    if (this.payType !== null) map.PayType = this.payType;
+    if (this.DeleveryType !== null) map.DeleveryType = this.DeleveryType;
+    if (this.username !== null) map.Username = this.username;
+    if (this.customerId !== null) map.CustomerId = this.customerId;
+    if (this.delegateId !== null) map.DelagateId = this.delegateId;
+    if (this.delegateWithCustomerId !== null) map.DelegateWithCustomerId = this.delegateWithCustomerId;
+    if (this.statusChangedBy !== null) map.StatusChangedBy = this.statusChangedBy;
+    if (this.viewInMainCurrency !== null) map.ViewInMainCurrency = this.viewInMainCurrency;
+    if (this.totalAmount !== null) map.TotalAmount = this.totalAmount;
+    if (this.sign !== null) map.Sign = this.sign;
+    if (this.couponOfferId !== null) map.CouponOfferId = this.couponOfferId;
+    if (this.applicationId !== null) map.ApplicationId = this.applicationId;
+    return map;
+  }
+  /**
+   * Create filter from URL search parameters
+   */
+  static fromURLSearchParams(params) {
+    const pagingParameters = new OrderPagingParameters({
+      currentPage: params.get("CurrentPage") ? parseInt(params.get("CurrentPage")) : 1,
+      pageSize: params.get("PageSize") ? parseInt(params.get("PageSize")) : 20,
+      sortField: params.get("SortField") || null,
+      currentSortField: params.get("CurrentSortField") || null,
+      currentSortOrder: params.get("CurrentSortOrder") || null
+    });
+    const orderStatusIds = params.getAll("OrderStatusIds").map((id) => parseInt(id));
+    return new _OrdersFilterParameters({
+      pagingParameters,
+      storeId: params.get("StoreId") ? parseInt(params.get("StoreId")) : null,
+      menuId: params.get("MenuId") ? parseInt(params.get("MenuId")) : null,
+      dateFrom: params.get("DateFrom") || null,
+      dateTo: params.get("DateTo") || null,
+      startTime: params.get("StartTime") || null,
+      endTime: params.get("EndTime") || null,
+      orderStatusId: params.get("OrderStatusId") ? parseInt(params.get("OrderStatusId")) : null,
+      orderStatusIds: orderStatusIds.length > 0 ? orderStatusIds : null,
+      isCanceled: params.get("IsCancled") ? params.get("IsCancled") === "true" : null,
+      isConfirmed: params.get("IsConformed") ? params.get("IsConformed") === "true" : null,
+      isRejected: params.get("IsRejected") ? params.get("IsRejected") === "true" : null,
+      isPrint: params.get("IsPrint") ? params.get("IsPrint") === "true" : null,
+      number: params.get("Number") ? parseInt(params.get("Number")) : null,
+      referenceId: params.get("ReferenceId") || null,
+      referenceDeliveryId: params.get("ReferenceDeliveryId") || null,
+      locationId: params.get("LocationId") ? parseInt(params.get("LocationId")) : null,
+      countryId: params.get("CountryId") ? parseInt(params.get("CountryId")) : null,
+      cityId: params.get("CityId") ? parseInt(params.get("CityId")) : null,
+      districtId: params.get("DistrictId") ? parseInt(params.get("DistrictId")) : null,
+      buildingId: params.get("BuildingId") ? parseInt(params.get("BuildingId")) : null,
+      apartmentId: params.get("AppartmentId") ? parseInt(params.get("AppartmentId")) : null,
+      orderType: params.get("OrderType") ? parseInt(params.get("OrderType")) : null,
+      payType: params.get("PayType") ? parseInt(params.get("PayType")) : null,
+      DeleveryType: params.get("DeleveryType") ? parseInt(params.get("DeleveryType")) : null,
+      username: params.get("Username") || null,
+      customerId: params.get("CustomerId") || null,
+      delegateId: params.get("DelagateId") || null,
+      delegateWithCustomerId: params.get("DelegateWithCustomerId") || null,
+      statusChangedBy: params.get("StatusChangedBy") || null,
+      viewInMainCurrency: params.get("ViewInMainCurrency") ? params.get("ViewInMainCurrency") === "true" : null,
+      totalAmount: params.get("TotalAmount") ? parseFloat(params.get("TotalAmount")) : null,
+      sign: params.get("Sign") ? parseInt(params.get("Sign")) : null,
+      couponOfferId: params.get("CouponOfferId") || null,
+      applicationId: params.get("ApplicationId") || null
+    });
+  }
+};
+
+// src/inventory/orders/getOrders.ts
+async function getOrders({
+  filterParams
+}) {
+  const params = filterParams.toURLSearchParams();
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { default: getToken2 } = await Promise.resolve().then(() => (init_token(), token_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    const token = await getToken2();
+    return getWithAuth2(
+      `${Api2.getOrders}?${params.toString()}`
+    );
+  }
+  const response = await fetch(`/api/orders?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/orders/handler/orders.ts
+async function GET(request) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const filterParams = OrdersFilterParameters.fromURLSearchParams(searchParams);
+    const orders = await getOrders({ filterParams });
+    return import_server.NextResponse.json(orders);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch orders";
+    console.error("orders error:", message);
+    return import_server.NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
+  }
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  GET
+});

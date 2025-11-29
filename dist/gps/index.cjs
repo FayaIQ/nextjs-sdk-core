@@ -35,46 +35,58 @@ var config_exports = {};
 __export(config_exports, {
   getAuthConfig: () => getAuthConfig
 });
-var getAuthConfig;
+var getEnvVar, getAuthConfig;
 var init_config = __esm({
   "src/core/config.ts"() {
     "use strict";
+    getEnvVar = (key, brand) => {
+      if (typeof process === "undefined" || !process.env) return void 0;
+      if (brand) {
+        const brandKey = `${brand.toUpperCase()}_${key}`;
+        if (process.env[brandKey]) return process.env[brandKey];
+      }
+      return process.env[key];
+    };
     getAuthConfig = () => {
       if (typeof process !== "undefined" && process.env) {
+        const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
         const envConfig = {
-          clientId: process.env.STOREAK_CLIENT_ID,
-          clientSecret: process.env.STOREAK_CLIENT_SECRET,
-          username: process.env.STOREAK_USERNAME,
-          password: process.env.STOREAK_PASSWORD
+          clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
+          clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
+          username: getEnvVar("STOREAK_USERNAME", brand2),
+          password: getEnvVar("STOREAK_PASSWORD", brand2)
         };
         if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
           return {
             ...envConfig,
-            language: parseInt(process.env.STOREAK_LANGUAGE || "0"),
-            gmt: parseInt(process.env.STOREAK_GMT || "3")
+            language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
+            gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
           };
         }
       }
+      const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
+      const prefix = brand ? `${brand.toUpperCase()}_` : "";
       const missing = [];
       const required = [
-        "STOREAK_CLIENT_ID",
-        "STOREAK_CLIENT_SECRET"
+        `${prefix}STOREAK_CLIENT_ID`,
+        `${prefix}STOREAK_CLIENT_SECRET`
       ];
       required.forEach((name) => {
         if (!process.env?.[name]) missing.push(name);
       });
       if (missing.length > 0) {
+        const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
         throw new Error(
-          `Missing required environment variables for authentication: ${missing.join(", ")}`
+          `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
         );
       }
       return {
-        clientId: process.env.STOREAK_CLIENT_ID,
-        clientSecret: process.env.STOREAK_CLIENT_SECRET,
-        username: process.env.STOREAK_USERNAME,
-        password: process.env.STOREAK_PASSWORD,
-        language: parseInt(process.env.STOREAK_LANGUAGE || "0"),
-        gmt: parseInt(process.env.STOREAK_GMT || "3")
+        clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
+        clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
+        username: getEnvVar("STOREAK_USERNAME", brand),
+        password: getEnvVar("STOREAK_PASSWORD", brand),
+        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
+        gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
       };
     };
   }
@@ -168,7 +180,7 @@ var init_api = __esm({
       }
       // Payments endpoints
       static getStorePayments(storeId) {
-        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+        return `${_Api.INVENTORY_BASE}/v1/Stores/${storeId}/Payments`;
       }
       static getPayment(id) {
         return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
@@ -197,7 +209,7 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
       }
       static getAddress(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Addresses/${id}`;
+        return `${_Api.GPS_BASE}/v1/Addresses/${id}`;
       }
       // Order item endpoints (v3)
       static getOrderItem(orderId, itemId) {
@@ -288,6 +300,7 @@ var init_api = __esm({
     _Api.GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
     _Api.THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
     _Api.INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
+    _Api.CRM_BASE = `https://storeak-crm-service.azurewebsites.net/api`;
     _Api.IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
     _Api.signIn = `${_Api.IDENTITY_BASE}/v1/token`;
     _Api.refreshToken = `${_Api.IDENTITY_BASE}/v1/token/refresh`;
@@ -303,6 +316,8 @@ var init_api = __esm({
     _Api.putUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
     _Api.phoneVerificationSend = `${_Api.IDENTITY_BASE}/v1/verification/phone/send`;
     _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
+    // stores
+    _Api.getStores = `${_Api.STORES_BASE}/v1/Stores/Dropdown`;
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
     _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
@@ -330,13 +345,13 @@ var init_api = __esm({
     _Api.getOffersCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/Customers`;
     _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
     _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
-    _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
+    _Api.getBrands = `${_Api.STORES_BASE}/api/v1/Complex/MenuBrand`;
     _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
     _Api.getOrders = `${_Api.INVENTORY_BASE}/v1/Orders/Paging`;
     // CRM - Clients
-    _Api.getClientsPaging = `${_Api.INVENTORY_BASE}/v1/Clients/Paging`;
-    _Api.getClients = `${_Api.INVENTORY_BASE}/v1/Clients`;
-    _Api.postClients = `${_Api.INVENTORY_BASE}/v1/Clients`;
+    _Api.getClientsPaging = `${_Api.CRM_BASE}/v1/Clients/Paging`;
+    _Api.getClients = `${_Api.CRM_BASE}/v1/Clients`;
+    _Api.postClients = `${_Api.CRM_BASE}/v1/Clients`;
     _Api.postOrders = `${_Api.INVENTORY_BASE}/v2/Orders`;
     _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
     _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
@@ -774,6 +789,7 @@ var init_core = __esm({
 var gps_exports = {};
 __export(gps_exports, {
   GetDeliveryZonesGET: () => GET,
+  getAddressById: () => getAddressById,
   getCities: () => getCities,
   getCountries: () => getCountries,
   getDeliveryZones: () => getDeliveryZones,
@@ -830,6 +846,20 @@ async function getDistricts(cityId) {
   return getLocationChildren(cityId);
 }
 
+// src/gps/locations/getAddressById.ts
+async function getAddressById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getAddress(id));
+  }
+  const res = await fetch(`/api/addresses/${id}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch address ${id}: ${res.statusText}`);
+  }
+  return res.json();
+}
+
 // src/core/errorResponse.ts
 var import_server = require("next/server");
 init_fetcher();
@@ -864,6 +894,7 @@ async function GET(request) {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   GetDeliveryZonesGET,
+  getAddressById,
   getCities,
   getCountries,
   getDeliveryZones,

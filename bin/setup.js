@@ -34,10 +34,10 @@ const routes = [
   {
     name: "addressById",
     path: ["src", "app", "api", "addresses", "[id]"],
-    handler: "erp-core/inventory/orders",
+    handler: "erp-core/gps/locations",
     methods: ["GET"],
-    exportName: "GETAddress",
-    description: "Get address by id",
+    exportName: "getAddressByIdHandler",
+    description: "Get address by id (GPS service)",
   },
   {
     name: "offerByIdDelete",
@@ -56,6 +56,14 @@ const routes = [
     exportName: ["GETOrders", "POSTOrder"],
     description: "Orders listing and creation endpoint",
   },
+    {
+      name: "createOrder",
+      path: ["src", "app", "api", "orders"],
+      handler: "erp-core/inventory/orders",
+      methods: ["POST"],
+      exportName: "POSTOrder",
+      description: "Create an order (POST /api/orders)",
+    },
   {
     name: "orderFullInfo",
     path: ["src", "app", "api", "orders", "full-info"],
@@ -267,7 +275,7 @@ const routes = [
   {
     name: "stores",
     path: ["src", "app", "api", "stores"],
-    handler: "erp-core/identity/application",
+    handler: "erp-core/stores",
     methods: ["GET"],
     exportName: "GETStores",
     description: "Stores listing endpoint",
@@ -291,7 +299,7 @@ const routes = [
   // CRM - clients endpoints
   {
     name: "clientsPaging",
-    path: ["src", "app", "api", "clients", "paging"],
+    path: ["src", "app", "api", "crm" ,"clients", "paging"],
     handler: "erp-core/crm",
     methods: ["GET"],
     exportName: "GETClientsPaging",
@@ -299,7 +307,7 @@ const routes = [
   },
   {
     name: "clients",
-    path: ["src", "app", "api", "clients"],
+    path: ["src", "app", "api", "crm", "clients"],
     handler: "erp-core/crm",
     methods: ["GET"],
     exportName: "GETClients",
@@ -307,7 +315,7 @@ const routes = [
   },
   {
     name: "clientsPost",
-    path: ["src", "app", "api", "clients"],
+    path: ["src", "app", "api", "crm", "clients"],
     handler: "erp-core/crm",
     methods: ["POST"],
     exportName: "POSTClient",
@@ -701,6 +709,14 @@ const routes = [
     methods: ["GET"],
     exportName: "getSlidesGET",
     description: "Slides listing endpoint",
+  },
+  {
+    name: "brands",
+    path: ["src", "app", "api", "brands"],
+    handler: "erp-core/inventory/brands",
+    methods: ["GET"],
+    exportName: "GET",
+    description: "Menu brands listing endpoint",
   },
 ];
 

@@ -1,48 +1,30 @@
 import {
-  getAddressById
-} from "../../chunk-IFSY5G3B.js";
+  GET as GET3
+} from "../../chunk-ZLP54NGO.js";
+import {
+  GET as GET2
+} from "../../chunk-EJNGR7KD.js";
+import {
+  GET
+} from "../../chunk-TRNUGHBE.js";
 import {
   getCities,
-  getCountries,
   getDistricts,
   getLocationChildren
-} from "../../chunk-TYZ7OOYL.js";
-
-// src/gps/locations/handler/countries.ts
-import { NextResponse } from "next/server";
-async function GET(request) {
-  try {
-    const countries = await getCountries();
-    return NextResponse.json(countries);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch countries";
-    console.error("countries error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
-}
-
-// src/gps/locations/handler/children.ts
-import { NextResponse as NextResponse2 } from "next/server";
-async function GET2(request, { params }) {
-  try {
-    const { parentId: parentIdStr } = await params;
-    const parentId = parseInt(parentIdStr, 10);
-    if (isNaN(parentId)) {
-      return NextResponse2.json(
-        { error: "Invalid parent ID" },
-        { status: 400 }
-      );
-    }
-    const children = await getLocationChildren(parentId);
-    return NextResponse2.json(children);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to fetch location children";
-    console.error("location children error:", message);
-    return NextResponse2.json({ error: message }, { status: 500 });
-  }
-}
+} from "../../chunk-3ZGQJJZY.js";
+import {
+  getAddressById
+} from "../../chunk-JRZ6EO3N.js";
+import {
+  getCountries
+} from "../../chunk-TSZNFBWK.js";
+import "../../chunk-KKPZYAYC.js";
+import "../../chunk-UZVDDDFY.js";
+import "../../chunk-XXEDZABO.js";
+import "../../chunk-MLKGABMK.js";
 export {
   getAddressById,
+  GET3 as getAddressByIdHandler,
   getCities,
   getCountries,
   GET as getCountriesHandler,

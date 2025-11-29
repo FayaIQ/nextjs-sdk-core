@@ -6,6 +6,7 @@ export class Api {
   private static GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
   private static THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
   private static INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
+  private static CRM_BASE = `https://storeak-crm-service.azurewebsites.net/api`;
   public static IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
 
   static signIn: string = `${Api.IDENTITY_BASE}/v1/token`;
@@ -24,13 +25,18 @@ export class Api {
   static phoneVerificationSend: string = `${Api.IDENTITY_BASE}/v1/verification/phone/send`;
   static phoneVerificationVerify: string = `${Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 
+
+
+  // stores
+  static getStores: string = `${Api.STORES_BASE}/v1/Stores/Dropdown`;
+
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
   static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
-    static getProductInfoV2(id: string): string {
+  static getProductInfoV2(id: string): string {
     return `${Api.INVENTORY_BASE}/v2/Items/${id}/FullInfo`;
   }
   static getMenus: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
@@ -135,13 +141,13 @@ export class Api {
   static getOffersCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/Customers`;
   static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
-  static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
+  static getBrands: string = `${Api.STORES_BASE}/api/v1/Complex/MenuBrand`;
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
   // CRM - Clients
-  static getClientsPaging: string = `${Api.INVENTORY_BASE}/v1/Clients/Paging`;
-  static getClients: string = `${Api.INVENTORY_BASE}/v1/Clients`;
-  static postClients: string = `${Api.INVENTORY_BASE}/v1/Clients`;
+  static getClientsPaging: string = `${Api.CRM_BASE}/v1/Clients/Paging`;
+  static getClients: string = `${Api.CRM_BASE}/v1/Clients`;
+  static postClients: string = `${Api.CRM_BASE}/v1/Clients`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
   static putOrderPayment(orderId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
@@ -156,7 +162,7 @@ export class Api {
   static getReportsOrderSales: string = `${Api.INVENTORY_BASE}/v1/Reports/OrderSales`;
   // Payments endpoints
   static getStorePayments(storeId: string | number): string {
-    return `${Api.STORES_BASE}/v1/Stores/${storeId}/Payments`;
+    return `${Api.INVENTORY_BASE}/v1/Stores/${storeId}/Payments`;
   }
   static getPayment(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Payments/${id}`;
@@ -195,7 +201,7 @@ export class Api {
   }
 
   static getAddress(id: string | number): string {
-    return `${Api.INVENTORY_BASE}/v1/Addresses/${id}`;
+    return `${Api.GPS_BASE}/v1/Addresses/${id}`;
   }
 
   // Order item endpoints (v3)
