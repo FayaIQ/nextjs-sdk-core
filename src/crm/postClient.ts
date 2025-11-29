@@ -15,7 +15,7 @@ export async function postClient(data: PostClientRequest): Promise<Client> {
   });
 if (!res.ok) {
     // Extract error message from response body before throwing
-    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
     try {
       const errorBody = await res.json();
       errorMessage = errorBody.error || errorBody.message || errorMessage;

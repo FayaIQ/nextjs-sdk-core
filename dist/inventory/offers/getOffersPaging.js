@@ -1,6 +1,6 @@
 import {
   getOffersPaging
-} from "../../chunk-LABRPVGU.js";
+} from "../../chunk-M35UOHPZ.js";
 export {
   getOffersPaging
 };

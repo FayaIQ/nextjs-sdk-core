@@ -90,6 +90,9 @@ var init_api = __esm({
   "src/api/api.ts"() {
     "use strict";
     _Api = class _Api {
+      static getStoreDeliveryZones(storeId) {
+        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -1190,7 +1193,7 @@ async function postOrder(data) {
     body: JSON.stringify(data)
   });
   if (!res.ok) {
-    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
     try {
       const errorBody = await res.json();
       errorMessage = errorBody.error || errorBody.message || errorMessage;

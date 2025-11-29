@@ -1,6 +1,6 @@
 import {
   deleteOffer
-} from "../../chunk-IN7GAF66.js";
+} from "../../chunk-MGFXO4GX.js";
 export {
   deleteOffer
 };

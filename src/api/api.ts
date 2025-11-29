@@ -29,6 +29,9 @@ export class Api {
 
   // stores
   static getStores: string = `${Api.STORES_BASE}/v1/Stores/Dropdown`;
+  static getStoreDeliveryZones(storeId: string | number): string {
+    return `${Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+  }
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;

@@ -1,6 +1,6 @@
 import {
   getOfferById
-} from "../../chunk-CM7NG4ZH.js";
+} from "../../chunk-4A2JXHGE.js";
 export {
   getOfferById
 };

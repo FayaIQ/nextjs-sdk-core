@@ -1,6 +1,6 @@
 import {
   getCatigories
-} from "../../chunk-4VJU4YMF.js";
+} from "../../chunk-N4Z2SHLK.js";
 export {
   getCatigories
 };

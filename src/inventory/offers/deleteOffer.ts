@@ -8,7 +8,7 @@ export async function deleteOffer(id: string | number): Promise<any> {
   const res = await fetch(`/api/offers/${id}`, { method: "DELETE" });
  if (!res.ok) {
     // Extract error message from response body before throwing
-    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
     try {
       const errorBody = await res.json();
       // Use the error message from the API response

@@ -1,6 +1,6 @@
 import {
   getMenusDropdown
-} from "../../chunk-7ST2BXQC.js";
+} from "../../chunk-DC6FQZKZ.js";
 export {
   getMenusDropdown
 };

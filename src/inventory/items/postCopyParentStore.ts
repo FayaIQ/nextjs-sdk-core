@@ -23,11 +23,10 @@ export async function postCopyParentStore(itemIds: (number | string)[]): Promise
     body: JSON.stringify({ itemIds }),
   });
 
-  console.log("postCopyParentStore response status:", res.status);
 
   if (!res.ok) {
     // Extract error message from response body before throwing
-    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
     try {
       const errorBody = await res.json();
       // Use the error message from the API response

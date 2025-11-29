@@ -1,6 +1,6 @@
 import {
   postOffersDeliveryZones
-} from "../../chunk-XRHDCNWW.js";
+} from "../../chunk-7S2DBMAF.js";
 export {
   postOffersDeliveryZones
 };

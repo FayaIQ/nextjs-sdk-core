@@ -1,6 +1,6 @@
 import {
   putOffersCustomerDiscount
-} from "../../chunk-CJNDIUUP.js";
+} from "../../chunk-BGGOVCMT.js";
 export {
   putOffersCustomerDiscount
 };

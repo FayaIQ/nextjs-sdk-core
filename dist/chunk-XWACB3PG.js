@@ -1,0 +1,20 @@
+import {
+  putWithAuth
+} from "./chunk-43V4HC6L.js";
+import {
+  Api
+} from "./chunk-FY27PB4C.js";
+
+// src/inventory/orderItem/putOrderItemUndoCancel.ts
+async function putOrderItemUndoCancel(id, itemId) {
+  if (typeof window === "undefined") {
+    return putWithAuth(Api.putOrderItemUndoCancel(id, itemId));
+  }
+  const res = await fetch(`/api/orders/${id}/orderItems/${itemId}/undo-cancel`, { method: "PUT" });
+  if (!res.ok) throw new Error(`Failed to undo cancel order item: ${res.statusText}`);
+  return res.json();
+}
+
+export {
+  putOrderItemUndoCancel
+};

@@ -90,6 +90,9 @@ var init_api = __esm({
   "src/api/api.ts"() {
     "use strict";
     _Api = class _Api {
+      static getStoreDeliveryZones(storeId) {
+        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -756,6 +759,8 @@ var init_fetcher = __esm({
 var stores_exports = {};
 __export(stores_exports, {
   GETStores: () => GET,
+  GetStoreDeliveryZonesGET: () => GET2,
+  getStoreDeliveryZones: () => getStoreDeliveryZones,
   getStores: () => getStores
 });
 module.exports = __toCommonJS(stores_exports);
@@ -803,8 +808,44 @@ async function GET(request) {
     return toNextResponseFromError(err);
   }
 }
+
+// src/stores/getStoreDeliveryZones.ts
+async function getStoreDeliveryZones(storeId) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getStoreDeliveryZones(storeId));
+  }
+  const res = await fetch(`/api/stores/${storeId}/delivery-zones`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
+// src/stores/handler/getStoreDeliveryZones.ts
+async function GET2(request, { params }) {
+  try {
+    const result = await getStoreDeliveryZones((await params).storeId);
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    });
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   GETStores,
+  GetStoreDeliveryZonesGET,
+  getStoreDeliveryZones,
   getStores
 });

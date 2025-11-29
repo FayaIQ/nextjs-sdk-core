@@ -24,6 +24,9 @@ __export(api_exports, {
 });
 module.exports = __toCommonJS(api_exports);
 var _Api = class _Api {
+  static getStoreDeliveryZones(storeId) {
+    return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+  }
   static getProductInfo(id) {
     return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }

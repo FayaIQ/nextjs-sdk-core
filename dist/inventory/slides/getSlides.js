@@ -1,6 +1,6 @@
 import {
   getSlides
-} from "../../chunk-QDN2XYBG.js";
+} from "../../chunk-WF27CXOT.js";
 export {
   getSlides
 };

@@ -1,6 +1,6 @@
 import {
   getOffersItemsDropdown
-} from "../../chunk-66RZB35S.js";
+} from "../../chunk-AQPHGP6Q.js";
 export {
   getOffersItemsDropdown
 };

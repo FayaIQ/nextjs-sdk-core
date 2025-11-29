@@ -20,7 +20,7 @@ export async function postOrder(data: PostOrderRequest): Promise<OrderDetail> {
   });
 if (!res.ok) {
     // Extract error message from response body before throwing
-    let errorMessage = `Copy parent store failed: ${res.status} ${res.statusText}`;
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
     try {
       const errorBody = await res.json();
       // Use the error message from the API response

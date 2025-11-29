@@ -1,0 +1,26 @@
+import {
+  ItemsFilterParameters
+} from "./chunk-3K4HOFQA.js";
+import {
+  getProducts
+} from "./chunk-NVLVNBUG.js";
+import {
+  toNextResponseFromError
+} from "./chunk-MKZOJXDY.js";
+
+// src/inventory/items/handler/getProducts.ts
+import { NextResponse } from "next/server";
+async function GET(request) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const filterParams = ItemsFilterParameters.fromURLSearchParams(searchParams);
+    const products = await getProducts({ filterParams });
+    return NextResponse.json(products);
+  } catch (error) {
+    return toNextResponseFromError(error);
+  }
+}
+
+export {
+  GET
+};
