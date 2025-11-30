@@ -25,8 +25,6 @@ export class Api {
   static phoneVerificationSend: string = `${Api.IDENTITY_BASE}/v1/verification/phone/send`;
   static phoneVerificationVerify: string = `${Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 
-
-
   // stores
   static getStores: string = `${Api.STORES_BASE}/v1/Stores/Dropdown`;
 
@@ -141,7 +139,7 @@ export class Api {
   static getOffersCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/Customers`;
   static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
-  static getBrands: string = `${Api.STORES_BASE}/api/v1/Complex/MenuBrand`;
+  static getBrands: string = `${Api.STORES_BASE}/v1/Complex/MenuBrand`;
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
   // CRM - Clients
