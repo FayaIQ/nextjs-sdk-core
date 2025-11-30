@@ -718,6 +718,14 @@ const routes = [
     exportName: "GET",
     description: "Menu brands listing endpoint",
   },
+  {
+    name: "wishes",
+    path: ["src", "app", "api", "wishes"],
+    handler: "erp-core/inventory/wishes",
+    methods: ["GET"],
+    exportName: "GetWishesGET",
+    description: "Wishes paging endpoint",
+  },
 ];
 
 /**
