@@ -2,7 +2,7 @@
  * Brand interface representing menu brand data
  */
 export interface Brand {
-  id: string | number;
+  id: number;
   name: string;
   /** optional localized or secondary name (e.g., English) */
   secondaryName?: string | null;
