@@ -186,6 +186,7 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/wish`;
   }
 
+  
   static deleteWish(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
   }

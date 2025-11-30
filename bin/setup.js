@@ -726,6 +726,14 @@ const routes = [
     exportName: "GetWishesGET",
     description: "Wishes paging endpoint",
   },
+  {
+    name: "wishes-item",
+    path: ["src", "app", "api", "wishes", "[itemId]"],
+    handler: "erp-core/inventory/wishes",
+    methods: ["POST", "DELETE"],
+    exportName: "PostWishPOST,DeleteWishDELETE",
+    description: "Add/remove item from wishlist",
+  },
 ];
 
 /**

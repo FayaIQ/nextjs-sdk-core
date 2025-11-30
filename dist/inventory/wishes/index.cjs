@@ -390,8 +390,12 @@ var init_api = __esm({
 // src/inventory/wishes/index.ts
 var wishes_exports = {};
 __export(wishes_exports, {
+  DeleteWishDELETE: () => DELETE,
   GetWishesGET: () => GET,
-  getWishes: () => getWishes
+  PostWishPOST: () => POST,
+  deleteWish: () => deleteWish,
+  getWishes: () => getWishes,
+  postWish: () => postWish
 });
 module.exports = __toCommonJS(wishes_exports);
 
@@ -586,6 +590,45 @@ async function getWithAuth(url, query, headers) {
     headers
   });
 }
+async function postWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "POST",
+    token,
+    data,
+    headers
+  });
+}
+async function deleteWithAuth(url, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "DELETE",
+    token,
+    headers
+  });
+}
 
 // src/inventory/wishes/getWishes.ts
 init_api();
@@ -614,6 +657,38 @@ async function getWishes(params) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch wishes: ${res.statusText}`);
   return res.json();
+}
+
+// src/inventory/wishes/postWish.ts
+init_api();
+async function postWish(itemId) {
+  if (typeof window === "undefined") {
+    const url = Api.postWish(itemId);
+    return postWithAuth(url, {});
+  }
+  const res = await fetch(`/api/wishes/${itemId}`, {
+    method: "POST"
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to add wish: ${res.statusText}`);
+  }
+  return;
+}
+
+// src/inventory/wishes/deleteWish.ts
+init_api();
+async function deleteWish(itemId) {
+  if (typeof window === "undefined") {
+    const url = Api.deleteWish(itemId);
+    return deleteWithAuth(url);
+  }
+  const res = await fetch(`/api/wishes/${itemId}`, {
+    method: "DELETE"
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to remove wish: ${res.statusText}`);
+  }
+  return;
 }
 
 // src/core/errorResponse.ts
@@ -651,8 +726,48 @@ async function GET(request) {
     return toNextResponseFromError(err);
   }
 }
+
+// src/inventory/wishes/handler/postWish.ts
+var import_server2 = require("next/server");
+async function POST(request, context) {
+  try {
+    const { itemId } = await context.params;
+    if (!itemId) {
+      return import_server2.NextResponse.json(
+        { error: "Item ID is required" },
+        { status: 400 }
+      );
+    }
+    await postWish(itemId);
+    return import_server2.NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    return toNextResponseFromError(error);
+  }
+}
+
+// src/inventory/wishes/handler/deleteWish.ts
+var import_server3 = require("next/server");
+async function DELETE(request, context) {
+  try {
+    const { itemId } = await context.params;
+    if (!itemId) {
+      return import_server3.NextResponse.json(
+        { error: "Item ID is required" },
+        { status: 400 }
+      );
+    }
+    await deleteWish(itemId);
+    return import_server3.NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    return toNextResponseFromError(error);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  DeleteWishDELETE,
   GetWishesGET,
-  getWishes
+  PostWishPOST,
+  deleteWish,
+  getWishes,
+  postWish
 });
