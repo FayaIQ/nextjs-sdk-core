@@ -1,5 +1,5 @@
-import { G as GetBrandsResponse } from '../../getBrands-CtwNxho6.js';
-export { B as Brand, g as getBrands } from '../../getBrands-CtwNxho6.js';
+import { G as GetBrandsResponse } from '../../getBrands-BOTu8IV7.js';
+export { B as Brand, g as getBrands } from '../../getBrands-BOTu8IV7.js';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
