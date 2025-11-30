@@ -773,8 +773,8 @@ var init_core = __esm({
 // src/inventory/brands/index.ts
 var brands_exports = {};
 __export(brands_exports, {
-  getBrands: () => getBrands,
-  handlers: () => get_brands_exports
+  GetBrandsGET: () => GET,
+  getBrands: () => getBrands
 });
 module.exports = __toCommonJS(brands_exports);
 
@@ -794,10 +794,6 @@ async function getBrands() {
 }
 
 // src/inventory/brands/handler/get-brands.ts
-var get_brands_exports = {};
-__export(get_brands_exports, {
-  GET: () => GET
-});
 var import_server = require("next/server");
 async function GET(request) {
   try {
@@ -811,6 +807,6 @@ async function GET(request) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  getBrands,
-  handlers
+  GetBrandsGET,
+  getBrands
 });

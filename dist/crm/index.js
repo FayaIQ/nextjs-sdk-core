@@ -1,16 +1,15 @@
 import {
   toNextResponseFromError
-} from "../chunk-GIKQHBMH.js";
-import "../chunk-JN33UK4M.js";
-import "../chunk-U773LIZ4.js";
-import "../chunk-MLKGABMK.js";
+} from "../chunk-GYNOH4CA.js";
+import "../chunk-WDERMAWM.js";
+import "../chunk-E7TJCOFK.js";
 
 // src/crm/getClientsPaging.ts
 async function getClientsPaging(query) {
   const qs = query ? `?${new URLSearchParams(query).toString()}` : "";
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-HFWCTJH5.js");
-    const { Api } = await import("../api-JFMDIACR.js");
+    const { getWithAuth } = await import("../fetcher-RIVZ2SH3.js");
+    const { Api } = await import("../api-QG2WVXL6.js");
     return getWithAuth(`${Api.getClientsPaging}${qs}`);
   }
   const res = await fetch(`/api/crm/clients/paging${qs}`);
@@ -39,8 +38,8 @@ async function getClients({ filterParams } = {}) {
   const qs = toQueryString(filterParams);
   console.log("getClients query string:", qs);
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-HFWCTJH5.js");
-    const { Api } = await import("../api-JFMDIACR.js");
+    const { getWithAuth } = await import("../fetcher-RIVZ2SH3.js");
+    const { Api } = await import("../api-QG2WVXL6.js");
     return getWithAuth(`${Api.getClients}${qs}`);
   }
   const res = await fetch(`/api/crm/clients${qs}`);
@@ -59,8 +58,8 @@ async function getClients({ filterParams } = {}) {
 // src/crm/postClient.ts
 async function postClient(data) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../fetcher-HFWCTJH5.js");
-    const { Api } = await import("../api-JFMDIACR.js");
+    const { postWithAuth } = await import("../fetcher-RIVZ2SH3.js");
+    const { Api } = await import("../api-QG2WVXL6.js");
     return postWithAuth(Api.postClients, data);
   }
   const res = await fetch(`/api/crm/clients`, {

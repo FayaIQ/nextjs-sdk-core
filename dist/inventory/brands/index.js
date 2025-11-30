@@ -1,15 +1,8 @@
 import {
   getBrands
-} from "../../chunk-2VYCART3.js";
-import {
-  __export
-} from "../../chunk-MLKGABMK.js";
+} from "../../chunk-4TBHZ3EP.js";
 
 // src/inventory/brands/handler/get-brands.ts
-var get_brands_exports = {};
-__export(get_brands_exports, {
-  GET: () => GET
-});
 import { NextResponse } from "next/server";
 async function GET(request) {
   try {
@@ -22,6 +15,6 @@ async function GET(request) {
   }
 }
 export {
-  getBrands,
-  get_brands_exports as handlers
+  GET as GetBrandsGET,
+  getBrands
 };
