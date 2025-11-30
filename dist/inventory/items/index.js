@@ -1,7 +1,7 @@
 import {
   getProductInfo,
   getProducts
-} from "../../chunk-LDKVCVYT.js";
+} from "../../chunk-YNCP3FQR.js";
 import {
   AgeGroup,
   Gender,

@@ -26,8 +26,8 @@
     "QUICK_START.md"
   ],
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/gps/locations/index.ts src/identity/application/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/gps/locations/index.ts src/identity/application/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts --format cjs,esm --dts --watch",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
@@ -186,6 +186,16 @@
       "types": "./dist/inventory/brands/*.d.ts",
       "import": "./dist/inventory/brands/*.js",
       "require": "./dist/inventory/brands/*.cjs"
+    },
+    "./inventory/wishes": {
+      "types": "./dist/inventory/wishes/index.d.ts",
+      "import": "./dist/inventory/wishes/index.js",
+      "require": "./dist/inventory/wishes/index.cjs"
+    },
+    "./inventory/wishes/*": {
+      "types": "./dist/inventory/wishes/*.d.ts",
+      "import": "./dist/inventory/wishes/*.js",
+      "require": "./dist/inventory/wishes/*.cjs"
     },
     "./inventory/orderItem": {
       "types": "./dist/inventory/orderItem/index.d.ts",
