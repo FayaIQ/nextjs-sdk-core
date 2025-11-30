@@ -283,7 +283,7 @@ var init_api = __esm({
     _Api.getOffersCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/Customers`;
     _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
     _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
-    _Api.getBrands = `${_Api.STORES_BASE}/v1/Complex/MenuBrand`;
+    _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/Complex/MenuBrand`;
     _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
     _Api.getOrders = `${_Api.INVENTORY_BASE}/v1/Orders/Paging`;
     // CRM - Clients

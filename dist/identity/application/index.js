@@ -1,6 +1,6 @@
 import {
   getStoreInfo
-} from "../../chunk-KDSCTWUY.js";
+} from "../../chunk-LXAKXNGK.js";
 import "../../chunk-MLKGABMK.js";
 
 // src/identity/application/handler/getStores.ts
@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
 async function getStores() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-M7CLY2YV.js");
+    const { Api } = await import("../../api-JFMDIACR.js");
     return getWithAuth(Api.getApplicationsStores);
   }
   const response = await fetch(`/api/stores`);
@@ -55,7 +55,7 @@ import { NextResponse as NextResponse3 } from "next/server";
 async function getApplicationsStoreDropdown() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-M7CLY2YV.js");
+    const { Api } = await import("../../api-JFMDIACR.js");
     return getWithAuth(Api.getApplicationsStores);
   }
   const res = await fetch(`/api/applications/store/dropdown`);

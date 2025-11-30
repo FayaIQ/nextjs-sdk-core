@@ -4,7 +4,7 @@ import "../../chunk-MLKGABMK.js";
 async function getCatigories() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-M7CLY2YV.js");
+    const { Api } = await import("../../api-JFMDIACR.js");
     return getWithAuth(`${Api.getCatigories}`, {});
   } else {
     return fetch(`/api/categories`).then((res) => {

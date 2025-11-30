@@ -1,6 +1,6 @@
 import {
   getBrands
-} from "../../chunk-GBX73DYR.js";
+} from "../../chunk-2VYCART3.js";
 import {
   __export
 } from "../../chunk-MLKGABMK.js";

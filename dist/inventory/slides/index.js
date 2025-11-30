@@ -3,8 +3,8 @@ import "../../chunk-MLKGABMK.js";
 // src/inventory/slides/getSlides.ts
 async function getSlides() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-LNRTGLFX.js");
-    const { Api } = await import("../../api-M7CLY2YV.js");
+    const { getWithAuth } = await import("../../fetcher-HFWCTJH5.js");
+    const { Api } = await import("../../api-JFMDIACR.js");
     return getWithAuth(Api.getSlideShows);
   }
   const response = await fetch(`/api/slides?`);
