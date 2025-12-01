@@ -54,7 +54,8 @@ var init_config = __esm({
           clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
           clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
           username: getEnvVar("STOREAK_USERNAME", brand2),
-          password: getEnvVar("STOREAK_PASSWORD", brand2)
+          password: getEnvVar("STOREAK_PASSWORD", brand2),
+          thirdPartyToken: getEnvVar("STOREAK_THIRD_PARTY_TOKEN", brand2)
         };
         if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
           return {
@@ -85,6 +86,7 @@ var init_config = __esm({
         clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
         username: getEnvVar("STOREAK_USERNAME", brand),
         password: getEnvVar("STOREAK_PASSWORD", brand),
+        thirdPartyToken: getEnvVar("STOREAK_THIRD_PARTY_TOKEN", brand),
         language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
         gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
       };
@@ -447,6 +449,7 @@ async function getToken() {
     );
   }
   const data = await response.json();
+  console.log("Authentication response ", data);
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
   }

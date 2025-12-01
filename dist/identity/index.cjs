@@ -349,7 +349,8 @@ var init_config = __esm({
           clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
           clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
           username: getEnvVar("STOREAK_USERNAME", brand2),
-          password: getEnvVar("STOREAK_PASSWORD", brand2)
+          password: getEnvVar("STOREAK_PASSWORD", brand2),
+          thirdPartyToken: getEnvVar("STOREAK_THIRD_PARTY_TOKEN", brand2)
         };
         if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
           return {
@@ -380,6 +381,7 @@ var init_config = __esm({
         clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
         username: getEnvVar("STOREAK_USERNAME", brand),
         password: getEnvVar("STOREAK_PASSWORD", brand),
+        thirdPartyToken: getEnvVar("STOREAK_THIRD_PARTY_TOKEN", brand),
         language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
         gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
       };
@@ -430,6 +432,7 @@ async function getToken() {
     );
   }
   const data = await response.json();
+  console.log("Authentication response ", data);
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
   }
@@ -785,18 +788,26 @@ init_fetcher();
 init_config();
 async function loginUser(credentials) {
   const isServer = typeof window === "undefined";
+  const authMode = process.env.AUTH_MODE || "auto";
   if (isServer) {
     const config = getAuthConfig();
     const { cookies } = await import("next/headers");
+    if (authMode === "strict" && (!credentials.username || !credentials.password)) {
+      throw new Error("Username and password are required in STRICT mode");
+    }
     const fullCredentials = {
       clientId: config.clientId,
       clientSecret: config.clientSecret,
-      username: credentials.username,
-      password: credentials.password,
+      username: credentials.username || config.username,
+      password: credentials.password || config.password,
       Language: config.language ?? 0,
+      ThirdPartyToken: config.thirdPartyToken,
       GMT: config.gmt ?? 3,
       IsFromNotification: false
     };
+    if (!fullCredentials.username || !fullCredentials.password) {
+      throw new Error("Username and password must be provided either in credentials or environment config");
+    }
     const response = await postWithoutAuth(Api.signIn, fullCredentials);
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
@@ -810,8 +821,9 @@ async function loginUser(credentials) {
       path: "/",
       maxAge: expiresIn
     });
-    if (response.employeeStoreId) {
-      cookieStore.set("employee_store_id", String(response.employeeStoreId), {
+    if (authMode === "auto") {
+      const isUser = !!(response.roles && response.roles.length > 0);
+      cookieStore.set("isUser", String(isUser), {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -819,23 +831,34 @@ async function loginUser(credentials) {
         maxAge: expiresIn
       });
     }
-    if (response.roles?.length) {
-      cookieStore.set("roles", response.roles.join(","), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: expiresIn
-      });
-    }
-    if (response.user?.username) {
-      cookieStore.set("username", response.user.username, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: expiresIn
-      });
+    if (authMode === "strict") {
+      if (response.employeeStoreId) {
+        cookieStore.set("employee_store_id", String(response.employeeStoreId), {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: expiresIn
+        });
+      }
+      if (response.roles?.length) {
+        cookieStore.set("roles", response.roles.join(","), {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: expiresIn
+        });
+      }
+      if (response.user?.username) {
+        cookieStore.set("username", response.user.username, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: expiresIn
+        });
+      }
     }
     return response;
   }

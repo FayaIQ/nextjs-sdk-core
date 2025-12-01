@@ -3,14 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Represents login credentials for Storeak Identity Service
+ * In STRICT mode: username and password are required
+ * In AUTO mode: username and password are optional (uses env config)
  */
 interface LoginRequest {
-    username: string;
-    password: string;
+    username?: string;
+    password?: string;
 }
-/**
- * User information from login response
- */
 interface User {
     id: string;
     username: string;
@@ -37,7 +36,9 @@ interface LoginResponse {
 /**
  * Logs in a user and retrieves an access token.
  * Automatically saves the token, roles, and store ID to cookies.
- * Only requires username and password - other credentials come from env config.
+ *
+ * STRICT mode: username and password are required in credentials
+ * AUTO mode: username and password are optional - falls back to env config
  */
 declare function loginUser(credentials: LoginRequest): Promise<LoginResponse>;
 

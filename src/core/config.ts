@@ -5,6 +5,7 @@ export interface AuthConfig {
   clientSecret: string;
   username: string;
   password: string;
+  thirdPartyToken?: string;
   language?: number;
   gmt?: number;
 }
@@ -37,9 +38,11 @@ export const getAuthConfig = (): AuthConfig => {
       clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
       username: getEnvVar("STOREAK_USERNAME", brand),
       password: getEnvVar("STOREAK_PASSWORD", brand),
+      thirdPartyToken: getEnvVar("STOREAK_THIRD_PARTY_TOKEN", brand),
     };
 
-    // If all env vars are present, use them
+    // If required env vars are present, use them
+    // thirdPartyToken is optional
     if (
       envConfig.clientId &&
       envConfig.clientSecret &&
@@ -84,6 +87,7 @@ export const getAuthConfig = (): AuthConfig => {
     clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand)!,
     username: getEnvVar("STOREAK_USERNAME", brand),
     password: getEnvVar("STOREAK_PASSWORD", brand),
+    thirdPartyToken: getEnvVar("STOREAK_THIRD_PARTY_TOKEN", brand),
     language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
     gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3"),
   } as AuthConfig;

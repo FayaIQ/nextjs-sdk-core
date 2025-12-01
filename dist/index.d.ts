@@ -2,7 +2,7 @@ export { g as getStoreInfo } from './storeInfo-eCjXU8NH.js';
 export { a as getProductInfo, g as getProducts } from './getProductInfo-DOIZZ2AG.js';
 export { g as getMenus } from './getMenus-BU2KdRFd.js';
 export { g as getOrders } from './getOrders-C67REgTj.js';
-export { g as getBrands } from './getBrands-BOTu8IV7.js';
+export { g as getBrands } from './getBrands-CWOuMjIS.js';
 export { A as Address, C as Category, b as City, c as ColorType, a as Country, D as District, P as Product, S as SizeType, d as StoreType, U as UnitInfo } from './types-BlK7R_r9.js';
 export { A as AgeGroup, G as Gender, I as ItemsFilterParameters, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from './filter-models-B4kRw7Xr.js';
 export { C as CurrentPhase, D as DeleveryType, h as Order, d as OrderAddress, f as OrderClient, e as OrderCustomer, i as OrderDetail, g as OrderItem, c as OrderPagingParameters, b as OrderType, a as OrdersApiResponse, O as OrdersFilterParameters, P as PayType, k as PostOrderAddressRequest, j as PostOrderItemRequest, l as PostOrderRequest, S as Sign } from './order-models-nbgqiu1i.js';
@@ -153,6 +153,7 @@ interface AuthConfig {
     clientSecret: string;
     username: string;
     password: string;
+    thirdPartyToken?: string;
     language?: number;
     gmt?: number;
 }

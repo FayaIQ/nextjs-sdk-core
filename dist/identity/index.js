@@ -1,34 +1,42 @@
 import {
   getAuthConfig
-} from "../chunk-JC63QBDJ.js";
+} from "../chunk-G5ZRNFFO.js";
 import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-NONJEMQT.js";
+} from "../chunk-TDQP6ZHZ.js";
 import {
   Api
 } from "../chunk-536WXACQ.js";
 import {
   postWithoutAuth
-} from "../chunk-WDERMAWM.js";
-import "../chunk-E7TJCOFK.js";
+} from "../chunk-DX5D3J7G.js";
+import "../chunk-ZOAZYWLH.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
   const isServer = typeof window === "undefined";
+  const authMode = process.env.AUTH_MODE || "auto";
   if (isServer) {
     const config = getAuthConfig();
     const { cookies } = await import("next/headers");
+    if (authMode === "strict" && (!credentials.username || !credentials.password)) {
+      throw new Error("Username and password are required in STRICT mode");
+    }
     const fullCredentials = {
       clientId: config.clientId,
       clientSecret: config.clientSecret,
-      username: credentials.username,
-      password: credentials.password,
+      username: credentials.username || config.username,
+      password: credentials.password || config.password,
       Language: config.language ?? 0,
+      ThirdPartyToken: config.thirdPartyToken,
       GMT: config.gmt ?? 3,
       IsFromNotification: false
     };
+    if (!fullCredentials.username || !fullCredentials.password) {
+      throw new Error("Username and password must be provided either in credentials or environment config");
+    }
     const response = await postWithoutAuth(Api.signIn, fullCredentials);
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
@@ -42,8 +50,9 @@ async function loginUser(credentials) {
       path: "/",
       maxAge: expiresIn
     });
-    if (response.employeeStoreId) {
-      cookieStore.set("employee_store_id", String(response.employeeStoreId), {
+    if (authMode === "auto") {
+      const isUser = !!(response.roles && response.roles.length > 0);
+      cookieStore.set("isUser", String(isUser), {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -51,23 +60,34 @@ async function loginUser(credentials) {
         maxAge: expiresIn
       });
     }
-    if (response.roles?.length) {
-      cookieStore.set("roles", response.roles.join(","), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: expiresIn
-      });
-    }
-    if (response.user?.username) {
-      cookieStore.set("username", response.user.username, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: expiresIn
-      });
+    if (authMode === "strict") {
+      if (response.employeeStoreId) {
+        cookieStore.set("employee_store_id", String(response.employeeStoreId), {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: expiresIn
+        });
+      }
+      if (response.roles?.length) {
+        cookieStore.set("roles", response.roles.join(","), {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: expiresIn
+        });
+      }
+      if (response.user?.username) {
+        cookieStore.set("username", response.user.username, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: expiresIn
+        });
+      }
     }
     return response;
   }
@@ -100,7 +120,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-RIVZ2SH3.js");
+    const { getWithAuth } = await import("../fetcher-KQ73IXBD.js");
     const { Api: Api2 } = await import("../api-QG2WVXL6.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";

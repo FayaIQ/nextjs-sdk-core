@@ -61,6 +61,7 @@ export default async function getToken(): Promise<string> {
     body: JSON.stringify(requestBody),
   });
 
+
   if (!response.ok) {
     throw new Error(
       `Authentication failed: ${response.status} ${response.statusText}`
@@ -68,6 +69,8 @@ export default async function getToken(): Promise<string> {
   }
 
   const data = (await response.json()) as TokenResponse;
+
+  console.log("Authentication response " , data);
 
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
