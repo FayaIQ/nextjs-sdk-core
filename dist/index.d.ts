@@ -164,22 +164,6 @@ type TokenResponse = {
     expires_in?: number;
     [key: string]: unknown;
 };
-/**
- * Retrieves or generates an access token based on the configured mode.
- *
- * Modes:
- * - "auto": automatically logs in if token missing or expired
- * - "strict": throws Unauthorized error if no token exists
- *
- * For persistent cookie storage in AUTO mode, wire up the token route handler:
- * ```ts
- * // app/api/auth/token/route.ts
- * export { GET } from "erp-core/identity";
- * ```
- * Then set USE_TOKEN_ROUTE=true in your env
- *
- * This function is automatically memoized per-request using React.cache()
- */
 declare function getToken(): Promise<string>;
 
 export { Api, type AuthConfig, type TokenResponse, getToken };

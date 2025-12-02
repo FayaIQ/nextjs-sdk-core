@@ -402,7 +402,15 @@ __export(wishes_exports, {
 module.exports = __toCommonJS(wishes_exports);
 
 // src/token.ts
-var AUTH_MODE = process.env.AUTH_MODE || "strict";
+var AUTH_MODE = process.env.AUTH_MODE || "auto";
+var USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
+if (!globalThis.__AUTH_CACHE) {
+  globalThis.__AUTH_CACHE = {
+    token: null,
+    expiresAt: 0
+  };
+}
+var AUTH_CACHE = globalThis.__AUTH_CACHE;
 var cachedGetToken;
 try {
   const { cache } = require("react");
@@ -411,62 +419,63 @@ try {
   cachedGetToken = getTokenImpl;
 }
 async function getTokenImpl() {
-  const USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
+  if (AUTH_CACHE.token && Date.now() < AUTH_CACHE.expiresAt) {
+    return AUTH_CACHE.token;
+  }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");
-    const cookie = await cookies();
-    const accessTokenCookie = cookie.get("access_token")?.value;
-    if (accessTokenCookie) {
-      return accessTokenCookie;
+    const cookieStore = cookies();
+    const ck = (await cookieStore).get("access_token")?.value;
+    if (ck) {
+      AUTH_CACHE.token = ck;
+      AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
+      return ck;
     }
-    const err = new Error("Unauthorized: Access token missing (strict mode enabled)");
+    const err = new Error("Unauthorized: Access token missing (strict mode)");
     err.status = 401;
     throw err;
   }
-  try {
-    if (typeof window === "undefined") {
+  if (typeof window === "undefined") {
+    try {
       const { cookies } = await import("next/headers");
-      const cookie = await cookies();
-      const accessTokenCookie = cookie.get("access_token")?.value;
-      if (accessTokenCookie) {
-        console.log("[token:getToken] using existing access_token from cookie");
-        return accessTokenCookie;
+      const cookieStore = await cookies();
+      const ck = cookieStore.get("access_token")?.value;
+      if (ck) {
+        AUTH_CACHE.token = ck;
+        AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
+        return ck;
       }
+    } catch {
     }
-  } catch (e) {
   }
   if (USE_TOKEN_ROUTE && typeof window !== "undefined") {
     try {
-      console.log("[token:getToken] no cookie found (client), calling /api/auth/token ONCE to set cookie");
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || "http://localhost:3000";
       const res = await fetch(`${baseUrl}/api/auth/token`, {
         cache: "no-store"
-        // Don't cache the route response, we want the cookie
       });
       if (res.ok) {
         const data2 = await res.json();
         if (data2.access_token) {
-          console.log("[token:getToken] token route set cookie, returning token");
+          AUTH_CACHE.token = data2.access_token;
+          AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
           return data2.access_token;
         }
       }
-      console.log("[token:getToken] token route failed, falling back to direct sign-in");
-    } catch (e) {
-      console.log("[token:getToken] token route error, falling back to direct sign-in", e);
+    } catch {
     }
   }
   const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
   const authConfig = getAuthConfig2();
   let thirdPartyToken = void 0;
-  try {
-    if (typeof window === "undefined") {
+  if (typeof window === "undefined") {
+    try {
       const { cookies } = await import("next/headers");
-      const cookie = await cookies();
-      console.log("[token:getToken] tp_id cookie value", { value: cookie.get("tp_id")?.value });
-      thirdPartyToken = cookie.get("tp_id")?.value;
+      const cookieStore = await cookies();
+      thirdPartyToken = cookieStore.get("tp_id")?.value;
+    } catch {
     }
-  } catch {
   }
   const requestBody = {
     clientId: authConfig.clientId,
@@ -476,18 +485,13 @@ async function getTokenImpl() {
     IsFromNotification: false
   };
   if (thirdPartyToken) {
-    console.log("[token:getToken] using tp_id for sign-in");
     requestBody["ThirdPartyToken"] = thirdPartyToken;
   } else if (authConfig.thirdPartyToken) {
-    console.log("[token:getToken] using config thirdPartyToken for sign-in");
     requestBody["ThirdPartyToken"] = authConfig.thirdPartyToken;
-  } else {
-    console.log("[token:getToken] no tp_id, signing in with clientId/clientSecret only");
   }
   const response = await fetch(Api2.signIn, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    // Enable Next.js caching for 1 hour in AUTO mode
     ...AUTH_MODE === "auto" ? { next: { revalidate: 3600 } } : {},
     body: JSON.stringify({
       ...requestBody,
@@ -503,7 +507,8 @@ async function getTokenImpl() {
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
   }
-  console.log("[token:getToken] sign-in successful, got access_token");
+  AUTH_CACHE.token = data.access_token;
+  AUTH_CACHE.expiresAt = Date.now() + (data.expires_in ? data.expires_in * 1e3 : 3600 * 1e3);
   return data.access_token;
 }
 function getToken() {
