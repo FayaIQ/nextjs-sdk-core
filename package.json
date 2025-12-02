@@ -26,8 +26,8 @@
     "QUICK_START.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/gps/locations/index.ts src/identity/application/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts --format cjs,esm --dts --watch",
+  "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/gps/locations/index.ts src/identity/application/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts src/firebase/index.ts --format cjs,esm --dts",
+  "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts src/firebase/index.ts --format cjs,esm --dts --watch",
     "prepare": "NODE_OPTIONS=\"--max-old-space-size=8192\" npm run build",
     "prepublishOnly": "npm run build"
   },
@@ -237,6 +237,17 @@
       "import": "./dist/stores/*.js",
       "require": "./dist/stores/*.cjs"
     }
+    ,
+    "./firebase": {
+      "types": "./dist/firebase/index.d.ts",
+      "import": "./dist/firebase/index.js",
+      "require": "./dist/firebase/index.cjs"
+    },
+    "./firebase/*": {
+      "types": "./dist/firebase/*.d.ts",
+      "import": "./dist/firebase/*.js",
+      "require": "./dist/firebase/*.cjs"
+    }
   },
   "peerDependencies": {
     "next": "^14.0.0 || ^15.0.0 || ^16.0.0",
@@ -260,5 +271,8 @@
     "client-components",
     "react",
     "typescript"
-  ]
+  ],
+  "dependencies": {
+    "firebase": "^12.6.0"
+  }
 }

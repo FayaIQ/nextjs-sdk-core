@@ -11,6 +11,7 @@ import { getAuthConfig } from "../core/config";
 export interface LoginRequest {
   username?: string;
   password?: string;
+  thirdPartyToken?: string; // Firebase ID token when logging via phone auth
 }
 
 /**
@@ -64,11 +65,12 @@ export interface LoginResponse {
 export async function loginUser(credentials: LoginRequest): Promise<LoginResponse> {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
+  console.log("[identity:loginUser] called", { isServer, authMode, hasThirdPartyToken: !!credentials.thirdPartyToken });
 
   // ✅ SERVER SIDE
   if (isServer) {
     // Get client credentials from environment
-    const config = getAuthConfig();
+  const config = getAuthConfig();
     const { cookies } = await import("next/headers");
 
     // In STRICT mode, require username and password in credentials
@@ -79,23 +81,66 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
     // Merge user credentials with env config
     // In AUTO mode: use env credentials as fallback
     // In STRICT mode: credentials must be provided
-    const fullCredentials: FullLoginCredentials = {
-      clientId: config.clientId,
-      clientSecret: config.clientSecret,
-      username: credentials.username || config.username,
-      password: credentials.password || config.password,
-      Language: config.language ?? 0,
-      ThirdPartyToken: config.thirdPartyToken,
-      GMT: config.gmt ?? 3,
-      IsFromNotification: false,
-    };
+    const thirdPartyToken = credentials.thirdPartyToken || config.thirdPartyToken;
+    
+    // Build request body based on auth type
+    let requestBody: Record<string, any>;
+    
+    if (thirdPartyToken) {
+      // Third-party authentication (Firebase, etc.)
+      console.log("[identity:loginUser] using ThirdPartyToken authentication");
+      requestBody = {
+        clientId: config.clientId,
+        clientSecret: config.clientSecret,
+        Language: config.language ?? 0,
+        GMT: config.gmt ?? 3,
+        IsFromNotification: false,
+        ThirdPartyToken: thirdPartyToken,
+        ThirdPartyAuthType: 100, // Firebase auth type
+      };
+    } else {
+      // Standard username/password authentication or anonymous (client credentials only) in AUTO mode
+      const username = credentials.username || config.username;
+      const password = credentials.password || config.password;
 
-    // Validate that we have username and password from somewhere
-    if (!fullCredentials.username || !fullCredentials.password) {
-      throw new Error("Username and password must be provided either in credentials or environment config");
+      if (!username || !password) {
+        if (authMode === "auto") {
+          console.log("[identity:loginUser] AUTO mode anonymous login using clientId/clientSecret only");
+          requestBody = {
+            clientId: config.clientId,
+            clientSecret: config.clientSecret,
+            Language: config.language ?? 0,
+            GMT: config.gmt ?? 3,
+            IsFromNotification: false,
+          };
+        } else {
+          throw new Error("Username/password or ThirdPartyToken must be provided");
+        }
+      } else {
+        console.log("[identity:loginUser] using username/password authentication");
+        requestBody = {
+          clientId: config.clientId,
+          clientSecret: config.clientSecret,
+          username: username,
+          password: password,
+          Language: config.language ?? 0,
+          GMT: config.gmt ?? 3,
+          IsFromNotification: false,
+        };
+      }
     }
+    
+    console.log("[identity:loginUser] requestBody prepared", { 
+      hasClientId: !!(requestBody as any).clientId,
+      hasClientSecret: !!(requestBody as any).clientSecret,
+      hasUsername: !!(requestBody as any).username, 
+      hasPassword: !!(requestBody as any).password, 
+      hasThirdPartyToken: !!(requestBody as any).ThirdPartyToken,
+      hasThirdPartyAuthType: !!(requestBody as any).ThirdPartyAuthType 
+    });
 
-    const response = await postWithoutAuth<LoginResponse>(Api.signIn, fullCredentials);
+    const response = await postWithoutAuth<LoginResponse>(Api.signIn, requestBody);
+  console.log("[identity:loginUser] signIn response", { hasAccessToken: !!response?.access_token, rolesCount: response?.roles?.length || 0, employeeStoreId: response?.employeeStoreId });
 
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
@@ -104,7 +149,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
     
-    // Always save access_token
+  // Always save access_token
     cookieStore.set("access_token", response.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -113,9 +158,23 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
       maxAge: expiresIn,
     });
 
+    // If request included Firebase ID token, cache it as httpOnly cookie for re-login in AUTO mode
+    if (credentials.thirdPartyToken) {
+      console.log("[identity:loginUser] caching tp_id cookie for AUTO re-auth");
+      // Obfuscated third-party token cookie name
+      cookieStore.set("tp_id", credentials.thirdPartyToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 3600, // 1 hour typical Firebase token lifetime
+      });
+    }
+
     // AUTO mode: only save isUser flag based on roles
     if (authMode === "auto") {
       const isUser = !!(response.roles && response.roles.length > 0);
+      console.log("[identity:loginUser] AUTO mode set isUser", { isUser });
       cookieStore.set("isUser", String(isUser), {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
@@ -127,6 +186,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
 
     // STRICT mode: save all user data
     if (authMode === "strict") {
+      console.log("[identity:loginUser] STRICT mode: writing detailed cookies");
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
           httpOnly: false,
@@ -169,6 +229,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
   });
 
   if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
+  console.log("[identity:loginUser] client-side login completed", { status: res.status });
 
   return res.json();
 }
