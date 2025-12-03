@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Represents login credentials for Storeak Identity Service
+ * In STRICT mode: username and password are required
+ * In AUTO mode: username and password are optional (uses env config)
  */
 interface LoginRequest {
-    username: string;
-    password: string;
+    username?: string;
+    password?: string;
+    thirdPartyToken?: string;
 }
-/**
- * User information from login response
- */
 interface User {
     id: string;
     username: string;
@@ -37,7 +37,9 @@ interface LoginResponse {
 /**
  * Logs in a user and retrieves an access token.
  * Automatically saves the token, roles, and store ID to cookies.
- * Only requires username and password - other credentials come from env config.
+ *
+ * STRICT mode: username and password are required in credentials
+ * AUTO mode: username and password are optional - falls back to env config
  */
 declare function loginUser(credentials: LoginRequest): Promise<LoginResponse>;
 
@@ -98,7 +100,7 @@ declare function POST$1(request: NextRequest): Promise<NextResponse<{
     user: User | null;
 }> | NextResponse<{
     success: boolean;
-    error: string;
+    error: any;
 }>>;
 
 /**
@@ -122,7 +124,7 @@ declare function POST(): Promise<NextResponse<{
  * Next.js API handler for customers dropdown
  * Accepts query params: username, FullName
  */
-declare function GET(request: NextRequest): Promise<NextResponse<{
+declare function GET$1(request: NextRequest): Promise<NextResponse<{
     success: boolean;
     data: CustomersDropdownEnvelope;
 }> | NextResponse<{
@@ -130,4 +132,29 @@ declare function GET(request: NextRequest): Promise<NextResponse<{
     error: string;
 }>>;
 
-export { type Customer, type CustomerResponse, type CustomersDropdownEnvelope, GET as CustomersDropdownGET, POST$1 as LoginPOST, POST as LogoutPOST, getCustomersDropdown, loginUser, logoutUser };
+/**
+ * GET /api/auth/token
+ *
+ * Returns access token, checking cookie first, then fetching new one if needed.
+ * This route handler can set cookies (unlike during rendering).
+ *
+ * Usage in your Next.js app:
+ * ```ts
+ * // app/api/auth/token/route.ts
+ * export { GET } from "erp-core/identity/handler/token";
+ * ```
+ */
+declare function GET(request: NextRequest): Promise<NextResponse<{
+    error: string;
+}> | NextResponse<{
+    access_token: any;
+}>>;
+
+type KeepAliveOptions = {
+    endpoint?: string;
+    intervalMs?: number;
+    onError?: (e: any) => void;
+};
+declare function startSessionKeepAlive(options?: KeepAliveOptions): () => void;
+
+export { type Customer, type CustomerResponse, type CustomersDropdownEnvelope, GET$1 as CustomersDropdownGET, POST$1 as LoginPOST, POST as LogoutPOST, GET as TokenGET, getCustomersDropdown, loginUser, logoutUser, startSessionKeepAlive };

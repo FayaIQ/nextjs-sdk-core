@@ -1,15 +1,14 @@
 import {
   toNextResponseFromError
-} from "../chunk-MQK4KZWN.js";
-import "../chunk-TTOGW4EE.js";
-import "../chunk-XPPYGZO6.js";
-import "../chunk-MLKGABMK.js";
+} from "../chunk-4DPJZ6ZU.js";
+import "../chunk-ISX4EOFW.js";
+import "../chunk-35YYLZPN.js";
 
 // src/stores/getStores.ts
 async function getStores() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-LNRTGLFX.js");
-    const { Api } = await import("../api-M7CLY2YV.js");
+    const { getWithAuth } = await import("../fetcher-442K4FV3.js");
+    const { Api } = await import("../api-QG2WVXL6.js");
     return getWithAuth(Api.getStores);
   }
   const res = await fetch(`/api/stores`);

@@ -1,5 +1,5 @@
-import { G as GetBrandsResponse } from '../../getBrands-CtwNxho6.js';
-export { B as Brand, g as getBrands } from '../../getBrands-CtwNxho6.js';
+import { G as GetBrandsResponse } from '../../getBrands-CWOuMjIS.js';
+export { B as Brand, g as getBrands } from '../../getBrands-CWOuMjIS.js';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -13,9 +13,4 @@ declare function GET(request: NextRequest): Promise<NextResponse<GetBrandsRespon
     error: string;
 }>>;
 
-declare const getBrands_GET: typeof GET;
-declare namespace getBrands {
-  export { getBrands_GET as GET };
-}
-
-export { GetBrandsResponse, getBrands as handlers };
+export { GET as GetBrandsGET, GetBrandsResponse };

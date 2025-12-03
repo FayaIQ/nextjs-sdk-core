@@ -139,7 +139,7 @@ export class Api {
   static getOffersCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/Customers`;
   static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
-  static getBrands: string = `${Api.STORES_BASE}/v1/Complex/MenuBrand`;
+  static getBrands: string = `${Api.INVENTORY_BASE}/v1/Complex/MenuBrand`;
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
   // CRM - Clients
@@ -186,6 +186,7 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/wish`;
   }
 
+  
   static deleteWish(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
   }
