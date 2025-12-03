@@ -30,6 +30,182 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// src/utils/crypto.ts
+function getEncryptionKey() {
+  const keyB64 = process.env.COOKIE_CRYPTO_KEY;
+  if (!keyB64) {
+    throw new Error(
+      `COOKIE_CRYPTO_KEY environment variable not set. Generate one with: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+    );
+  }
+  try {
+    const key = Buffer.from(keyB64, "base64");
+    if (key.length !== 32) {
+      throw new Error(`COOKIE_CRYPTO_KEY must be 32 bytes, got ${key.length}`);
+    }
+    return key;
+  } catch (e) {
+    throw new Error(`Invalid COOKIE_CRYPTO_KEY: ${e.message}`);
+  }
+}
+function encrypt(plaintext) {
+  if (typeof window !== "undefined") {
+    throw new Error("encrypt() must only be called server-side");
+  }
+  const key = getEncryptionKey();
+  const iv = (0, import_crypto.randomBytes)(IV_LENGTH);
+  const cipher = (0, import_crypto.createCipheriv)(ALGORITHM, key, iv);
+  const encrypted = Buffer.concat([
+    cipher.update(plaintext, "utf8"),
+    cipher.final()
+  ]);
+  const authTag = cipher.getAuthTag();
+  const combined = Buffer.concat([iv, authTag, encrypted]);
+  return combined.toString("base64");
+}
+function decrypt(encryptedData) {
+  if (typeof window !== "undefined") {
+    throw new Error("decrypt() must only be called server-side");
+  }
+  const key = getEncryptionKey();
+  const normalizeBase64 = (s) => {
+    let t = s.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
+    const pad = t.length % 4;
+    if (pad === 2) t += "==";
+    else if (pad === 3) t += "=";
+    else if (pad === 1) {
+      t = t.slice(0, t.length - 1);
+    }
+    return t;
+  };
+  const combined = Buffer.from(normalizeBase64(encryptedData), "base64");
+  if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) {
+    throw new Error("Invalid encrypted data: too short");
+  }
+  const iv = combined.subarray(0, IV_LENGTH);
+  const authTag = combined.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
+  const ciphertext = combined.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
+  const decipher = (0, import_crypto.createDecipheriv)(ALGORITHM, key, iv);
+  decipher.setAuthTag(authTag);
+  const decrypted = Buffer.concat([
+    decipher.update(ciphertext),
+    decipher.final()
+  ]);
+  return decrypted.toString("utf8");
+}
+function tryDecryptTolerant(encryptedData) {
+  try {
+    return decrypt(encryptedData);
+  } catch (e) {
+    try {
+      const key = getEncryptionKey();
+      const normalizeBase64 = (s) => s.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
+      const combined = Buffer.from(normalizeBase64(encryptedData), "base64");
+      if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) throw e;
+      const iv = combined.subarray(0, IV_LENGTH);
+      const authTag = combined.subarray(combined.length - AUTH_TAG_LENGTH);
+      const ciphertext = combined.subarray(IV_LENGTH, combined.length - AUTH_TAG_LENGTH);
+      const decipher = (0, import_crypto.createDecipheriv)(ALGORITHM, key, iv);
+      decipher.setAuthTag(authTag);
+      const decrypted = Buffer.concat([
+        decipher.update(ciphertext),
+        decipher.final()
+      ]);
+      return decrypted.toString("utf8");
+    } catch (e2) {
+      throw e;
+    }
+  }
+}
+var import_crypto, ALGORITHM, IV_LENGTH, AUTH_TAG_LENGTH;
+var init_crypto = __esm({
+  "src/utils/crypto.ts"() {
+    "use strict";
+    import_crypto = require("crypto");
+    ALGORITHM = "aes-256-gcm";
+    IV_LENGTH = 16;
+    AUTH_TAG_LENGTH = 16;
+  }
+});
+
+// src/utils/cookie.ts
+var cookie_exports = {};
+__export(cookie_exports, {
+  COOKIE_NAMES: () => COOKIE_NAMES,
+  SECURE_COOKIE_OPTIONS: () => SECURE_COOKIE_OPTIONS,
+  deleteCookie: () => deleteCookie,
+  getEncryptedCookie: () => getEncryptedCookie,
+  setEncryptedCookie: () => setEncryptedCookie,
+  setPlainCookie: () => setPlainCookie
+});
+function setEncryptedCookie(cookieStore, name, value, options) {
+  if (typeof window !== "undefined") {
+    throw new Error("setEncryptedCookie must only be called server-side");
+  }
+  const encrypted = encrypt(value);
+  cookieStore.set(name, encrypted, {
+    ...SECURE_COOKIE_OPTIONS,
+    ...options
+  });
+}
+function getEncryptedCookie(cookieStore, name) {
+  if (typeof window !== "undefined") {
+    throw new Error("getEncryptedCookie must only be called server-side");
+  }
+  try {
+    const cookie = cookieStore.get(name);
+    if (!cookie?.value) return null;
+    try {
+      return decrypt(cookie.value);
+    } catch (e) {
+      try {
+        return tryDecryptTolerant(cookie.value);
+      } catch (e2) {
+        throw e;
+      }
+    }
+  } catch (e) {
+    console.error(`[cookie] Failed to decrypt ${name}:`, e);
+    return null;
+  }
+}
+function setPlainCookie(cookieStore, name, value, options) {
+  cookieStore.set(name, value, {
+    ...SECURE_COOKIE_OPTIONS,
+    httpOnly: false,
+    // Allow client-side read for flags
+    ...options
+  });
+}
+function deleteCookie(cookieStore, name) {
+  cookieStore.delete(name);
+}
+var COOKIE_NAMES, SECURE_COOKIE_OPTIONS;
+var init_cookie = __esm({
+  "src/utils/cookie.ts"() {
+    "use strict";
+    init_crypto();
+    COOKIE_NAMES = {
+      /** Encrypted backend access token (httpOnly) */
+      CRF: "crf",
+      /** User authentication flag */
+      IS_USER: "isUser",
+      /** Legacy: third-party token (for migration) */
+      TP_ID: "tp_id",
+      /** Legacy: access token (for migration) */
+      ACCESS_TOKEN: "access_token"
+    };
+    SECURE_COOKIE_OPTIONS = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7
+      // 7 days
+    };
+  }
+});
+
 // src/core/config.ts
 var config_exports = {};
 __export(config_exports, {
@@ -395,18 +571,19 @@ __export(token_exports, {
   default: () => getToken
 });
 async function getTokenImpl() {
-  if (AUTH_CACHE.token && Date.now() < AUTH_CACHE.expiresAt) {
-    return AUTH_CACHE.token;
-  }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");
-    const cookieStore = cookies();
-    const ck = (await cookieStore).get("access_token")?.value;
-    if (ck) {
-      AUTH_CACHE.token = ck;
-      AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
-      return ck;
+    const cookieStore = await cookies();
+    let token = null;
+    try {
+      const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+    } catch {
     }
+    if (!token) {
+      token = cookieStore.get("access_token")?.value || null;
+    }
+    if (token) return token;
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     err.status = 401;
     throw err;
@@ -415,12 +592,16 @@ async function getTokenImpl() {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const ck = cookieStore.get("access_token")?.value;
-      if (ck) {
-        AUTH_CACHE.token = ck;
-        AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
-        return ck;
+      let token = null;
+      try {
+        const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+      } catch {
       }
+      if (!token) {
+        token = cookieStore.get("access_token")?.value || null;
+      }
+      if (token) return token;
     } catch {
     }
   }
@@ -432,11 +613,7 @@ async function getTokenImpl() {
       });
       if (res.ok) {
         const data2 = await res.json();
-        if (data2.access_token) {
-          AUTH_CACHE.token = data2.access_token;
-          AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
-          return data2.access_token;
-        }
+        if (data2.access_token) return data2.access_token;
       }
     } catch {
     }
@@ -468,7 +645,7 @@ async function getTokenImpl() {
   const response = await fetch(Api2.signIn, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    ...AUTH_MODE === "auto" ? { next: { revalidate: 3600 } } : {},
+    ...AUTH_MODE === "auto" ? { next: { revalidate: 0 } } : {},
     body: JSON.stringify({
       ...requestBody,
       ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}
@@ -480,35 +657,21 @@ async function getTokenImpl() {
     );
   }
   const data = await response.json();
+  console.log("Fetched token from core:", data.access_token);
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
   }
-  AUTH_CACHE.token = data.access_token;
-  AUTH_CACHE.expiresAt = Date.now() + (data.expires_in ? data.expires_in * 1e3 : 3600 * 1e3);
   return data.access_token;
 }
 function getToken() {
-  return cachedGetToken();
+  return getTokenImpl();
 }
-var AUTH_MODE, USE_TOKEN_ROUTE, AUTH_CACHE, cachedGetToken;
+var AUTH_MODE, USE_TOKEN_ROUTE;
 var init_token = __esm({
   "src/token.ts"() {
     "use strict";
     AUTH_MODE = process.env.AUTH_MODE || "auto";
     USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
-    if (!globalThis.__AUTH_CACHE) {
-      globalThis.__AUTH_CACHE = {
-        token: null,
-        expiresAt: 0
-      };
-    }
-    AUTH_CACHE = globalThis.__AUTH_CACHE;
-    try {
-      const { cache } = require("react");
-      cachedGetToken = cache(getTokenImpl);
-    } catch {
-      cachedGetToken = getTokenImpl;
-    }
   }
 });
 
@@ -548,7 +711,15 @@ function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()
   if (typeof obj.message === "string" && obj.message) return obj.message;
   if (typeof obj.code === "string" && obj.code) return obj.code;
   if (typeof obj.error === "string" && obj.error) return obj.error;
-  const keysToCheck = ["message", "code", "error", "body", "data", "response", "errors"];
+  const keysToCheck = [
+    "message",
+    "code",
+    "error",
+    "body",
+    "data",
+    "response",
+    "errors"
+  ];
   for (const k of keysToCheck) {
     if (k in obj) {
       const v = obj[k];
@@ -618,10 +789,18 @@ async function apiFetch(url, options = {}) {
         const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
         throw new ApiError(response.status, errorData, derivedMessage);
       }
-      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
     } catch (err) {
       if (err instanceof ApiError) throw err;
-      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
     }
   }
   const contentType = response.headers.get("content-type");
@@ -637,7 +816,9 @@ async function apiFetch(url, options = {}) {
     const parsed = JSON.parse(text);
     return parsed;
   } catch (err) {
-    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
   }
 }
 async function getWithAuth(url, query, headers) {
@@ -718,10 +899,18 @@ async function postWithoutAuth(url, data, headers = {}) {
         const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
         throw new ApiError(response.status, errorData, derivedMessage);
       }
-      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
     } catch (err) {
       if (err instanceof ApiError) throw err;
-      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
     }
   }
   const contentLength = response.headers.get("content-length");
@@ -735,7 +924,9 @@ async function postWithoutAuth(url, data, headers = {}) {
   try {
     return JSON.parse(text);
   } catch (err) {
-    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
   }
 }
 async function putWithAuth(url, data, headers) {

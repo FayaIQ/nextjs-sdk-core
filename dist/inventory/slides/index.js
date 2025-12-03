@@ -1,10 +1,8 @@
-import "../../chunk-3RG5ZIWI.js";
-
 // src/inventory/slides/getSlides.ts
 async function getSlides() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-KMVB5KUG.js");
-    const { Api } = await import("../../api-RO5SLBPK.js");
+    const { getWithAuth } = await import("../../fetcher-KXJP7QMF.js");
+    const { Api } = await import("../../api-QG2WVXL6.js");
     return getWithAuth(Api.getSlideShows);
   }
   const response = await fetch(`/api/slides?`);

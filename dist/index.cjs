@@ -30,6 +30,185 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// src/utils/crypto.ts
+function getEncryptionKey() {
+  const keyB64 = process.env.COOKIE_CRYPTO_KEY;
+  if (!keyB64) {
+    throw new Error(
+      `COOKIE_CRYPTO_KEY environment variable not set. Generate one with: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+    );
+  }
+  try {
+    const key = Buffer.from(keyB64, "base64");
+    if (key.length !== 32) {
+      throw new Error(`COOKIE_CRYPTO_KEY must be 32 bytes, got ${key.length}`);
+    }
+    return key;
+  } catch (e) {
+    throw new Error(`Invalid COOKIE_CRYPTO_KEY: ${e.message}`);
+  }
+}
+function encrypt(plaintext) {
+  if (typeof window !== "undefined") {
+    throw new Error("encrypt() must only be called server-side");
+  }
+  const key = getEncryptionKey();
+  const iv = (0, import_crypto.randomBytes)(IV_LENGTH);
+  const cipher = (0, import_crypto.createCipheriv)(ALGORITHM, key, iv);
+  const encrypted = Buffer.concat([
+    cipher.update(plaintext, "utf8"),
+    cipher.final()
+  ]);
+  const authTag = cipher.getAuthTag();
+  const combined = Buffer.concat([iv, authTag, encrypted]);
+  return combined.toString("base64");
+}
+function decrypt(encryptedData) {
+  if (typeof window !== "undefined") {
+    throw new Error("decrypt() must only be called server-side");
+  }
+  const key = getEncryptionKey();
+  const normalizeBase64 = (s) => {
+    let t = s.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
+    const pad = t.length % 4;
+    if (pad === 2) t += "==";
+    else if (pad === 3) t += "=";
+    else if (pad === 1) {
+      t = t.slice(0, t.length - 1);
+    }
+    return t;
+  };
+  const combined = Buffer.from(normalizeBase64(encryptedData), "base64");
+  if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) {
+    throw new Error("Invalid encrypted data: too short");
+  }
+  const iv = combined.subarray(0, IV_LENGTH);
+  const authTag = combined.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
+  const ciphertext = combined.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
+  const decipher = (0, import_crypto.createDecipheriv)(ALGORITHM, key, iv);
+  decipher.setAuthTag(authTag);
+  const decrypted = Buffer.concat([
+    decipher.update(ciphertext),
+    decipher.final()
+  ]);
+  return decrypted.toString("utf8");
+}
+function tryDecryptTolerant(encryptedData) {
+  try {
+    return decrypt(encryptedData);
+  } catch (e) {
+    try {
+      const key = getEncryptionKey();
+      const normalizeBase64 = (s) => s.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
+      const combined = Buffer.from(normalizeBase64(encryptedData), "base64");
+      if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) throw e;
+      const iv = combined.subarray(0, IV_LENGTH);
+      const authTag = combined.subarray(combined.length - AUTH_TAG_LENGTH);
+      const ciphertext = combined.subarray(IV_LENGTH, combined.length - AUTH_TAG_LENGTH);
+      const decipher = (0, import_crypto.createDecipheriv)(ALGORITHM, key, iv);
+      decipher.setAuthTag(authTag);
+      const decrypted = Buffer.concat([
+        decipher.update(ciphertext),
+        decipher.final()
+      ]);
+      return decrypted.toString("utf8");
+    } catch (e2) {
+      throw e;
+    }
+  }
+}
+function validateEncryptionKey() {
+  getEncryptionKey();
+}
+var import_crypto, ALGORITHM, IV_LENGTH, AUTH_TAG_LENGTH;
+var init_crypto = __esm({
+  "src/utils/crypto.ts"() {
+    "use strict";
+    import_crypto = require("crypto");
+    ALGORITHM = "aes-256-gcm";
+    IV_LENGTH = 16;
+    AUTH_TAG_LENGTH = 16;
+  }
+});
+
+// src/utils/cookie.ts
+var cookie_exports = {};
+__export(cookie_exports, {
+  COOKIE_NAMES: () => COOKIE_NAMES,
+  SECURE_COOKIE_OPTIONS: () => SECURE_COOKIE_OPTIONS,
+  deleteCookie: () => deleteCookie,
+  getEncryptedCookie: () => getEncryptedCookie,
+  setEncryptedCookie: () => setEncryptedCookie,
+  setPlainCookie: () => setPlainCookie
+});
+function setEncryptedCookie(cookieStore, name, value, options) {
+  if (typeof window !== "undefined") {
+    throw new Error("setEncryptedCookie must only be called server-side");
+  }
+  const encrypted = encrypt(value);
+  cookieStore.set(name, encrypted, {
+    ...SECURE_COOKIE_OPTIONS,
+    ...options
+  });
+}
+function getEncryptedCookie(cookieStore, name) {
+  if (typeof window !== "undefined") {
+    throw new Error("getEncryptedCookie must only be called server-side");
+  }
+  try {
+    const cookie = cookieStore.get(name);
+    if (!cookie?.value) return null;
+    try {
+      return decrypt(cookie.value);
+    } catch (e) {
+      try {
+        return tryDecryptTolerant(cookie.value);
+      } catch (e2) {
+        throw e;
+      }
+    }
+  } catch (e) {
+    console.error(`[cookie] Failed to decrypt ${name}:`, e);
+    return null;
+  }
+}
+function setPlainCookie(cookieStore, name, value, options) {
+  cookieStore.set(name, value, {
+    ...SECURE_COOKIE_OPTIONS,
+    httpOnly: false,
+    // Allow client-side read for flags
+    ...options
+  });
+}
+function deleteCookie(cookieStore, name) {
+  cookieStore.delete(name);
+}
+var COOKIE_NAMES, SECURE_COOKIE_OPTIONS;
+var init_cookie = __esm({
+  "src/utils/cookie.ts"() {
+    "use strict";
+    init_crypto();
+    COOKIE_NAMES = {
+      /** Encrypted backend access token (httpOnly) */
+      CRF: "crf",
+      /** User authentication flag */
+      IS_USER: "isUser",
+      /** Legacy: third-party token (for migration) */
+      TP_ID: "tp_id",
+      /** Legacy: access token (for migration) */
+      ACCESS_TOKEN: "access_token"
+    };
+    SECURE_COOKIE_OPTIONS = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7
+      // 7 days
+    };
+  }
+});
+
 // src/core/config.ts
 var config_exports = {};
 __export(config_exports, {
@@ -395,18 +574,19 @@ __export(token_exports, {
   default: () => getToken
 });
 async function getTokenImpl() {
-  if (AUTH_CACHE.token && Date.now() < AUTH_CACHE.expiresAt) {
-    return AUTH_CACHE.token;
-  }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");
-    const cookieStore = cookies();
-    const ck = (await cookieStore).get("access_token")?.value;
-    if (ck) {
-      AUTH_CACHE.token = ck;
-      AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
-      return ck;
+    const cookieStore = await cookies();
+    let token = null;
+    try {
+      const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+    } catch {
     }
+    if (!token) {
+      token = cookieStore.get("access_token")?.value || null;
+    }
+    if (token) return token;
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     err.status = 401;
     throw err;
@@ -415,12 +595,16 @@ async function getTokenImpl() {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const ck = cookieStore.get("access_token")?.value;
-      if (ck) {
-        AUTH_CACHE.token = ck;
-        AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
-        return ck;
+      let token = null;
+      try {
+        const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+      } catch {
       }
+      if (!token) {
+        token = cookieStore.get("access_token")?.value || null;
+      }
+      if (token) return token;
     } catch {
     }
   }
@@ -432,11 +616,7 @@ async function getTokenImpl() {
       });
       if (res.ok) {
         const data2 = await res.json();
-        if (data2.access_token) {
-          AUTH_CACHE.token = data2.access_token;
-          AUTH_CACHE.expiresAt = Date.now() + 1e3 * 60 * 60;
-          return data2.access_token;
-        }
+        if (data2.access_token) return data2.access_token;
       }
     } catch {
     }
@@ -468,7 +648,7 @@ async function getTokenImpl() {
   const response = await fetch(Api2.signIn, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    ...AUTH_MODE === "auto" ? { next: { revalidate: 3600 } } : {},
+    ...AUTH_MODE === "auto" ? { next: { revalidate: 0 } } : {},
     body: JSON.stringify({
       ...requestBody,
       ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}
@@ -480,35 +660,21 @@ async function getTokenImpl() {
     );
   }
   const data = await response.json();
+  console.log("Fetched token from core:", data.access_token);
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
   }
-  AUTH_CACHE.token = data.access_token;
-  AUTH_CACHE.expiresAt = Date.now() + (data.expires_in ? data.expires_in * 1e3 : 3600 * 1e3);
   return data.access_token;
 }
 function getToken() {
-  return cachedGetToken();
+  return getTokenImpl();
 }
-var AUTH_MODE, USE_TOKEN_ROUTE, AUTH_CACHE, cachedGetToken;
+var AUTH_MODE, USE_TOKEN_ROUTE;
 var init_token = __esm({
   "src/token.ts"() {
     "use strict";
     AUTH_MODE = process.env.AUTH_MODE || "auto";
     USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
-    if (!globalThis.__AUTH_CACHE) {
-      globalThis.__AUTH_CACHE = {
-        token: null,
-        expiresAt: 0
-      };
-    }
-    AUTH_CACHE = globalThis.__AUTH_CACHE;
-    try {
-      const { cache } = require("react");
-      cachedGetToken = cache(getTokenImpl);
-    } catch {
-      cachedGetToken = getTokenImpl;
-    }
   }
 });
 
@@ -548,7 +714,15 @@ function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()
   if (typeof obj.message === "string" && obj.message) return obj.message;
   if (typeof obj.code === "string" && obj.code) return obj.code;
   if (typeof obj.error === "string" && obj.error) return obj.error;
-  const keysToCheck = ["message", "code", "error", "body", "data", "response", "errors"];
+  const keysToCheck = [
+    "message",
+    "code",
+    "error",
+    "body",
+    "data",
+    "response",
+    "errors"
+  ];
   for (const k of keysToCheck) {
     if (k in obj) {
       const v = obj[k];
@@ -618,10 +792,18 @@ async function apiFetch(url, options = {}) {
         const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
         throw new ApiError(response.status, errorData, derivedMessage);
       }
-      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
     } catch (err) {
       if (err instanceof ApiError) throw err;
-      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
     }
   }
   const contentType = response.headers.get("content-type");
@@ -637,7 +819,9 @@ async function apiFetch(url, options = {}) {
     const parsed = JSON.parse(text);
     return parsed;
   } catch (err) {
-    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
   }
 }
 async function getWithAuth(url, query, headers) {
@@ -718,10 +902,18 @@ async function postWithoutAuth(url, data, headers = {}) {
         const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
         throw new ApiError(response.status, errorData, derivedMessage);
       }
-      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
     } catch (err) {
       if (err instanceof ApiError) throw err;
-      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
     }
   }
   const contentLength = response.headers.get("content-length");
@@ -735,7 +927,9 @@ async function postWithoutAuth(url, data, headers = {}) {
   try {
     return JSON.parse(text);
   } catch (err) {
-    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
   }
 }
 async function putWithAuth(url, data, headers) {
@@ -854,11 +1048,73 @@ var init_core = __esm({
   }
 });
 
+// src/firebase/config.ts
+var config_exports2 = {};
+__export(config_exports2, {
+  getFirebaseApp: () => getFirebaseApp,
+  getPrimaryApp: () => getPrimaryApp,
+  getSecondaryApp: () => getSecondaryApp
+});
+async function getPrimaryApp() {
+  if (typeof window === "undefined") {
+    throw new Error("getPrimaryApp must be called on the client");
+  }
+  if (primaryApp) return primaryApp;
+  console.log("[firebase:getPrimaryApp] initializing primary app");
+  const { initializeApp, getApps } = await import("firebase/app");
+  const config = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  };
+  const existing = getApps().find((app) => app.name === "[DEFAULT]");
+  primaryApp = existing || initializeApp(config);
+  console.log("[firebase:getPrimaryApp] primary app ready");
+  return primaryApp;
+}
+async function getSecondaryApp() {
+  if (typeof window === "undefined") {
+    throw new Error("getSecondaryApp must be called on the client");
+  }
+  if (secondaryApp) return secondaryApp;
+  console.log("[firebase:getSecondaryApp] initializing secondary app");
+  const { initializeApp, getApps } = await import("firebase/app");
+  const config = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY_SECONDARY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN_SECONDARY,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_SECONDARY,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET_SECONDARY,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID_SECONDARY,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID_SECONDARY
+  };
+  const existing = getApps().find((app) => app.name === "secondary");
+  secondaryApp = existing || initializeApp(config, "secondary");
+  console.log("[firebase:getSecondaryApp] secondary app ready");
+  return secondaryApp;
+}
+async function getFirebaseApp() {
+  return getPrimaryApp();
+}
+var primaryApp, secondaryApp;
+var init_config2 = __esm({
+  "src/firebase/config.ts"() {
+    "use strict";
+    primaryApp = null;
+    secondaryApp = null;
+  }
+});
+
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
   AgeGroup: () => AgeGroup,
   Api: () => Api,
+  COOKIE_NAMES: () => COOKIE_NAMES,
   DeleveryType: () => DeleveryType,
   Gender: () => Gender,
   ItemsFilterParameters: () => ItemsFilterParameters,
@@ -868,16 +1124,31 @@ __export(index_exports, {
   OrdersFilterParameters: () => OrdersFilterParameters,
   PagingParameters: () => PagingParameters,
   PayType: () => PayType,
+  SECURE_COOKIE_OPTIONS: () => SECURE_COOKIE_OPTIONS,
   Sign: () => Sign,
   SortType: () => SortType,
   apiFetch: () => apiFetch,
+  decrypt: () => decrypt,
+  deleteCookie: () => deleteCookie,
+  encrypt: () => encrypt,
   getBrands: () => getBrands,
+  getEncryptedCookie: () => getEncryptedCookie,
+  getFirebaseApp: () => getFirebaseApp,
+  getFirebaseIdToken: () => getFirebaseIdToken,
   getMenus: () => getMenus,
   getOrders: () => getOrders,
+  getPrimaryApp: () => getPrimaryApp,
   getProductInfo: () => getProductInfo,
   getProducts: () => getProducts,
+  getSecondaryApp: () => getSecondaryApp,
   getStoreInfo: () => getStoreInfo,
-  getToken: () => getToken
+  getToken: () => getToken,
+  setEncryptedCookie: () => setEncryptedCookie,
+  setPlainCookie: () => setPlainCookie,
+  signOutFirebase: () => signOutFirebase,
+  startAuthStateSync: () => startAuthStateSync,
+  startPhoneSignIn: () => startPhoneSignIn,
+  validateEncryptionKey: () => validateEncryptionKey
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -1791,10 +2062,263 @@ var OrdersFilterParameters = class _OrdersFilterParameters {
 // src/index.ts
 init_fetcher();
 init_token();
+
+// src/firebase/auth.ts
+function decodeJwtPayload(token) {
+  try {
+    const base64 = token.split(".")[1];
+    if (!base64) return null;
+    const normalized = base64.replace(/-/g, "+").replace(/_/g, "/");
+    const json = typeof window !== "undefined" && typeof atob === "function" ? atob(normalized) : Buffer.from(normalized, "base64").toString();
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+function extractProjectIdFromIss(iss) {
+  if (!iss) return null;
+  const atIdx = iss.indexOf("@");
+  const suffix = ".iam.gserviceaccount.com";
+  if (atIdx > -1 && iss.endsWith(suffix)) {
+    const host = iss.slice(atIdx + 1);
+    const projectId = host.slice(0, host.length - suffix.length);
+    return projectId || null;
+  }
+  return null;
+}
+async function startPhoneSignIn(phoneNumber, options) {
+  if (typeof window === "undefined") {
+    throw new Error("startPhoneSignIn must be called in the browser");
+  }
+  console.log("[firebase:startPhoneSignIn]", { phoneNumber });
+  const { getSecondaryApp: getSecondaryApp2 } = await Promise.resolve().then(() => (init_config2(), config_exports2));
+  const { getFunctions, httpsCallable } = await import("firebase/functions");
+  const secondaryApp2 = await getSecondaryApp2();
+  const functions = getFunctions(secondaryApp2);
+  const sendFunctionName = options?.sendFunctionName || "whatsapp";
+  const sendOtpFunction = httpsCallable(functions, sendFunctionName);
+  try {
+    await sendOtpFunction({
+      phoneNumber,
+      projectName: options?.projectName || "serlab"
+    });
+    console.log("[firebase:startPhoneSignIn] OTP sent via WhatsApp");
+  } catch (error) {
+    console.error("[firebase:startPhoneSignIn] failed to send OTP", error);
+    throw error;
+  }
+  return {
+    confirm: async (code) => {
+      console.log("[firebase:confirmPhoneCode] verifying code");
+      __isSigningIn = true;
+      const verifyFunctionName = options?.verifyFunctionName || "verifySMS";
+      const verifyOtpFunction = httpsCallable(functions, verifyFunctionName);
+      try {
+        const response = await verifyOtpFunction({
+          phoneNumber,
+          code,
+          projectName: options?.projectName || "serlab"
+        });
+        const customToken = response.data.token;
+        console.log("[firebase:confirmPhoneCode] custom token received");
+        const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config2(), config_exports2));
+        const {
+          getAuth,
+          signInWithCustomToken,
+          setPersistence,
+          browserLocalPersistence
+        } = await import("firebase/auth");
+        const primaryApp2 = await getPrimaryApp2();
+        const auth = getAuth(primaryApp2);
+        try {
+          await setPersistence(auth, browserLocalPersistence);
+          console.log("[firebase:confirmPhoneCode] persistence set to LOCAL");
+        } catch (e) {
+          console.warn(
+            "[firebase:confirmPhoneCode] failed to set persistence",
+            e
+          );
+        }
+        try {
+          await signInWithCustomToken(auth, customToken);
+          console.log(
+            "[firebase:confirmPhoneCode] user signed in on primary app"
+          );
+        } catch (e) {
+          const appProjectId = primaryApp2?.options?.projectId;
+          const payload = decodeJwtPayload(customToken) || {};
+          const tokenProjectId = extractProjectIdFromIss(payload.iss) || payload.project_id || null;
+          const code2 = e?.code || e?.message || String(e);
+          const likelyMismatch = code2?.includes("auth/custom-token-mismatch") || code2?.includes("custom-token-mismatch") || code2?.includes("auth/invalid-custom-token") || code2?.includes("invalid-custom-token") || code2?.includes("CREDENTIAL_MISMATCH");
+          if (likelyMismatch) {
+            console.error(
+              "[firebase:confirmPhoneCode] CREDENTIAL_MISMATCH \u2192 token project != client app",
+              {
+                code: code2,
+                clientProjectId: appProjectId,
+                tokenIss: payload.iss,
+                tokenProjectId,
+                tokenAud: payload.aud
+              }
+            );
+            throw new Error(
+              `CREDENTIAL_MISMATCH: Custom token was minted for project "${tokenProjectId ?? "<unknown>"}" but you are signing into "${appProjectId}". Ensure your verifySMS Cloud Function mints tokens using the PRIMARY project's service account (the same project used by getPrimaryApp).`
+            );
+          }
+          throw e;
+        }
+        const { onAuthStateChanged } = await import("firebase/auth");
+        await new Promise((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+              unsubscribe();
+              resolve();
+            }
+          });
+        });
+        const { getIdToken } = await import("firebase/auth");
+        const idToken = await getIdToken(auth.currentUser, true);
+        console.log(
+          "[firebase:confirmPhoneCode] ID token obtained (refreshed)"
+        );
+        __isSigningIn = false;
+        console.log("[firebase:confirmPhoneCode] sign-in flag cleared");
+        return idToken;
+      } catch (error) {
+        console.error("[firebase:confirmPhoneCode] verification failed", error);
+        __isSigningIn = false;
+        throw error;
+      }
+    }
+  };
+}
+async function getFirebaseIdToken(forceRefresh = false) {
+  if (typeof window === "undefined") return null;
+  const [{ getAuth }, { getIdToken }, { getPrimaryApp: getPrimaryApp2 }] = await Promise.all([
+    import("firebase/auth"),
+    import("firebase/auth"),
+    Promise.resolve().then(() => (init_config2(), config_exports2))
+  ]);
+  const app = await getPrimaryApp2();
+  const auth = getAuth(app);
+  const user = auth.currentUser;
+  if (!user) return null;
+  try {
+    console.log("[firebase:getFirebaseIdToken] fetching token", {
+      forceRefresh
+    });
+    return await getIdToken(user, forceRefresh);
+  } catch (e) {
+    console.log("[firebase:getFirebaseIdToken] failed to get ID token", e);
+    return null;
+  }
+}
+async function signOutFirebase() {
+  if (typeof window === "undefined") return;
+  const [{ getAuth, signOut }, { getPrimaryApp: getPrimaryApp2 }] = await Promise.all([
+    import("firebase/auth"),
+    Promise.resolve().then(() => (init_config2(), config_exports2))
+  ]);
+  const app = await getPrimaryApp2();
+  const auth = getAuth(app);
+  console.log("[firebase:signOutFirebase] signing out");
+  await signOut(auth);
+}
+var __authSyncUnsubscribe = null;
+var __authSyncPromise = null;
+var __lastSyncedToken = null;
+var __lastSyncTime = 0;
+var __isSigningIn = false;
+async function startAuthStateSync(options) {
+  if (typeof window === "undefined") return () => {
+  };
+  if (__authSyncPromise) return __authSyncPromise;
+  __authSyncPromise = (async () => {
+    const {
+      getAuth,
+      onIdTokenChanged,
+      getIdToken,
+      setPersistence,
+      browserLocalPersistence
+    } = await import("firebase/auth");
+    const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config2(), config_exports2));
+    const app = await getPrimaryApp2();
+    const auth = getAuth(app);
+    const endpoint = options?.loginEndpoint || "/api/auth/login";
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      console.log("[firebase:startAuthStateSync] persistence set");
+    } catch (e) {
+      console.warn(
+        "[firebase:startAuthStateSync] failed to set persistence",
+        e
+      );
+    }
+    const STORAGE_KEY = "erp_core_last_tp_id";
+    const pushTokenToServer = async (forceRefresh = false) => {
+      if (__isSigningIn) {
+        console.log(
+          "[firebase:startAuthStateSync] skipping sync during sign-in"
+        );
+        return;
+      }
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+        const token = await getIdToken(user, forceRefresh);
+        if (!token) return;
+        const now = Date.now();
+        if (token === __lastSyncedToken && now - __lastSyncTime < 3e3) return;
+        try {
+          const lastPersisted = localStorage.getItem(STORAGE_KEY);
+          if (lastPersisted && lastPersisted === token) {
+            return;
+          }
+        } catch {
+        }
+        await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ thirdPartyToken: token })
+        });
+        __lastSyncedToken = token;
+        __lastSyncTime = now;
+        try {
+          localStorage.setItem(STORAGE_KEY, token);
+        } catch {
+        }
+        console.log("[firebase:startAuthStateSync] token synced \u2192 server");
+      } catch (e) {
+        console.error("[firebase:startAuthStateSync] sync failed", e);
+        options?.onError?.(e);
+      }
+    };
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      if (!user) return;
+      await pushTokenToServer(false);
+    });
+    __authSyncUnsubscribe = () => {
+      try {
+        unsubscribe();
+      } catch {
+      }
+      __authSyncPromise = null;
+      __authSyncUnsubscribe = null;
+    };
+    return __authSyncUnsubscribe;
+  })();
+  return __authSyncPromise;
+}
+
+// src/index.ts
+init_config2();
+init_cookie();
+init_crypto();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AgeGroup,
   Api,
+  COOKIE_NAMES,
   DeleveryType,
   Gender,
   ItemsFilterParameters,
@@ -1804,14 +2328,29 @@ init_token();
   OrdersFilterParameters,
   PagingParameters,
   PayType,
+  SECURE_COOKIE_OPTIONS,
   Sign,
   SortType,
   apiFetch,
+  decrypt,
+  deleteCookie,
+  encrypt,
   getBrands,
+  getEncryptedCookie,
+  getFirebaseApp,
+  getFirebaseIdToken,
   getMenus,
   getOrders,
+  getPrimaryApp,
   getProductInfo,
   getProducts,
+  getSecondaryApp,
   getStoreInfo,
-  getToken
+  getToken,
+  setEncryptedCookie,
+  setPlainCookie,
+  signOutFirebase,
+  startAuthStateSync,
+  startPhoneSignIn,
+  validateEncryptionKey
 });

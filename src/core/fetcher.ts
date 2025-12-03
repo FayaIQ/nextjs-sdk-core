@@ -35,12 +35,16 @@ export class ApiError extends Error {
  * Recursively search for a human-friendly message inside an error-like object.
  * Looks for common fields: message, code, error, body, data, response.
  */
-function findMessageInError(obj: any, depth = 0, seen = new WeakSet()): string | null {
+function findMessageInError(
+  obj: any,
+  depth = 0,
+  seen = new WeakSet()
+): string | null {
   if (obj == null || depth > 6) return null;
   if (typeof obj === "string") {
     // If it's a JSON string, try to parse and search inside
     const s = obj.trim();
-    if ((s.startsWith("{") || s.startsWith("["))) {
+    if (s.startsWith("{") || s.startsWith("[")) {
       try {
         const parsed = JSON.parse(s);
         return findMessageInError(parsed, depth + 1, seen) || obj;
@@ -61,7 +65,15 @@ function findMessageInError(obj: any, depth = 0, seen = new WeakSet()): string |
   if (typeof obj.error === "string" && obj.error) return obj.error;
 
   // Recurse into known containers
-  const keysToCheck = ["message", "code", "error", "body", "data", "response", "errors"];
+  const keysToCheck = [
+    "message",
+    "code",
+    "error",
+    "body",
+    "data",
+    "response",
+    "errors",
+  ];
   for (const k of keysToCheck) {
     if (k in obj) {
       const v = (obj as any)[k];
@@ -113,11 +125,11 @@ export async function apiFetch<T>(
 
   // Prepare headers
   const requestHeaders: Record<string, string> = { ...headers };
-  
+
   if (token) {
     requestHeaders["Authorization"] = `Bearer ${token}`;
   }
-  
+
   if (data && !(data instanceof FormData)) {
     requestHeaders["Content-Type"] = "application/json";
   }
@@ -161,40 +173,52 @@ export async function apiFetch<T>(
         }
 
         // Prefer a clear message coming from the backend body (search nested fields)
-        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        const derivedMessage =
+          findMessageInError(errorData) ||
+          (typeof errorData === "string" ? errorData : response.statusText);
 
         throw new ApiError(response.status, errorData, derivedMessage);
       }
       // Empty error body
-      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
     } catch (err) {
       if (err instanceof ApiError) throw err;
       // Reading response failed - throw generic ApiError
-      throw new ApiError(response.status, null, `Request failed with status ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
     }
   }
 
   // Handle empty response body
   const contentType = response.headers.get("content-type");
   const contentLength = response.headers.get("content-length");
-  
+
   // If content-length is 0 or no content-type, return empty object
   if (contentLength === "0" || (!contentType && response.status === 200)) {
     return {} as T;
   }
-  
+
   // Check if response has content
   const text = await response.text();
   if (!text || text.trim() === "") {
     return {} as T;
   }
-  
+
   try {
     const parsed = JSON.parse(text);
     // Return response as-is without any normalization
     return parsed as T;
   } catch (err) {
-    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
   }
 }
 
@@ -208,12 +232,12 @@ import getToken from "../token";
 /**
  * GET request with automatic authentication
  * Automatically fetches the auth token - no need to pass it manually
- * 
+ *
  * @param url - The API endpoint URL
  * @param query - Optional query parameters
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * const products = await getWithAuth<Product[]>('https://api.example.com/products', { page: 1 });
  */
@@ -227,7 +251,10 @@ export async function getWithAuth<T>(
     token = await getToken();
   } catch (err: any) {
     // Normalize token-related unauthorized errors to ApiError(401)
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+    if (
+      err &&
+      (err.status === 401 || /unauthor/i.test(String(err.message || err)))
+    ) {
       throw new ApiError(401, null, "Unauthorized");
     }
     throw err;
@@ -250,7 +277,7 @@ export async function getWithAuth<T>(
  * @param query - Optional query parameters
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * const data = await getWithoutAuth<PublicData>('/api/public/info', { lang: 'en' });
  */
@@ -269,12 +296,12 @@ export async function getWithoutAuth<T>(
 /**
  * POST request with automatic authentication
  * Automatically fetches the auth token - no need to pass it manually
- * 
+ *
  * @param url - The API endpoint URL
  * @param data - Request body data
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * const order = await postWithAuth<Order>('https://api.example.com/orders', { items: [...] });
  */
@@ -287,7 +314,10 @@ export async function postWithAuth<T>(
   try {
     token = await getToken();
   } catch (err: any) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+    if (
+      err &&
+      (err.status === 401 || /unauthor/i.test(String(err.message || err)))
+    ) {
       throw new ApiError(401, null, "Unauthorized");
     }
     throw err;
@@ -309,7 +339,7 @@ export async function postWithAuth<T>(
  * @param data - Request body data
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * const result = await postWithoutAuth<LoginResponse>('/api/login', { username, password });
  */
@@ -351,16 +381,26 @@ export async function postWithoutAuth<T>(
           }
         }
 
-        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        const derivedMessage =
+          findMessageInError(errorData) ||
+          (typeof errorData === "string" ? errorData : response.statusText);
 
         throw new ApiError(response.status, errorData, derivedMessage);
       }
       // Empty error body
-      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
     } catch (err) {
       if (err instanceof ApiError) throw err;
       // Reading response failed - throw generic ApiError
-      throw new ApiError(response.status, null, `POST request failed: ${response.status} ${response.statusText}`);
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
     }
   }
 
@@ -378,19 +418,21 @@ export async function postWithoutAuth<T>(
   try {
     return JSON.parse(text) as T;
   } catch (err) {
-    throw new Error(`Failed to parse response as JSON: ${text.substring(0, 100)}`);
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
   }
 }
 
 /**
  * PUT request with automatic authentication
  * Automatically fetches the auth token - no need to pass it manually
- * 
+ *
  * @param url - The API endpoint URL
  * @param data - Request body data
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * const updated = await putWithAuth<Product>('https://api.example.com/products/123', { name: 'New Name' });
  */
@@ -403,7 +445,10 @@ export async function putWithAuth<T>(
   try {
     token = await getToken();
   } catch (err: any) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+    if (
+      err &&
+      (err.status === 401 || /unauthor/i.test(String(err.message || err)))
+    ) {
       throw new ApiError(401, null, "Unauthorized");
     }
     throw err;
@@ -425,7 +470,7 @@ export async function putWithAuth<T>(
  * @param data - Request body data
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * const updated = await putWithoutAuth<Settings>('/api/public/settings', { theme: 'dark' });
  */
@@ -444,11 +489,11 @@ export async function putWithoutAuth<T>(
 /**
  * DELETE request with automatic authentication
  * Automatically fetches the auth token - no need to pass it manually
- * 
+ *
  * @param url - The API endpoint URL
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * await deleteWithAuth<void>('https://api.example.com/products/123');
  */
@@ -460,7 +505,10 @@ export async function deleteWithAuth<T>(
   try {
     token = await getToken();
   } catch (err: any) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+    if (
+      err &&
+      (err.status === 401 || /unauthor/i.test(String(err.message || err)))
+    ) {
       throw new ApiError(401, null, "Unauthorized");
     }
     throw err;
@@ -480,7 +528,7 @@ export async function deleteWithAuth<T>(
  * @param url - The API endpoint URL
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * await deleteWithoutAuth<void>('/api/cache/clear');
  */
@@ -497,12 +545,12 @@ export async function deleteWithoutAuth<T>(
 /**
  * PATCH request with automatic authentication
  * Automatically fetches the auth token - no need to pass it manually
- * 
+ *
  * @param url - The API endpoint URL
  * @param data - Request body data (partial update)
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * const patched = await patchWithAuth<Product>('https://api.example.com/products/123', { price: 99.99 });
  */
@@ -515,7 +563,10 @@ export async function patchWithAuth<T>(
   try {
     token = await getToken();
   } catch (err: any) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+    if (
+      err &&
+      (err.status === 401 || /unauthor/i.test(String(err.message || err)))
+    ) {
       throw new ApiError(401, null, "Unauthorized");
     }
     throw err;
@@ -537,7 +588,7 @@ export async function patchWithAuth<T>(
  * @param data - Request body data (partial update)
  * @param headers - Optional additional headers
  * @returns Promise with typed response data
- * 
+ *
  * @example
  * const patched = await patchWithoutAuth<Settings>('/api/public/preferences', { notifications: false });
  */
@@ -552,4 +603,3 @@ export async function patchWithoutAuth<T>(
     headers,
   });
 }
-

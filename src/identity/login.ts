@@ -149,8 +149,29 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
     
-  // Always save access_token
-    cookieStore.set("access_token", response.access_token, {
+    // Import cookie utilities for encrypted storage
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../utils/cookie");
+    
+    // Save encrypted access_token as 'crf' cookie (httpOnly, secure)
+    console.log("[identity:loginUser] saving encrypted crf cookie");
+    try {
+      setEncryptedCookie(cookieStore, COOKIE_NAMES.CRF, response.access_token, {
+        maxAge: expiresIn,
+      });
+    } catch (e) {
+      console.error("[identity:loginUser] Failed to encrypt token - fallback to plain", e);
+      // Fallback to plain cookie if encryption fails (missing COOKIE_CRYPTO_KEY)
+      cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: expiresIn,
+      });
+    }
+    
+    // LEGACY: Keep access_token for backward compatibility during migration
+    cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -158,11 +179,10 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
       maxAge: expiresIn,
     });
 
-    // If request included Firebase ID token, cache it as httpOnly cookie for re-login in AUTO mode
+    // If request included Firebase ID token, cache it for re-login in AUTO mode
     if (credentials.thirdPartyToken) {
       console.log("[identity:loginUser] caching tp_id cookie for AUTO re-auth");
-      // Obfuscated third-party token cookie name
-      cookieStore.set("tp_id", credentials.thirdPartyToken, {
+      cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -175,11 +195,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
     if (authMode === "auto") {
       const isUser = !!(response.roles && response.roles.length > 0);
       console.log("[identity:loginUser] AUTO mode set isUser", { isUser });
-      cookieStore.set("isUser", String(isUser), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
+      setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
         maxAge: expiresIn,
       });
     }

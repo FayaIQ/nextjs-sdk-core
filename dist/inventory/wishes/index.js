@@ -3,14 +3,13 @@ import {
 } from "../../chunk-536WXACQ.js";
 import {
   toNextResponseFromError
-} from "../../chunk-5526RT3R.js";
+} from "../../chunk-Q5UAPQOW.js";
 import {
   deleteWithAuth,
   getWithAuth,
   postWithAuth
-} from "../../chunk-FXVF23HR.js";
-import "../../chunk-MGHQYVNO.js";
-import "../../chunk-3RG5ZIWI.js";
+} from "../../chunk-KVQU4RVP.js";
+import "../../chunk-SK7VZIJK.js";
 
 // src/inventory/wishes/getWishes.ts
 async function getWishes(params) {

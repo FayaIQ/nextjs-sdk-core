@@ -33,16 +33,17 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/firebase/config.ts
 var config_exports = {};
 __export(config_exports, {
-  getFirebaseApp: () => getFirebaseApp
+  getFirebaseApp: () => getFirebaseApp,
+  getPrimaryApp: () => getPrimaryApp,
+  getSecondaryApp: () => getSecondaryApp
 });
-async function getFirebaseApp() {
+async function getPrimaryApp() {
   if (typeof window === "undefined") {
-    throw new Error("getFirebaseApp must be called on the client");
+    throw new Error("getPrimaryApp must be called on the client");
   }
-  console.log("[firebase:getFirebaseApp] initializing app");
-  const [{ initializeApp, getApps }] = await Promise.all([
-    import("firebase/app")
-  ]);
+  if (primaryApp) return primaryApp;
+  console.log("[firebase:getPrimaryApp] initializing primary app");
+  const { initializeApp, getApps } = await import("firebase/app");
   const config = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -53,22 +54,50 @@ async function getFirebaseApp() {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
   };
-  const apps = getApps();
-  console.log("[firebase:getFirebaseApp] app count", { count: apps.length });
-  return apps.length ? apps[0] : initializeApp(config);
+  const existing = getApps().find((app) => app.name === "[DEFAULT]");
+  primaryApp = existing || initializeApp(config);
+  console.log("[firebase:getPrimaryApp] primary app ready");
+  return primaryApp;
 }
+async function getSecondaryApp() {
+  if (typeof window === "undefined") {
+    throw new Error("getSecondaryApp must be called on the client");
+  }
+  if (secondaryApp) return secondaryApp;
+  console.log("[firebase:getSecondaryApp] initializing secondary app");
+  const { initializeApp, getApps } = await import("firebase/app");
+  const config = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY_SECONDARY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN_SECONDARY,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_SECONDARY,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET_SECONDARY,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID_SECONDARY,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID_SECONDARY
+  };
+  const existing = getApps().find((app) => app.name === "secondary");
+  secondaryApp = existing || initializeApp(config, "secondary");
+  console.log("[firebase:getSecondaryApp] secondary app ready");
+  return secondaryApp;
+}
+async function getFirebaseApp() {
+  return getPrimaryApp();
+}
+var primaryApp, secondaryApp;
 var init_config = __esm({
   "src/firebase/config.ts"() {
     "use strict";
+    primaryApp = null;
+    secondaryApp = null;
   }
 });
 
 // src/firebase/index.ts
 var firebase_exports = {};
 __export(firebase_exports, {
-  confirmPhoneCode: () => confirmPhoneCode,
   getFirebaseApp: () => getFirebaseApp,
   getFirebaseIdToken: () => getFirebaseIdToken,
+  getPrimaryApp: () => getPrimaryApp,
+  getSecondaryApp: () => getSecondaryApp,
   signOutFirebase: () => signOutFirebase,
   startAuthStateSync: () => startAuthStateSync,
   startPhoneSignIn: () => startPhoneSignIn
@@ -77,71 +106,149 @@ module.exports = __toCommonJS(firebase_exports);
 init_config();
 
 // src/firebase/auth.ts
-async function startPhoneSignIn(phoneNumber, recaptchaContainerId) {
+function decodeJwtPayload(token) {
+  try {
+    const base64 = token.split(".")[1];
+    if (!base64) return null;
+    const normalized = base64.replace(/-/g, "+").replace(/_/g, "/");
+    const json = typeof window !== "undefined" && typeof atob === "function" ? atob(normalized) : Buffer.from(normalized, "base64").toString();
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+function extractProjectIdFromIss(iss) {
+  if (!iss) return null;
+  const atIdx = iss.indexOf("@");
+  const suffix = ".iam.gserviceaccount.com";
+  if (atIdx > -1 && iss.endsWith(suffix)) {
+    const host = iss.slice(atIdx + 1);
+    const projectId = host.slice(0, host.length - suffix.length);
+    return projectId || null;
+  }
+  return null;
+}
+async function startPhoneSignIn(phoneNumber, options) {
   if (typeof window === "undefined") {
     throw new Error("startPhoneSignIn must be called in the browser");
   }
-  console.log("[firebase:startPhoneSignIn]", { phoneNumber, recaptchaContainerId });
-  const [
-    { getAuth, signInWithPhoneNumber, setPersistence, browserLocalPersistence },
-    { getFirebaseApp: getFirebaseApp2 }
-  ] = await Promise.all([import("firebase/auth"), Promise.resolve().then(() => (init_config(), config_exports))]);
-  const app = await getFirebaseApp2();
-  const auth = getAuth(app);
+  console.log("[firebase:startPhoneSignIn]", { phoneNumber });
+  const { getSecondaryApp: getSecondaryApp2 } = await Promise.resolve().then(() => (init_config(), config_exports));
+  const { getFunctions, httpsCallable } = await import("firebase/functions");
+  const secondaryApp2 = await getSecondaryApp2();
+  const functions = getFunctions(secondaryApp2);
+  const sendFunctionName = options?.sendFunctionName || "whatsapp";
+  const sendOtpFunction = httpsCallable(functions, sendFunctionName);
   try {
-    await setPersistence(auth, browserLocalPersistence);
-    console.log("[firebase:startPhoneSignIn] persistence set to LOCAL");
-  } catch (e) {
-    console.warn("[firebase:startPhoneSignIn] failed to set persistence", e);
-  }
-  const verifier = {
-    type: "recaptcha",
-    verify: () => Promise.resolve(""),
-    clear: () => {
-    },
-    _reset: () => {
-    },
-    _destroy: () => {
-    },
-    _widgetId: 0
-  };
-  const confirmation = await signInWithPhoneNumber(auth, phoneNumber, verifier);
-  console.log("[firebase:startPhoneSignIn] confirmation received");
-  return confirmation;
-}
-async function confirmPhoneCode(confirmation, code) {
-  if (typeof window === "undefined") {
-    throw new Error("confirmPhoneCode must be called in the browser");
-  }
-  console.log("[firebase:confirmPhoneCode] confirming code");
-  const result = await confirmation.confirm(code);
-  const user = result.user;
-  console.log("[firebase:confirmPhoneCode] user signed in", { uid: user?.uid });
-  const { getIdToken } = await import("firebase/auth");
-  const idToken = await getIdToken(user, true);
-  try {
-    const { getIdTokenResult } = await import("firebase/auth");
-    const tokenResult = await getIdTokenResult(user);
-    console.log("[firebase:confirmPhoneCode] token metadata", {
-      expiresAt: tokenResult.expirationTime,
-      issuedAt: tokenResult.issuedAtTime
+    await sendOtpFunction({
+      phoneNumber,
+      projectName: options?.projectName || "serlab"
     });
-  } catch (e) {
-    console.log("[firebase:confirmPhoneCode] idTokenResult unavailable", e);
+    console.log("[firebase:startPhoneSignIn] OTP sent via WhatsApp");
+  } catch (error) {
+    console.error("[firebase:startPhoneSignIn] failed to send OTP", error);
+    throw error;
   }
-  return idToken;
+  return {
+    confirm: async (code) => {
+      console.log("[firebase:confirmPhoneCode] verifying code");
+      __isSigningIn = true;
+      const verifyFunctionName = options?.verifyFunctionName || "verifySMS";
+      const verifyOtpFunction = httpsCallable(functions, verifyFunctionName);
+      try {
+        const response = await verifyOtpFunction({
+          phoneNumber,
+          code,
+          projectName: options?.projectName || "serlab"
+        });
+        const customToken = response.data.token;
+        console.log("[firebase:confirmPhoneCode] custom token received");
+        const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config(), config_exports));
+        const {
+          getAuth,
+          signInWithCustomToken,
+          setPersistence,
+          browserLocalPersistence
+        } = await import("firebase/auth");
+        const primaryApp2 = await getPrimaryApp2();
+        const auth = getAuth(primaryApp2);
+        try {
+          await setPersistence(auth, browserLocalPersistence);
+          console.log("[firebase:confirmPhoneCode] persistence set to LOCAL");
+        } catch (e) {
+          console.warn(
+            "[firebase:confirmPhoneCode] failed to set persistence",
+            e
+          );
+        }
+        try {
+          await signInWithCustomToken(auth, customToken);
+          console.log(
+            "[firebase:confirmPhoneCode] user signed in on primary app"
+          );
+        } catch (e) {
+          const appProjectId = primaryApp2?.options?.projectId;
+          const payload = decodeJwtPayload(customToken) || {};
+          const tokenProjectId = extractProjectIdFromIss(payload.iss) || payload.project_id || null;
+          const code2 = e?.code || e?.message || String(e);
+          const likelyMismatch = code2?.includes("auth/custom-token-mismatch") || code2?.includes("custom-token-mismatch") || code2?.includes("auth/invalid-custom-token") || code2?.includes("invalid-custom-token") || code2?.includes("CREDENTIAL_MISMATCH");
+          if (likelyMismatch) {
+            console.error(
+              "[firebase:confirmPhoneCode] CREDENTIAL_MISMATCH \u2192 token project != client app",
+              {
+                code: code2,
+                clientProjectId: appProjectId,
+                tokenIss: payload.iss,
+                tokenProjectId,
+                tokenAud: payload.aud
+              }
+            );
+            throw new Error(
+              `CREDENTIAL_MISMATCH: Custom token was minted for project "${tokenProjectId ?? "<unknown>"}" but you are signing into "${appProjectId}". Ensure your verifySMS Cloud Function mints tokens using the PRIMARY project's service account (the same project used by getPrimaryApp).`
+            );
+          }
+          throw e;
+        }
+        const { onAuthStateChanged } = await import("firebase/auth");
+        await new Promise((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+              unsubscribe();
+              resolve();
+            }
+          });
+        });
+        const { getIdToken } = await import("firebase/auth");
+        const idToken = await getIdToken(auth.currentUser, true);
+        console.log(
+          "[firebase:confirmPhoneCode] ID token obtained (refreshed)"
+        );
+        __isSigningIn = false;
+        console.log("[firebase:confirmPhoneCode] sign-in flag cleared");
+        return idToken;
+      } catch (error) {
+        console.error("[firebase:confirmPhoneCode] verification failed", error);
+        __isSigningIn = false;
+        throw error;
+      }
+    }
+  };
 }
 async function getFirebaseIdToken(forceRefresh = false) {
   if (typeof window === "undefined") return null;
-  const [{ getAuth }, { getIdToken }] = await Promise.all([
+  const [{ getAuth }, { getIdToken }, { getPrimaryApp: getPrimaryApp2 }] = await Promise.all([
     import("firebase/auth"),
-    import("firebase/auth")
+    import("firebase/auth"),
+    Promise.resolve().then(() => (init_config(), config_exports))
   ]);
-  const auth = getAuth();
+  const app = await getPrimaryApp2();
+  const auth = getAuth(app);
   const user = auth.currentUser;
   if (!user) return null;
   try {
-    console.log("[firebase:getFirebaseIdToken] fetching token", { forceRefresh });
+    console.log("[firebase:getFirebaseIdToken] fetching token", {
+      forceRefresh
+    });
     return await getIdToken(user, forceRefresh);
   } catch (e) {
     console.log("[firebase:getFirebaseIdToken] failed to get ID token", e);
@@ -150,85 +257,106 @@ async function getFirebaseIdToken(forceRefresh = false) {
 }
 async function signOutFirebase() {
   if (typeof window === "undefined") return;
-  const { getAuth, signOut } = await import("firebase/auth");
-  const auth = getAuth();
+  const [{ getAuth, signOut }, { getPrimaryApp: getPrimaryApp2 }] = await Promise.all([
+    import("firebase/auth"),
+    Promise.resolve().then(() => (init_config(), config_exports))
+  ]);
+  const app = await getPrimaryApp2();
+  const auth = getAuth(app);
   console.log("[firebase:signOutFirebase] signing out");
   await signOut(auth);
 }
 var __authSyncUnsubscribe = null;
-var __authSyncStarted = false;
+var __authSyncPromise = null;
 var __lastSyncedToken = null;
 var __lastSyncTime = 0;
-var TOKEN_SYNC_DEBOUNCE = 3e3;
+var __isSigningIn = false;
 async function startAuthStateSync(options) {
-  if (typeof window === "undefined") {
-    console.warn("[firebase:startAuthStateSync] cannot run on server");
-    return () => {
-    };
-  }
-  if (__authSyncStarted && __authSyncUnsubscribe) {
-    return __authSyncUnsubscribe;
-  }
-  const {
-    getAuth,
-    onIdTokenChanged,
-    getIdToken,
-    setPersistence,
-    browserLocalPersistence
-  } = await import("firebase/auth");
-  const auth = getAuth();
-  const endpoint = options?.loginEndpoint || "/api/auth/login";
-  try {
-    await setPersistence(auth, browserLocalPersistence);
-    console.log("[firebase:startAuthStateSync] persistence = browserLocalPersistence");
-  } catch (e) {
-    console.warn("[firebase:startAuthStateSync] failed to set persistence", e);
-  }
-  const pushTokenToServer = async () => {
+  if (typeof window === "undefined") return () => {
+  };
+  if (__authSyncPromise) return __authSyncPromise;
+  __authSyncPromise = (async () => {
+    const {
+      getAuth,
+      onIdTokenChanged,
+      getIdToken,
+      setPersistence,
+      browserLocalPersistence
+    } = await import("firebase/auth");
+    const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config(), config_exports));
+    const app = await getPrimaryApp2();
+    const auth = getAuth(app);
+    const endpoint = options?.loginEndpoint || "/api/auth/login";
     try {
-      const user = auth.currentUser;
-      if (!user) return;
-      const token = await getIdToken(user, true);
-      if (!token) return;
-      const now = Date.now();
-      if (token === __lastSyncedToken && now - __lastSyncTime < TOKEN_SYNC_DEBOUNCE) {
-        console.log("[firebase:startAuthStateSync] skip duplicate token sync");
+      await setPersistence(auth, browserLocalPersistence);
+      console.log("[firebase:startAuthStateSync] persistence set");
+    } catch (e) {
+      console.warn(
+        "[firebase:startAuthStateSync] failed to set persistence",
+        e
+      );
+    }
+    const STORAGE_KEY = "erp_core_last_tp_id";
+    const pushTokenToServer = async (forceRefresh = false) => {
+      if (__isSigningIn) {
+        console.log(
+          "[firebase:startAuthStateSync] skipping sync during sign-in"
+        );
         return;
       }
-      await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ thirdPartyToken: token })
-      });
-      __lastSyncedToken = token;
-      __lastSyncTime = now;
-      console.log("[firebase:startAuthStateSync] token synced \u2192 server");
-    } catch (e) {
-      console.error("[firebase:startAuthStateSync] sync failed", e);
-      options?.onError?.(e);
-    }
-  };
-  const unsubscribe = onIdTokenChanged(auth, async (user) => {
-    if (!user) return;
-    await pushTokenToServer();
-  });
-  if (options?.refreshOnInit) pushTokenToServer();
-  __authSyncUnsubscribe = () => {
-    try {
-      unsubscribe();
-    } catch {
-    }
-    __authSyncStarted = false;
-    __authSyncUnsubscribe = null;
-  };
-  __authSyncStarted = true;
-  return __authSyncUnsubscribe;
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+        const token = await getIdToken(user, forceRefresh);
+        if (!token) return;
+        const now = Date.now();
+        if (token === __lastSyncedToken && now - __lastSyncTime < 3e3) return;
+        try {
+          const lastPersisted = localStorage.getItem(STORAGE_KEY);
+          if (lastPersisted && lastPersisted === token) {
+            return;
+          }
+        } catch {
+        }
+        await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ thirdPartyToken: token })
+        });
+        __lastSyncedToken = token;
+        __lastSyncTime = now;
+        try {
+          localStorage.setItem(STORAGE_KEY, token);
+        } catch {
+        }
+        console.log("[firebase:startAuthStateSync] token synced \u2192 server");
+      } catch (e) {
+        console.error("[firebase:startAuthStateSync] sync failed", e);
+        options?.onError?.(e);
+      }
+    };
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      if (!user) return;
+      await pushTokenToServer(false);
+    });
+    __authSyncUnsubscribe = () => {
+      try {
+        unsubscribe();
+      } catch {
+      }
+      __authSyncPromise = null;
+      __authSyncUnsubscribe = null;
+    };
+    return __authSyncUnsubscribe;
+  })();
+  return __authSyncPromise;
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  confirmPhoneCode,
   getFirebaseApp,
   getFirebaseIdToken,
+  getPrimaryApp,
+  getSecondaryApp,
   signOutFirebase,
   startAuthStateSync,
   startPhoneSignIn
