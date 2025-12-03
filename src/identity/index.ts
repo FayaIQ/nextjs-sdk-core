@@ -9,3 +9,7 @@ export * from "./users";
 export { POST as LoginPOST } from "./handler/login";
 export { POST as LogoutPOST } from "./handler/logout";
 export { GET as CustomersDropdownGET } from "./handler/getCustomersDropdown";
+export { GET as TokenGET } from "./handler/token";
+
+// Client helpers
+export { startSessionKeepAlive } from "./client";
