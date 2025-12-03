@@ -5,16 +5,15 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-FUQGWFO5.js";
+} from "../chunk-DB77AVUC.js";
 import {
   Api
 } from "../chunk-536WXACQ.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-FXVF23HR.js";
-import "../chunk-MGHQYVNO.js";
-import "../chunk-3RG5ZIWI.js";
+} from "../chunk-ISX4EOFW.js";
+import "../chunk-35YYLZPN.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -85,7 +84,23 @@ async function loginUser(credentials) {
     }
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
-    cookieStore.set("access_token", response.access_token, {
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-UIF5DEUF.js");
+    console.log("[identity:loginUser] saving encrypted crf cookie");
+    try {
+      setEncryptedCookie(cookieStore, COOKIE_NAMES.CRF, response.access_token, {
+        maxAge: expiresIn
+      });
+    } catch (e) {
+      console.error("[identity:loginUser] Failed to encrypt token - fallback to plain", e);
+      cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: expiresIn
+      });
+    }
+    cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -94,7 +109,7 @@ async function loginUser(credentials) {
     });
     if (credentials.thirdPartyToken) {
       console.log("[identity:loginUser] caching tp_id cookie for AUTO re-auth");
-      cookieStore.set("tp_id", credentials.thirdPartyToken, {
+      cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -106,11 +121,7 @@ async function loginUser(credentials) {
     if (authMode === "auto") {
       const isUser = !!(response.roles && response.roles.length > 0);
       console.log("[identity:loginUser] AUTO mode set isUser", { isUser });
-      cookieStore.set("isUser", String(isUser), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
+      setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
         maxAge: expiresIn
       });
     }
@@ -176,8 +187,8 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-KMVB5KUG.js");
-    const { Api: Api2 } = await import("../api-RO5SLBPK.js");
+    const { getWithAuth } = await import("../fetcher-442K4FV3.js");
+    const { Api: Api2 } = await import("../api-QG2WVXL6.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
     const fullNameTrimmed2 = FullName !== void 0 ? String(FullName).trim() : "";
@@ -214,6 +225,40 @@ async function POST(request) {
       thirdPartyToken: body.thirdPartyToken ?? config.thirdPartyToken
     };
     console.log("[identity:handler:login] credentials prepared", { hasUsername: !!credentials.username, hasPassword: !!credentials.password, hasThirdPartyToken: !!credentials.thirdPartyToken });
+    if (body.thirdPartyToken) {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      let hasValidToken = false;
+      try {
+        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-UIF5DEUF.js");
+        const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+        const existingTpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
+        if (existingToken && existingTpId === body.thirdPartyToken) {
+          hasValidToken = true;
+        }
+      } catch {
+      }
+      if (!hasValidToken) {
+        const existingToken = cookieStore.get("access_token")?.value;
+        const existingTpId = cookieStore.get("tp_id")?.value;
+        if (existingToken && existingTpId === body.thirdPartyToken) {
+          hasValidToken = true;
+        }
+      }
+      if (hasValidToken) {
+        console.log("[identity:handler:login] already logged in with same thirdPartyToken, skipping re-auth");
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Already logged in",
+            employeeStoreId: null,
+            roles: [],
+            user: null
+          },
+          { status: 200 }
+        );
+      }
+    }
     const response = await loginUser(credentials);
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
     if (body.thirdPartyToken) {
@@ -315,8 +360,12 @@ async function GET2(request) {
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
+    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-UIF5DEUF.js");
     console.log("[identity:handler:token] GET checking existing token");
-    const existingToken = cookieStore.get("access_token")?.value;
+    let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    if (!existingToken) {
+      existingToken = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+    }
     if (existingToken) {
       console.log("[identity:handler:token] returning existing token from cookie");
       return NextResponse4.json(
@@ -329,7 +378,7 @@ async function GET2(request) {
         }
       );
     }
-    const tpId = cookieStore.get("tp_id")?.value;
+    const tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
     const authConfig = getAuthConfig();
     const requestBody = {
       clientId: authConfig.clientId,
@@ -369,9 +418,24 @@ async function GET2(request) {
         { status: 500 }
       );
     }
-    console.log("[identity:handler:token] new token obtained, setting cookie");
+    console.log("[identity:handler:token] new token obtained, setting encrypted cookie");
     const res = NextResponse4.json({ access_token: data.access_token });
-    res.cookies.set("access_token", data.access_token, {
+    try {
+      const { setEncryptedCookie: setEncCookie, COOKIE_NAMES: CN } = await import("../cookie-UIF5DEUF.js");
+      const { encrypt } = await import("../crypto-J736LS26.js");
+      const encrypted = encrypt(data.access_token);
+      res.cookies.set(CN.CRF, encrypted, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 3600
+        // 1 hour
+      });
+    } catch (e) {
+      console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
+    }
+    res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

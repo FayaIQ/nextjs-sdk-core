@@ -9,71 +9,57 @@ export type TokenResponse = {
 const AUTH_MODE = process.env.AUTH_MODE || "auto"; // auto | strict
 const USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
 
-// -------------------------------
-// GLOBAL TOKEN CACHE (Fixes login spam)
-// -------------------------------
-if (!(globalThis as any).__AUTH_CACHE) {
-  (globalThis as any).__AUTH_CACHE = {
-    token: null as string | null,
-    expiresAt: 0
-  };
-}
-const AUTH_CACHE = (globalThis as any).__AUTH_CACHE;
-
-// -------------------------------
-// React.cache wrapper (per-request memo)
-// -------------------------------
-let cachedGetToken: () => Promise<string>;
-try {
-  const { cache } = require("react");
-  cachedGetToken = cache(getTokenImpl);
-} catch {
-  cachedGetToken = getTokenImpl;
-}
-
 // ------------------------------------------------
-// INTERNAL TOKEN LOGIC (with global caching)
+// SINGLE SOURCE OF TRUTH — NO CACHING
 // ------------------------------------------------
 async function getTokenImpl(): Promise<string> {
-  // 🟢 1. if token exists globally and is not expired → reuse it
-  if (AUTH_CACHE.token && Date.now() < AUTH_CACHE.expiresAt) {
-    return AUTH_CACHE.token;
-  }
-
-  // 🟢 2. STRICT MODE → token must exist in cookie
+  // 🟢 1. STRICT MODE → token must exist in cookie (SSR)
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");
-    const cookieStore = cookies();
-    const ck = (await cookieStore).get("access_token")?.value;
-
-    if (ck) {
-      // store in global cache for next calls
-      AUTH_CACHE.token = ck;
-      AUTH_CACHE.expiresAt = Date.now() + 1000 * 60 * 60; // assume 1hr
-      return ck;
+    const cookieStore = await cookies();
+    
+    // Try encrypted crf first
+    let token: string | null = null;
+    try {
+      const { getEncryptedCookie, COOKIE_NAMES } = await import("./utils/cookie");
+      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    } catch {}
+    
+    // Fallback to legacy access_token
+    if (!token) {
+      token = cookieStore.get("access_token")?.value || null;
     }
+
+    if (token) return token;
 
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     (err as any).status = 401;
     throw err;
   }
 
-  // 🟢 3. AUTO MODE → check if token exists via SSR cookies
+  // 🟢 2. AUTO MODE → SSR cookie check
   if (typeof window === "undefined") {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const ck = cookieStore.get("access_token")?.value;
-
-      if (ck) {
-        AUTH_CACHE.token = ck;
-        AUTH_CACHE.expiresAt = Date.now() + 1000 * 60 * 60;
-        return ck;
+      
+      // Try encrypted crf first
+      let token: string | null = null;
+      try {
+        const { getEncryptedCookie, COOKIE_NAMES } = await import("./utils/cookie");
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+      } catch {}
+      
+      // Fallback to legacy access_token
+      if (!token) {
+        token = cookieStore.get("access_token")?.value || null;
       }
+
+      if (token) return token;
     } catch {}
   }
 
-  // 🟢 4. (CLIENT ONLY) use /api/auth/token route to set cookie
+  // 🟢 3. CLIENT → use /api/auth/token if enabled
   if (USE_TOKEN_ROUTE && typeof window !== "undefined") {
     try {
       const baseUrl =
@@ -87,28 +73,23 @@ async function getTokenImpl(): Promise<string> {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.access_token) {
-          AUTH_CACHE.token = data.access_token;
-          AUTH_CACHE.expiresAt = Date.now() + 1000 * 60 * 60;
-          return data.access_token;
-        }
+        if (data.access_token) return data.access_token;
       }
     } catch {}
   }
 
-  // 🟢 5. NO TOKEN FOUND → perform sign-in ONCE
+  // 🟢 4. FULL LOGIN (NO CACHE)
   const { getAuthConfig } = await import("./core/config");
   const { Api } = await import("./api/api");
 
   const authConfig = getAuthConfig();
 
-  // Third-party token
   let thirdPartyToken: string | undefined = undefined;
 
   if (typeof window === "undefined") {
     try {
       const { cookies } = await import("next/headers");
-      const cookieStore =await cookies();
+      const cookieStore = await cookies();
       thirdPartyToken = cookieStore.get("tp_id")?.value;
     } catch {}
   }
@@ -130,7 +111,7 @@ async function getTokenImpl(): Promise<string> {
   const response = await fetch(Api.signIn, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    ...(AUTH_MODE === "auto" ? { next: { revalidate: 3600 } } : {}),
+    ...(AUTH_MODE === "auto" ? { next: { revalidate: 0 } } : {}),
     body: JSON.stringify({
       ...requestBody,
       ...(requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}),
@@ -149,17 +130,12 @@ async function getTokenImpl(): Promise<string> {
     throw new Error("Token missing in authentication response");
   }
 
-  // 🟢 6. SAVE TOKEN IN GLOBAL CACHE
-  AUTH_CACHE.token = data.access_token;
-  AUTH_CACHE.expiresAt =
-    Date.now() + (data.expires_in ? data.expires_in * 1000 : 3600 * 1000);
-
   return data.access_token;
 }
 
 // -------------------------------
-// PUBLIC API
+// PUBLIC API (NO MEMOIZATION)
 // -------------------------------
 export default function getToken(): Promise<string> {
-  return cachedGetToken();
+  return getTokenImpl();
 }

@@ -19,10 +19,19 @@ export async function GET(request: NextRequest) {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     
+    // Import cookie utilities
+    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
+    
     console.log("[identity:handler:token] GET checking existing token");
     
-    // Check existing token first
-    const existingToken = cookieStore.get("access_token")?.value;
+    // Check encrypted crf cookie first
+    let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    
+    // Fallback to legacy access_token if crf not found
+    if (!existingToken) {
+      existingToken = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+    }
+    
     if (existingToken) {
       console.log("[identity:handler:token] returning existing token from cookie");
       // Return with cache headers to prevent repeated calls
@@ -37,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Try to use tp_id for re-auth
-    const tpId = cookieStore.get("tp_id")?.value;
+    const tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
     
     const authConfig = getAuthConfig();
     const requestBody: Record<string, any> = {
@@ -86,11 +95,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log("[identity:handler:token] new token obtained, setting cookie");
+    console.log("[identity:handler:token] new token obtained, setting encrypted cookie");
 
-    // Return response with cookie
+    // Return response with encrypted cookie
     const res = NextResponse.json({ access_token: data.access_token });
-    res.cookies.set("access_token", data.access_token, {
+    
+    // Set encrypted crf cookie
+    try {
+      const { setEncryptedCookie: setEncCookie, COOKIE_NAMES: CN } = await import("../../utils/cookie");
+      const { encrypt } = await import("../../utils/crypto");
+      const encrypted = encrypt(data.access_token);
+      
+      res.cookies.set(CN.CRF, encrypted, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 3600, // 1 hour
+      });
+    } catch (e) {
+      console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
+    }
+    
+    // LEGACY: Keep access_token for backward compatibility
+    res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

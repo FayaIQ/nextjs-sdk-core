@@ -1,10 +1,9 @@
 import {
   getMenus
-} from "../../chunk-MHPHDXXA.js";
+} from "../../chunk-4ODCYNML.js";
 import {
   ItemsFilterParameters
 } from "../../chunk-Q2Y4LIEU.js";
-import "../../chunk-3RG5ZIWI.js";
 
 // src/inventory/menus/handler/getMenus.ts
 import { NextResponse } from "next/server";
@@ -25,7 +24,7 @@ async function GET(request) {
 async function getMenusDropdown() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-RO5SLBPK.js");
+    const { Api } = await import("../../api-QG2WVXL6.js");
     return getWithAuth(`${Api.getMenusDropdown}`, {});
   } else {
     return fetch(`/api/menus/dropdown`).then((res) => {
@@ -51,8 +50,8 @@ async function GET2(request) {
 // src/inventory/menus/getMenuById.ts
 async function getMenuById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-KMVB5KUG.js");
-    const { Api } = await import("../../api-RO5SLBPK.js");
+    const { getWithAuth } = await import("../../fetcher-442K4FV3.js");
+    const { Api } = await import("../../api-QG2WVXL6.js");
     return getWithAuth(Api.getMenuById(id));
   }
   const res = await fetch(`/api/menus/${id}`);

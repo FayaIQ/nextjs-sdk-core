@@ -1,4 +1,4 @@
-import { g as OrderItem } from '../../order-models-nbgqiu1i.js';
+import { g as OrderItem } from '../../order-models-Dqv0Jc_o.js';
 import { NextRequest, NextResponse } from 'next/server';
 
 declare function getOrderItem(id: string | number, itemId: string | number): Promise<OrderItem>;

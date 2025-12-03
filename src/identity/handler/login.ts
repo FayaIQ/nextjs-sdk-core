@@ -31,8 +31,49 @@ export async function POST(request: NextRequest) {
     };
     console.log("[identity:handler:login] credentials prepared", { hasUsername: !!credentials.username, hasPassword: !!credentials.password, hasThirdPartyToken: !!credentials.thirdPartyToken });
 
+    // ✅ Server-side dedupe: avoid re-signing if already logged in with same thirdPartyToken
+    if (body.thirdPartyToken) {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      
+      // Check if we have a valid access_token and matching tp_id
+      let hasValidToken = false;
+      try {
+        const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
+        const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+        const existingTpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
+        
+        if (existingToken && existingTpId === body.thirdPartyToken) {
+          hasValidToken = true;
+        }
+      } catch {}
+      
+      // Fallback to legacy cookies
+      if (!hasValidToken) {
+        const existingToken = cookieStore.get("access_token")?.value;
+        const existingTpId = cookieStore.get("tp_id")?.value;
+        if (existingToken && existingTpId === body.thirdPartyToken) {
+          hasValidToken = true;
+        }
+      }
+      
+      if (hasValidToken) {
+        console.log("[identity:handler:login] already logged in with same thirdPartyToken, skipping re-auth");
+        return NextResponse.json(
+          {
+            success: true,
+            message: "Already logged in",
+            employeeStoreId: null,
+            roles: [],
+            user: null,
+          },
+          { status: 200 }
+        );
+      }
+    }
+
     // Perform login (this automatically saves token, roles, and storeId to cookies)
-  const response = await loginUser(credentials);
+    const response = await loginUser(credentials);
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
 
     // If login provided a thirdPartyToken, persist it for AUTO mode re-auth

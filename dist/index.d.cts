@@ -1,12 +1,15 @@
 export { g as getStoreInfo } from './storeInfo-P_uWqRYc.cjs';
 export { a as getProductInfo, g as getProducts } from './getProductInfo-DqdckrpB.cjs';
 export { g as getMenus } from './getMenus-DneqpZEa.cjs';
-export { g as getOrders } from './getOrders-Bkhx8SPP.cjs';
+export { g as getOrders } from './getOrders-CBVmsvgl.cjs';
 export { g as getBrands } from './getBrands-CWOuMjIS.cjs';
 export { A as Address, C as Category, b as City, c as ColorType, a as Country, D as District, P as Product, S as SizeType, d as StoreType, U as UnitInfo } from './types-BlK7R_r9.cjs';
 export { A as AgeGroup, G as Gender, I as ItemsFilterParameters, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from './filter-models-B4kRw7Xr.cjs';
-export { C as CurrentPhase, D as DeleveryType, h as Order, d as OrderAddress, f as OrderClient, e as OrderCustomer, i as OrderDetail, g as OrderItem, c as OrderPagingParameters, b as OrderType, a as OrdersApiResponse, O as OrdersFilterParameters, P as PayType, k as PostOrderAddressRequest, j as PostOrderItemRequest, l as PostOrderRequest, S as Sign } from './order-models-nbgqiu1i.cjs';
+export { C as CurrentPhase, D as DeleveryType, h as Order, b as OrderAddress, f as OrderClient, e as OrderCustomer, i as OrderDetail, g as OrderItem, d as OrderPagingParameters, c as OrderType, a as OrdersApiResponse, O as OrdersFilterParameters, P as PayType, k as PostOrderAddressRequest, j as PostOrderItemRequest, l as PostOrderRequest, S as Sign } from './order-models-Dqv0Jc_o.cjs';
 export { a as apiFetch } from './index-BRffoVUg.cjs';
+export { StartPhoneSignInResult, WhatsAppOTPOptions, getFirebaseApp, getFirebaseIdToken, getPrimaryApp, getSecondaryApp, signOutFirebase, startAuthStateSync, startPhoneSignIn } from './firebase/index.cjs';
+import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
+import 'firebase/app';
 
 declare class Api {
     private static LOCAL_BASE;
@@ -166,4 +169,71 @@ type TokenResponse = {
 };
 declare function getToken(): Promise<string>;
 
-export { Api, type AuthConfig, type TokenResponse, getToken };
+/**
+ * Secure cookie utilities for encrypted token storage.
+ * Server-side only - works with Next.js cookies API.
+ */
+
+/**
+ * Cookie names used by the SDK
+ */
+declare const COOKIE_NAMES: {
+    /** Encrypted backend access token (httpOnly) */
+    readonly CRF: "crf";
+    /** User authentication flag */
+    readonly IS_USER: "isUser";
+    /** Legacy: third-party token (for migration) */
+    readonly TP_ID: "tp_id";
+    /** Legacy: access token (for migration) */
+    readonly ACCESS_TOKEN: "access_token";
+};
+/**
+ * Default cookie options for secure httpOnly cookies
+ */
+declare const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie>;
+/**
+ * Set an encrypted cookie value.
+ * Server-side only.
+ */
+declare function setEncryptedCookie(cookieStore: any, name: string, value: string, options?: Partial<ResponseCookie>): void;
+/**
+ * Get and decrypt a cookie value.
+ * Server-side only.
+ * Returns null if cookie doesn't exist or decryption fails.
+ */
+declare function getEncryptedCookie(cookieStore: any, name: string): string | null;
+/**
+ * Set a plain (non-encrypted) cookie.
+ * Use for non-sensitive flags like isUser.
+ */
+declare function setPlainCookie(cookieStore: any, name: string, value: string, options?: Partial<ResponseCookie>): void;
+/**
+ * Delete a cookie by name.
+ */
+declare function deleteCookie(cookieStore: any, name: string): void;
+
+/**
+ * AES-256-GCM encryption utilities for secure cookie storage.
+ * Server-side only - uses Node.js crypto module.
+ *
+ * Requires env var: COOKIE_CRYPTO_KEY (base64-encoded 32 bytes)
+ *
+ * Generate a key: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+ */
+/**
+ * Encrypt a string using AES-256-GCM.
+ * Returns base64-encoded string: iv:authTag:ciphertext
+ */
+declare function encrypt(plaintext: string): string;
+/**
+ * Decrypt a string encrypted with encrypt().
+ * Expects base64-encoded string: iv:authTag:ciphertext
+ */
+declare function decrypt(encryptedData: string): string;
+/**
+ * Validate that encryption key is configured correctly.
+ * Throws if key is missing or invalid.
+ */
+declare function validateEncryptionKey(): void;
+
+export { Api, type AuthConfig, COOKIE_NAMES, SECURE_COOKIE_OPTIONS, type TokenResponse, decrypt, deleteCookie, encrypt, getEncryptedCookie, getToken, setEncryptedCookie, setPlainCookie, validateEncryptionKey };
