@@ -26,10 +26,9 @@
     "QUICK_START.md"
   ],
   "scripts": {
-  "build": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/ src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/gps/locations/index.ts src/identity/application/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts --format cjs,esm --dts",
-  "build:ci": "NODE_OPTIONS=--max-old-space-size=8192 npm run build",
-    "dev": "tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts --format cjs,esm --dts --watch",
-  "prepare": "NODE_OPTIONS=--max-old-space-size=8192 npm run build",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/gps/locations/index.ts src/identity/application/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts src/firebase/index.ts --format cjs,esm --dts --dts-resolve",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts src/firebase/index.ts --format cjs,esm --dts --dts-resolve --watch",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "exports": {
@@ -93,8 +92,6 @@
       "import": "./dist/identity/application/*.js",
       "require": "./dist/identity/application/*.cjs"
     },
-    
-
     "./inventory/orders": {
       "types": "./dist/inventory/orders/index.d.ts",
       "import": "./dist/inventory/orders/index.js",
@@ -180,6 +177,26 @@
       "import": "./dist/inventory/itemSource/*.js",
       "require": "./dist/inventory/itemSource/*.cjs"
     },
+    "./inventory/brands": {
+      "types": "./dist/inventory/brands/index.d.ts",
+      "import": "./dist/inventory/brands/index.js",
+      "require": "./dist/inventory/brands/index.cjs"
+    },
+    "./inventory/brands/*": {
+      "types": "./dist/inventory/brands/*.d.ts",
+      "import": "./dist/inventory/brands/*.js",
+      "require": "./dist/inventory/brands/*.cjs"
+    },
+    "./inventory/wishes": {
+      "types": "./dist/inventory/wishes/index.d.ts",
+      "import": "./dist/inventory/wishes/index.js",
+      "require": "./dist/inventory/wishes/index.cjs"
+    },
+    "./inventory/wishes/*": {
+      "types": "./dist/inventory/wishes/*.d.ts",
+      "import": "./dist/inventory/wishes/*.js",
+      "require": "./dist/inventory/wishes/*.cjs"
+    },
     "./inventory/orderItem": {
       "types": "./dist/inventory/orderItem/index.d.ts",
       "import": "./dist/inventory/orderItem/index.js",
@@ -209,8 +226,7 @@
       "types": "./dist/crm/*.d.ts",
       "import": "./dist/crm/*.js",
       "require": "./dist/crm/*.cjs"
-    }
-    ,
+    },
     "./stores": {
       "types": "./dist/stores/index.d.ts",
       "import": "./dist/stores/index.js",
@@ -220,6 +236,16 @@
       "types": "./dist/stores/*.d.ts",
       "import": "./dist/stores/*.js",
       "require": "./dist/stores/*.cjs"
+    },
+    "./firebase": {
+      "types": "./dist/firebase/index.d.ts",
+      "import": "./dist/firebase/index.js",
+      "require": "./dist/firebase/index.cjs"
+    },
+    "./firebase/*": {
+      "types": "./dist/firebase/*.d.ts",
+      "import": "./dist/firebase/*.js",
+      "require": "./dist/firebase/*.cjs"
     }
   },
   "peerDependencies": {
@@ -244,5 +270,8 @@
     "client-components",
     "react",
     "typescript"
-  ]
+  ],
+  "dependencies": {
+    "firebase": "^12.6.0"
+  }
 }
