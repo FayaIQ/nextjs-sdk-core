@@ -93,7 +93,7 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
 
-  static getStoreDeliveryZones (storeId: string | number): string {
+  static getStoreDeliveryZones(storeId: string | number): string {
     return `${Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
   }
   static deleteOffersGroup(
@@ -179,7 +179,7 @@ export class Api {
   static postPayments: string = `${Api.INVENTORY_BASE}/v1/Payments`;
   static getPayments: string = `${Api.INVENTORY_BASE}/v1/Payments`;
   static getPaymentsReport: string = `${Api.INVENTORY_BASE}/v1/Payments/Report`;
-  static getSlideShows: string = `${Api.THEME_BASE}/v1/SlideShows/Paging`;
+  static getSlideShows: string = `${Api.THEME_BASE}/v1/SlideShows/Paging?pageSize=20`;
 
   static getItemById(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v3/Items/${id}`;
@@ -191,7 +191,6 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/wish`;
   }
 
-  
   static deleteWish(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
   }

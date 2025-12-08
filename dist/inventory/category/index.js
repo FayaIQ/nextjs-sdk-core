@@ -2,7 +2,7 @@
 async function getCatigories() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-OCFVPUT3.js");
+    const { Api } = await import("../../api-YF4GAK4X.js");
     return getWithAuth(`${Api.getCatigories}`, {});
   } else {
     return fetch(`/api/categories`).then((res) => {
