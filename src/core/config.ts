@@ -38,10 +38,6 @@ export const getAuthConfig = (): AuthConfig => {
       clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
       username: getEnvVar("STOREAK_USERNAME", brand),
       password: getEnvVar("STOREAK_PASSWORD", brand),
-<<<<<<< HEAD
-=======
-      thirdPartyToken: getEnvVar("STOREAK_THIRD_PARTY_TOKEN", brand),
->>>>>>> dcc4086e0f7fa63c7aa80bd64a15391cc1ec5e96
     };
 
     // If required env vars are present, use them
@@ -90,10 +86,6 @@ export const getAuthConfig = (): AuthConfig => {
     clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand)!,
     username: getEnvVar("STOREAK_USERNAME", brand),
     password: getEnvVar("STOREAK_PASSWORD", brand),
-<<<<<<< HEAD
-=======
-    thirdPartyToken: getEnvVar("STOREAK_THIRD_PARTY_TOKEN", brand),
->>>>>>> dcc4086e0f7fa63c7aa80bd64a15391cc1ec5e96
     language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
     gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3"),
   } as AuthConfig;
