@@ -226,3 +226,87 @@ export interface UpdateItemRequest {
   categoryId4?: number | null;
 }
 
+
+// Payload for activating/deactivating item collections by filter
+export interface ItemsCollectionsFilterRequest {
+  currentPage: number;
+  pageSize: number;
+  sortField: string | null;
+  currentSortField: string | null;
+  currentSortOrder: string | null;
+  id: number | null;
+  ids: number[] | null;
+  excludeId: number | null;
+  name: string | null;
+  menuId: number | null;
+  categoryId: number | null;
+  categoryId2: number | null;
+  categoryId3: number | null;
+  categoryId4: number | null;
+  barCode: string | null;
+  code: string | null;
+  nameOrBarcode: string | null;
+  sourceId: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
+  availability: boolean | null;
+  deliveryability: boolean | null;
+  isFeatured: boolean | null;
+  haveColor: boolean | null;
+  havePicture: boolean | null;
+  haveDescription: boolean | null;
+  haveOffer: boolean | null;
+  haveItemCollectionOffer: boolean | null;
+  filterCollections: boolean | null;
+  sizeValueId: number | null;
+  colorId: number | null;
+  rejectionNote: string | null;
+  isActive: boolean | null;
+  approvedStatus: number | null;
+  newArrival: number | null;
+  age: number | null;
+  gender: number | null;
+  sizePatternId: string | null;
+  storeId: number | null;
+  isDeleted: boolean | null;
+  offerId: string | null;
+  itemQuantityStatus: number | null;
+  checkQuantityBeforeSale: boolean | null;
+  syncThirdPartyId: string | null;
+  haveDarkOffer: boolean | null;
+  createdBy: string | null;
+  createdByName: string | null;
+  updatedBy: string | null;
+  updatedByName: string | null;
+  sortType: number | null;
+  getPacks: boolean | null;
+  getColors: boolean | null;
+  getColorsDefaultPictures: boolean | null;
+  getColorsPictures: boolean | null;
+  getGeneralPictures: boolean | null;
+  getSizeSet: boolean | null;
+  getSizeSetValues: boolean | null;
+  getCollections: boolean | null;
+  getOffer: boolean | null;
+  getPointOffer: boolean | null;
+  getMenu: boolean | null;
+  getMultipleMenu: boolean | null;
+  getBrand: boolean | null;
+  getLikes: boolean | null;
+  getWishes: boolean | null;
+  getFavourites: boolean | null;
+  getRating: boolean | null;
+  getTempPicture: boolean | null;
+  getCategory: boolean | null;
+  getUnit: boolean | null;
+  getStoreId: boolean | null;
+  getPoints: boolean | null;
+  getPriceAfterDiscount: boolean | null;
+  getSyncThirdPartyId: boolean | null;
+  getDarkOffer: boolean | null;
+  combineNameAndBarcode: boolean | null;
+  // Filter by creation/update timestamps (ISO strings)
+  CreatedAt: string | null;
+  UpdatedAt: string | null;
+}
+

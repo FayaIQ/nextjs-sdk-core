@@ -1,0 +1,22 @@
+import {
+  postOffersShippingDiscount
+} from "./chunk-GAXFDLSU.js";
+import {
+  toNextResponseFromError
+} from "./chunk-RHIY7DLR.js";
+
+// src/inventory/offers/handler/postOffersShippingDiscount.ts
+import { NextResponse } from "next/server";
+async function POST(request) {
+  try {
+    const data = await request.json();
+    const result = await postOffersShippingDiscount(data);
+    return NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
+export {
+  POST
+};

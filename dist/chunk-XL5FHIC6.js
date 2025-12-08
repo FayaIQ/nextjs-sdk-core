@@ -1,0 +1,23 @@
+import {
+  putOrderReferenceId
+} from "./chunk-JTBH25KP.js";
+
+// src/inventory/orders/handler/reference-id.ts
+import { NextResponse } from "next/server";
+async function PUT(request, { params }) {
+  try {
+    const body = await request.json();
+    const { id } = await params;
+    const result = await putOrderReferenceId(id, body);
+    return NextResponse.json(result);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message || "Failed to update order reference ID" },
+      { status: 500 }
+    );
+  }
+}
+
+export {
+  PUT
+};

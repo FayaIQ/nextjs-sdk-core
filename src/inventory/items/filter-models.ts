@@ -141,6 +141,10 @@ export class ItemsFilterParameters {
   HaveItemCollectionOffer: boolean | null;
   IsDeleted: boolean | null;
   CheckQuantityBeforeSale: boolean | null;
+  CreatedAt: string | null;
+  UpdatedAt: string | null;
+  CreatedBy: string | null;
+  UpdatedBy: string | null;
 
   constructor({
     pagingParameters = new PagingParameters(),
@@ -187,7 +191,11 @@ export class ItemsFilterParameters {
     HaveOffer = null,
     HaveItemCollectionOffer = null,
     IsDeleted = null,
-    CheckQuantityBeforeSale = null,
+  CheckQuantityBeforeSale = null,
+  CreatedAt = null,
+  UpdatedAt = null,
+  CreatedBy = null,
+  UpdatedBy = null,
   }: {
     pagingParameters?: PagingParameters;
     sortType?: SortType;
@@ -234,6 +242,10 @@ export class ItemsFilterParameters {
     HaveItemCollectionOffer?: boolean | null;
     IsDeleted?: boolean | null;
     CheckQuantityBeforeSale?: boolean | null;
+  CreatedAt?: string | null;
+  UpdatedAt?: string | null;
+  CreatedBy?: string | null;
+  UpdatedBy?: string | null;
   } = {}) {
     this.pagingParameters = pagingParameters;
     this.sortType = sortType;
@@ -280,6 +292,10 @@ export class ItemsFilterParameters {
     this.HaveItemCollectionOffer = HaveItemCollectionOffer;
     this.IsDeleted = IsDeleted;
     this.CheckQuantityBeforeSale = CheckQuantityBeforeSale;
+  this.CreatedAt = CreatedAt;
+  this.UpdatedAt = UpdatedAt;
+    this.CreatedBy = CreatedBy;
+    this.UpdatedBy = UpdatedBy;
   }
   /**
    * Create a copy of the filter with updated parameters
@@ -403,6 +419,14 @@ export class ItemsFilterParameters {
           : this.HaveItemCollectionOffer,
       IsDeleted:
         updates.IsDeleted !== undefined ? updates.IsDeleted : this.IsDeleted,
+      CreatedAt:
+        updates.CreatedAt !== undefined ? updates.CreatedAt : this.CreatedAt,
+      UpdatedAt:
+        updates.UpdatedAt !== undefined ? updates.UpdatedAt : this.UpdatedAt,
+      CreatedBy:
+        updates.CreatedBy !== undefined ? updates.CreatedBy : this.CreatedBy,
+      UpdatedBy:
+        updates.UpdatedBy !== undefined ? updates.UpdatedBy : this.UpdatedBy,
       CheckQuantityBeforeSale:
         updates.CheckQuantityBeforeSale !== undefined
           ? updates.CheckQuantityBeforeSale
@@ -574,6 +598,18 @@ export class ItemsFilterParameters {
         String(this.CheckQuantityBeforeSale)
       );
     }
+    if (this.CreatedAt !== null) {
+      params.set("CreatedAt", this.CreatedAt);
+    }
+    if (this.UpdatedAt !== null) {
+      params.set("UpdatedAt", this.UpdatedAt);
+    }
+    if (this.CreatedBy !== null) {
+      params.set("CreatedBy", this.CreatedBy);
+    }
+    if (this.UpdatedBy !== null) {
+      params.set("UpdatedBy", this.UpdatedBy);
+    }
     return params;
   }
   /**
@@ -644,6 +680,10 @@ export class ItemsFilterParameters {
     if (this.IsDeleted !== null) map.IsDeleted = this.IsDeleted;
     if (this.CheckQuantityBeforeSale !== null)
       map.CheckQuantityBeforeSale = this.CheckQuantityBeforeSale;
+    if (this.CreatedAt !== null) map.CreatedAt = this.CreatedAt;
+    if (this.UpdatedAt !== null) map.UpdatedAt = this.UpdatedAt;
+      if (this.CreatedBy !== null) map.CreatedBy = this.CreatedBy;
+      if (this.UpdatedBy !== null) map.UpdatedBy = this.UpdatedBy;
 
     return map;
   }
@@ -751,6 +791,10 @@ export class ItemsFilterParameters {
       HaveItemCollectionOffer: params.get("HaveItemCollectionOffer")
         ? params.get("HaveItemCollectionOffer") === "true"
         : null,
+      CreatedAt: params.get("CreatedAt") || null,
+      UpdatedAt: params.get("UpdatedAt") || null,
+      CreatedBy: params.get("CreatedBy") || null,
+      UpdatedBy: params.get("UpdatedBy") || null,
       IsDeleted: params.get("IsDeleted")
         ? params.get("IsDeleted") === "true"
         : null,

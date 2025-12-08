@@ -10,10 +10,10 @@ import { putOrderPayment } from "../putOrderPayment";
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // <-- use Promise
 ) {
   try {
-    const orderId = params.id;
+    const { id: orderId } = await params;
 
     if (!orderId) {
       return NextResponse.json(

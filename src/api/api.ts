@@ -25,13 +25,10 @@ export class Api {
   static phoneVerificationSend: string = `${Api.IDENTITY_BASE}/v1/verification/phone/send`;
   static phoneVerificationVerify: string = `${Api.IDENTITY_BASE}/v1/verification/phone/verify`;
 
-
-
   // stores
   static getStores: string = `${Api.STORES_BASE}/v1/Stores/Dropdown`;
-  static getStoreDeliveryZones(storeId: string | number): string {
-    return `${Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
-  }
+  // Store users
+  static getStoreUsersPaging: string = `${Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
@@ -39,7 +36,7 @@ export class Api {
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
-    static getProductInfoV2(id: string): string {
+  static getProductInfoV2(id: string): string {
     return `${Api.INVENTORY_BASE}/v2/Items/${id}/FullInfo`;
   }
   static getMenus: string = `${Api.INVENTORY_BASE}/v1/Menus/Search/true`;
@@ -96,6 +93,9 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
 
+  static getStoreDeliveryZones (storeId: string | number): string {
+    return `${Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+  }
   static deleteOffersGroup(
     offerId: string | number,
     id: string | number
@@ -144,7 +144,7 @@ export class Api {
   static getOffersCustomers: string = `${Api.INVENTORY_BASE}/v1/Offers/Customers`;
   static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
-  static getBrands: string = `${Api.INVENTORY_BASE}/v1/StoreItemSources/Paging?isFeatured=True`;
+  static getBrands: string = `${Api.INVENTORY_BASE}/v1/Complex/MenuBrand`;
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
   // CRM - Clients
@@ -191,6 +191,7 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/wish`;
   }
 
+  
   static deleteWish(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
   }
@@ -322,6 +323,15 @@ export class Api {
 
   static putItemDeactivate(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/Deactivate`;
+  }
+
+  // Item collections activate/deactivate by filter
+  static putItemsCollectionsActivateByFilter(): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/Collections/ActivateByFilter`;
+  }
+
+  static putItemsCollectionsDeactivateByFilter(): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/Collections/DeActivateByFilter`;
   }
 
   // Item update endpoint
