@@ -1035,6 +1035,7 @@ var stores_exports = {};
 __export(stores_exports, {
   GETStoreUsersPaging: () => GET2,
   GETStores: () => GET,
+  getStoreDeliveryZones: () => getStoreDeliveryZones,
   getStoreUsersPaging: () => getStoreUsersPaging,
   getStores: () => getStores
 });
@@ -1099,6 +1100,27 @@ async function getStoreUsersPaging(params) {
   return res.json();
 }
 
+// src/stores/getStoreDeliveryZones.ts
+async function getStoreDeliveryZones(storeId) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getStoreDeliveryZones(storeId));
+  }
+  const res = await fetch(`/api/stores/${storeId}/delivery-zones`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
 // src/stores/handler/getStoreUsersPaging.ts
 var import_server3 = require("next/server");
 init_fetcher();
@@ -1122,6 +1144,7 @@ async function GET2(request) {
 0 && (module.exports = {
   GETStoreUsersPaging,
   GETStores,
+  getStoreDeliveryZones,
   getStoreUsersPaging,
   getStores
 });

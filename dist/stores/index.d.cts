@@ -45,6 +45,8 @@ interface StoreUsersPagingResponse {
  */
 declare function getStoreUsersPaging(params?: Record<string, any>): Promise<StoreUsersPagingResponse>;
 
+declare function getStoreDeliveryZones(storeId: string | number): Promise<any[]>;
+
 declare function GET(request: NextRequest): Promise<NextResponse<any>>;
 
-export { GET as GETStoreUsersPaging, GET$1 as GETStores, type Store, type StoreUser, type StoreUsersPagingResponse, getStoreUsersPaging, getStores };
+export { GET as GETStoreUsersPaging, GET$1 as GETStores, type Store, type StoreUser, type StoreUsersPagingResponse, getStoreDeliveryZones, getStoreUsersPaging, getStores };

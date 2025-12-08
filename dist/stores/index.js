@@ -47,6 +47,27 @@ async function getStoreUsersPaging(params) {
   return res.json();
 }
 
+// src/stores/getStoreDeliveryZones.ts
+async function getStoreDeliveryZones(storeId) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await import("../fetcher-BER6YULF.js");
+    const { Api: Api2 } = await import("../api-OCFVPUT3.js");
+    return getWithAuth2(Api2.getStoreDeliveryZones(storeId));
+  }
+  const res = await fetch(`/api/stores/${storeId}/delivery-zones`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
 // src/stores/handler/getStoreUsersPaging.ts
 import { NextResponse as NextResponse2 } from "next/server";
 async function GET2(request) {
@@ -67,6 +88,7 @@ async function GET2(request) {
 export {
   GET2 as GETStoreUsersPaging,
   GET as GETStores,
+  getStoreDeliveryZones,
   getStoreUsersPaging,
   getStores
 };
