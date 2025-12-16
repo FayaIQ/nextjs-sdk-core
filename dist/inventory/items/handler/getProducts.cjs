@@ -787,6 +787,7 @@ async function getProducts({
       `${Api2.getProducts}?${params.toString()}`
     );
   }
+  console.log("Fetching products with params:", params.toString());
   const response = await fetch(`/api/products?${params.toString()}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);
@@ -1282,7 +1283,9 @@ function toNextResponseFromError(err) {
 async function GET(request) {
   try {
     const searchParams = request.nextUrl.searchParams;
+    console.log("Search Params:", searchParams.toString());
     const filterParams = ItemsFilterParameters.fromURLSearchParams(searchParams);
+    console.log("Filter Params:", filterParams);
     const products = await getProducts({ filterParams });
     return import_server2.NextResponse.json(products);
   } catch (error) {

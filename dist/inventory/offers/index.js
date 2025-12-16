@@ -68,21 +68,9 @@ import {
   GET as GET7
 } from "../../chunk-VP2WOZZM.js";
 import {
-  putOffersItemsDiscount
-} from "../../chunk-BPI5ITMF.js";
-import {
-  putOffersItemsDiscountCustomers
-} from "../../chunk-DDSGQHDQ.js";
-import {
   putOffersShippingDiscount
 } from "../../chunk-7CWMBNWP.js";
 import "../../chunk-LZO4JAER.js";
-import {
-  postOffersDeliveryZones
-} from "../../chunk-WBYKA3CI.js";
-import {
-  postOffersInvoiceDiscount
-} from "../../chunk-6ITNQXI7.js";
 import {
   postOffersItemsDiscount
 } from "../../chunk-OOKB3N3S.js";
@@ -102,11 +90,11 @@ import {
   putOffersInvoiceDiscount
 } from "../../chunk-Q7ONRGT6.js";
 import {
-  getOffersCustomers
-} from "../../chunk-OUGRW7CN.js";
+  putOffersItemsDiscount
+} from "../../chunk-BPI5ITMF.js";
 import {
-  getOffersGroups
-} from "../../chunk-3OOCLSHM.js";
+  putOffersItemsDiscountCustomers
+} from "../../chunk-DDSGQHDQ.js";
 import {
   getOffersItemsDropdown
 } from "../../chunk-JMGCVRQA.js";
@@ -125,6 +113,12 @@ import {
   postOffersCustomerDiscount
 } from "../../chunk-V36PQRZ6.js";
 import {
+  postOffersDeliveryZones
+} from "../../chunk-WBYKA3CI.js";
+import {
+  postOffersInvoiceDiscount
+} from "../../chunk-6ITNQXI7.js";
+import {
   deleteOffer
 } from "../../chunk-G4DOJMQ3.js";
 import {
@@ -142,6 +136,12 @@ import {
 import {
   getOffersCouponsDropdown
 } from "../../chunk-RNQFEHPO.js";
+import {
+  getOffersCustomers
+} from "../../chunk-OUGRW7CN.js";
+import {
+  getOffersGroups
+} from "../../chunk-3OOCLSHM.js";
 import "../../chunk-W22MSDJZ.js";
 import "../../chunk-ITFNSMMK.js";
 import "../../chunk-MCE7RKB4.js";

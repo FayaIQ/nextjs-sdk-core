@@ -844,6 +844,7 @@ async function getProducts({
       `${Api2.getProducts}?${params.toString()}`
     );
   }
+  console.log("Fetching products with params:", params.toString());
   const response = await fetch(`/api/products?${params.toString()}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);

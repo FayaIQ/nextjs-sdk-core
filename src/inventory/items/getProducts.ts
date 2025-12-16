@@ -36,6 +36,7 @@ export async function getProducts({
       `${Api.getProducts}?${params.toString()}`
     );
   }
+  
 
   // Client-side: Use Next.js API route
   const response = await fetch(`/api/products?${params.toString()}`);
