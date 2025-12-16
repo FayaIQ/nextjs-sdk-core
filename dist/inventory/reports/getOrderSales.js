@@ -1,6 +1,6 @@
 import {
   getReportsOrderSales
-} from "../../chunk-QT5LKECG.js";
+} from "../../chunk-AGQLNJQT.js";
 export {
   getReportsOrderSales
 };

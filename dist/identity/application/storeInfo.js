@@ -1,6 +1,6 @@
 import {
   getStoreInfo
-} from "../../chunk-N5HNCBFI.js";
+} from "../../chunk-4NMS4JHZ.js";
 export {
   getStoreInfo
 };

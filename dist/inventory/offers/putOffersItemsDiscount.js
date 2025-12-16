@@ -1,6 +1,6 @@
 import {
   putOffersItemsDiscount
-} from "../../chunk-BPI5ITMF.js";
+} from "../../chunk-WL2U3BEH.js";
 export {
   putOffersItemsDiscount
 };

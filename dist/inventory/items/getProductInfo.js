@@ -1,6 +1,6 @@
 import {
   getProductInfo
-} from "../../chunk-5L3Z5KYW.js";
+} from "../../chunk-VDZ4YJAY.js";
 export {
   getProductInfo
 };

@@ -1,9 +1,9 @@
 import {
   GET
-} from "../../chunk-JRU5D6DB.js";
+} from "../../chunk-MEJGPSLJ.js";
 import {
   getCatigories
-} from "../../chunk-MXRRRPCU.js";
+} from "../../chunk-R2ZMYP7G.js";
 import "../../chunk-DQLIRP6S.js";
 export {
   GET as CategoriesGET,

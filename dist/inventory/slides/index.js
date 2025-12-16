@@ -1,9 +1,9 @@
 import {
   GET
-} from "../../chunk-DFMNVFTH.js";
+} from "../../chunk-WI272F6G.js";
 import {
   getSlides
-} from "../../chunk-75I5H67Y.js";
+} from "../../chunk-EDRXKEXF.js";
 export {
   getSlides,
   GET as getSlidesGET

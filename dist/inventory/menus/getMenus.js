@@ -1,6 +1,6 @@
 import {
   getMenus
-} from "../../chunk-CJBLRROI.js";
+} from "../../chunk-LHBXRSGI.js";
 export {
   getMenus
 };

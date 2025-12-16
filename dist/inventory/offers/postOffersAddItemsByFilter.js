@@ -1,6 +1,6 @@
 import {
   postOffersAddItemsByFilter
-} from "../../chunk-PKCQMO4B.js";
+} from "../../chunk-G62BFI6T.js";
 export {
   postOffersAddItemsByFilter
 };

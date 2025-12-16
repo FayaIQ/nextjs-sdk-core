@@ -32,6 +32,10 @@ export class Api {
   static getStoreDeliveryZones(storeId: string | number): string {
     return `${Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
   }
+  // Store users paging endpoint
+  static getStoreUsersPaging(): string {
+    return `${Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
+  }
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;

@@ -1,6 +1,6 @@
 import {
   getItemById
-} from "../../chunk-6VIZQYNH.js";
+} from "../../chunk-LRA4WR4V.js";
 export {
   getItemById
 };

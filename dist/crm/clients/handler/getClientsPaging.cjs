@@ -105,6 +105,10 @@ var init_api = __esm({
       static getStoreDeliveryZones(storeId) {
         return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
+      // Store users paging endpoint
+      static getStoreUsersPaging() {
+        return `${_Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -812,11 +816,8 @@ async function GET(request) {
   try {
     const params = request.nextUrl.searchParams;
     const obj = {};
-    console.log("GET clients paging request url:", request.url);
     params.forEach((v, k) => obj[k] = v);
-    console.log("GET clients paging params:", obj);
     const result = await getClientsPaging(obj);
-    console.log("GET clients paging result:", result);
     return import_server2.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);

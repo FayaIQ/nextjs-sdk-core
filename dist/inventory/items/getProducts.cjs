@@ -105,6 +105,10 @@ var init_api = __esm({
       static getStoreDeliveryZones(storeId) {
         return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
+      // Store users paging endpoint
+      static getStoreUsersPaging() {
+        return `${_Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -784,7 +788,6 @@ async function getProducts({
       `${Api2.getProducts}?${params.toString()}`
     );
   }
-  console.log("Fetching products with params:", params.toString());
   const response = await fetch(`/api/products?${params.toString()}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);

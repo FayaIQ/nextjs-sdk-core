@@ -1,6 +1,6 @@
 import {
   getAddressById
-} from "../../chunk-FEM3XBQ6.js";
+} from "../../chunk-65B75MWD.js";
 export {
   getAddressById
 };

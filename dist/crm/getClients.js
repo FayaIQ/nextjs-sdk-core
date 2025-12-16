@@ -1,6 +1,6 @@
 import {
   getClients
-} from "../chunk-KOKNZ5OA.js";
+} from "../chunk-5FOUZ2RZ.js";
 export {
   getClients
 };

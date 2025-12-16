@@ -1,6 +1,6 @@
 import {
   getOrdersFullInfo
-} from "../../chunk-M2PLE56L.js";
+} from "../../chunk-ZEK25FFF.js";
 export {
   getOrdersFullInfo
 };

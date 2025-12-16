@@ -1,6 +1,6 @@
 import {
   deleteItem
-} from "../../chunk-5ARGBDBR.js";
+} from "../../chunk-ION3OSYQ.js";
 export {
   deleteItem
 };

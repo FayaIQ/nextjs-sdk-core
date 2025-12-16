@@ -24,6 +24,7 @@ declare class Api {
     static phoneVerificationVerify: string;
     static getStores: string;
     static getStoreDeliveryZones(storeId: string | number): string;
+    static getStoreUsersPaging(): string;
     static getProducts: string;
     static getItemsPaging: string;
     static getProductInfo(id: string): string;

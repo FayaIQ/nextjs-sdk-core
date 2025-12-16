@@ -1,6 +1,6 @@
 import {
   getCoupons
-} from "../../chunk-NEAOBQZU.js";
+} from "../../chunk-V7AUW24J.js";
 export {
   getCoupons
 };

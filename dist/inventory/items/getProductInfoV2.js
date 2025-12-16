@@ -1,6 +1,6 @@
 import {
   getProductInfoV2
-} from "../../chunk-HANNIJSP.js";
+} from "../../chunk-DNUW37KY.js";
 export {
   getProductInfoV2
 };

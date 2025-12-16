@@ -5,3 +5,5 @@ export type { Store } from "./store-models";
 export { GET as GETStores } from "./handler/getStores";
 export * from "./getStoreDeliveryZones";
 export { GET as GetStoreDeliveryZonesGET } from "./handler/getStoreDeliveryZones";
+export * from "./getStoreUsersPaging";
+export { GET as GETStoreUsersPaging } from "./handler/getStoreUsersPaging";

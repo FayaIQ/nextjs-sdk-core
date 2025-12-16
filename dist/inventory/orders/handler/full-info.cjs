@@ -105,6 +105,10 @@ var init_api = __esm({
       static getStoreDeliveryZones(storeId) {
         return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
+      // Store users paging endpoint
+      static getStoreUsersPaging() {
+        return `${_Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -801,7 +805,6 @@ async function POST(request) {
   try {
     const payload = await request.json().catch(() => ({}));
     const orderIds = Array.isArray(payload) ? payload : payload.orderIds ?? payload.body ?? [];
-    console.log("Received body for full info:", payload);
     if (!Array.isArray(orderIds) || orderIds.length === 0) {
       return import_server.NextResponse.json({ error: "orderIds array is required" }, { status: 400 });
     }

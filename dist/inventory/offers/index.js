@@ -1,106 +1,91 @@
 import {
-  POST as POST4
-} from "../../chunk-LPG5H4L2.js";
-import {
-  PUT as PUT3
-} from "../../chunk-RB2XOOOT.js";
-import {
   PUT as PUT4
-} from "../../chunk-NM5KRHSW.js";
+} from "../../chunk-564VXQX2.js";
 import {
   PUT as PUT2
-} from "../../chunk-2TKQ5JXM.js";
+} from "../../chunk-JYFCEW7E.js";
 import {
   PUT as PUT5
-} from "../../chunk-Z2TK355Q.js";
+} from "../../chunk-TV5CJTII.js";
 import {
   PUT
-} from "../../chunk-3DJOK3SI.js";
+} from "../../chunk-6K22L42B.js";
 import {
   PUT as PUT6
-} from "../../chunk-E3VSH4XA.js";
+} from "../../chunk-RRXY4URZ.js";
 import {
   PUT as PUT7
-} from "../../chunk-HT4KYQVA.js";
-import {
-  GET as GET8
-} from "../../chunk-QJNUPJ7W.js";
-import {
-  GET as GET5
-} from "../../chunk-GTAJNLCL.js";
+} from "../../chunk-IRXAEQ46.js";
 import {
   GET
-} from "../../chunk-QEEZH64T.js";
+} from "../../chunk-PMXCFZUI.js";
 import {
   POST as POST5
-} from "../../chunk-7B5EBUTT.js";
+} from "../../chunk-TFZUWFXU.js";
 import {
   POST as POST2
-} from "../../chunk-NYJD24HK.js";
+} from "../../chunk-S2YXUC3S.js";
 import {
   POST as POST6
-} from "../../chunk-NMZLC5YE.js";
+} from "../../chunk-SDZVGS37.js";
 import {
   POST as POST3
-} from "../../chunk-ZKLJJZPQ.js";
+} from "../../chunk-ZFYPQNP2.js";
 import {
   POST
-} from "../../chunk-NFMVZGL7.js";
+} from "../../chunk-ORWPBM62.js";
 import {
-  GET as GET2
-} from "../../chunk-MOT2ZAFK.js";
+  POST as POST4
+} from "../../chunk-ATAAAUTR.js";
+import {
+  PUT as PUT3
+} from "../../chunk-GFMA5PR7.js";
 import {
   DELETE
-} from "../../chunk-4F45YGGK.js";
+} from "../../chunk-AXRRHWE3.js";
 import {
   DELETE as DELETE2
-} from "../../chunk-637IK4JA.js";
+} from "../../chunk-LWMUPSAM.js";
 import {
   GET as GET4
-} from "../../chunk-U2KGBSCU.js";
+} from "../../chunk-AJGQIQK6.js";
 import {
   GET as GET3
-} from "../../chunk-WOHQPTUE.js";
+} from "../../chunk-UF7KY7HJ.js";
 import {
   GET as GET6
-} from "../../chunk-2UMCGFVI.js";
+} from "../../chunk-BOTZRWMM.js";
 import {
   GET as GET7
-} from "../../chunk-VP2WOZZM.js";
+} from "../../chunk-RNNHVWIT.js";
 import {
-  putOffersShippingDiscount
-} from "../../chunk-7CWMBNWP.js";
-import "../../chunk-LZO4JAER.js";
+  GET as GET8
+} from "../../chunk-HZFGTNI4.js";
 import {
-  postOffersItemsDiscount
-} from "../../chunk-OOKB3N3S.js";
+  GET as GET5
+} from "../../chunk-UR2F3NH3.js";
 import {
-  postOffersShippingDiscount
-} from "../../chunk-SK5HOSKN.js";
-import {
-  putOffersCustomerDiscount
-} from "../../chunk-FYDKZ65S.js";
+  GET as GET2
+} from "../../chunk-TGQIFGTP.js";
 import {
   putOffersExtraItemDiscount
-} from "../../chunk-KUXVJLHA.js";
+} from "../../chunk-OMAZU7TT.js";
 import {
   putOffersGroup
-} from "../../chunk-DC2NVRHE.js";
+} from "../../chunk-WFMWZSFO.js";
 import {
   putOffersInvoiceDiscount
-} from "../../chunk-Q7ONRGT6.js";
+} from "../../chunk-DNCYQ745.js";
 import {
   putOffersItemsDiscount
-} from "../../chunk-BPI5ITMF.js";
+} from "../../chunk-WL2U3BEH.js";
 import {
   putOffersItemsDiscountCustomers
-} from "../../chunk-DDSGQHDQ.js";
+} from "../../chunk-S2O2BBJ5.js";
 import {
-  getOffersItemsDropdown
-} from "../../chunk-JMGCVRQA.js";
-import {
-  getOffersPaging
-} from "../../chunk-2TZSEGKF.js";
+  putOffersShippingDiscount
+} from "../../chunk-HTX57E62.js";
+import "../../chunk-LZO4JAER.js";
 import {
   OfferPagingParameters,
   OffersFilterParameters,
@@ -108,43 +93,58 @@ import {
 } from "../../chunk-ZWRZ22XK.js";
 import {
   postOffersAddItemsByFilter
-} from "../../chunk-PKCQMO4B.js";
+} from "../../chunk-G62BFI6T.js";
 import {
   postOffersCustomerDiscount
-} from "../../chunk-V36PQRZ6.js";
+} from "../../chunk-IGGPSVNI.js";
 import {
   postOffersDeliveryZones
-} from "../../chunk-WBYKA3CI.js";
+} from "../../chunk-W4GIWPG5.js";
 import {
   postOffersInvoiceDiscount
-} from "../../chunk-6ITNQXI7.js";
+} from "../../chunk-TNBB4PA7.js";
 import {
-  deleteOffer
-} from "../../chunk-G4DOJMQ3.js";
+  postOffersItemsDiscount
+} from "../../chunk-ON6M2Z76.js";
 import {
-  deleteOffersGroup
-} from "../../chunk-VVI2ZSUP.js";
+  postOffersShippingDiscount
+} from "../../chunk-VDJVMCYF.js";
 import {
-  getCoupons
-} from "../../chunk-NEAOBQZU.js";
+  putOffersCustomerDiscount
+} from "../../chunk-VMN4PISV.js";
 import {
   getInvoiceDiscount
-} from "../../chunk-AJGOVIIL.js";
+} from "../../chunk-CZ4ALZY4.js";
 import {
   getOfferById
-} from "../../chunk-MK5OBHOA.js";
+} from "../../chunk-RLAWQEYR.js";
 import {
   getOffersCouponsDropdown
-} from "../../chunk-RNQFEHPO.js";
+} from "../../chunk-EOQ4OZOE.js";
 import {
   getOffersCustomers
-} from "../../chunk-OUGRW7CN.js";
+} from "../../chunk-UW5VTVD5.js";
 import {
   getOffersGroups
-} from "../../chunk-3OOCLSHM.js";
-import "../../chunk-W22MSDJZ.js";
-import "../../chunk-ITFNSMMK.js";
-import "../../chunk-MCE7RKB4.js";
+} from "../../chunk-WZ3LRJVJ.js";
+import {
+  getOffersItemsDropdown
+} from "../../chunk-2LQPLRAN.js";
+import {
+  getOffersPaging
+} from "../../chunk-25JFKOXQ.js";
+import {
+  deleteOffer
+} from "../../chunk-ELVFFLCO.js";
+import {
+  deleteOffersGroup
+} from "../../chunk-FJWGW5HK.js";
+import {
+  getCoupons
+} from "../../chunk-V7AUW24J.js";
+import "../../chunk-3ZI5QZAW.js";
+import "../../chunk-TOM4IICH.js";
+import "../../chunk-SFHDV4E2.js";
 export {
   DELETE as DeleteOfferDELETE,
   DELETE2 as DeleteOffersGroupDELETE,

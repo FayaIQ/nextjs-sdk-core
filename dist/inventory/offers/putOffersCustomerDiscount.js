@@ -1,6 +1,6 @@
 import {
   putOffersCustomerDiscount
-} from "../../chunk-FYDKZ65S.js";
+} from "../../chunk-VMN4PISV.js";
 export {
   putOffersCustomerDiscount
 };

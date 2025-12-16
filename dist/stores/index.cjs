@@ -105,6 +105,10 @@ var init_api = __esm({
       static getStoreDeliveryZones(storeId) {
         return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
+      // Store users paging endpoint
+      static getStoreUsersPaging() {
+        return `${_Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -770,9 +774,11 @@ var init_fetcher = __esm({
 // src/stores/index.ts
 var stores_exports = {};
 __export(stores_exports, {
+  GETStoreUsersPaging: () => GET3,
   GETStores: () => GET,
   GetStoreDeliveryZonesGET: () => GET2,
   getStoreDeliveryZones: () => getStoreDeliveryZones,
+  getStoreUsersPaging: () => getStoreUsersPaging,
   getStores: () => getStores
 });
 module.exports = __toCommonJS(stores_exports);
@@ -854,10 +860,62 @@ async function GET2(request, { params }) {
     return toNextResponseFromError(err);
   }
 }
+
+// src/stores/getStoreUsersPaging.ts
+async function getStoreUsersPaging(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== void 0 && v !== null) {
+      if (Array.isArray(v)) {
+        v.forEach((x) => qs.append(k, String(x)));
+      } else {
+        qs.append(k, String(v));
+      }
+    }
+  });
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    const url = Api2.getStoreUsersPaging();
+    return getWithAuth2(`${url}?${qs.toString()}`);
+  }
+  const res = await fetch(`/api/stores/users/paging?${qs.toString()}`);
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Failed to fetch store users: ${res.status} ${res.statusText} ${txt}`);
+  }
+  return res.json();
+}
+
+// src/stores/handler/getStoreUsersPaging.ts
+var import_server3 = require("next/server");
+async function GET3(request) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const params = {};
+    for (const [k, v] of searchParams.entries()) {
+      if (k === "CurrentPage" || k === "PageSize") {
+        params[k] = parseInt(v, 10);
+      } else if (k === "EmailConfirmed" || k === "PhoneNumberConfirmed") {
+        params[k] = v === "true";
+      } else if (k === "Roles") {
+        params[k] = searchParams.getAll(k);
+      } else {
+        params[k] = v;
+      }
+    }
+    const result = await getStoreUsersPaging(params);
+    return import_server3.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  GETStoreUsersPaging,
   GETStores,
   GetStoreDeliveryZonesGET,
   getStoreDeliveryZones,
+  getStoreUsersPaging,
   getStores
 });

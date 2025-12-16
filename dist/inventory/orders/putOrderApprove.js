@@ -1,7 +1,7 @@
 import {
   putOrderApprove,
   putOrderApproveList
-} from "../../chunk-ABSUCI7H.js";
+} from "../../chunk-LKSHZJRK.js";
 export {
   putOrderApprove,
   putOrderApproveList

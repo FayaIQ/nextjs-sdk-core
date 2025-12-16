@@ -27,6 +27,10 @@ var _Api = class _Api {
   static getStoreDeliveryZones(storeId) {
     return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
   }
+  // Store users paging endpoint
+  static getStoreUsersPaging() {
+    return `${_Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
+  }
   static getProductInfo(id) {
     return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
