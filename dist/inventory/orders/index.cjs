@@ -549,7 +549,7 @@ var init_api = __esm({
     _Api.postPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
     _Api.getPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
     _Api.getPaymentsReport = `${_Api.INVENTORY_BASE}/v1/Payments/Report`;
-    _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging`;
+    _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging?pageSize=20`;
     // orders endpoints
     _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
     _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
