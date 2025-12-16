@@ -491,6 +491,9 @@ export class ItemsFilterParameters {
       params.set("branchId", this.branchId.toString());
     }
     if (this.storeId !== null) {
+      // Emit StoreId (capital S) to match other models/handlers which expect "StoreId".
+      params.set("StoreId", this.storeId.toString());
+      // Keep lowercase for backwards compatibility clients that expect it.
       params.set("storeId", this.storeId.toString());
     }
     // Add availability filter
@@ -613,7 +616,11 @@ export class ItemsFilterParameters {
     if (this.getSize) map.getSize = true;
     if (this.getCollections) map.getCollections = true;
     if (this.branchId !== null) map.branchId = this.branchId;
-  if (this.storeId !== null) map.storeId = this.storeId;
+  if (this.storeId !== null) {
+    // Use StoreId key in map to match server-side naming conventions.
+    map.StoreId = this.storeId;
+    map.storeId = this.storeId; // keep lowercase alias for consumers
+  }
     if (this.availability !== null) map.availability = this.availability;
     if (this.minRating !== null) map.minRating = this.minRating;
     if (this.hasDiscount !== null) map.hasDiscount = this.hasDiscount;
@@ -703,7 +710,12 @@ export class ItemsFilterParameters {
       branchId: params.get("branchId")
         ? parseInt(params.get("branchId")!)
         : null,
-      storeId: params.get("storeId") ? parseInt(params.get("storeId")!) : null,
+      // Accept both "StoreId" and "storeId" when parsing query params.
+      storeId: params.get("StoreId")
+        ? parseInt(params.get("StoreId")!)
+        : params.get("storeId")
+        ? parseInt(params.get("storeId")!)
+        : null,
       availability: params.get("availability")
         ? params.get("availability") === "true"
         : null,

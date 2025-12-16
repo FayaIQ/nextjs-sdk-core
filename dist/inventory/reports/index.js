@@ -5,11 +5,11 @@ import {
   GET as GET2
 } from "../../chunk-7A7VPTJB.js";
 import {
-  getReportsCustomerOrders
-} from "../../chunk-4EX4PICG.js";
-import {
   getReportsOrderSales
 } from "../../chunk-QT5LKECG.js";
+import {
+  getReportsCustomerOrders
+} from "../../chunk-4EX4PICG.js";
 import "../../chunk-W22MSDJZ.js";
 import "../../chunk-ITFNSMMK.js";
 import "../../chunk-MCE7RKB4.js";

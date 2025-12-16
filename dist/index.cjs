@@ -1173,6 +1173,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       params.set("branchId", this.branchId.toString());
     }
     if (this.storeId !== null) {
+      params.set("StoreId", this.storeId.toString());
       params.set("storeId", this.storeId.toString());
     }
     if (this.availability !== null) {
@@ -1290,7 +1291,10 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     if (this.getSize) map.getSize = true;
     if (this.getCollections) map.getCollections = true;
     if (this.branchId !== null) map.branchId = this.branchId;
-    if (this.storeId !== null) map.storeId = this.storeId;
+    if (this.storeId !== null) {
+      map.StoreId = this.storeId;
+      map.storeId = this.storeId;
+    }
     if (this.availability !== null) map.availability = this.availability;
     if (this.minRating !== null) map.minRating = this.minRating;
     if (this.hasDiscount !== null) map.hasDiscount = this.hasDiscount;
@@ -1362,7 +1366,8 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       getSize: params.get("getSize") === "true",
       getCollections: params.get("getCollections") === "true",
       branchId: params.get("branchId") ? parseInt(params.get("branchId")) : null,
-      storeId: params.get("storeId") ? parseInt(params.get("storeId")) : null,
+      // Accept both "StoreId" and "storeId" when parsing query params.
+      storeId: params.get("StoreId") ? parseInt(params.get("StoreId")) : params.get("storeId") ? parseInt(params.get("storeId")) : null,
       availability: params.get("availability") ? params.get("availability") === "true" : null,
       minRating: params.get("minRating") ? parseFloat(params.get("minRating")) : null,
       hasDiscount: params.get("hasDiscount") ? params.get("hasDiscount") === "true" : null,
