@@ -2,7 +2,7 @@
 async function getAddressById(id) {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("./core/index.js");
-    const { Api } = await import("./api-OCFVPUT3.js");
+    const { Api } = await import("./api-IZXQRBVZ.js");
     return getWithAuth(Api.getAddress(id));
   }
   const res = await fetch(`/api/addresses/${id}`);

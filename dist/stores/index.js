@@ -1,20 +1,15 @@
 import {
-  Api
-} from "../chunk-3XSMIWLO.js";
-import {
   toNextResponseFromError
-} from "../chunk-EQRTL3D2.js";
-import {
-  getWithAuth
-} from "../chunk-MEZUUZWF.js";
-import "../chunk-QE7EUSIT.js";
+} from "../chunk-U356OEBM.js";
+import "../chunk-WLBM7SWW.js";
+import "../chunk-5UZNI7GZ.js";
 
 // src/stores/getStores.ts
 async function getStores() {
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await import("../fetcher-BER6YULF.js");
-    const { Api: Api2 } = await import("../api-OCFVPUT3.js");
-    return getWithAuth2(Api2.getStores);
+    const { getWithAuth } = await import("../fetcher-UBKYMKSK.js");
+    const { Api } = await import("../api-IZXQRBVZ.js");
+    return getWithAuth(Api.getStores);
   }
   const res = await fetch(`/api/stores`);
   if (!res.ok) throw new Error(`Failed to fetch stores: ${res.statusText}`);
@@ -33,26 +28,37 @@ async function GET(request) {
 }
 
 // src/stores/getStoreUsersPaging.ts
-async function getStoreUsersPaging(params) {
+async function getStoreUsersPaging(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== void 0 && v !== null) {
+      if (Array.isArray(v)) {
+        v.forEach((x) => qs.append(k, String(x)));
+      } else {
+        qs.append(k, String(v));
+      }
+    }
+  });
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await import("../fetcher-BER6YULF.js");
-    const { Api: Api2 } = await import("../api-OCFVPUT3.js");
-    const qs2 = params ? new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : "";
-    const url = qs2 ? `${Api2.getStoreUsersPaging}?${qs2}` : Api2.getStoreUsersPaging;
-    return getWithAuth2(url);
+    const { getWithAuth } = await import("../fetcher-UBKYMKSK.js");
+    const { Api } = await import("../api-IZXQRBVZ.js");
+    const url = Api.getStoreUsersPaging;
+    return getWithAuth(`${url}?${qs.toString()}`);
   }
-  const qs = params ? new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : "";
-  const res = await fetch(`/api/store-users/paging${qs ? `?${qs}` : ""}`);
-  if (!res.ok) throw new Error(`Failed to fetch store users: ${res.statusText}`);
+  const res = await fetch(`/api/stores/users/paging?${qs.toString()}`);
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Failed to fetch store users: ${res.status} ${res.statusText} ${txt}`);
+  }
   return res.json();
 }
 
 // src/stores/getStoreDeliveryZones.ts
 async function getStoreDeliveryZones(storeId) {
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await import("../fetcher-BER6YULF.js");
-    const { Api: Api2 } = await import("../api-OCFVPUT3.js");
-    return getWithAuth2(Api2.getStoreDeliveryZones(storeId));
+    const { getWithAuth } = await import("../fetcher-UBKYMKSK.js");
+    const { Api } = await import("../api-IZXQRBVZ.js");
+    return getWithAuth(Api.getStoreDeliveryZones(storeId));
   }
   const res = await fetch(`/api/stores/${storeId}/delivery-zones`);
   if (!res.ok) {
@@ -72,15 +78,21 @@ async function getStoreDeliveryZones(storeId) {
 import { NextResponse as NextResponse2 } from "next/server";
 async function GET2(request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const params = new URLSearchParams();
-    searchParams.forEach((value, key) => {
-      params.set(key, value);
-    });
-    const queryString = params.toString();
-    const url = queryString ? `${Api.getStoreUsersPaging}?${queryString}` : Api.getStoreUsersPaging;
-    const data = await getWithAuth(url);
-    return NextResponse2.json(data);
+    const searchParams = request.nextUrl.searchParams;
+    const params = {};
+    for (const [k, v] of searchParams.entries()) {
+      if (k === "CurrentPage" || k === "PageSize") {
+        params[k] = parseInt(v, 10);
+      } else if (k === "EmailConfirmed" || k === "PhoneNumberConfirmed") {
+        params[k] = v === "true";
+      } else if (k === "Roles") {
+        params[k] = searchParams.getAll(k);
+      } else {
+        params[k] = v;
+      }
+    }
+    const result = await getStoreUsersPaging(params);
+    return NextResponse2.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }

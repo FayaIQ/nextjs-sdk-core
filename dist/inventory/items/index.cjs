@@ -278,6 +278,9 @@ var init_api = __esm({
   "src/api/api.ts"() {
     "use strict";
     _Api = class _Api {
+      static getStoreDeliveryZones(storeId) {
+        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -314,9 +317,6 @@ var init_api = __esm({
       }
       static putOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
-      }
-      static getStoreDeliveryZones(storeId) {
-        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
       static deleteOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
@@ -1274,6 +1274,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     getSize = false,
     getCollections = false,
     branchId = null,
+    storeId = null,
     availability = null,
     minRating = null,
     hasDiscount = null,
@@ -1324,6 +1325,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     this.getSize = getSize;
     this.getCollections = getCollections;
     this.branchId = branchId;
+    this.storeId = storeId;
     this.availability = availability;
     this.minRating = minRating;
     this.hasDiscount = hasDiscount;
@@ -1379,6 +1381,7 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       getSize: updates.getSize !== void 0 ? updates.getSize : this.getSize,
       getCollections: updates.getCollections !== void 0 ? updates.getCollections : this.getCollections,
       branchId: updates.branchId !== void 0 ? updates.branchId : this.branchId,
+      storeId: updates.storeId !== void 0 ? updates.storeId : this.storeId,
       availability: updates.availability !== void 0 ? updates.availability : this.availability,
       minRating: updates.minRating !== void 0 ? updates.minRating : this.minRating,
       hasDiscount: updates.hasDiscount !== void 0 ? updates.hasDiscount : this.hasDiscount,
@@ -1475,6 +1478,10 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     }
     if (this.branchId !== null) {
       params.set("branchId", this.branchId.toString());
+    }
+    if (this.storeId !== null) {
+      params.set("StoreId", this.storeId.toString());
+      params.set("storeId", this.storeId.toString());
     }
     if (this.availability !== null) {
       params.set("availability", this.availability.toString());
@@ -1603,6 +1610,10 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     if (this.getSize) map.getSize = true;
     if (this.getCollections) map.getCollections = true;
     if (this.branchId !== null) map.branchId = this.branchId;
+    if (this.storeId !== null) {
+      map.StoreId = this.storeId;
+      map.storeId = this.storeId;
+    }
     if (this.availability !== null) map.availability = this.availability;
     if (this.minRating !== null) map.minRating = this.minRating;
     if (this.hasDiscount !== null) map.hasDiscount = this.hasDiscount;
@@ -1678,6 +1689,8 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       getSize: params.get("getSize") === "true",
       getCollections: params.get("getCollections") === "true",
       branchId: params.get("branchId") ? parseInt(params.get("branchId")) : null,
+      // Accept both "StoreId" and "storeId" when parsing query params.
+      storeId: params.get("StoreId") ? parseInt(params.get("StoreId")) : params.get("storeId") ? parseInt(params.get("storeId")) : null,
       availability: params.get("availability") ? params.get("availability") === "true" : null,
       minRating: params.get("minRating") ? parseFloat(params.get("minRating")) : null,
       hasDiscount: params.get("hasDiscount") ? params.get("hasDiscount") === "true" : null,

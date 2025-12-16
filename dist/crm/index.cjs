@@ -278,6 +278,9 @@ var init_api = __esm({
   "src/api/api.ts"() {
     "use strict";
     _Api = class _Api {
+      static getStoreDeliveryZones(storeId) {
+        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -314,9 +317,6 @@ var init_api = __esm({
       }
       static putOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
-      }
-      static getStoreDeliveryZones(storeId) {
-        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
       static deleteOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
@@ -1157,11 +1157,8 @@ async function GET2(request) {
   try {
     const params = new URL(request.url).searchParams;
     const obj = {};
-    console.log("GET clients paging request url:", request.url);
     params.forEach((v, k) => obj[k] = v);
-    console.log("GET clients paging params:", obj);
     const result = await getClientsPaging(obj);
-    console.log("GET clients paging result:", result);
     return import_server3.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);

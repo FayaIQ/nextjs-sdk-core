@@ -1,5 +1,8 @@
 // src/api/api.ts
 var _Api = class _Api {
+  static getStoreDeliveryZones(storeId) {
+    return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+  }
   static getProductInfo(id) {
     return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
@@ -36,9 +39,6 @@ var _Api = class _Api {
   }
   static putOffersGroup(offerId, id) {
     return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
-  }
-  static getStoreDeliveryZones(storeId) {
-    return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
   }
   static deleteOffersGroup(offerId, id) {
     return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;

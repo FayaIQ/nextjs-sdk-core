@@ -27,6 +27,9 @@ export class Api {
 
   // stores
   static getStores: string = `${Api.STORES_BASE}/v1/Stores/Dropdown`;
+  static getStoreDeliveryZones(storeId: string | number): string {
+    return `${Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+  }
   // Store users
   static getStoreUsersPaging: string = `${Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
 
@@ -93,9 +96,6 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
 
-  static getStoreDeliveryZones (storeId: string | number): string {
-    return `${Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
-  }
   static deleteOffersGroup(
     offerId: string | number,
     id: string | number

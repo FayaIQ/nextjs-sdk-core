@@ -50,7 +50,7 @@ async function getTokenImpl() {
     }
   }
   const { getAuthConfig } = await import("./config-C55SUHGX.js");
-  const { Api } = await import("./api-OCFVPUT3.js");
+  const { Api } = await import("./api-IZXQRBVZ.js");
   const authConfig = getAuthConfig();
   let thirdPartyToken = void 0;
   if (typeof window === "undefined") {

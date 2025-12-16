@@ -1,15 +1,15 @@
 import {
   Api
-} from "../../chunk-3XSMIWLO.js";
+} from "../../chunk-W426YNKH.js";
 import {
   toNextResponseFromError
-} from "../../chunk-EQRTL3D2.js";
+} from "../../chunk-U356OEBM.js";
 import {
   deleteWithAuth,
   getWithAuth,
   postWithAuth
-} from "../../chunk-MEZUUZWF.js";
-import "../../chunk-QE7EUSIT.js";
+} from "../../chunk-WLBM7SWW.js";
+import "../../chunk-5UZNI7GZ.js";
 
 // src/inventory/wishes/getWishes.ts
 async function getWishes(params) {

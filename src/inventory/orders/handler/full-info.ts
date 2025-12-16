@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
       ? payload
       : payload.orderIds ?? payload.body ?? [];
 
-    console.log("Received body for full info:", payload);
     if (!Array.isArray(orderIds) || orderIds.length === 0) {
       return NextResponse.json({ error: "orderIds array is required" }, { status: 400 });
     }

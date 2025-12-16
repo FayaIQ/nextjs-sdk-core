@@ -5,7 +5,7 @@ async function getMenus({
   const params = filterParams.toURLSearchParams();
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("./core/index.js");
-    const { Api } = await import("./api-OCFVPUT3.js");
+    const { Api } = await import("./api-IZXQRBVZ.js");
     return getWithAuth(`${Api.getMenus}?${params.toString()}`, {});
   } else {
     return fetch(`/api/menus?${params.toString()}`).then((res) => {

@@ -1,7 +1,7 @@
-export { g as getMenus } from '../../getMenus-DgbSPvY6.js';
+export { g as getMenus } from '../../getMenus-D4-W1Rih.js';
 import { C as Category } from '../../types-BlK7R_r9.js';
 import { NextRequest, NextResponse } from 'next/server';
-import '../../filter-models-Dt5y9Xvs.js';
+import '../../filter-models-DrN9K3P8.js';
 
 /**
  * Ready-to-use API route handler for orders

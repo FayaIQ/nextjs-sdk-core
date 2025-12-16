@@ -278,6 +278,9 @@ var init_api = __esm({
   "src/api/api.ts"() {
     "use strict";
     _Api = class _Api {
+      static getStoreDeliveryZones(storeId) {
+        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -314,9 +317,6 @@ var init_api = __esm({
       }
       static putOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
-      }
-      static getStoreDeliveryZones(storeId) {
-        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
       static deleteOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
@@ -1086,17 +1086,28 @@ async function GET(request) {
 }
 
 // src/stores/getStoreUsersPaging.ts
-async function getStoreUsersPaging(params) {
+async function getStoreUsersPaging(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== void 0 && v !== null) {
+      if (Array.isArray(v)) {
+        v.forEach((x) => qs.append(k, String(x)));
+      } else {
+        qs.append(k, String(v));
+      }
+    }
+  });
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    const qs2 = params ? new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : "";
-    const url = qs2 ? `${Api2.getStoreUsersPaging}?${qs2}` : Api2.getStoreUsersPaging;
-    return getWithAuth2(url);
+    const url = Api2.getStoreUsersPaging;
+    return getWithAuth2(`${url}?${qs.toString()}`);
   }
-  const qs = params ? new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString() : "";
-  const res = await fetch(`/api/store-users/paging${qs ? `?${qs}` : ""}`);
-  if (!res.ok) throw new Error(`Failed to fetch store users: ${res.statusText}`);
+  const res = await fetch(`/api/stores/users/paging?${qs.toString()}`);
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Failed to fetch store users: ${res.status} ${res.statusText} ${txt}`);
+  }
   return res.json();
 }
 
@@ -1123,19 +1134,23 @@ async function getStoreDeliveryZones(storeId) {
 
 // src/stores/handler/getStoreUsersPaging.ts
 var import_server3 = require("next/server");
-init_fetcher();
-init_api();
 async function GET2(request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const params = new URLSearchParams();
-    searchParams.forEach((value, key) => {
-      params.set(key, value);
-    });
-    const queryString = params.toString();
-    const url = queryString ? `${Api.getStoreUsersPaging}?${queryString}` : Api.getStoreUsersPaging;
-    const data = await getWithAuth(url);
-    return import_server3.NextResponse.json(data);
+    const searchParams = request.nextUrl.searchParams;
+    const params = {};
+    for (const [k, v] of searchParams.entries()) {
+      if (k === "CurrentPage" || k === "PageSize") {
+        params[k] = parseInt(v, 10);
+      } else if (k === "EmailConfirmed" || k === "PhoneNumberConfirmed") {
+        params[k] = v === "true";
+      } else if (k === "Roles") {
+        params[k] = searchParams.getAll(k);
+      } else {
+        params[k] = v;
+      }
+    }
+    const result = await getStoreUsersPaging(params);
+    return import_server3.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }

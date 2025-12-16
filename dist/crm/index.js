@@ -1,15 +1,15 @@
 import {
   toNextResponseFromError
-} from "../chunk-EQRTL3D2.js";
-import "../chunk-MEZUUZWF.js";
-import "../chunk-QE7EUSIT.js";
+} from "../chunk-U356OEBM.js";
+import "../chunk-WLBM7SWW.js";
+import "../chunk-5UZNI7GZ.js";
 
 // src/crm/getClientsPaging.ts
 async function getClientsPaging(query) {
   const qs = query ? `?${new URLSearchParams(query).toString()}` : "";
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-BER6YULF.js");
-    const { Api } = await import("../api-OCFVPUT3.js");
+    const { getWithAuth } = await import("../fetcher-UBKYMKSK.js");
+    const { Api } = await import("../api-IZXQRBVZ.js");
     return getWithAuth(`${Api.getClientsPaging}${qs}`);
   }
   const res = await fetch(`/api/crm/clients/paging${qs}`);
@@ -38,8 +38,8 @@ async function getClients({ filterParams } = {}) {
   const qs = toQueryString(filterParams);
   console.log("getClients query string:", qs);
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-BER6YULF.js");
-    const { Api } = await import("../api-OCFVPUT3.js");
+    const { getWithAuth } = await import("../fetcher-UBKYMKSK.js");
+    const { Api } = await import("../api-IZXQRBVZ.js");
     return getWithAuth(`${Api.getClients}${qs}`);
   }
   const res = await fetch(`/api/crm/clients${qs}`);
@@ -58,8 +58,8 @@ async function getClients({ filterParams } = {}) {
 // src/crm/postClient.ts
 async function postClient(data) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../fetcher-BER6YULF.js");
-    const { Api } = await import("../api-OCFVPUT3.js");
+    const { postWithAuth } = await import("../fetcher-UBKYMKSK.js");
+    const { Api } = await import("../api-IZXQRBVZ.js");
     return postWithAuth(Api.postClients, data);
   }
   const res = await fetch(`/api/crm/clients`, {
@@ -98,11 +98,8 @@ async function GET2(request) {
   try {
     const params = new URL(request.url).searchParams;
     const obj = {};
-    console.log("GET clients paging request url:", request.url);
     params.forEach((v, k) => obj[k] = v);
-    console.log("GET clients paging params:", obj);
     const result = await getClientsPaging(obj);
-    console.log("GET clients paging result:", result);
     return NextResponse2.json(result);
   } catch (err) {
     return toNextResponseFromError(err);

@@ -77,6 +77,7 @@ declare class ItemsFilterParameters {
     getSize: boolean;
     getCollections: boolean;
     branchId: number | null;
+    storeId: number | null;
     availability: boolean | null;
     minRating: number | null;
     hasDiscount: boolean | null;
@@ -107,7 +108,7 @@ declare class ItemsFilterParameters {
     UpdatedAt: string | null;
     CreatedBy: string | null;
     UpdatedBy: string | null;
-    constructor({ pagingParameters, sortType, menuId, categoryId, minPrice, maxPrice, name, gender, age, sourceId, offerId, newArrival, GetBrand, getColors, getColorsDefaultPictures, getOffer, getSize, getCollections, branchId, availability, minRating, hasDiscount, minDiscountPercentage, ItemQuantityStatus, RejectionNote, Deliveryability, Availability, SyncThirdPartyIds, SyncThirdPartyId, IsMultiMenuStore, UseApprovalSystem, CurrentSortField, CurrentSortOrder, Code, barcode, IsFeatured, IsActive, ApprovedStatus, HavePicture, HaveDescription, HaveColor, HaveOffer, HaveItemCollectionOffer, IsDeleted, CheckQuantityBeforeSale, CreatedAt, UpdatedAt, CreatedBy, UpdatedBy, }?: {
+    constructor({ pagingParameters, sortType, menuId, categoryId, minPrice, maxPrice, name, gender, age, sourceId, offerId, newArrival, GetBrand, getColors, getColorsDefaultPictures, getOffer, getSize, getCollections, branchId, storeId, availability, minRating, hasDiscount, minDiscountPercentage, ItemQuantityStatus, RejectionNote, Deliveryability, Availability, SyncThirdPartyIds, SyncThirdPartyId, IsMultiMenuStore, UseApprovalSystem, CurrentSortField, CurrentSortOrder, Code, barcode, IsFeatured, IsActive, ApprovedStatus, HavePicture, HaveDescription, HaveColor, HaveOffer, HaveItemCollectionOffer, IsDeleted, CheckQuantityBeforeSale, CreatedAt, UpdatedAt, CreatedBy, UpdatedBy, }?: {
         pagingParameters?: PagingParameters;
         sortType?: SortType;
         menuId?: number | null;
@@ -127,6 +128,7 @@ declare class ItemsFilterParameters {
         getSize?: boolean;
         getCollections?: boolean;
         branchId?: number | null;
+        storeId?: number | null;
         availability?: boolean | null;
         minRating?: number | null;
         hasDiscount?: boolean | null;

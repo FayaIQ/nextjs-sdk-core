@@ -2,7 +2,7 @@
 async function getStoreInfo() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("./core/index.js");
-    const { Api } = await import("./api-OCFVPUT3.js");
+    const { Api } = await import("./api-IZXQRBVZ.js");
     return getWithAuth(Api.getStoreInfo);
   }
   const response = await fetch("/api/storeInfo");

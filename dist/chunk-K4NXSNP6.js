@@ -4,8 +4,8 @@ async function getProducts({
 }) {
   const params = filterParams.toURLSearchParams();
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-BER6YULF.js");
-    const { Api } = await import("./api-OCFVPUT3.js");
+    const { getWithAuth } = await import("./fetcher-UBKYMKSK.js");
+    const { Api } = await import("./api-IZXQRBVZ.js");
     return getWithAuth(
       `${Api.getProducts}?${params.toString()}`
     );
@@ -20,8 +20,8 @@ async function getProducts({
 // src/inventory/items/getProductInfo.ts
 async function getProductInfo(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-BER6YULF.js");
-    const { Api } = await import("./api-OCFVPUT3.js");
+    const { getWithAuth } = await import("./fetcher-UBKYMKSK.js");
+    const { Api } = await import("./api-IZXQRBVZ.js");
     return getWithAuth(`${Api.getProductInfo(id)}`);
   }
   const response = await fetch(`/api/products/${id}`);

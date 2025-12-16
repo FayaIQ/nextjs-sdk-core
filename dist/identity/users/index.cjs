@@ -278,6 +278,9 @@ var init_api = __esm({
   "src/api/api.ts"() {
     "use strict";
     _Api = class _Api {
+      static getStoreDeliveryZones(storeId) {
+        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -314,9 +317,6 @@ var init_api = __esm({
       }
       static putOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
-      }
-      static getStoreDeliveryZones(storeId) {
-        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
       static deleteOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;

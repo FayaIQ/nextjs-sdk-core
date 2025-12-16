@@ -10,6 +10,35 @@ declare function getStores(): Promise<Store[]>;
 
 declare function GET$1(request: NextRequest): Promise<NextResponse<any>>;
 
+/**
+ * Parameters accepted by getStoreUsersPaging
+ */
+type StoreUserPagingParams = {
+    Username?: string | null;
+    FullName?: string | null;
+    Email?: string | null;
+    EmailConfirmed?: boolean | null;
+    Phone?: string | null;
+    PhoneNumberConfirmed?: boolean | null;
+    Gender?: number | null;
+    Birthdate?: string | null;
+    Role?: string | null;
+    Roles?: string[] | null;
+    CurrentPage?: number;
+    PageSize?: number;
+    SortField?: string | null;
+    CurrentSortField?: string | null;
+    CurrentSortOrder?: string | null;
+    [k: string]: any;
+};
+/**
+ * Fetch paged store users from the Store service.
+ * Works both server-side (calls upstream service directly) and client-side (calls nextjs API route).
+ */
+declare function getStoreUsersPaging(params?: StoreUserPagingParams): Promise<any>;
+
+declare function getStoreDeliveryZones(storeId: string | number): Promise<any[]>;
+
 interface StoreUser {
     id: string;
     userId: string;
@@ -39,14 +68,6 @@ interface StoreUsersPagingResponse {
     results: StoreUser[];
 }
 
-/**
- * Get store users with paging and filters.
- * Pass an optional params object to set query parameters (e.g., { Username: 'abc', CurrentPage: 1 })
- */
-declare function getStoreUsersPaging(params?: Record<string, any>): Promise<StoreUsersPagingResponse>;
-
-declare function getStoreDeliveryZones(storeId: string | number): Promise<any[]>;
-
 declare function GET(request: NextRequest): Promise<NextResponse<any>>;
 
-export { GET as GETStoreUsersPaging, GET$1 as GETStores, type Store, type StoreUser, type StoreUsersPagingResponse, getStoreDeliveryZones, getStoreUsersPaging, getStores };
+export { GET as GETStoreUsersPaging, GET$1 as GETStores, type Store, type StoreUser, type StoreUserPagingParams, type StoreUsersPagingResponse, getStoreDeliveryZones, getStoreUsersPaging, getStores };

@@ -40,6 +40,9 @@ var init_api = __esm({
   "src/api/api.ts"() {
     "use strict";
     _Api = class _Api {
+      static getStoreDeliveryZones(storeId) {
+        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
+      }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
       }
@@ -76,9 +79,6 @@ var init_api = __esm({
       }
       static putOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
-      }
-      static getStoreDeliveryZones(storeId) {
-        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
       static deleteOffersGroup(offerId, id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
@@ -1217,9 +1217,10 @@ async function logoutUser() {
   if (typeof window === "undefined") {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    cookieStore.delete("access_token");
-    cookieStore.delete("employee_store_id");
-    cookieStore.delete("roles");
+    const allCookies = cookieStore.getAll();
+    for (const cookie of allCookies) {
+      cookieStore.delete(cookie.name);
+    }
     return { success: true };
   }
   const res = await fetch("/api/auth/logout", {

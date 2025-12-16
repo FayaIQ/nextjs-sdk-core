@@ -5,15 +5,15 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-4HU5OGYB.js";
+} from "../chunk-JTO4FOAA.js";
 import {
   Api
-} from "../chunk-3XSMIWLO.js";
+} from "../chunk-W426YNKH.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-MEZUUZWF.js";
-import "../chunk-QE7EUSIT.js";
+} from "../chunk-WLBM7SWW.js";
+import "../chunk-5UZNI7GZ.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -172,9 +172,10 @@ async function logoutUser() {
   if (typeof window === "undefined") {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    cookieStore.delete("access_token");
-    cookieStore.delete("employee_store_id");
-    cookieStore.delete("roles");
+    const allCookies = cookieStore.getAll();
+    for (const cookie of allCookies) {
+      cookieStore.delete(cookie.name);
+    }
     return { success: true };
   }
   const res = await fetch("/api/auth/logout", {
@@ -187,8 +188,8 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-BER6YULF.js");
-    const { Api: Api2 } = await import("../api-OCFVPUT3.js");
+    const { getWithAuth } = await import("../fetcher-UBKYMKSK.js");
+    const { Api: Api2 } = await import("../api-IZXQRBVZ.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
     const fullNameTrimmed2 = FullName !== void 0 ? String(FullName).trim() : "";

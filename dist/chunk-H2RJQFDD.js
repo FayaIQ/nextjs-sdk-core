@@ -2,7 +2,7 @@
 async function getCountries() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("./core/index.js");
-    const { Api } = await import("./api-OCFVPUT3.js");
+    const { Api } = await import("./api-IZXQRBVZ.js");
     return getWithAuth(Api.getCountries);
   }
   const response = await fetch(`/api/locations/countries`);
@@ -16,7 +16,7 @@ async function getCountries() {
 async function getLocationChildren(parentId) {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("./core/index.js");
-    const { Api } = await import("./api-OCFVPUT3.js");
+    const { Api } = await import("./api-IZXQRBVZ.js");
     return getWithAuth(
       `${Api.getLocationChildren(parentId)}`
     );
