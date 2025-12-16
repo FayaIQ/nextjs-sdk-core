@@ -108,6 +108,8 @@ export class ItemsFilterParameters {
   getCollections: boolean;
   // Location-based
   branchId: number | null;
+  // Store filtering
+  storeId: number | null;
   // Availability
   availability: boolean | null;
   // Rating
@@ -162,6 +164,7 @@ export class ItemsFilterParameters {
     getSize = false,
     getCollections = false,
     branchId = null,
+  storeId = null,
     availability = null,
     minRating = null,
     hasDiscount = null,
@@ -208,6 +211,7 @@ export class ItemsFilterParameters {
     getSize?: boolean;
     getCollections?: boolean;
     branchId?: number | null;
+  storeId?: number | null;
     availability?: boolean | null;
     minRating?: number | null;
     hasDiscount?: boolean | null;
@@ -254,6 +258,7 @@ export class ItemsFilterParameters {
     this.getSize = getSize;
     this.getCollections = getCollections;
     this.branchId = branchId;
+  this.storeId = storeId;
     this.availability = availability;
     this.minRating = minRating;
     this.hasDiscount = hasDiscount;
@@ -321,6 +326,7 @@ export class ItemsFilterParameters {
           : this.getCollections,
       branchId:
         updates.branchId !== undefined ? updates.branchId : this.branchId,
+      storeId: updates.storeId !== undefined ? updates.storeId : this.storeId,
       availability:
         updates.availability !== undefined
           ? updates.availability
@@ -484,6 +490,9 @@ export class ItemsFilterParameters {
     if (this.branchId !== null) {
       params.set("branchId", this.branchId.toString());
     }
+    if (this.storeId !== null) {
+      params.set("storeId", this.storeId.toString());
+    }
     // Add availability filter
     if (this.availability !== null) {
       params.set("availability", this.availability.toString());
@@ -604,6 +613,7 @@ export class ItemsFilterParameters {
     if (this.getSize) map.getSize = true;
     if (this.getCollections) map.getCollections = true;
     if (this.branchId !== null) map.branchId = this.branchId;
+  if (this.storeId !== null) map.storeId = this.storeId;
     if (this.availability !== null) map.availability = this.availability;
     if (this.minRating !== null) map.minRating = this.minRating;
     if (this.hasDiscount !== null) map.hasDiscount = this.hasDiscount;
@@ -693,6 +703,7 @@ export class ItemsFilterParameters {
       branchId: params.get("branchId")
         ? parseInt(params.get("branchId")!)
         : null,
+      storeId: params.get("storeId") ? parseInt(params.get("storeId")!) : null,
       availability: params.get("availability")
         ? params.get("availability") === "true"
         : null,
