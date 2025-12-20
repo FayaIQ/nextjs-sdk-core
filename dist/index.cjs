@@ -1339,6 +1339,39 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     getCollections = false,
     branchId = null,
     storeId = null,
+    id = null,
+    ids = null,
+    excludeId = null,
+    CategoryId2 = null,
+    CategoryId3 = null,
+    CategoryId4 = null,
+    NameOrBarcode = null,
+    BarCode = null,
+    FilterCollections = null,
+    SizeValueId = null,
+    ColorId = null,
+    SizePatternId = null,
+    OfferGuid = null,
+    GetColorsPictures = null,
+    GetGeneralPictures = null,
+    GetSizeSet = null,
+    GetSizeSetValues = null,
+    GetPointOffer = null,
+    GetMenu = null,
+    GetMultipleMenu = null,
+    GetLikes = null,
+    GetWishes = null,
+    GetFavourites = null,
+    GetRating = null,
+    GetTempPicture = null,
+    GetCategory = null,
+    GetUnit = null,
+    GetStoreId = null,
+    GetPoints = null,
+    GetPriceAfterDiscount = null,
+    GetSyncThirdPartyId = null,
+    GetDarkOffer = null,
+    CombineNameAndBarcode = null,
     availability = null,
     minRating = null,
     hasDiscount = null,
@@ -1397,6 +1430,39 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     this.ItemQuantityStatus = ItemQuantityStatus;
     this.SyncThirdPartyIds = SyncThirdPartyIds;
     this.SyncThirdPartyId = SyncThirdPartyId;
+    this.id = id;
+    this.ids = ids;
+    this.excludeId = excludeId;
+    this.CategoryId2 = CategoryId2;
+    this.CategoryId3 = CategoryId3;
+    this.CategoryId4 = CategoryId4;
+    this.NameOrBarcode = NameOrBarcode;
+    this.BarCode = BarCode;
+    this.FilterCollections = FilterCollections;
+    this.SizeValueId = SizeValueId;
+    this.ColorId = ColorId;
+    this.SizePatternId = SizePatternId;
+    this.OfferGuid = OfferGuid;
+    this.GetColorsPictures = GetColorsPictures;
+    this.GetGeneralPictures = GetGeneralPictures;
+    this.GetSizeSet = GetSizeSet;
+    this.GetSizeSetValues = GetSizeSetValues;
+    this.GetPointOffer = GetPointOffer;
+    this.GetMenu = GetMenu;
+    this.GetMultipleMenu = GetMultipleMenu;
+    this.GetLikes = GetLikes;
+    this.GetWishes = GetWishes;
+    this.GetFavourites = GetFavourites;
+    this.GetRating = GetRating;
+    this.GetTempPicture = GetTempPicture;
+    this.GetCategory = GetCategory;
+    this.GetUnit = GetUnit;
+    this.GetStoreId = GetStoreId;
+    this.GetPoints = GetPoints;
+    this.GetPriceAfterDiscount = GetPriceAfterDiscount;
+    this.GetSyncThirdPartyId = GetSyncThirdPartyId;
+    this.GetDarkOffer = GetDarkOffer;
+    this.CombineNameAndBarcode = CombineNameAndBarcode;
     this.RejectionNote = RejectionNote;
     this.Deliveryability = Deliveryability;
     this.Availability = Availability;
@@ -1475,7 +1541,41 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       UpdatedAt: updates.UpdatedAt !== void 0 ? updates.UpdatedAt : this.UpdatedAt,
       CreatedBy: updates.CreatedBy !== void 0 ? updates.CreatedBy : this.CreatedBy,
       UpdatedBy: updates.UpdatedBy !== void 0 ? updates.UpdatedBy : this.UpdatedBy,
-      CheckQuantityBeforeSale: updates.CheckQuantityBeforeSale !== void 0 ? updates.CheckQuantityBeforeSale : this.CheckQuantityBeforeSale
+      CheckQuantityBeforeSale: updates.CheckQuantityBeforeSale !== void 0 ? updates.CheckQuantityBeforeSale : this.CheckQuantityBeforeSale,
+      // new fields
+      id: updates.id !== void 0 ? updates.id : this.id,
+      ids: updates.ids !== void 0 ? updates.ids : this.ids,
+      excludeId: updates.excludeId !== void 0 ? updates.excludeId : this.excludeId,
+      CategoryId2: updates.CategoryId2 !== void 0 ? updates.CategoryId2 : this.CategoryId2,
+      CategoryId3: updates.CategoryId3 !== void 0 ? updates.CategoryId3 : this.CategoryId3,
+      CategoryId4: updates.CategoryId4 !== void 0 ? updates.CategoryId4 : this.CategoryId4,
+      NameOrBarcode: updates.NameOrBarcode !== void 0 ? updates.NameOrBarcode : this.NameOrBarcode,
+      BarCode: updates.BarCode !== void 0 ? updates.BarCode : this.BarCode,
+      FilterCollections: updates.FilterCollections !== void 0 ? updates.FilterCollections : this.FilterCollections,
+      SizeValueId: updates.SizeValueId !== void 0 ? updates.SizeValueId : this.SizeValueId,
+      ColorId: updates.ColorId !== void 0 ? updates.ColorId : this.ColorId,
+      SizePatternId: updates.SizePatternId !== void 0 ? updates.SizePatternId : this.SizePatternId,
+      OfferGuid: updates.OfferGuid !== void 0 ? updates.OfferGuid : this.OfferGuid,
+      GetColorsPictures: updates.GetColorsPictures !== void 0 ? updates.GetColorsPictures : this.GetColorsPictures,
+      GetGeneralPictures: updates.GetGeneralPictures !== void 0 ? updates.GetGeneralPictures : this.GetGeneralPictures,
+      GetSizeSet: updates.GetSizeSet !== void 0 ? updates.GetSizeSet : this.GetSizeSet,
+      GetSizeSetValues: updates.GetSizeSetValues !== void 0 ? updates.GetSizeSetValues : this.GetSizeSetValues,
+      GetPointOffer: updates.GetPointOffer !== void 0 ? updates.GetPointOffer : this.GetPointOffer,
+      GetMenu: updates.GetMenu !== void 0 ? updates.GetMenu : this.GetMenu,
+      GetMultipleMenu: updates.GetMultipleMenu !== void 0 ? updates.GetMultipleMenu : this.GetMultipleMenu,
+      GetLikes: updates.GetLikes !== void 0 ? updates.GetLikes : this.GetLikes,
+      GetWishes: updates.GetWishes !== void 0 ? updates.GetWishes : this.GetWishes,
+      GetFavourites: updates.GetFavourites !== void 0 ? updates.GetFavourites : this.GetFavourites,
+      GetRating: updates.GetRating !== void 0 ? updates.GetRating : this.GetRating,
+      GetTempPicture: updates.GetTempPicture !== void 0 ? updates.GetTempPicture : this.GetTempPicture,
+      GetCategory: updates.GetCategory !== void 0 ? updates.GetCategory : this.GetCategory,
+      GetUnit: updates.GetUnit !== void 0 ? updates.GetUnit : this.GetUnit,
+      GetStoreId: updates.GetStoreId !== void 0 ? updates.GetStoreId : this.GetStoreId,
+      GetPoints: updates.GetPoints !== void 0 ? updates.GetPoints : this.GetPoints,
+      GetPriceAfterDiscount: updates.GetPriceAfterDiscount !== void 0 ? updates.GetPriceAfterDiscount : this.GetPriceAfterDiscount,
+      GetSyncThirdPartyId: updates.GetSyncThirdPartyId !== void 0 ? updates.GetSyncThirdPartyId : this.GetSyncThirdPartyId,
+      GetDarkOffer: updates.GetDarkOffer !== void 0 ? updates.GetDarkOffer : this.GetDarkOffer,
+      CombineNameAndBarcode: updates.CombineNameAndBarcode !== void 0 ? updates.CombineNameAndBarcode : this.CombineNameAndBarcode
     });
   }
   /**
@@ -1646,6 +1746,42 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     if (this.UpdatedBy !== null) {
       params.set("UpdatedBy", this.UpdatedBy);
     }
+    if (this.id !== null) params.set("id", this.id.toString());
+    if (this.ids !== null && Array.isArray(this.ids) && this.ids.length > 0)
+      params.set("ids", this.ids.join(","));
+    if (this.excludeId !== null) params.set("excludeId", this.excludeId.toString());
+    if (this.CategoryId2 !== null) params.set("CategoryId2", this.CategoryId2.toString());
+    if (this.CategoryId3 !== null) params.set("CategoryId3", this.CategoryId3.toString());
+    if (this.CategoryId4 !== null) params.set("CategoryId4", this.CategoryId4.toString());
+    if (this.NameOrBarcode !== null && this.NameOrBarcode.trim() !== "")
+      params.set("NameOrBarcode", this.NameOrBarcode.trim());
+    if (this.BarCode !== null && this.BarCode.trim() !== "") params.set("BarCode", this.BarCode.trim());
+    if (this.FilterCollections !== null) params.set("FilterCollections", String(this.FilterCollections));
+    if (this.SizeValueId !== null) params.set("SizeValueId", this.SizeValueId.toString());
+    if (this.ColorId !== null) params.set("ColorId", this.ColorId.toString());
+    if (this.SizePatternId !== null) params.set("SizePatternId", this.SizePatternId);
+    if (this.OfferGuid !== null) params.set("OfferGuid", this.OfferGuid);
+    if (this.GetColorsPictures) params.set("GetColorsPictures", "true");
+    if (this.GetGeneralPictures) params.set("GetGeneralPictures", "true");
+    if (this.GetSizeSet) params.set("GetSizeSet", "true");
+    if (this.GetSizeSetValues) params.set("GetSizeSetValues", "true");
+    if (this.GetPointOffer) params.set("GetPointOffer", "true");
+    if (this.GetMenu) params.set("GetMenu", "true");
+    if (this.GetMultipleMenu) params.set("GetMultipleMenu", "true");
+    if (this.GetLikes) params.set("GetLikes", "true");
+    if (this.GetWishes) params.set("GetWishes", "true");
+    if (this.GetFavourites) params.set("GetFavourites", "true");
+    if (this.GetRating) params.set("GetRating", "true");
+    if (this.GetTempPicture) params.set("GetTempPicture", "true");
+    if (this.GetCategory) params.set("GetCategory", "true");
+    if (this.GetUnit) params.set("GetUnit", "true");
+    if (this.GetStoreId) params.set("GetStoreId", "true");
+    if (this.GetPoints) params.set("GetPoints", "true");
+    if (this.GetPriceAfterDiscount) params.set("GetPriceAfterDiscount", "true");
+    if (this.GetSyncThirdPartyId) params.set("GetSyncThirdPartyId", "true");
+    if (this.GetDarkOffer) params.set("GetDarkOffer", "true");
+    if (this.CombineNameAndBarcode !== null)
+      params.set("CombineNameAndBarcode", String(this.CombineNameAndBarcode));
     return params;
   }
   /**
@@ -1678,6 +1814,41 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       map.StoreId = this.storeId;
       map.storeId = this.storeId;
     }
+    if (this.id !== null) map.id = this.id;
+    if (this.ids !== null && Array.isArray(this.ids) && this.ids.length > 0)
+      map.ids = this.ids;
+    if (this.excludeId !== null) map.excludeId = this.excludeId;
+    if (this.CategoryId2 !== null) map.CategoryId2 = this.CategoryId2;
+    if (this.CategoryId3 !== null) map.CategoryId3 = this.CategoryId3;
+    if (this.CategoryId4 !== null) map.CategoryId4 = this.CategoryId4;
+    if (this.NameOrBarcode !== null && this.NameOrBarcode.trim() !== "")
+      map.NameOrBarcode = this.NameOrBarcode.trim();
+    if (this.BarCode !== null && this.BarCode.trim() !== "") map.BarCode = this.BarCode.trim();
+    if (this.FilterCollections !== null) map.FilterCollections = this.FilterCollections;
+    if (this.SizeValueId !== null) map.SizeValueId = this.SizeValueId;
+    if (this.ColorId !== null) map.ColorId = this.ColorId;
+    if (this.SizePatternId !== null) map.SizePatternId = this.SizePatternId;
+    if (this.OfferGuid !== null) map.OfferGuid = this.OfferGuid;
+    if (this.GetColorsPictures) map.GetColorsPictures = true;
+    if (this.GetGeneralPictures) map.GetGeneralPictures = true;
+    if (this.GetSizeSet) map.GetSizeSet = true;
+    if (this.GetSizeSetValues) map.GetSizeSetValues = true;
+    if (this.GetPointOffer) map.GetPointOffer = true;
+    if (this.GetMenu) map.GetMenu = true;
+    if (this.GetMultipleMenu) map.GetMultipleMenu = true;
+    if (this.GetLikes) map.GetLikes = true;
+    if (this.GetWishes) map.GetWishes = true;
+    if (this.GetFavourites) map.GetFavourites = true;
+    if (this.GetRating) map.GetRating = true;
+    if (this.GetTempPicture) map.GetTempPicture = true;
+    if (this.GetCategory) map.GetCategory = true;
+    if (this.GetUnit) map.GetUnit = true;
+    if (this.GetStoreId) map.GetStoreId = true;
+    if (this.GetPoints) map.GetPoints = true;
+    if (this.GetPriceAfterDiscount) map.GetPriceAfterDiscount = true;
+    if (this.GetSyncThirdPartyId) map.GetSyncThirdPartyId = true;
+    if (this.GetDarkOffer) map.GetDarkOffer = true;
+    if (this.CombineNameAndBarcode !== null) map.CombineNameAndBarcode = this.CombineNameAndBarcode;
     if (this.availability !== null) map.availability = this.availability;
     if (this.minRating !== null) map.minRating = this.minRating;
     if (this.hasDiscount !== null) map.hasDiscount = this.hasDiscount;
@@ -1763,6 +1934,40 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
       SyncThirdPartyIds: params.get("SyncThirdPartyIds") || null,
       SyncThirdPartyId: params.get("SyncThirdPartyId") || null,
       RejectionNote: params.get("RejectionNote") || null,
+      // new identifier and collection fields
+      id: params.get("id") ? parseInt(params.get("id")) : null,
+      ids: params.get("ids") ? params.get("ids").split(",").map((s) => parseInt(s)).filter((n) => !Number.isNaN(n)) : null,
+      excludeId: params.get("excludeId") ? parseInt(params.get("excludeId")) : null,
+      CategoryId2: params.get("CategoryId2") ? parseInt(params.get("CategoryId2")) : null,
+      CategoryId3: params.get("CategoryId3") ? parseInt(params.get("CategoryId3")) : null,
+      CategoryId4: params.get("CategoryId4") ? parseInt(params.get("CategoryId4")) : null,
+      NameOrBarcode: params.get("NameOrBarcode") || null,
+      BarCode: params.get("BarCode") || null,
+      FilterCollections: params.get("FilterCollections") ? params.get("FilterCollections") === "true" : null,
+      SizeValueId: params.get("SizeValueId") ? parseInt(params.get("SizeValueId")) : null,
+      ColorId: params.get("ColorId") ? parseInt(params.get("ColorId")) : null,
+      SizePatternId: params.get("SizePatternId") || null,
+      OfferGuid: params.get("OfferGuid") || null,
+      GetColorsPictures: params.get("GetColorsPictures") === "true",
+      GetGeneralPictures: params.get("GetGeneralPictures") === "true",
+      GetSizeSet: params.get("GetSizeSet") === "true",
+      GetSizeSetValues: params.get("GetSizeSetValues") === "true",
+      GetPointOffer: params.get("GetPointOffer") === "true",
+      GetMenu: params.get("GetMenu") === "true",
+      GetMultipleMenu: params.get("GetMultipleMenu") === "true",
+      GetLikes: params.get("GetLikes") === "true",
+      GetWishes: params.get("GetWishes") === "true",
+      GetFavourites: params.get("GetFavourites") === "true",
+      GetRating: params.get("GetRating") === "true",
+      GetTempPicture: params.get("GetTempPicture") === "true",
+      GetCategory: params.get("GetCategory") === "true",
+      GetUnit: params.get("GetUnit") === "true",
+      GetStoreId: params.get("GetStoreId") === "true",
+      GetPoints: params.get("GetPoints") === "true",
+      GetPriceAfterDiscount: params.get("GetPriceAfterDiscount") === "true",
+      GetSyncThirdPartyId: params.get("GetSyncThirdPartyId") === "true",
+      GetDarkOffer: params.get("GetDarkOffer") === "true",
+      CombineNameAndBarcode: params.get("CombineNameAndBarcode") ? params.get("CombineNameAndBarcode") === "true" : null,
       Deliveryability: params.get("Deliveryability") ? params.get("Deliveryability") === "true" : null,
       Availability: params.get("Availability") ? params.get("Availability") === "true" : null,
       IsMultiMenuStore: params.get("IsMultiMenuStore") ? params.get("IsMultiMenuStore") === "true" : null,

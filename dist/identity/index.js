@@ -69,14 +69,6 @@ async function loginUser(credentials) {
         };
       }
     }
-    console.log("[identity:loginUser] requestBody prepared", {
-      hasClientId: !!requestBody.clientId,
-      hasClientSecret: !!requestBody.clientSecret,
-      hasUsername: !!requestBody.username,
-      hasPassword: !!requestBody.password,
-      hasThirdPartyToken: !!requestBody.ThirdPartyToken,
-      hasThirdPartyAuthType: !!requestBody.ThirdPartyAuthType
-    });
     const response = await postWithoutAuth(Api.signIn, requestBody);
     console.log("[identity:loginUser] signIn response", { hasAccessToken: !!response?.access_token, rolesCount: response?.roles?.length || 0, employeeStoreId: response?.employeeStoreId });
     if (!response?.access_token) {
@@ -93,7 +85,7 @@ async function loginUser(credentials) {
     } catch (e) {
       console.error("[identity:loginUser] Failed to encrypt token - fallback to plain", e);
       cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -101,7 +93,7 @@ async function loginUser(credentials) {
       });
     }
     cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -110,7 +102,7 @@ async function loginUser(credentials) {
     if (credentials.thirdPartyToken) {
       console.log("[identity:loginUser] caching tp_id cookie for AUTO re-auth");
       cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",

@@ -130,15 +130,6 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
       }
     }
     
-    console.log("[identity:loginUser] requestBody prepared", { 
-      hasClientId: !!(requestBody as any).clientId,
-      hasClientSecret: !!(requestBody as any).clientSecret,
-      hasUsername: !!(requestBody as any).username, 
-      hasPassword: !!(requestBody as any).password, 
-      hasThirdPartyToken: !!(requestBody as any).ThirdPartyToken,
-      hasThirdPartyAuthType: !!(requestBody as any).ThirdPartyAuthType 
-    });
-
     const response = await postWithoutAuth<LoginResponse>(Api.signIn, requestBody);
   console.log("[identity:loginUser] signIn response", { hasAccessToken: !!response?.access_token, rolesCount: response?.roles?.length || 0, employeeStoreId: response?.employeeStoreId });
 
@@ -162,7 +153,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
       console.error("[identity:loginUser] Failed to encrypt token - fallback to plain", e);
       // Fallback to plain cookie if encryption fails (missing COOKIE_CRYPTO_KEY)
       cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -172,7 +163,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
     
     // LEGACY: Keep access_token for backward compatibility during migration
     cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -183,7 +174,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
     if (credentials.thirdPartyToken) {
       console.log("[identity:loginUser] caching tp_id cookie for AUTO re-auth");
       cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
