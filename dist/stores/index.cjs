@@ -1033,8 +1033,10 @@ var init_fetcher = __esm({
 // src/stores/index.ts
 var stores_exports = {};
 __export(stores_exports, {
+  GETBranches: () => GET3,
   GETStoreUsersPaging: () => GET2,
   GETStores: () => GET,
+  getBranches: () => getBranches,
   getStoreDeliveryZones: () => getStoreDeliveryZones,
   getStoreUsersPaging: () => getStoreUsersPaging,
   getStores: () => getStores
@@ -1155,10 +1157,43 @@ async function GET2(request) {
     return toNextResponseFromError(err);
   }
 }
+
+// src/stores/getBranches.ts
+async function getBranches() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getBranches);
+  }
+  const res = await fetch(`/api/stores/branches`);
+  if (!res.ok) {
+    let err = `Failed to fetch branches: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      err = body.error || body.message || err;
+    } catch (e) {
+    }
+    throw new Error(err);
+  }
+  return res.json();
+}
+
+// src/stores/handler/getBranches.ts
+var import_server4 = require("next/server");
+async function GET3(request) {
+  try {
+    const data = await getBranches();
+    return import_server4.NextResponse.json(data);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  GETBranches,
   GETStoreUsersPaging,
   GETStores,
+  getBranches,
   getStoreDeliveryZones,
   getStoreUsersPaging,
   getStores

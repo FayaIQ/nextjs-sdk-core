@@ -97,9 +97,42 @@ async function GET2(request) {
     return toNextResponseFromError(err);
   }
 }
+
+// src/stores/getBranches.ts
+async function getBranches() {
+  if (typeof window === "undefined") {
+    const { getWithAuth } = await import("../fetcher-MU3UGESH.js");
+    const { Api } = await import("../api-C5LOEZ6C.js");
+    return getWithAuth(Api.getBranches);
+  }
+  const res = await fetch(`/api/stores/branches`);
+  if (!res.ok) {
+    let err = `Failed to fetch branches: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      err = body.error || body.message || err;
+    } catch (e) {
+    }
+    throw new Error(err);
+  }
+  return res.json();
+}
+
+// src/stores/handler/getBranches.ts
+import { NextResponse as NextResponse3 } from "next/server";
+async function GET3(request) {
+  try {
+    const data = await getBranches();
+    return NextResponse3.json(data);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
 export {
+  GET3 as GETBranches,
   GET2 as GETStoreUsersPaging,
   GET as GETStores,
+  getBranches,
   getStoreDeliveryZones,
   getStoreUsersPaging,
   getStores

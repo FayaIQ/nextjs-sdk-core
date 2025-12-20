@@ -27,12 +27,12 @@ import {
   getBrands
 } from "./chunk-OVGKZNDR.js";
 import {
-  getMenus
-} from "./chunk-2AVSMV2C.js";
-import {
   getProductInfo,
   getProducts
 } from "./chunk-BHTBVO6B.js";
+import {
+  getMenus
+} from "./chunk-2AVSMV2C.js";
 import {
   AgeGroup,
   Gender,
