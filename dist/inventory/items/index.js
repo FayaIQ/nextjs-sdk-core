@@ -321,7 +321,7 @@ async function putParentStoreSync(itemId, body) {
 import { NextResponse as NextResponse10 } from "next/server";
 async function PUT(request, { params }) {
   try {
-    const { itemId } = await params;
+    const { id } = await params;
     const maybeBody = await (async () => {
       try {
         return await request.json();
@@ -329,7 +329,7 @@ async function PUT(request, { params }) {
         return void 0;
       }
     })();
-    const result = await putParentStoreSync(itemId, maybeBody);
+    const result = await putParentStoreSync(id, maybeBody);
     return NextResponse10.json(result);
   } catch (err) {
     return toNextResponseFromError(err);

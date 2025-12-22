@@ -417,7 +417,7 @@ const routes = [
   },
   {
     name: "putParentStoreSync",
-    path: ["src", "app", "api", "items", "[itemId]", "parent", "store", "sync"],
+    path: ["src", "app", "api", "items", "[id]", "parent", "store", "sync"],
     handler: "erp-core/inventory/items",
     methods: ["PUT"],
     exportName: "PutParentStoreSyncPUT",

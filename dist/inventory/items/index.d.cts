@@ -152,7 +152,7 @@ declare function putParentStoreSync(itemId: string | number, body?: any): Promis
 
 declare function PUT$5(request: NextRequest, { params }: {
     params: Promise<{
-        itemId: string;
+        id: string;
     }>;
 }): Promise<NextResponse<any>>;
 
