@@ -13,8 +13,14 @@ export {GET as GetItemByIdGET} from "./handler/getItemById";
 
 export * from "./filter-models";
 export * from "./postCopyParentStore";
+export * from "./postCopyParentToChildStores";
+export * from "./postCopyToStore";
 export * from "./types"
 export { POST as CopyParentStorePOST } from "./handler/postCopyParentStore";
+export { POST as CopyParentToChildStoresPOST } from "./handler/postCopyParentToChildStores";
+export { POST as CopyToStorePOST } from "./handler/postCopyToStore";
+export * from "./putParentStoreSync";
+export { PUT as PutParentStoreSyncPUT } from "./handler/putParentStoreSync";
 export * from "./putActivate";
 export * from "./putDeactivate";
 export * from "./putCollectionsActivateByFilter";

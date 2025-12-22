@@ -109,7 +109,52 @@ interface CopyParentResponse {
  */
 declare function postCopyParentStore(itemIds: (number | string)[]): Promise<CopyParentResponse>;
 
-declare function POST(request: NextRequest): Promise<NextResponse<any>>;
+interface CopyParentToChildStoresRequest {
+    itemIds: (number | string)[];
+    childStoreIds?: (number | string)[];
+}
+interface CopyParentToChildStoresResponse {
+    success: boolean;
+    message?: string;
+}
+/**
+ * Copy selected parent items to multiple child stores.
+ */
+declare function postCopyParentToChildStores(payload: CopyParentToChildStoresRequest): Promise<CopyParentToChildStoresResponse>;
+
+interface CopyToStoreRequest {
+    itemIds: (number | string)[];
+    forceUpdate?: boolean;
+}
+interface CopyToStoreResponse {
+    success: boolean;
+    message?: string;
+}
+/**
+ * Copy selected items to a specific child store.
+ */
+declare function postCopyToStore(childStoreId: string | number, payload: CopyToStoreRequest): Promise<CopyToStoreResponse>;
+
+declare function POST$2(request: NextRequest): Promise<NextResponse<any>>;
+
+declare function POST$1(request: NextRequest): Promise<NextResponse<any>>;
+
+declare function POST(request: NextRequest, { params }: {
+    params: Promise<{
+        childStoreId: string;
+    }>;
+}): Promise<NextResponse<any>>;
+
+/**
+ * Trigger a sync from the parent store to child store(s) for a specific item
+ */
+declare function putParentStoreSync(itemId: string | number, body?: any): Promise<any>;
+
+declare function PUT$5(request: NextRequest, { params }: {
+    params: Promise<{
+        itemId: string;
+    }>;
+}): Promise<NextResponse<any>>;
 
 /**
  * Activate an item by id
@@ -176,4 +221,4 @@ declare function PUT$1(request: NextRequest): Promise<NextResponse<any>>;
 
 declare function PUT(request: NextRequest): Promise<NextResponse<any>>;
 
-export { type CopyParentResponse, POST as CopyParentStorePOST, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$5 as GetProductsGET, ItemsFilterParameters, Product, GET$4 as ProductInfoGET, GET$3 as ProductInfoV2GET, ProductResponse, PUT$1 as PutCollectionsActivateByFilterPUT, PUT as PutCollectionsDeactivateByFilterPUT, PUT$4 as PutItemActivatePUT, PUT$3 as PutItemDeactivatePUT, PUT$2 as PutItemPUT, UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, getProductInfoV2, postCopyParentStore, putActivateItem, putCollectionsActivateByFilter, putCollectionsDeactivateByFilter, putDeactivateItem, putItem };
+export { type CopyParentResponse, POST$2 as CopyParentStorePOST, POST$1 as CopyParentToChildStoresPOST, type CopyParentToChildStoresRequest, type CopyParentToChildStoresResponse, POST as CopyToStorePOST, type CopyToStoreRequest, type CopyToStoreResponse, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$5 as GetProductsGET, ItemsFilterParameters, Product, GET$4 as ProductInfoGET, GET$3 as ProductInfoV2GET, ProductResponse, PUT$1 as PutCollectionsActivateByFilterPUT, PUT as PutCollectionsDeactivateByFilterPUT, PUT$4 as PutItemActivatePUT, PUT$3 as PutItemDeactivatePUT, PUT$2 as PutItemPUT, PUT$5 as PutParentStoreSyncPUT, UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, getProductInfoV2, postCopyParentStore, postCopyParentToChildStores, postCopyToStore, putActivateItem, putCollectionsActivateByFilter, putCollectionsDeactivateByFilter, putDeactivateItem, putItem, putParentStoreSync };

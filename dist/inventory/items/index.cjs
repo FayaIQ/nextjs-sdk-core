@@ -439,6 +439,14 @@ var init_api = __esm({
       static putOrderReferenceDeliveryId(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
       }
+      // Copy items to a specific child store
+      static postCopyToStore(childStoreId) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/Copy/Store/${childStoreId}`;
+      }
+      // Sync parent store data to child store for a given item
+      static putItemParentStoreSync(itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Parent/Store/Sync`;
+      }
       // Item activation endpoints
       static putItemActivate(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Activate`;
@@ -567,6 +575,8 @@ var init_api = __esm({
     _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
     // Items copy endpoints
     _Api.postCopyParentStore = `${_Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
+    // Copy from parent to child stores (bulk)
+    _Api.postCopyParentToChildStores = `${_Api.INVENTORY_BASE}/v1/Items/Copy/Parent/To/Child/Stores`;
     _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
     // Cart endpoints
     _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
@@ -1056,6 +1066,8 @@ var items_exports = {};
 __export(items_exports, {
   AgeGroup: () => AgeGroup,
   CopyParentStorePOST: () => POST,
+  CopyParentToChildStoresPOST: () => POST2,
+  CopyToStorePOST: () => POST3,
   DeleteItemDELETE: () => DELETE,
   Gender: () => Gender,
   GetItemByIdGET: () => GET6,
@@ -1067,11 +1079,12 @@ __export(items_exports, {
   PagingParameters: () => PagingParameters,
   ProductInfoGET: () => GET2,
   ProductInfoV2GET: () => GET3,
-  PutCollectionsActivateByFilterPUT: () => PUT4,
-  PutCollectionsDeactivateByFilterPUT: () => PUT5,
-  PutItemActivatePUT: () => PUT,
-  PutItemDeactivatePUT: () => PUT2,
-  PutItemPUT: () => PUT3,
+  PutCollectionsActivateByFilterPUT: () => PUT5,
+  PutCollectionsDeactivateByFilterPUT: () => PUT6,
+  PutItemActivatePUT: () => PUT2,
+  PutItemDeactivatePUT: () => PUT3,
+  PutItemPUT: () => PUT4,
+  PutParentStoreSyncPUT: () => PUT,
   SortType: () => SortType,
   deleteItem: () => deleteItem,
   getItemById: () => getItemById,
@@ -1081,11 +1094,14 @@ __export(items_exports, {
   getProductInfoV2: () => getProductInfoV2,
   getProducts: () => getProducts,
   postCopyParentStore: () => postCopyParentStore,
+  postCopyParentToChildStores: () => postCopyParentToChildStores,
+  postCopyToStore: () => postCopyToStore,
   putActivateItem: () => putActivateItem,
   putCollectionsActivateByFilter: () => putCollectionsActivateByFilter,
   putCollectionsDeactivateByFilter: () => putCollectionsDeactivateByFilter,
   putDeactivateItem: () => putDeactivateItem,
-  putItem: () => putItem
+  putItem: () => putItem,
+  putParentStoreSync: () => putParentStoreSync
 });
 module.exports = __toCommonJS(items_exports);
 
@@ -2056,6 +2072,54 @@ async function postCopyParentStore(itemIds) {
   return res.json();
 }
 
+// src/inventory/items/postCopyParentToChildStores.ts
+async function postCopyParentToChildStores(payload) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(Api2.postCopyParentToChildStores, payload);
+  }
+  const res = await fetch(`/api/items/copy-parent-to-child-stores`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
+// src/inventory/items/postCopyToStore.ts
+async function postCopyToStore(childStoreId, payload) {
+  if (typeof window === "undefined") {
+    const { postWithAuth: postWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return postWithAuth2(Api2.postCopyToStore(childStoreId), payload);
+  }
+  const res = await fetch(`/api/items/copy-to-store/${childStoreId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
 // src/inventory/items/handler/postCopyParentStore.ts
 var import_server8 = require("next/server");
 async function POST(request) {
@@ -2066,6 +2130,81 @@ async function POST(request) {
     }
     const result = await postCopyParentStore(itemIds);
     return import_server8.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
+// src/inventory/items/handler/postCopyParentToChildStores.ts
+var import_server9 = require("next/server");
+async function POST2(request) {
+  try {
+    const payload = await request.json();
+    if (!payload || !Array.isArray(payload.itemIds) || payload.itemIds.length === 0) {
+      return import_server9.NextResponse.json({ error: "itemIds array is required" }, { status: 400 });
+    }
+    const result = await postCopyParentToChildStores(payload);
+    return import_server9.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
+// src/inventory/items/handler/postCopyToStore.ts
+var import_server10 = require("next/server");
+async function POST3(request, { params }) {
+  try {
+    const { childStoreId } = await params;
+    const payload = await request.json();
+    if (!payload || !Array.isArray(payload.itemIds) || payload.itemIds.length === 0) {
+      return import_server10.NextResponse.json({ error: "itemIds array is required" }, { status: 400 });
+    }
+    const result = await postCopyToStore(childStoreId, payload);
+    return import_server10.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
+// src/inventory/items/putParentStoreSync.ts
+async function putParentStoreSync(itemId, body) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    if (body !== void 0) return putWithAuth2(Api2.putItemParentStoreSync(itemId), body);
+    return putWithAuth2(Api2.putItemParentStoreSync(itemId));
+  }
+  const res = await fetch(`/api/items/${itemId}/parent/store/sync`, {
+    method: "PUT",
+    headers: body ? { "Content-Type": "application/json" } : void 0,
+    body: body ? JSON.stringify(body) : void 0
+  });
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body2 = await res.json();
+      errorMessage = body2.error || body2.message || errorMessage;
+    } catch (e) {
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
+// src/inventory/items/handler/putParentStoreSync.ts
+var import_server11 = require("next/server");
+async function PUT(request, { params }) {
+  try {
+    const { itemId } = await params;
+    const maybeBody = await (async () => {
+      try {
+        return await request.json();
+      } catch (_) {
+        return void 0;
+      }
+    })();
+    const result = await putParentStoreSync(itemId, maybeBody);
+    return import_server11.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -2178,37 +2317,37 @@ async function deleteItem(id) {
 }
 
 // src/inventory/items/handler/putActivate.ts
-var import_server9 = require("next/server");
-async function PUT(request, { params }) {
+var import_server12 = require("next/server");
+async function PUT2(request, { params }) {
   try {
     const { id } = await params;
     const result = await putActivateItem(id);
-    return import_server9.NextResponse.json(result);
+    return import_server12.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
 // src/inventory/items/handler/putDeactivate.ts
-var import_server10 = require("next/server");
-async function PUT2(request, { params }) {
+var import_server13 = require("next/server");
+async function PUT3(request, { params }) {
   try {
     const { id } = await params;
     const result = await putDeactivateItem(id);
-    return import_server10.NextResponse.json(result);
+    return import_server13.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
 // src/inventory/items/handler/putItem.ts
-var import_server11 = require("next/server");
-async function PUT3(request, { params }) {
+var import_server14 = require("next/server");
+async function PUT4(request, { params }) {
   try {
     const data = await request.json();
     const { id } = await params;
     const result = await putItem(id, data);
-    return import_server11.NextResponse.json(result);
+    return import_server14.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -2228,24 +2367,24 @@ async function DELETE(request, { params }) {
 }
 
 // src/inventory/items/handler/putCollectionsActivateByFilter.ts
-var import_server12 = require("next/server");
-async function PUT4(request) {
+var import_server15 = require("next/server");
+async function PUT5(request) {
   try {
     const payload = await request.json();
     const result = await putCollectionsActivateByFilter(payload);
-    return import_server12.NextResponse.json(result);
+    return import_server15.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
 // src/inventory/items/handler/putCollectionsDeactivateByFilter.ts
-var import_server13 = require("next/server");
-async function PUT5(request) {
+var import_server16 = require("next/server");
+async function PUT6(request) {
   try {
     const payload = await request.json();
     const result = await putCollectionsDeactivateByFilter(payload);
-    return import_server13.NextResponse.json(result);
+    return import_server16.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -2254,6 +2393,8 @@ async function PUT5(request) {
 0 && (module.exports = {
   AgeGroup,
   CopyParentStorePOST,
+  CopyParentToChildStoresPOST,
+  CopyToStorePOST,
   DeleteItemDELETE,
   Gender,
   GetItemByIdGET,
@@ -2270,6 +2411,7 @@ async function PUT5(request) {
   PutItemActivatePUT,
   PutItemDeactivatePUT,
   PutItemPUT,
+  PutParentStoreSyncPUT,
   SortType,
   deleteItem,
   getItemById,
@@ -2279,9 +2421,12 @@ async function PUT5(request) {
   getProductInfoV2,
   getProducts,
   postCopyParentStore,
+  postCopyParentToChildStores,
+  postCopyToStore,
   putActivateItem,
   putCollectionsActivateByFilter,
   putCollectionsDeactivateByFilter,
   putDeactivateItem,
-  putItem
+  putItem,
+  putParentStoreSync
 });

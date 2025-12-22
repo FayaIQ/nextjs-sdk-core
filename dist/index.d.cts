@@ -140,6 +140,9 @@ declare class Api {
     static getCountries: string;
     static getParentProducts: string;
     static postCopyParentStore: string;
+    static postCopyParentToChildStores: string;
+    static postCopyToStore(childStoreId: string | number): string;
+    static putItemParentStoreSync(itemId: string | number): string;
     static putItemActivate(id: string | number): string;
     static putItemDeactivate(id: string | number): string;
     static putItemsCollectionsActivateByFilter(): string;

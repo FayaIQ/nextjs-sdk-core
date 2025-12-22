@@ -314,6 +314,18 @@ export class Api {
 
   // Items copy endpoints
   static postCopyParentStore: string = `${Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
+  // Copy from parent to child stores (bulk)
+  static postCopyParentToChildStores: string = `${Api.INVENTORY_BASE}/v1/Items/Copy/Parent/To/Child/Stores`;
+
+  // Copy items to a specific child store
+  static postCopyToStore(childStoreId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/Copy/Store/${childStoreId}`;
+  }
+
+  // Sync parent store data to child store for a given item
+  static putItemParentStoreSync(itemId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Parent/Store/Sync`;
+  }
 
   // Item activation endpoints
   static putItemActivate(id: string | number): string {

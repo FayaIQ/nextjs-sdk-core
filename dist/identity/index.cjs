@@ -201,6 +201,14 @@ var init_api = __esm({
       static putOrderReferenceDeliveryId(id) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
       }
+      // Copy items to a specific child store
+      static postCopyToStore(childStoreId) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/Copy/Store/${childStoreId}`;
+      }
+      // Sync parent store data to child store for a given item
+      static putItemParentStoreSync(itemId) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Parent/Store/Sync`;
+      }
       // Item activation endpoints
       static putItemActivate(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Activate`;
@@ -329,6 +337,8 @@ var init_api = __esm({
     _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
     // Items copy endpoints
     _Api.postCopyParentStore = `${_Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
+    // Copy from parent to child stores (bulk)
+    _Api.postCopyParentToChildStores = `${_Api.INVENTORY_BASE}/v1/Items/Copy/Parent/To/Child/Stores`;
     _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
     // Cart endpoints
     _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
