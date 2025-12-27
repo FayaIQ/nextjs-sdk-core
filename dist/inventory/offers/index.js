@@ -267,6 +267,19 @@ async function postOffersDeliveryZones(offerId, payload) {
   return res.json();
 }
 
+// src/inventory/offers/getOffersDeliveryZones.ts
+async function getOffersDeliveryZones() {
+  if (typeof window === "undefined") {
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
+    return getWithAuth(Api.getOffersDeiveryZones);
+  }
+  const res = await fetch(`/api/offers/deliveryZones`);
+  if (!res.ok)
+    throw new Error(`Failed to fetch offers deivery zones: ${res.statusText}`);
+  return res.json();
+}
+
 // src/inventory/offers/getOffersGroups.ts
 async function getOffersGroups(offerId) {
   if (typeof window === "undefined") {
@@ -853,6 +866,7 @@ export {
   getOfferById,
   getOffersCouponsDropdown,
   getOffersCustomers,
+  getOffersDeliveryZones,
   getOffersGroups,
   getOffersItemsDropdown,
   getOffersPaging,

@@ -13,6 +13,7 @@ export * from "./postOffersShippingDiscount";
 export * from "./postOffersAddItemsByFilter";
 export * from "./getCoupons";
 export * from "./postOffersDeliveryZones";
+export * from "./getOffersDeliveryZones";
 export * from "./getOffersGroups";
 export * from "./putOffersGroup";
 export * from "./deleteOffersGroup";

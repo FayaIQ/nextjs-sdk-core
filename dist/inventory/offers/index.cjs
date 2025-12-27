@@ -1101,6 +1101,7 @@ __export(offers_exports, {
   getOfferById: () => getOfferById,
   getOffersCouponsDropdown: () => getOffersCouponsDropdown,
   getOffersCustomers: () => getOffersCustomers,
+  getOffersDeliveryZones: () => getOffersDeliveryZones,
   getOffersGroups: () => getOffersGroups,
   getOffersItemsDropdown: () => getOffersItemsDropdown,
   getOffersPaging: () => getOffersPaging,
@@ -1376,6 +1377,19 @@ async function postOffersDeliveryZones(offerId, payload) {
     errorMessage = errorBody.error || errorBody.message || errorMessage;
     throw new Error(errorMessage);
   }
+  return res.json();
+}
+
+// src/inventory/offers/getOffersDeliveryZones.ts
+async function getOffersDeliveryZones() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getOffersDeiveryZones);
+  }
+  const res = await fetch(`/api/offers/deliveryZones`);
+  if (!res.ok)
+    throw new Error(`Failed to fetch offers deivery zones: ${res.statusText}`);
   return res.json();
 }
 
@@ -2001,6 +2015,7 @@ async function PUT7(request, { params }) {
   getOfferById,
   getOffersCouponsDropdown,
   getOffersCustomers,
+  getOffersDeliveryZones,
   getOffersGroups,
   getOffersItemsDropdown,
   getOffersPaging,
