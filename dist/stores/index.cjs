@@ -1197,8 +1197,8 @@ async function getStoreById(id) {
 var import_server4 = require("next/server");
 async function GET3(request, { params }) {
   try {
-    const { id } = await params;
-    const result = await getStoreById(id);
+    const { storeId } = await params;
+    const result = await getStoreById(storeId);
     return import_server4.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);

@@ -77,7 +77,7 @@ declare function getStoreById(id: string | number): Promise<any>;
 
 declare function GET$1(request: NextRequest, { params }: {
     params: Promise<{
-        id: string;
+        storeId: string;
     }>;
 }): Promise<NextResponse<any>>;
 

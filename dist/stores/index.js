@@ -122,8 +122,8 @@ async function getStoreById(id) {
 import { NextResponse as NextResponse3 } from "next/server";
 async function GET3(request, { params }) {
   try {
-    const { id } = await params;
-    const result = await getStoreById(id);
+    const { storeId } = await params;
+    const result = await getStoreById(storeId);
     return NextResponse3.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
