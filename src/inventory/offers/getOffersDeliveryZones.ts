@@ -5,7 +5,7 @@ export async function getOffersDeliveryZones(): Promise<any> {
     return getWithAuth<any>(Api.getOffersDeiveryZones);
   }
 
-  const res = await fetch(`/api/offers/deliveryZones`);
+  const res = await fetch(`/api/offers/delivery-zones`);
   if (!res.ok)
     throw new Error(`Failed to fetch offers deivery zones: ${res.statusText}`);
   return res.json();

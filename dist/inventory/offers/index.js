@@ -1,7 +1,4 @@
 import {
-  getOffersDeliveryZones
-} from "../../chunk-47A2JI5U.js";
-import {
   toNextResponseFromError
 } from "../../chunk-KJCEAUBE.js";
 import "../../chunk-ATLAWEEM.js";
@@ -262,6 +259,19 @@ async function postOffersDeliveryZones(offerId, payload) {
     errorMessage = errorBody.error || errorBody.message || errorMessage;
     throw new Error(errorMessage);
   }
+  return res.json();
+}
+
+// src/inventory/offers/getOffersDeliveryZones.ts
+async function getOffersDeliveryZones() {
+  if (typeof window === "undefined") {
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
+    return getWithAuth(Api.getOffersDeiveryZones);
+  }
+  const res = await fetch(`/api/offers/delivery-zones`);
+  if (!res.ok)
+    throw new Error(`Failed to fetch offers deivery zones: ${res.statusText}`);
   return res.json();
 }
 
@@ -711,20 +721,14 @@ async function POST6(request, { params }) {
 
 // src/inventory/offers/handler/getOffersDeliveryZones.ts
 import { NextResponse as NextResponse14 } from "next/server";
-var GET8 = async (request) => {
+async function GET8() {
   try {
-    const { getOffersDeliveryZones: getOffersDeliveryZones2 } = await import("../../getOffersDeliveryZones-ZR5PGM7G.js");
-    const data = await getOffersDeliveryZones2();
-    return NextResponse14.json(data);
-  } catch (error) {
-    return NextResponse14.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to fetch offers delivery zones"
-      },
-      { status: 500 }
-    );
+    const result = await getOffersDeliveryZones();
+    return NextResponse14.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
   }
-};
+}
 
 // src/inventory/offers/handler/getOffersGroups.ts
 async function GET9(request, { params }) {

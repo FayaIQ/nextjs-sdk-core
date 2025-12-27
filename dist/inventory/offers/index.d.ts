@@ -275,7 +275,7 @@ declare function POST(request: NextRequest, { params }: {
     }>;
 }): Promise<Response>;
 
-declare const GET$1: (request: NextRequest) => Promise<NextResponse<any>>;
+declare function GET$1(): Promise<NextResponse<any>>;
 
 declare function GET(request: NextRequest, { params }: {
     params: Promise<{
