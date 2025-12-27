@@ -1,14 +1,19 @@
 import {
+  getDeliveryZones
+} from "../../chunk-QJOAYXWL.js";
+import "../../chunk-3X5IRPGD.js";
+import "../../chunk-WNXLDDFR.js";
+import {
   toNextResponseFromError
-} from "../../chunk-PW6V7FVY.js";
-import "../../chunk-27NLU7D3.js";
-import "../../chunk-J3WCJNVW.js";
+} from "../../chunk-KJCEAUBE.js";
+import "../../chunk-ATLAWEEM.js";
+import "../../chunk-PQYV5NCO.js";
 
 // src/inventory/offers/getOffersPaging.ts
 async function getOffersPaging(query) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return getWithAuth(Api.getOffersPaging, query);
   }
   const qs = query ? new URLSearchParams(query).toString() : "";
@@ -20,8 +25,8 @@ async function getOffersPaging(query) {
 // src/inventory/offers/getOfferById.ts
 async function getOfferById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return getWithAuth(Api.getOfferById(id));
   }
   const res = await fetch(`/api/offers/${id}`);
@@ -32,8 +37,8 @@ async function getOfferById(id) {
 // src/inventory/offers/deleteOffer.ts
 async function deleteOffer(id) {
   if (typeof window === "undefined") {
-    const { deleteWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { deleteWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return deleteWithAuth(Api.deleteOffer(id));
   }
   const res = await fetch(`/api/offers/${id}`, { method: "DELETE" });
@@ -53,8 +58,8 @@ async function deleteOffer(id) {
 // src/inventory/offers/getInvoiceDiscount.ts
 async function getInvoiceDiscount(coupon) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return getWithAuth(Api.getInvoiceDiscount(coupon));
   }
   const res = await fetch(
@@ -68,8 +73,8 @@ async function getInvoiceDiscount(coupon) {
 // src/inventory/offers/getOffersItemsDropdown.ts
 async function getOffersItemsDropdown() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return getWithAuth(Api.getOffersItemsDropdown);
   }
   const res = await fetch(`/api/offers/items/dropdown`);
@@ -80,8 +85,8 @@ async function getOffersItemsDropdown() {
 // src/inventory/offers/getOffersCouponsDropdown.ts
 async function getOffersCouponsDropdown() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return getWithAuth(Api.getOffersCouponsDropdown);
   }
   const res = await fetch(`/api/offers/coupons/dropdown`);
@@ -92,8 +97,8 @@ async function getOffersCouponsDropdown() {
 // src/inventory/offers/postOffersItemsDiscount.ts
 async function postOffersItemsDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { postWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return postWithAuth(Api.postOffersItemsDiscount, payload);
   }
   const res = await fetch(`/api/offers/items-discount`, {
@@ -113,8 +118,8 @@ async function postOffersItemsDiscount(payload) {
 // src/inventory/offers/putOffersItemsDiscount.ts
 async function putOffersItemsDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { putWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return putWithAuth(Api.putOffersItemsDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/items-discount`, {
@@ -134,8 +139,8 @@ async function putOffersItemsDiscount(id, payload) {
 // src/inventory/offers/getOffersCustomers.ts
 async function getOffersCustomers() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return getWithAuth(Api.getOffersCustomers);
   }
   const res = await fetch(`/api/offers/customers`);
@@ -146,8 +151,8 @@ async function getOffersCustomers() {
 // src/inventory/offers/postOffersCustomerDiscount.ts
 async function postOffersCustomerDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { postWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return postWithAuth(Api.postOffersCustomerDiscount, payload);
   }
   const res = await fetch(`/api/offers/customer-discount`, {
@@ -167,8 +172,8 @@ async function postOffersCustomerDiscount(payload) {
 // src/inventory/offers/postOffersInvoiceDiscount.ts
 async function postOffersInvoiceDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { postWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return postWithAuth(Api.postOffersInvoiceDiscount, payload);
   }
   const res = await fetch(`/api/offers/invoice-discount`, {
@@ -188,8 +193,8 @@ async function postOffersInvoiceDiscount(payload) {
 // src/inventory/offers/postOffersShippingDiscount.ts
 async function postOffersShippingDiscount(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { postWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return postWithAuth(Api.postOffersShippingDiscount, payload);
   }
   const res = await fetch(`/api/offers/shipping-discount`, {
@@ -209,8 +214,8 @@ async function postOffersShippingDiscount(payload) {
 // src/inventory/offers/postOffersAddItemsByFilter.ts
 async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { postWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return postWithAuth(Api.postOffersAddItemsByFilter(offerId, forceUpdate), payload);
   }
   const res = await fetch(`/api/offers/${offerId}/add-items-by-filter/${String(forceUpdate)}`, {
@@ -231,7 +236,7 @@ async function postOffersAddItemsByFilter(offerId, forceUpdate, payload) {
 async function getCoupons() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return getWithAuth(Api.getCouponOffers);
   }
   const response = await fetch(`/api/offers/coupons`);
@@ -244,8 +249,8 @@ async function getCoupons() {
 // src/inventory/offers/postOffersDeliveryZones.ts
 async function postOffersDeliveryZones(offerId, payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { postWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return postWithAuth(Api.postOffersDeliveryZones(offerId), payload);
   }
   const res = await fetch(`/api/offers/${offerId}/delivery-zones`, {
@@ -265,8 +270,8 @@ async function postOffersDeliveryZones(offerId, payload) {
 // src/inventory/offers/getOffersGroups.ts
 async function getOffersGroups(offerId) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { getWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return getWithAuth(Api.getOffersGroups(offerId));
   }
   const res = await fetch(`/api/offers/${offerId}/offer-groups`);
@@ -277,8 +282,8 @@ async function getOffersGroups(offerId) {
 // src/inventory/offers/putOffersGroup.ts
 async function putOffersGroup(offerId, id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { putWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return putWithAuth(Api.putOffersGroup(offerId, id), payload);
   }
   const res = await fetch(`/api/offers/${offerId}/offer-groups/${id}`, {
@@ -298,8 +303,8 @@ async function putOffersGroup(offerId, id, payload) {
 // src/inventory/offers/deleteOffersGroup.ts
 async function deleteOffersGroup(offerId, id) {
   if (typeof window === "undefined") {
-    const { deleteWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { deleteWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return deleteWithAuth(Api.deleteOffersGroup(offerId, id));
   }
   const res = await fetch(`/api/offers/${offerId}/offer-groups/${id}`, { method: "DELETE" });
@@ -319,8 +324,8 @@ async function deleteOffersGroup(offerId, id) {
 // src/inventory/offers/putOffersCustomerDiscount.ts
 async function putOffersCustomerDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { putWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return putWithAuth(Api.putOffersCustomerDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/customer-discount`, {
@@ -340,8 +345,8 @@ async function putOffersCustomerDiscount(id, payload) {
 // src/inventory/offers/putOffersExtraItemDiscount.ts
 async function putOffersExtraItemDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { putWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return putWithAuth(Api.putOffersExtraItemDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/extra-item-discount`, {
@@ -361,8 +366,8 @@ async function putOffersExtraItemDiscount(id, payload) {
 // src/inventory/offers/putOffersInvoiceDiscount.ts
 async function putOffersInvoiceDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { putWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return putWithAuth(Api.putOffersInvoiceDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/invoice-discount`, {
@@ -382,8 +387,8 @@ async function putOffersInvoiceDiscount(id, payload) {
 // src/inventory/offers/putOffersItemsDiscountCustomers.ts
 async function putOffersItemsDiscountCustomers(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { putWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return putWithAuth(Api.putOffersItemsDiscountCustomers(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/items-discount/customers`, {
@@ -398,8 +403,8 @@ async function putOffersItemsDiscountCustomers(id, payload) {
 // src/inventory/offers/putOffersShippingDiscount.ts
 async function putOffersShippingDiscount(id, payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
-    const { Api } = await import("../../api-IWME5TPE.js");
+    const { putWithAuth } = await import("../../fetcher-RXETYHEA.js");
+    const { Api } = await import("../../api-GMXANBP6.js");
     return putWithAuth(Api.putOffersShippingDiscount(id), payload);
   }
   const res = await fetch(`/api/offers/${id}/shipping-discount`, {
@@ -706,8 +711,19 @@ async function POST6(request, { params }) {
   }
 }
 
+// src/inventory/offers/handler/getOffersDeliveryZones.ts
+import { NextResponse as NextResponse14 } from "next/server";
+async function GET8() {
+  try {
+    const result = await getDeliveryZones();
+    return NextResponse14.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
 // src/inventory/offers/handler/getOffersGroups.ts
-async function GET8(request, { params }) {
+async function GET9(request, { params }) {
   try {
     const result = await getOffersGroups((await params).id);
     return new Response(JSON.stringify(result), {
@@ -720,85 +736,85 @@ async function GET8(request, { params }) {
 }
 
 // src/inventory/offers/handler/putOffersGroup.ts
-import { NextResponse as NextResponse14 } from "next/server";
+import { NextResponse as NextResponse15 } from "next/server";
 async function PUT2(request, { params }) {
   try {
     const data = await request.json();
     const { id, offerGroupId } = await params;
     const result = await putOffersGroup(id, offerGroupId, data);
-    return NextResponse14.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/offers/handler/deleteOffersGroup.ts
-import { NextResponse as NextResponse15 } from "next/server";
-async function DELETE2(_request, { params }) {
-  try {
-    const { id, offerGroupId } = await params;
-    const result = await deleteOffersGroup(id, offerGroupId);
     return NextResponse15.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersCustomerDiscount.ts
+// src/inventory/offers/handler/deleteOffersGroup.ts
 import { NextResponse as NextResponse16 } from "next/server";
-async function PUT3(request, { params }) {
+async function DELETE2(_request, { params }) {
   try {
-    const data = await request.json();
-    const result = await putOffersCustomerDiscount((await params).id, data);
+    const { id, offerGroupId } = await params;
+    const result = await deleteOffersGroup(id, offerGroupId);
     return NextResponse16.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersExtraItemDiscount.ts
+// src/inventory/offers/handler/putOffersCustomerDiscount.ts
 import { NextResponse as NextResponse17 } from "next/server";
-async function PUT4(request, { params }) {
+async function PUT3(request, { params }) {
   try {
     const data = await request.json();
-    const result = await putOffersExtraItemDiscount((await params).id, data);
+    const result = await putOffersCustomerDiscount((await params).id, data);
     return NextResponse17.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersInvoiceDiscount.ts
+// src/inventory/offers/handler/putOffersExtraItemDiscount.ts
 import { NextResponse as NextResponse18 } from "next/server";
-async function PUT5(request, { params }) {
+async function PUT4(request, { params }) {
   try {
     const data = await request.json();
-    const result = await putOffersInvoiceDiscount((await params).id, data);
+    const result = await putOffersExtraItemDiscount((await params).id, data);
     return NextResponse18.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersItemsDiscountCustomers.ts
+// src/inventory/offers/handler/putOffersInvoiceDiscount.ts
 import { NextResponse as NextResponse19 } from "next/server";
-async function PUT6(request, { params }) {
+async function PUT5(request, { params }) {
   try {
     const data = await request.json();
-    const result = await putOffersItemsDiscountCustomers((await params).id, data);
+    const result = await putOffersInvoiceDiscount((await params).id, data);
     return NextResponse19.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersShippingDiscount.ts
+// src/inventory/offers/handler/putOffersItemsDiscountCustomers.ts
 import { NextResponse as NextResponse20 } from "next/server";
+async function PUT6(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersItemsDiscountCustomers((await params).id, data);
+    return NextResponse20.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
+// src/inventory/offers/handler/putOffersShippingDiscount.ts
+import { NextResponse as NextResponse21 } from "next/server";
 async function PUT7(request, { params }) {
   try {
     const data = await request.json();
     const result = await putOffersShippingDiscount((await params).id, data);
-    return NextResponse20.json(result);
+    return NextResponse21.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -811,7 +827,8 @@ export {
   GET3 as GetOfferByIdGET,
   GET6 as GetOffersCouponsDropdownGET,
   GET7 as GetOffersCustomersGET,
-  GET8 as GetOffersGroupsGET,
+  GET8 as GetOffersDeliveryZonesGET,
+  GET9 as GetOffersGroupsGET,
   GET5 as GetOffersItemsDropdownGET,
   GET as GetOffersPagingGET,
   OfferPagingParameters,

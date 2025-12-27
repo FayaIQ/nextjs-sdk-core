@@ -75,6 +75,7 @@ export class Api {
   static getOffersPointsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
   static getOffersNewsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
   static getOffersCouponsDropdown: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
+  static getOffersDeiveryZones: string = `${Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/{deliveryZoneId}`;
   static postOffersItemsDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
   static postOffersAddItemsByFilter(
     offerId: string | number,

@@ -57,6 +57,7 @@ declare class Api {
     static getOffersPointsDropdown: string;
     static getOffersNewsDropdown: string;
     static getOffersCouponsDropdown: string;
+    static getOffersDeiveryZones: string;
     static postOffersItemsDiscount: string;
     static postOffersAddItemsByFilter(offerId: string | number, forceUpdate: boolean | string): string;
     static postOffersDeliveryZones(offerId: string | number): string;

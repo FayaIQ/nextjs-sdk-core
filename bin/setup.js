@@ -56,14 +56,14 @@ const routes = [
     exportName: ["GETOrders", "POSTOrder"],
     description: "Orders listing and creation endpoint",
   },
-    {
-      name: "createOrder",
-      path: ["src", "app", "api", "orders"],
-      handler: "erp-core/inventory/orders",
-      methods: ["POST"],
-      exportName: "POSTOrder",
-      description: "Create an order (POST /api/orders)",
-    },
+  {
+    name: "createOrder",
+    path: ["src", "app", "api", "orders"],
+    handler: "erp-core/inventory/orders",
+    methods: ["POST"],
+    exportName: "POSTOrder",
+    description: "Create an order (POST /api/orders)",
+  },
   {
     name: "orderFullInfo",
     path: ["src", "app", "api", "orders", "full-info"],
@@ -307,7 +307,7 @@ const routes = [
   // CRM - clients endpoints
   {
     name: "clientsPaging",
-    path: ["src", "app", "api", "crm" ,"clients", "paging"],
+    path: ["src", "app", "api", "crm", "clients", "paging"],
     handler: "erp-core/crm",
     methods: ["GET"],
     exportName: "GETClientsPaging",
@@ -371,14 +371,7 @@ const routes = [
   },
   {
     name: "itemsCollectionsActivateByFilter",
-    path: [
-      "src",
-      "app",
-      "api",
-      "items",
-      "collections",
-      "activate-by-filter",
-    ],
+    path: ["src", "app", "api", "items", "collections", "activate-by-filter"],
     handler: "erp-core/inventory/items",
     methods: ["PUT"],
     exportName: "PutCollectionsActivateByFilterPUT",
@@ -386,14 +379,7 @@ const routes = [
   },
   {
     name: "itemsCollectionsDeactivateByFilter",
-    path: [
-      "src",
-      "app",
-      "api",
-      "items",
-      "collections",
-      "deactivate-by-filter",
-    ],
+    path: ["src", "app", "api", "items", "collections", "deactivate-by-filter"],
     handler: "erp-core/inventory/items",
     methods: ["PUT"],
     exportName: "PutCollectionsDeactivateByFilterPUT",
@@ -566,6 +552,14 @@ const routes = [
     methods: ["POST"],
     exportName: "PostOffersAddItemsByFilterPOST",
     description: "Add items to offer by filter with force update flag",
+  },
+  {
+    name: "offersDeliveryZones",
+    path: ["src", "app", "api", "offers", "delivery-zones"],
+    handler: "erp-core/inventory/offers/",
+    methods: ["GET"],
+    exportName: "GetOffersDeliveryZonesGet",
+    description: "get offers to a delivery zones",
   },
   {
     name: "offersDeliveryZones",

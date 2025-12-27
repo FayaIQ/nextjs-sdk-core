@@ -531,6 +531,7 @@ var init_api = __esm({
     _Api.getOffersPointsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
     _Api.getOffersNewsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
     _Api.getOffersCouponsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
+    _Api.getOffersDeiveryZones = `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/{deliveryZoneId}`;
     _Api.postOffersItemsDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
     _Api.postOffersItemsDiscountCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
     _Api.postOffersExtraItemDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
@@ -1074,7 +1075,8 @@ __export(offers_exports, {
   GetOfferByIdGET: () => GET3,
   GetOffersCouponsDropdownGET: () => GET6,
   GetOffersCustomersGET: () => GET7,
-  GetOffersGroupsGET: () => GET8,
+  GetOffersDeliveryZonesGET: () => GET9,
+  GetOffersGroupsGET: () => GET10,
   GetOffersItemsDropdownGET: () => GET5,
   GetOffersPagingGET: () => GET,
   OfferPagingParameters: () => OfferPagingParameters,
@@ -1842,8 +1844,33 @@ async function POST6(request, { params }) {
   }
 }
 
+// src/inventory/offers/handler/getOffersDeliveryZones.ts
+var import_server15 = require("next/server");
+
+// src/gps/getDeliveryZones.ts
+async function getDeliveryZones() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getDeliveryZones);
+  }
+  const res = await fetch(`/api/gps/delivery-zones`);
+  if (!res.ok) throw new Error(`Failed to fetch delivery zones: ${res.statusText}`);
+  return res.json();
+}
+
+// src/inventory/offers/handler/getOffersDeliveryZones.ts
+async function GET9() {
+  try {
+    const result = await getDeliveryZones();
+    return import_server15.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
 // src/inventory/offers/handler/getOffersGroups.ts
-async function GET8(request, { params }) {
+async function GET10(request, { params }) {
   try {
     const result = await getOffersGroups((await params).id);
     return new Response(JSON.stringify(result), {
@@ -1856,85 +1883,85 @@ async function GET8(request, { params }) {
 }
 
 // src/inventory/offers/handler/putOffersGroup.ts
-var import_server15 = require("next/server");
+var import_server16 = require("next/server");
 async function PUT2(request, { params }) {
   try {
     const data = await request.json();
     const { id, offerGroupId } = await params;
     const result = await putOffersGroup(id, offerGroupId, data);
-    return import_server15.NextResponse.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
-  }
-}
-
-// src/inventory/offers/handler/deleteOffersGroup.ts
-var import_server16 = require("next/server");
-async function DELETE2(_request, { params }) {
-  try {
-    const { id, offerGroupId } = await params;
-    const result = await deleteOffersGroup(id, offerGroupId);
     return import_server16.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersCustomerDiscount.ts
+// src/inventory/offers/handler/deleteOffersGroup.ts
 var import_server17 = require("next/server");
-async function PUT3(request, { params }) {
+async function DELETE2(_request, { params }) {
   try {
-    const data = await request.json();
-    const result = await putOffersCustomerDiscount((await params).id, data);
+    const { id, offerGroupId } = await params;
+    const result = await deleteOffersGroup(id, offerGroupId);
     return import_server17.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersExtraItemDiscount.ts
+// src/inventory/offers/handler/putOffersCustomerDiscount.ts
 var import_server18 = require("next/server");
-async function PUT4(request, { params }) {
+async function PUT3(request, { params }) {
   try {
     const data = await request.json();
-    const result = await putOffersExtraItemDiscount((await params).id, data);
+    const result = await putOffersCustomerDiscount((await params).id, data);
     return import_server18.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersInvoiceDiscount.ts
+// src/inventory/offers/handler/putOffersExtraItemDiscount.ts
 var import_server19 = require("next/server");
-async function PUT5(request, { params }) {
+async function PUT4(request, { params }) {
   try {
     const data = await request.json();
-    const result = await putOffersInvoiceDiscount((await params).id, data);
+    const result = await putOffersExtraItemDiscount((await params).id, data);
     return import_server19.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersItemsDiscountCustomers.ts
+// src/inventory/offers/handler/putOffersInvoiceDiscount.ts
 var import_server20 = require("next/server");
-async function PUT6(request, { params }) {
+async function PUT5(request, { params }) {
   try {
     const data = await request.json();
-    const result = await putOffersItemsDiscountCustomers((await params).id, data);
+    const result = await putOffersInvoiceDiscount((await params).id, data);
     return import_server20.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 
-// src/inventory/offers/handler/putOffersShippingDiscount.ts
+// src/inventory/offers/handler/putOffersItemsDiscountCustomers.ts
 var import_server21 = require("next/server");
+async function PUT6(request, { params }) {
+  try {
+    const data = await request.json();
+    const result = await putOffersItemsDiscountCustomers((await params).id, data);
+    return import_server21.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
+// src/inventory/offers/handler/putOffersShippingDiscount.ts
+var import_server22 = require("next/server");
 async function PUT7(request, { params }) {
   try {
     const data = await request.json();
     const result = await putOffersShippingDiscount((await params).id, data);
-    return import_server21.NextResponse.json(result);
+    return import_server22.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -1948,6 +1975,7 @@ async function PUT7(request, { params }) {
   GetOfferByIdGET,
   GetOffersCouponsDropdownGET,
   GetOffersCustomersGET,
+  GetOffersDeliveryZonesGET,
   GetOffersGroupsGET,
   GetOffersItemsDropdownGET,
   GetOffersPagingGET,
