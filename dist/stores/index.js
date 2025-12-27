@@ -1,14 +1,14 @@
 import {
   toNextResponseFromError
-} from "../chunk-PO5ESI5N.js";
-import "../chunk-2JDMHW7P.js";
-import "../chunk-HALIJFAD.js";
+} from "../chunk-PW6V7FVY.js";
+import "../chunk-27NLU7D3.js";
+import "../chunk-J3WCJNVW.js";
 
 // src/stores/getStores.ts
 async function getStores() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-A4L6W3MW.js");
-    const { Api } = await import("../api-A4L53SZM.js");
+    const { getWithAuth } = await import("../fetcher-AUVXNMTA.js");
+    const { Api } = await import("../api-IWME5TPE.js");
     return getWithAuth(Api.getStores);
   }
   const res = await fetch(`/api/stores`);
@@ -40,8 +40,8 @@ async function getStoreUsersPaging(params = {}) {
     }
   });
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-A4L6W3MW.js");
-    const { Api } = await import("../api-A4L53SZM.js");
+    const { getWithAuth } = await import("../fetcher-AUVXNMTA.js");
+    const { Api } = await import("../api-IWME5TPE.js");
     const url = Api.getStoreUsersPaging;
     return getWithAuth(`${url}?${qs.toString()}`);
   }
@@ -56,8 +56,8 @@ async function getStoreUsersPaging(params = {}) {
 // src/stores/getStoreDeliveryZones.ts
 async function getStoreDeliveryZones(storeId) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-A4L6W3MW.js");
-    const { Api } = await import("../api-A4L53SZM.js");
+    const { getWithAuth } = await import("../fetcher-AUVXNMTA.js");
+    const { Api } = await import("../api-IWME5TPE.js");
     return getWithAuth(Api.getStoreDeliveryZones(storeId));
   }
   const res = await fetch(`/api/stores/${storeId}/delivery-zones`);
@@ -98,11 +98,43 @@ async function GET2(request) {
   }
 }
 
+// src/stores/getStoreById.ts
+async function getStoreById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth } = await import("../fetcher-AUVXNMTA.js");
+    const { Api } = await import("../api-IWME5TPE.js");
+    return getWithAuth(Api.getStoreById(id));
+  }
+  const res = await fetch(`/api/stores/${id}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
+// src/stores/handler/getStoreById.ts
+import { NextResponse as NextResponse3 } from "next/server";
+async function GET3(request, { params }) {
+  try {
+    const { id } = await params;
+    const result = await getStoreById(id);
+    return NextResponse3.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
 // src/stores/getBranches.ts
 async function getBranches() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-A4L6W3MW.js");
-    const { Api } = await import("../api-A4L53SZM.js");
+    const { getWithAuth } = await import("../fetcher-AUVXNMTA.js");
+    const { Api } = await import("../api-IWME5TPE.js");
     return getWithAuth(Api.getBranches);
   }
   const res = await fetch(`/api/stores/branches`);
@@ -119,20 +151,22 @@ async function getBranches() {
 }
 
 // src/stores/handler/getBranches.ts
-import { NextResponse as NextResponse3 } from "next/server";
-async function GET3(request) {
+import { NextResponse as NextResponse4 } from "next/server";
+async function GET4(request) {
   try {
     const data = await getBranches();
-    return NextResponse3.json(data);
+    return NextResponse4.json(data);
   } catch (err) {
     return toNextResponseFromError(err);
   }
 }
 export {
-  GET3 as GETBranches,
+  GET4 as GETBranches,
   GET2 as GETStoreUsersPaging,
   GET as GETStores,
+  GET3 as GetStoreByIdGET,
   getBranches,
+  getStoreById,
   getStoreDeliveryZones,
   getStoreUsersPaging,
   getStores

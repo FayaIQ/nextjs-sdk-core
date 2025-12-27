@@ -8,7 +8,7 @@ interface Store {
 
 declare function getStores(): Promise<Store[]>;
 
-declare function GET$2(request: NextRequest): Promise<NextResponse<any>>;
+declare function GET$3(request: NextRequest): Promise<NextResponse<any>>;
 
 /**
  * Parameters accepted by getStoreUsersPaging
@@ -68,7 +68,18 @@ interface StoreUsersPagingResponse {
     results: StoreUser[];
 }
 
-declare function GET$1(request: NextRequest): Promise<NextResponse<any>>;
+declare function GET$2(request: NextRequest): Promise<NextResponse<any>>;
+
+/**
+ * Get a store by id
+ */
+declare function getStoreById(id: string | number): Promise<any>;
+
+declare function GET$1(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<NextResponse<any>>;
 
 interface CountryModel {
     id: number;
@@ -150,4 +161,4 @@ declare function getBranches(): Promise<BranchesResponse>;
 
 declare function GET(request: NextRequest): Promise<NextResponse<any>>;
 
-export { type BranchesResponse, GET as GETBranches, GET$1 as GETStoreUsersPaging, GET$2 as GETStores, type Store, type StoreUser, type StoreUserPagingParams, type StoreUsersPagingResponse, getBranches, getStoreDeliveryZones, getStoreUsersPaging, getStores };
+export { type BranchesResponse, GET as GETBranches, GET$2 as GETStoreUsersPaging, GET$3 as GETStores, GET$1 as GetStoreByIdGET, type Store, type StoreUser, type StoreUserPagingParams, type StoreUsersPagingResponse, getBranches, getStoreById, getStoreDeliveryZones, getStoreUsersPaging, getStores };

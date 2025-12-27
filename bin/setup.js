@@ -281,6 +281,14 @@ const routes = [
     description: "Stores listing endpoint",
   },
   {
+    name: "storeById",
+    path: ["src", "app", "api", "stores", "[id]"],
+    handler: "erp-core/stores",
+    methods: ["GET"],
+    exportName: "GetStoreByIdGET",
+    description: "Get store by id",
+  },
+  {
     name: "applicationsStoreDropDown",
     path: ["src", "app", "api", "applications", "store", "dropdown"],
     handler: "erp-core/identity/application",

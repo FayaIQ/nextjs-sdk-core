@@ -351,6 +351,9 @@ var init_api = __esm({
       static putOffersDarkDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
       }
+      static getStoreById(id) {
+        return `${_Api.STORES_BASE}/v1/Stores/${id}`;
+      }
       static putOrderPayment(orderId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
       }
@@ -1043,10 +1046,12 @@ var init_fetcher = __esm({
 // src/stores/index.ts
 var stores_exports = {};
 __export(stores_exports, {
-  GETBranches: () => GET3,
+  GETBranches: () => GET4,
   GETStoreUsersPaging: () => GET2,
   GETStores: () => GET,
+  GetStoreByIdGET: () => GET3,
   getBranches: () => getBranches,
+  getStoreById: () => getStoreById,
   getStoreDeliveryZones: () => getStoreDeliveryZones,
   getStoreUsersPaging: () => getStoreUsersPaging,
   getStores: () => getStores
@@ -1168,6 +1173,38 @@ async function GET2(request) {
   }
 }
 
+// src/stores/getStoreById.ts
+async function getStoreById(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getStoreById(id));
+  }
+  const res = await fetch(`/api/stores/${id}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
+// src/stores/handler/getStoreById.ts
+var import_server4 = require("next/server");
+async function GET3(request, { params }) {
+  try {
+    const { id } = await params;
+    const result = await getStoreById(id);
+    return import_server4.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
 // src/stores/getBranches.ts
 async function getBranches() {
   if (typeof window === "undefined") {
@@ -1189,11 +1226,11 @@ async function getBranches() {
 }
 
 // src/stores/handler/getBranches.ts
-var import_server4 = require("next/server");
-async function GET3(request) {
+var import_server5 = require("next/server");
+async function GET4(request) {
   try {
     const data = await getBranches();
-    return import_server4.NextResponse.json(data);
+    return import_server5.NextResponse.json(data);
   } catch (err) {
     return toNextResponseFromError(err);
   }
@@ -1203,7 +1240,9 @@ async function GET3(request) {
   GETBranches,
   GETStoreUsersPaging,
   GETStores,
+  GetStoreByIdGET,
   getBranches,
+  getStoreById,
   getStoreDeliveryZones,
   getStoreUsersPaging,
   getStores

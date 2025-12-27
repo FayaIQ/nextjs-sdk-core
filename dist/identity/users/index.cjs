@@ -351,6 +351,9 @@ var init_api = __esm({
       static putOffersDarkDiscount(id) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
       }
+      static getStoreById(id) {
+        return `${_Api.STORES_BASE}/v1/Stores/${id}`;
+      }
       static putOrderPayment(orderId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
       }

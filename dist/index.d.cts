@@ -86,6 +86,7 @@ declare class Api {
     static getCouponOffers: string;
     static getBranches: string;
     static getBrands: string;
+    static getStoreById(id: string | number): string;
     static getWishes: string;
     static getOrders: string;
     static getClientsPaging: string;

@@ -145,6 +145,9 @@ export class Api {
   static getCouponOffers: string = `${Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
   static getBranches: string = `${Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
   static getBrands: string = `${Api.INVENTORY_BASE}/v1/Complex/MenuBrand`;
+  static getStoreById(id: string | number): string {
+    return `${Api.STORES_BASE}/v1/Stores/${id}`;
+  }
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
   static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
   // CRM - Clients

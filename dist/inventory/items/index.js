@@ -1,7 +1,7 @@
 import {
   getProductInfo,
   getProducts
-} from "../../chunk-IMSAC3UM.js";
+} from "../../chunk-5RKAIHIP.js";
 import {
   AgeGroup,
   Gender,
@@ -12,20 +12,20 @@ import {
 } from "../../chunk-Q3KXH3LE.js";
 import {
   Api
-} from "../../chunk-TEVHWDM5.js";
+} from "../../chunk-UF6CMAZG.js";
 import {
   toNextResponseFromError
-} from "../../chunk-PO5ESI5N.js";
+} from "../../chunk-PW6V7FVY.js";
 import {
   getWithAuth
-} from "../../chunk-2JDMHW7P.js";
-import "../../chunk-HALIJFAD.js";
+} from "../../chunk-27NLU7D3.js";
+import "../../chunk-J3WCJNVW.js";
 
 // src/inventory/items/getProductInfoV2.ts
 async function getProductInfoV2(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     return getWithAuth2(`${Api2.getProductInfoV2(id)}`);
   }
   const response = await fetch(`/api/products/v2/${id}`);
@@ -41,7 +41,7 @@ async function getParentProducts({
 }) {
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await import("../../core/index.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     const params = filterParams.toURLSearchParams();
     return getWithAuth2(`${Api2.getParentProducts}?${params.toString()}`, {});
   } else {
@@ -81,8 +81,8 @@ async function getItemsPaging(filters) {
 // src/inventory/items/getItemById.ts
 async function getItemById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     return getWithAuth2(Api2.getItemById(id));
   }
   const response = await fetch(`/api/items/${id}/info`);
@@ -176,8 +176,8 @@ async function GET6(request, { params }) {
 // src/inventory/items/postCopyParentStore.ts
 async function postCopyParentStore(itemIds) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     return postWithAuth(Api2.postCopyParentStore, { itemIds });
   }
   const res = await fetch(`/api/items/copy-parent-store`, {
@@ -201,8 +201,8 @@ async function postCopyParentStore(itemIds) {
 // src/inventory/items/postCopyParentToChildStores.ts
 async function postCopyParentToChildStores(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     return postWithAuth(Api2.postCopyParentToChildStores, payload);
   }
   const res = await fetch(`/api/items/copy-parent-to-child-stores`, {
@@ -225,8 +225,8 @@ async function postCopyParentToChildStores(payload) {
 // src/inventory/items/postCopyToStore.ts
 async function postCopyToStore(childStoreId, payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { postWithAuth } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     return postWithAuth(Api2.postCopyToStore(childStoreId), payload);
   }
   const res = await fetch(`/api/items/copy-to-store/${childStoreId}`, {
@@ -295,8 +295,8 @@ async function POST3(request, { params }) {
 // src/inventory/items/putParentStoreSync.ts
 async function putParentStoreSync(itemId, body) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     if (body !== void 0) return putWithAuth(Api2.putItemParentStoreSync(itemId), body);
     return putWithAuth(Api2.putItemParentStoreSync(itemId));
   }
@@ -339,8 +339,8 @@ async function PUT(request, { params }) {
 // src/inventory/items/putActivate.ts
 async function putActivateItem(id) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     return putWithAuth(Api2.putItemActivate(id));
   }
   const res = await fetch(`/api/items/${id}/activate`, { method: "PUT" });
@@ -351,8 +351,8 @@ async function putActivateItem(id) {
 // src/inventory/items/putDeactivate.ts
 async function putDeactivateItem(id) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     return putWithAuth(Api2.putItemDeactivate(id));
   }
   const res = await fetch(`/api/items/${id}/deactivate`, { method: "PUT" });
@@ -363,7 +363,7 @@ async function putDeactivateItem(id) {
 // src/inventory/items/putCollectionsActivateByFilter.ts
 async function putCollectionsActivateByFilter(payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-A4L6W3MW.js");
+    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
     return putWithAuth(Api.putItemsCollectionsActivateByFilter(), payload);
   }
   const res = await fetch(`/api/items/collections/activate-by-filter`, {
@@ -387,7 +387,7 @@ async function putCollectionsActivateByFilter(payload) {
 // src/inventory/items/putCollectionsDeactivateByFilter.ts
 async function putCollectionsDeactivateByFilter(payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-A4L6W3MW.js");
+    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
     return putWithAuth(Api.putItemsCollectionsDeactivateByFilter(), payload);
   }
   const res = await fetch(`/api/items/collections/deactivate-by-filter`, {
@@ -411,8 +411,8 @@ async function putCollectionsDeactivateByFilter(payload) {
 // src/inventory/items/putItem.ts
 async function putItem(id, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { putWithAuth } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     console.log("putItem data:", data);
     return putWithAuth(Api2.putItem(id), data);
   }
@@ -431,8 +431,8 @@ async function putItem(id, data) {
 // src/inventory/items/deleteItem.ts
 async function deleteItem(id) {
   if (typeof window === "undefined") {
-    const { deleteWithAuth } = await import("../../fetcher-A4L6W3MW.js");
-    const { Api: Api2 } = await import("../../api-A4L53SZM.js");
+    const { deleteWithAuth } = await import("../../fetcher-AUVXNMTA.js");
+    const { Api: Api2 } = await import("../../api-IWME5TPE.js");
     return deleteWithAuth(Api2.deleteItem(id));
   }
   const res = await fetch(`/api/items/${id}`, { method: "DELETE" });
