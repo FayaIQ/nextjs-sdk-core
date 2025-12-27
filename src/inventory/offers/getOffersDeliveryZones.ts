@@ -1,8 +1,8 @@
-export async function getOffersDeliveryZones(): Promise<any> {
+export async function getOffersDeliveryZones(id: string): Promise<any> {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
-    return getWithAuth<any>(Api.getOffersDeiveryZones);
+    return getWithAuth<any>(Api.getOffersDeliveryZones(id));
   }
 
   const res = await fetch(`/api/offers/delivery-zones`);

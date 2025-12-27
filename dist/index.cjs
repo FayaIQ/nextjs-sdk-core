@@ -304,7 +304,7 @@ var init_api = __esm({
           String(coupon)
         )}`;
       }
-      static getDeliveryZoneDiscount(deliveryZoneId) {
+      static getOffersDeliveryZones(deliveryZoneId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
       }
       static postOffersAddItemsByFilter(offerId, forceUpdate) {
@@ -534,7 +534,6 @@ var init_api = __esm({
     _Api.getOffersPointsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
     _Api.getOffersNewsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
     _Api.getOffersCouponsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
-    _Api.getOffersDeiveryZones = `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/{deliveryZoneId}`;
     _Api.postOffersItemsDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
     _Api.postOffersItemsDiscountCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
     _Api.postOffersExtraItemDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;

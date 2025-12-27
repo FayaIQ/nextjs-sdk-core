@@ -127,7 +127,7 @@ declare function getCoupons(): Promise<any>;
 
 declare function postOffersDeliveryZones(offerId: string | number, payload: any): Promise<any>;
 
-declare function getOffersDeliveryZones(): Promise<any>;
+declare function getOffersDeliveryZones(id: string): Promise<any>;
 
 declare function getOffersGroups(offerId: string | number): Promise<any>;
 
@@ -275,7 +275,11 @@ declare function POST(request: NextRequest, { params }: {
     }>;
 }): Promise<Response>;
 
-declare function GET$1(): Promise<NextResponse<any>>;
+declare function GET$1(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<NextResponse<any>>;
 
 declare function GET(request: NextRequest, { params }: {
     params: Promise<{

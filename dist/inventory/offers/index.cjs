@@ -301,7 +301,7 @@ var init_api = __esm({
           String(coupon)
         )}`;
       }
-      static getDeliveryZoneDiscount(deliveryZoneId) {
+      static getOffersDeliveryZones(deliveryZoneId) {
         return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
       }
       static postOffersAddItemsByFilter(offerId, forceUpdate) {
@@ -531,7 +531,6 @@ var init_api = __esm({
     _Api.getOffersPointsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
     _Api.getOffersNewsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
     _Api.getOffersCouponsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
-    _Api.getOffersDeiveryZones = `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/{deliveryZoneId}`;
     _Api.postOffersItemsDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
     _Api.postOffersItemsDiscountCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
     _Api.postOffersExtraItemDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
@@ -1381,11 +1380,11 @@ async function postOffersDeliveryZones(offerId, payload) {
 }
 
 // src/inventory/offers/getOffersDeliveryZones.ts
-async function getOffersDeliveryZones() {
+async function getOffersDeliveryZones(id) {
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(Api2.getOffersDeiveryZones);
+    return getWithAuth2(Api2.getOffersDeliveryZones(id));
   }
   const res = await fetch(`/api/offers/delivery-zones`);
   if (!res.ok)
@@ -1860,9 +1859,10 @@ async function POST6(request, { params }) {
 
 // src/inventory/offers/handler/getOffersDeliveryZones.ts
 var import_server15 = require("next/server");
-async function GET8() {
+async function GET8(request, { params }) {
+  const { id } = await params;
   try {
-    const result = await getOffersDeliveryZones();
+    const result = await getOffersDeliveryZones(id);
     return import_server15.NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);

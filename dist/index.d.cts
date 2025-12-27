@@ -50,14 +50,13 @@ declare class Api {
     static deleteOffer(id: string | number): string;
     static getOffersCustomerItemLoggedIn: string;
     static getStoreInvoiceDiscount(storeId: string | number, coupon: string): string;
-    static getDeliveryZoneDiscount(deliveryZoneId: string | number): string;
+    static getOffersDeliveryZones(deliveryZoneId: string | number): string;
     static getOffersItemsDropdown: string;
     static getOffersSlideShowsDropdown: string;
     static getOffersItemsStores: string;
     static getOffersPointsDropdown: string;
     static getOffersNewsDropdown: string;
     static getOffersCouponsDropdown: string;
-    static getOffersDeiveryZones: string;
     static postOffersItemsDiscount: string;
     static postOffersAddItemsByFilter(offerId: string | number, forceUpdate: boolean | string): string;
     static postOffersDeliveryZones(offerId: string | number): string;
