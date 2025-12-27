@@ -1065,6 +1065,28 @@ var init_core = __esm({
   }
 });
 
+// src/inventory/offers/getOffersDeliveryZones.ts
+var getOffersDeliveryZones_exports = {};
+__export(getOffersDeliveryZones_exports, {
+  getOffersDeliveryZones: () => getOffersDeliveryZones
+});
+async function getOffersDeliveryZones() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getOffersDeiveryZones);
+  }
+  const res = await fetch(`/api/offers/deliveryZones`);
+  if (!res.ok)
+    throw new Error(`Failed to fetch offers deivery zones: ${res.statusText}`);
+  return res.json();
+}
+var init_getOffersDeliveryZones = __esm({
+  "src/inventory/offers/getOffersDeliveryZones.ts"() {
+    "use strict";
+  }
+});
+
 // src/inventory/offers/index.ts
 var offers_exports = {};
 __export(offers_exports, {
@@ -1075,8 +1097,8 @@ __export(offers_exports, {
   GetOfferByIdGET: () => GET3,
   GetOffersCouponsDropdownGET: () => GET6,
   GetOffersCustomersGET: () => GET7,
-  GetOffersDeliveryZonesGET: () => GET9,
-  GetOffersGroupsGET: () => GET10,
+  GetOffersDeliveryZonesGET: () => GET8,
+  GetOffersGroupsGET: () => GET9,
   GetOffersItemsDropdownGET: () => GET5,
   GetOffersPagingGET: () => GET,
   OfferPagingParameters: () => OfferPagingParameters,
@@ -1380,18 +1402,8 @@ async function postOffersDeliveryZones(offerId, payload) {
   return res.json();
 }
 
-// src/inventory/offers/getOffersDeliveryZones.ts
-async function getOffersDeliveryZones() {
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(Api2.getOffersDeiveryZones);
-  }
-  const res = await fetch(`/api/offers/deliveryZones`);
-  if (!res.ok)
-    throw new Error(`Failed to fetch offers deivery zones: ${res.statusText}`);
-  return res.json();
-}
+// src/inventory/offers/index.ts
+init_getOffersDeliveryZones();
 
 // src/inventory/offers/getOffersGroups.ts
 async function getOffersGroups(offerId) {
@@ -1860,31 +1872,23 @@ async function POST6(request, { params }) {
 
 // src/inventory/offers/handler/getOffersDeliveryZones.ts
 var import_server15 = require("next/server");
-
-// src/gps/getDeliveryZones.ts
-async function getDeliveryZones() {
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(Api2.getDeliveryZones);
-  }
-  const res = await fetch(`/api/gps/delivery-zones`);
-  if (!res.ok) throw new Error(`Failed to fetch delivery zones: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/offers/handler/getOffersDeliveryZones.ts
-async function GET9() {
+var GET8 = async (request) => {
   try {
-    const result = await getDeliveryZones();
-    return import_server15.NextResponse.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
+    const { getOffersDeliveryZones: getOffersDeliveryZones2 } = await Promise.resolve().then(() => (init_getOffersDeliveryZones(), getOffersDeliveryZones_exports));
+    const data = await getOffersDeliveryZones2();
+    return import_server15.NextResponse.json(data);
+  } catch (error) {
+    return import_server15.NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Failed to fetch offers delivery zones"
+      },
+      { status: 500 }
+    );
   }
-}
+};
 
 // src/inventory/offers/handler/getOffersGroups.ts
-async function GET10(request, { params }) {
+async function GET9(request, { params }) {
   try {
     const result = await getOffersGroups((await params).id);
     return new Response(JSON.stringify(result), {

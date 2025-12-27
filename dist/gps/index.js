@@ -1,8 +1,4 @@
 import {
-  GET,
-  getDeliveryZones
-} from "../chunk-QJOAYXWL.js";
-import {
   getCities,
   getCountries,
   getDistricts,
@@ -11,9 +7,36 @@ import {
 import {
   getAddressById
 } from "../chunk-WNXLDDFR.js";
-import "../chunk-KJCEAUBE.js";
+import {
+  toNextResponseFromError
+} from "../chunk-KJCEAUBE.js";
 import "../chunk-ATLAWEEM.js";
 import "../chunk-PQYV5NCO.js";
+
+// src/gps/getDeliveryZones.ts
+async function getDeliveryZones() {
+  if (typeof window === "undefined") {
+    const { getWithAuth } = await import("../fetcher-RXETYHEA.js");
+    const { Api } = await import("../api-GMXANBP6.js");
+    return getWithAuth(Api.getDeliveryZones);
+  }
+  const res = await fetch(`/api/gps/delivery-zones`);
+  if (!res.ok) throw new Error(`Failed to fetch delivery zones: ${res.statusText}`);
+  return res.json();
+}
+
+// src/gps/handler/getDeliveryZones.ts
+async function GET(request) {
+  try {
+    const result = await getDeliveryZones();
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    });
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
 export {
   GET as GetDeliveryZonesGET,
   getAddressById,

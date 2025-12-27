@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { toNextResponseFromError } from "../../../core/errorResponse";
-import { getDeliveryZones } from "../../../gps";
 
-export async function GET() {
+export const GET = async (request: NextRequest) => {
   try {
-    const result = await getDeliveryZones();
-    return NextResponse.json(result);
-  } catch (err) {
-    return toNextResponseFromError(err);
+    const { getOffersDeliveryZones } = await import(
+      "../getOffersDeliveryZones"
+    );
+    const data = await getOffersDeliveryZones();
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch offers delivery zones",
+      },
+      { status: 500 }
+    );
   }
-}
+};

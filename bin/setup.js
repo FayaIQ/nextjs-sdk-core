@@ -558,7 +558,7 @@ const routes = [
     path: ["src", "app", "api", "offers", "delivery-zones"],
     handler: "erp-core/inventory/offers/",
     methods: ["GET"],
-    exportName: "GetOffersDeliveryZonesGet",
+    exportName: "GetOffersDeliveryZonesGET",
     description: "get offers to a delivery zones",
   },
   {
