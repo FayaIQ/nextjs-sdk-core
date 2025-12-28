@@ -403,6 +403,9 @@ var init_api = __esm({
       static putOrderItemCancel(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
       }
+      static putOrderCancel(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/cancel`;
+      }
       static putOrderItemUndoCancel(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
       }
@@ -1082,6 +1085,7 @@ __export(orders_exports, {
   POSTOrderFullInfo: () => POST2,
   PUTOrderApprove: () => PUT,
   PUTOrderApproveList: () => PUT3,
+  PUTOrderCancel: () => PUT11,
   PUTOrderChangeStatus: () => PUT7,
   PUTOrderDisapprove: () => PUT2,
   PUTOrderDisapproveList: () => PUT4,
@@ -1098,6 +1102,7 @@ __export(orders_exports, {
   postOrder: () => postOrder,
   putOrderApprove: () => putOrderApprove,
   putOrderApproveList: () => putOrderApproveList,
+  putOrderCancel: () => putOrderCancel,
   putOrderChangeStatus: () => putOrderChangeStatus,
   putOrderDisapprove: () => putOrderDisapprove,
   putOrderDisapproveList: () => putOrderDisapproveList,
@@ -1730,6 +1735,28 @@ async function putOrderReferenceDeliveryId(orderId, data) {
   return res.json();
 }
 
+// src/inventory/orders/putOrderCancel.ts
+async function putOrderCancel(id, note) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putOrderCancel(id), {
+      note: note || ""
+    });
+  }
+  const response = await fetch(`/api/orders/${id}/Cancel`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ note: note || "" })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to cancel order: ${response.statusText}`);
+  }
+  return response.json();
+}
+
 // src/inventory/orders/handler/post-order.ts
 var import_server = require("next/server");
 async function POST(request) {
@@ -2048,6 +2075,27 @@ async function PUT10(request, { params }) {
     );
   }
 }
+
+// src/inventory/orders/handler/cancel.ts
+var import_server17 = require("next/server");
+async function PUT11(request, { params }) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    if (!id) {
+      return import_server17.NextResponse.json(
+        { error: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderCancel(id, body?.note);
+    return import_server17.NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to cancel order";
+    console.error("Order cancel error:", message);
+    return import_server17.NextResponse.json({ error: message }, { status: 500 });
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DeleveryType,
@@ -2061,6 +2109,7 @@ async function PUT10(request, { params }) {
   POSTOrderFullInfo,
   PUTOrderApprove,
   PUTOrderApproveList,
+  PUTOrderCancel,
   PUTOrderChangeStatus,
   PUTOrderDisapprove,
   PUTOrderDisapproveList,
@@ -2077,6 +2126,7 @@ async function PUT10(request, { params }) {
   postOrder,
   putOrderApprove,
   putOrderApproveList,
+  putOrderCancel,
   putOrderChangeStatus,
   putOrderDisapprove,
   putOrderDisapproveList,

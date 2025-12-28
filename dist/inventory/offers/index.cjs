@@ -403,6 +403,9 @@ var init_api = __esm({
       static putOrderItemCancel(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
       }
+      static putOrderCancel(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/cancel`;
+      }
       static putOrderItemUndoCancel(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
       }
@@ -1386,7 +1389,7 @@ async function getOffersDeliveryZones(id) {
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
     return getWithAuth2(Api2.getOffersDeliveryZones(id));
   }
-  const res = await fetch(`/api/offers/delivery-zones`);
+  const res = await fetch(`/api/offers/delivery-zones/${id}`);
   if (!res.ok)
     throw new Error(`Failed to fetch offers deivery zones: ${res.statusText}`);
   return res.json();

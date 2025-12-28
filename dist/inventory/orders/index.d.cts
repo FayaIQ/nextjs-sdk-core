@@ -131,6 +131,12 @@ interface OrderReferenceDeliveryIdRequest {
  */
 declare function putOrderReferenceDeliveryId(orderId: string | number, data: OrderReferenceDeliveryIdRequest): Promise<any>;
 
+interface CancelOrderResponse {
+    success: boolean;
+    message?: string;
+}
+declare function putOrderCancel(id: string | number, note?: string): Promise<CancelOrderResponse>;
+
 declare function POST$1(request: NextRequest): Promise<NextResponse<OrderDetail> | NextResponse<{
     error: string;
 }>>;
@@ -146,7 +152,7 @@ declare function POST(request: NextRequest): Promise<NextResponse<{
     error: string;
 }> | NextResponse<OrderDetail[]>>;
 
-declare function PUT$9(request: NextRequest, { params }: {
+declare function PUT$a(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -161,7 +167,7 @@ declare function PUT$9(request: NextRequest, { params }: {
  * @example
  * export { PUT } from 'my-next-core/inventory/orders/handler/disapprove';
  */
-declare function PUT$8(request: NextRequest, { params }: {
+declare function PUT$9(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -176,7 +182,7 @@ declare function PUT$8(request: NextRequest, { params }: {
  * @example
  * export { PUT } from 'my-next-core/inventory/orders/handler/approve-list';
  */
-declare function PUT$7(request: NextRequest): Promise<NextResponse<ApproveOrderResponse> | NextResponse<{
+declare function PUT$8(request: NextRequest): Promise<NextResponse<ApproveOrderResponse> | NextResponse<{
     error: string;
 }>>;
 
@@ -187,7 +193,7 @@ declare function PUT$7(request: NextRequest): Promise<NextResponse<ApproveOrderR
  * @example
  * export { PUT } from 'my-next-core/inventory/orders/handler/disapprove-list';
  */
-declare function PUT$6(request: NextRequest): Promise<NextResponse<DisapproveOrderResponse> | NextResponse<{
+declare function PUT$7(request: NextRequest): Promise<NextResponse<DisapproveOrderResponse> | NextResponse<{
     error: string;
 }>>;
 
@@ -198,7 +204,7 @@ declare function PUT$6(request: NextRequest): Promise<NextResponse<DisapproveOrd
  * @example
  * export { PUT } from 'erp-core/inventory/orders';
  */
-declare function PUT$5(request: NextRequest, { params }: {
+declare function PUT$6(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -213,7 +219,7 @@ declare function PUT$5(request: NextRequest, { params }: {
  * @example
  * export { PUT } from 'erp-core/inventory/orders';
  */
-declare function PUT$4(request: NextRequest, { params }: {
+declare function PUT$5(request: NextRequest, { params }: {
     params: {
         id: string;
     };
@@ -248,7 +254,7 @@ declare function GET(request: NextRequest): Promise<NextResponse<OrderAddress> |
 /**
  * PUT /api/orders/[id]/change-status
  */
-declare function PUT$3(request: NextRequest, { params }: {
+declare function PUT$4(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -257,7 +263,7 @@ declare function PUT$3(request: NextRequest, { params }: {
 /**
  * PUT /api/orders/[id]/discount
  */
-declare function PUT$2(request: NextRequest, { params }: {
+declare function PUT$3(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -266,7 +272,7 @@ declare function PUT$2(request: NextRequest, { params }: {
 /**
  * PUT /api/orders/[id]/reference-id
  */
-declare function PUT$1(request: NextRequest, { params }: {
+declare function PUT$2(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -275,10 +281,18 @@ declare function PUT$1(request: NextRequest, { params }: {
 /**
  * PUT /api/orders/[id]/reference-delivery-id
  */
-declare function PUT(request: NextRequest, { params }: {
+declare function PUT$1(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
 }): Promise<NextResponse<any>>;
 
-export { type ApproveOrderResponse, type ChangeOrderStatusRequest, type DisapproveOrderResponse, GET as GETAddress, GET$1 as GETOrder, GET$2 as GETOrders, OrderAddress, OrderDetail, type OrderDiscountRequest, type OrderReferenceDeliveryIdRequest, type OrderReferenceIdRequest, OrdersApiResponse, POST$1 as POSTOrder, POST as POSTOrderFullInfo, PUT$9 as PUTOrderApprove, PUT$7 as PUTOrderApproveList, PUT$3 as PUTOrderChangeStatus, PUT$8 as PUTOrderDisapprove, PUT$6 as PUTOrderDisapproveList, PUT$2 as PUTOrderDiscount, PUT$5 as PUTOrderPayment, PUT$4 as PUTOrderPaymentStatus, PUT as PUTOrderReferenceDeliveryId, PUT$1 as PUTOrderReferenceId, PostOrderRequest, type PutOrderPaymentResponse, getOrder, getOrdersFullInfo, postOrder, putOrderApprove, putOrderApproveList, putOrderChangeStatus, putOrderDisapprove, putOrderDisapproveList, putOrderDiscount, putOrderPayment, putOrderPaymentStatus, putOrderReferenceDeliveryId, putOrderReferenceId };
+declare function PUT(request: NextRequest, { params }: {
+    params: Promise<{
+        id: string;
+    }>;
+}): Promise<NextResponse<{
+    error: string;
+}> | NextResponse<CancelOrderResponse>>;
+
+export { type ApproveOrderResponse, type CancelOrderResponse, type ChangeOrderStatusRequest, type DisapproveOrderResponse, GET as GETAddress, GET$1 as GETOrder, GET$2 as GETOrders, OrderAddress, OrderDetail, type OrderDiscountRequest, type OrderReferenceDeliveryIdRequest, type OrderReferenceIdRequest, OrdersApiResponse, POST$1 as POSTOrder, POST as POSTOrderFullInfo, PUT$a as PUTOrderApprove, PUT$8 as PUTOrderApproveList, PUT as PUTOrderCancel, PUT$4 as PUTOrderChangeStatus, PUT$9 as PUTOrderDisapprove, PUT$7 as PUTOrderDisapproveList, PUT$3 as PUTOrderDiscount, PUT$6 as PUTOrderPayment, PUT$5 as PUTOrderPaymentStatus, PUT$1 as PUTOrderReferenceDeliveryId, PUT$2 as PUTOrderReferenceId, PostOrderRequest, type PutOrderPaymentResponse, getOrder, getOrdersFullInfo, postOrder, putOrderApprove, putOrderApproveList, putOrderCancel, putOrderChangeStatus, putOrderDisapprove, putOrderDisapproveList, putOrderDiscount, putOrderPayment, putOrderPaymentStatus, putOrderReferenceDeliveryId, putOrderReferenceId };
