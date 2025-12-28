@@ -18,7 +18,7 @@ export async function putOrderCancel(
   }
 
   // Client-side: Use Next.js API route
-  const response = await fetch(`/api/Orders/${id}/Cancel`, {
+  const response = await fetch(`/api/orders/${id}/Cancel`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

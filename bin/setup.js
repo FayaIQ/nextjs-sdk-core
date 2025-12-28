@@ -82,7 +82,7 @@ const routes = [
   },
   {
     name: "orderCancel",
-    path: ["src", "app", "api", "Orders", "[id]", "Cancel"],
+    path: ["src", "app", "api", "orders", "[id]", "Cancel"],
     handler: "erp-core/inventory/orders",
     methods: ["PUT"],
     exportName: "PUTOrderCancel",
