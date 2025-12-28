@@ -81,6 +81,14 @@ const routes = [
     description: "Approve a single order",
   },
   {
+    name: "orderCancel",
+    path: ["src", "app", "api", "orders", "[id]", "cancel"],
+    handler: "erp-core/inventory/orders",
+    methods: ["PUT"],
+    exportName: "PUTOrderCancel",
+    description: "Cancel a single order",
+  },
+  {
     name: "orderDisapprove",
     path: ["src", "app", "api", "orders", "[id]", "disapprove"],
     handler: "erp-core/inventory/orders",
@@ -555,7 +563,7 @@ const routes = [
   },
   {
     name: "offersDeliveryZones",
-    path: ["src", "app", "api", "offers", "delivery-zones"],
+    path: ["src", "app", "api", "offers", "delivery-zones", "[id]"],
     handler: "erp-core/inventory/offers",
     methods: ["GET"],
     exportName: "GetOffersDeliveryZonesGET",

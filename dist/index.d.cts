@@ -117,6 +117,7 @@ declare class Api {
     static getOrderItem(orderId: string | number, itemId: string | number): string;
     static postOrderItem(orderId: string | number): string;
     static putOrderItemCancel(orderId: string | number, itemId: string | number): string;
+    static putOrderCancel(orderId: string | number): string;
     static putOrderItemUndoCancel(orderId: string | number, itemId: string | number): string;
     static putOrderItemUpdate(orderId: string | number, itemId: string | number): string;
     static getOrderFullInfo: string;

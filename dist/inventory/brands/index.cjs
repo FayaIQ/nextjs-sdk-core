@@ -403,6 +403,9 @@ var init_api = __esm({
       static putOrderItemCancel(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
       }
+      static putOrderCancel(orderId) {
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/cancel`;
+      }
       static putOrderItemUndoCancel(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
       }

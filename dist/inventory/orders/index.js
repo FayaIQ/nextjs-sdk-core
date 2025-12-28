@@ -6,26 +6,26 @@ import {
   PayType,
   Sign,
   getOrders
-} from "../../chunk-5OBGW7EN.js";
+} from "../../chunk-N5MI7UJH.js";
 import {
   Api
-} from "../../chunk-MQX6V3MO.js";
+} from "../../chunk-POYSVHPM.js";
 import {
   getAddressById
-} from "../../chunk-42FY5KGR.js";
+} from "../../chunk-5XMZ62VU.js";
 import {
   toNextResponseFromError
-} from "../../chunk-R5KMKS7K.js";
+} from "../../chunk-62ZNCZU4.js";
 import {
   putWithAuth
-} from "../../chunk-ZBFVDZDR.js";
-import "../../chunk-PHIPV526.js";
+} from "../../chunk-CIHJ6LT2.js";
+import "../../chunk-IQ6COM4B.js";
 
 // src/inventory/orders/getOrder.ts
 async function getOrder(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { getWithAuth } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return getWithAuth(
       `${Api2.getOrder(id)}`
     );
@@ -40,8 +40,8 @@ async function getOrder(id) {
 // src/inventory/orders/postOrder.ts
 async function postOrder(data) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { postWithAuth } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return postWithAuth(Api2.postOrders, data);
   }
   const res = await fetch(`/api/orders`, {
@@ -65,8 +65,8 @@ async function postOrder(data) {
 // src/inventory/orders/putOrderApprove.ts
 async function putOrderApprove(id, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return putWithAuth2(
       Api2.putOrderApprove(id),
       { note: note || "" }
@@ -86,8 +86,8 @@ async function putOrderApprove(id, note) {
 }
 async function putOrderApproveList(ids, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return putWithAuth2(
       Api2.putOrderApproveList,
       { orderIds: ids, note: note || "" }
@@ -109,8 +109,8 @@ async function putOrderApproveList(ids, note) {
 // src/inventory/orders/putOrderDisapprove.ts
 async function putOrderDisapprove(id, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return putWithAuth2(
       Api2.putOrderDisapprove(id),
       { note }
@@ -130,8 +130,8 @@ async function putOrderDisapprove(id, note) {
 }
 async function putOrderDisapproveList(ids, note) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return putWithAuth2(
       Api2.putOrderDisapproveList,
       { orderIds: ids, note: note || "" }
@@ -200,8 +200,8 @@ async function putOrderPaymentStatus(orderId) {
 async function getOrdersFullInfo(input) {
   const orderIds = Array.isArray(input) ? input : input.orderIds ?? input.body ?? [];
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { postWithAuth } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return postWithAuth(Api2.getOrderFullInfo, { orderIds });
   }
   const response = await fetch("/api/orders/full-info", {
@@ -220,8 +220,8 @@ async function getOrdersFullInfo(input) {
 // src/inventory/orders/putOrderChangeStatus.ts
 async function putOrderChangeStatus(orderId, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return await putWithAuth2(Api2.putChangeStatusOrder(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/change-status`, {
@@ -258,8 +258,8 @@ async function putOrderDiscount(orderId, data) {
 // src/inventory/orders/putOrderReferenceId.ts
 async function putOrderReferenceId(orderId, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return await putWithAuth2(Api2.putOrderReferenceId(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/referenceId`, {
@@ -278,8 +278,8 @@ async function putOrderReferenceId(orderId, data) {
 // src/inventory/orders/putOrderReferenceDeliveryId.ts
 async function putOrderReferenceDeliveryId(orderId, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-IPUEKTOU.js");
-    const { Api: Api2 } = await import("../../api-ZX2CZJVZ.js");
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
     return await putWithAuth2(Api2.putOrderReferenceDeliveryId(orderId), data);
   }
   const res = await fetch(`/api/orders/${orderId}/referenceDeliveryId`, {
@@ -293,6 +293,28 @@ async function putOrderReferenceDeliveryId(orderId, data) {
     throw new Error(`Failed to apply order reference delivery ID: ${res.statusText}`);
   }
   return res.json();
+}
+
+// src/inventory/orders/putOrderCancel.ts
+async function putOrderCancel(id, note) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await import("../../fetcher-PN3S5IBC.js");
+    const { Api: Api2 } = await import("../../api-BGMUOXBY.js");
+    return putWithAuth2(Api2.putOrderCancel(id), {
+      note: note || ""
+    });
+  }
+  const response = await fetch(`/api/orders/${id}/Cancel`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ note: note || "" })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to cancel order: ${response.statusText}`);
+  }
+  return response.json();
 }
 
 // src/inventory/orders/handler/post-order.ts
@@ -576,6 +598,27 @@ async function PUT10(request, { params }) {
     );
   }
 }
+
+// src/inventory/orders/handler/cancel.ts
+import { NextResponse as NextResponse16 } from "next/server";
+async function PUT11(request, { params }) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    if (!id) {
+      return NextResponse16.json(
+        { error: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+    const result = await putOrderCancel(id, body?.note);
+    return NextResponse16.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to cancel order";
+    console.error("Order cancel error:", message);
+    return NextResponse16.json({ error: message }, { status: 500 });
+  }
+}
 export {
   DeleveryType,
   GET3 as GETAddress,
@@ -588,6 +631,7 @@ export {
   POST2 as POSTOrderFullInfo,
   PUT as PUTOrderApprove,
   PUT3 as PUTOrderApproveList,
+  PUT11 as PUTOrderCancel,
   PUT7 as PUTOrderChangeStatus,
   PUT2 as PUTOrderDisapprove,
   PUT4 as PUTOrderDisapproveList,
@@ -604,6 +648,7 @@ export {
   postOrder,
   putOrderApprove,
   putOrderApproveList,
+  putOrderCancel,
   putOrderChangeStatus,
   putOrderDisapprove,
   putOrderDisapproveList,

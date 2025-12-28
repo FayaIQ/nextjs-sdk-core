@@ -228,6 +228,9 @@ export class Api {
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
   }
+  static putOrderCancel(orderId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/cancel`;
+  }
 
   static putOrderItemUndoCancel(
     orderId: string | number,
