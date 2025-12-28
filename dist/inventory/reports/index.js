@@ -1,14 +1,14 @@
 import {
   toNextResponseFromError
-} from "../../chunk-62ZNCZU4.js";
-import "../../chunk-CIHJ6LT2.js";
-import "../../chunk-IQ6COM4B.js";
+} from "../../chunk-6CRK5UOV.js";
+import "../../chunk-LNETFEBQ.js";
+import "../../chunk-IUIUHPNR.js";
 
 // src/inventory/reports/getCustomerOrders.ts
 async function getReportsCustomerOrders(query) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-PN3S5IBC.js");
-    const { Api } = await import("../../api-BGMUOXBY.js");
+    const { getWithAuth } = await import("../../fetcher-VGCQIDM6.js");
+    const { Api } = await import("../../api-UEHYIAOC.js");
     return getWithAuth(Api.getReportsCustomerOrders, query);
   }
   const params = new URLSearchParams();
@@ -25,8 +25,8 @@ async function getReportsCustomerOrders(query) {
 // src/inventory/reports/getOrderSales.ts
 async function getReportsOrderSales(query) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-PN3S5IBC.js");
-    const { Api } = await import("../../api-BGMUOXBY.js");
+    const { getWithAuth } = await import("../../fetcher-VGCQIDM6.js");
+    const { Api } = await import("../../api-UEHYIAOC.js");
     return getWithAuth(Api.getReportsOrderSales, query);
   }
   const params = new URLSearchParams();

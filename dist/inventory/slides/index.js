@@ -1,8 +1,8 @@
 // src/inventory/slides/getSlides.ts
 async function getSlides() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-PN3S5IBC.js");
-    const { Api } = await import("../../api-BGMUOXBY.js");
+    const { getWithAuth } = await import("../../fetcher-VGCQIDM6.js");
+    const { Api } = await import("../../api-UEHYIAOC.js");
     return getWithAuth(Api.getSlideShows);
   }
   const response = await fetch(`/api/slides?`);

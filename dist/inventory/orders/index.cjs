@@ -404,7 +404,7 @@ var init_api = __esm({
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
       }
       static putOrderCancel(orderId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/cancel`;
+        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Cancel`;
       }
       static putOrderItemUndoCancel(orderId, itemId) {
         return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
@@ -1744,7 +1744,7 @@ async function putOrderCancel(id, note) {
       note: note || ""
     });
   }
-  const response = await fetch(`/api/orders/${id}/Cancel`, {
+  const response = await fetch(`/api/Orders/${id}/Cancel`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json"
