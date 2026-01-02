@@ -2304,8 +2304,14 @@ async function putItem(id, data) {
     body: JSON.stringify(data)
   });
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(`Update item failed: ${errorData.error || res.statusText}`);
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
   }
   return res.json();
 }

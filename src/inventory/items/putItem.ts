@@ -33,10 +33,20 @@ export async function putItem(
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(`Update item failed: ${errorData.error || res.statusText}`);
-  }
 
+  if (!res.ok) {
+    // Extract error message from response body before throwing
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      // Use the error message from the API response
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+      // If parsing fails, use the default message
+      console.error("Failed to parse error response:", parseErr);
+    }
+    throw new Error(errorMessage);
+  }
+  
   return res.json();
 }

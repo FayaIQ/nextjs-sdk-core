@@ -19,7 +19,6 @@ import "../chunk-IQ6COM4B.js";
 async function loginUser(credentials) {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
-  console.log("[identity:loginUser] called", { isServer, authMode, hasThirdPartyToken: !!credentials.thirdPartyToken });
   if (isServer) {
     const config = getAuthConfig();
     const { cookies } = await import("next/headers");
@@ -29,7 +28,6 @@ async function loginUser(credentials) {
     const thirdPartyToken = credentials.thirdPartyToken || config.thirdPartyToken;
     let requestBody;
     if (thirdPartyToken) {
-      console.log("[identity:loginUser] using ThirdPartyToken authentication");
       requestBody = {
         clientId: config.clientId,
         clientSecret: config.clientSecret,
@@ -45,7 +43,6 @@ async function loginUser(credentials) {
       const password = credentials.password || config.password;
       if (!username || !password) {
         if (authMode === "auto") {
-          console.log("[identity:loginUser] AUTO mode anonymous login using clientId/clientSecret only");
           requestBody = {
             clientId: config.clientId,
             clientSecret: config.clientSecret,
@@ -57,7 +54,6 @@ async function loginUser(credentials) {
           throw new Error("Username/password or ThirdPartyToken must be provided");
         }
       } else {
-        console.log("[identity:loginUser] using username/password authentication");
         requestBody = {
           clientId: config.clientId,
           clientSecret: config.clientSecret,
@@ -69,21 +65,21 @@ async function loginUser(credentials) {
         };
       }
     }
+    if (credentials.playerId) {
+      requestBody.playerId = credentials.playerId;
+    }
     const response = await postWithoutAuth(Api.signIn, requestBody);
-    console.log("[identity:loginUser] signIn response", { hasAccessToken: !!response?.access_token, rolesCount: response?.roles?.length || 0, employeeStoreId: response?.employeeStoreId });
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
     }
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
     const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-UIF5DEUF.js");
-    console.log("[identity:loginUser] saving encrypted crf cookie");
     try {
       setEncryptedCookie(cookieStore, COOKIE_NAMES.CRF, response.access_token, {
         maxAge: expiresIn
       });
     } catch (e) {
-      console.error("[identity:loginUser] Failed to encrypt token - fallback to plain", e);
       cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
@@ -100,7 +96,6 @@ async function loginUser(credentials) {
       maxAge: expiresIn
     });
     if (credentials.thirdPartyToken) {
-      console.log("[identity:loginUser] caching tp_id cookie for AUTO re-auth");
       cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
@@ -112,13 +107,11 @@ async function loginUser(credentials) {
     }
     if (authMode === "auto") {
       const isUser = !!(response.roles && response.roles.length > 0);
-      console.log("[identity:loginUser] AUTO mode set isUser", { isUser });
       setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
         maxAge: expiresIn
       });
     }
     if (authMode === "strict") {
-      console.log("[identity:loginUser] STRICT mode: writing detailed cookies");
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
           httpOnly: false,
@@ -155,7 +148,6 @@ async function loginUser(credentials) {
     body: JSON.stringify(credentials)
   });
   if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
-  console.log("[identity:loginUser] client-side login completed", { status: res.status });
   return res.json();
 }
 

@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 interface LoginRequest {
     username?: string;
     password?: string;
+    playerId?: string;
     thirdPartyToken?: string;
 }
 interface User {
@@ -17,6 +18,7 @@ interface User {
     fullName: string;
     email: string;
     phoneNumber: string;
+    playerId: string;
     storeIDRegisteredWith: number;
     gender: number;
     birthdate: string;
