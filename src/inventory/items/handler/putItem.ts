@@ -12,6 +12,6 @@ export async function PUT(
     const result = await putItem(id, data);
     return NextResponse.json(result);
   } catch (err) {
-    return toNextResponseFromError(err);
+    return NextResponse.json(err instanceof Error ? { message: err.message } : err, { status: 500 });
   }
 }

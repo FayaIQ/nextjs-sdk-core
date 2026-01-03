@@ -479,7 +479,7 @@ async function PUT4(request, { params }) {
     const result = await putItem(id, data);
     return NextResponse13.json(result);
   } catch (err) {
-    return toNextResponseFromError(err);
+    return NextResponse13.json(err instanceof Error ? { message: err.message } : err, { status: 500 });
   }
 }
 

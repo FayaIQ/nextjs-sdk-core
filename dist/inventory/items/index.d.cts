@@ -209,7 +209,7 @@ declare function PUT$2(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
-}): Promise<NextResponse<any>>;
+}): Promise<NextResponse<unknown>>;
 
 declare function DELETE(request: NextRequest, { params }: {
     params: Promise<{

@@ -2361,7 +2361,7 @@ async function PUT4(request, { params }) {
     const result = await putItem(id, data);
     return import_server14.NextResponse.json(result);
   } catch (err) {
-    return toNextResponseFromError(err);
+    return import_server14.NextResponse.json(err instanceof Error ? { message: err.message } : err, { status: 500 });
   }
 }
 
