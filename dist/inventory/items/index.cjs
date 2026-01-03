@@ -474,6 +474,17 @@ var init_api = __esm({
       static deleteItem(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}`;
       }
+      // Item collection endpoint (update a specific collection for an item)
+      static putItemCollection(itemId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}`;
+      }
+      // Activate / Deactivate an item collection
+      static putItemCollectionActivate(itemId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Activate`;
+      }
+      static putItemCollectionDeactivate(itemId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Deactivate`;
+      }
       static getLocationChildren(parentId) {
         return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
       }
@@ -1088,6 +1099,9 @@ __export(items_exports, {
   PutCollectionsActivateByFilterPUT: () => PUT5,
   PutCollectionsDeactivateByFilterPUT: () => PUT6,
   PutItemActivatePUT: () => PUT2,
+  PutItemCollectionActivatePUT: () => PUT8,
+  PutItemCollectionDeactivatePUT: () => PUT9,
+  PutItemCollectionPUT: () => PUT7,
   PutItemDeactivatePUT: () => PUT3,
   PutItemPUT: () => PUT4,
   PutParentStoreSyncPUT: () => PUT,
@@ -1107,6 +1121,9 @@ __export(items_exports, {
   putCollectionsDeactivateByFilter: () => putCollectionsDeactivateByFilter,
   putDeactivateItem: () => putDeactivateItem,
   putItem: () => putItem,
+  putItemCollection: () => putItemCollection,
+  putItemCollectionActivate: () => putItemCollectionActivate,
+  putItemCollectionDeactivate: () => putItemCollectionDeactivate,
   putParentStoreSync: () => putParentStoreSync
 });
 module.exports = __toCommonJS(items_exports);
@@ -2328,6 +2345,74 @@ async function deleteItem(id) {
   return res.json();
 }
 
+// src/inventory/items/putItemCollection.ts
+async function putItemCollection(itemId, id, data) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollection(itemId, id), data);
+  }
+  const res = await fetch(`/api/items/${itemId}/collections/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json-patch+json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
+// src/inventory/items/putItemCollectionActivate.ts
+async function putItemCollectionActivate(itemId, id) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollectionActivate(itemId, id));
+  }
+  const res = await fetch(`/api/items/${itemId}/collections/${id}/activate`, {
+    method: "PUT"
+  });
+  if (!res.ok) {
+    let err = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const b = await res.json();
+      err = b.error || b.message || err;
+    } catch {
+    }
+    throw new Error(err);
+  }
+  return res.json();
+}
+
+// src/inventory/items/putItemCollectionDeactivate.ts
+async function putItemCollectionDeactivate(itemId, id) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollectionDeactivate(itemId, id));
+  }
+  const res = await fetch(`/api/items/${itemId}/collections/${id}/deactivate`, {
+    method: "PUT"
+  });
+  if (!res.ok) {
+    let err = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const b = await res.json();
+      err = b.error || b.message || err;
+    } catch {
+    }
+    throw new Error(err);
+  }
+  return res.json();
+}
+
 // src/inventory/items/handler/putActivate.ts
 var import_server12 = require("next/server");
 async function PUT2(request, { params }) {
@@ -2401,6 +2486,43 @@ async function PUT6(request) {
     return toNextResponseFromError(err);
   }
 }
+
+// src/inventory/items/handler/putItemCollection.ts
+var import_server17 = require("next/server");
+async function PUT7(request, { params }) {
+  try {
+    const data = await request.json();
+    const { itemId, id } = await params;
+    const result = await putItemCollection(itemId, id, data);
+    return import_server17.NextResponse.json(result);
+  } catch (err) {
+    return import_server17.NextResponse.json(err instanceof Error ? { message: err.message } : err, { status: 500 });
+  }
+}
+
+// src/inventory/items/handler/putItemCollectionActivate.ts
+var import_server18 = require("next/server");
+async function PUT8(request, { params }) {
+  try {
+    const { itemId, id } = await params;
+    const result = await putItemCollectionActivate(itemId, id);
+    return import_server18.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
+
+// src/inventory/items/handler/putItemCollectionDeactivate.ts
+var import_server19 = require("next/server");
+async function PUT9(request, { params }) {
+  try {
+    const { itemId, id } = await params;
+    const result = await putItemCollectionDeactivate(itemId, id);
+    return import_server19.NextResponse.json(result);
+  } catch (err) {
+    return toNextResponseFromError(err);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AgeGroup,
@@ -2421,6 +2543,9 @@ async function PUT6(request) {
   PutCollectionsActivateByFilterPUT,
   PutCollectionsDeactivateByFilterPUT,
   PutItemActivatePUT,
+  PutItemCollectionActivatePUT,
+  PutItemCollectionDeactivatePUT,
+  PutItemCollectionPUT,
   PutItemDeactivatePUT,
   PutItemPUT,
   PutParentStoreSyncPUT,
@@ -2440,5 +2565,8 @@ async function PUT6(request) {
   putCollectionsDeactivateByFilter,
   putDeactivateItem,
   putItem,
+  putItemCollection,
+  putItemCollectionActivate,
+  putItemCollectionDeactivate,
   putParentStoreSync
 });

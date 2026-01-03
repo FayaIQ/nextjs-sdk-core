@@ -151,6 +151,9 @@ declare class Api {
     static putItemsCollectionsDeactivateByFilter(): string;
     static putItem(id: string | number): string;
     static deleteItem(id: string | number): string;
+    static putItemCollection(itemId: string | number, id: string | number): string;
+    static putItemCollectionActivate(itemId: string | number, id: string | number): string;
+    static putItemCollectionDeactivate(itemId: string | number, id: string | number): string;
     static getLocationChildren(parentId: string | number): string;
     static getInvoiceDiscount(code: string): string;
     static getCheckoutQuote: string;

@@ -474,6 +474,17 @@ var init_api = __esm({
       static deleteItem(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}`;
       }
+      // Item collection endpoint (update a specific collection for an item)
+      static putItemCollection(itemId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}`;
+      }
+      // Activate / Deactivate an item collection
+      static putItemCollectionActivate(itemId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Activate`;
+      }
+      static putItemCollectionDeactivate(itemId, id) {
+        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Deactivate`;
+      }
       static getLocationChildren(parentId) {
         return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
       }

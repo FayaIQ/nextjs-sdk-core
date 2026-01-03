@@ -150,7 +150,7 @@ declare function POST(request: NextRequest, { params }: {
  */
 declare function putParentStoreSync(itemId: string | number, body?: any): Promise<any>;
 
-declare function PUT$5(request: NextRequest, { params }: {
+declare function PUT$8(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -193,19 +193,54 @@ declare function putItem(id: string | number, data: UpdateItemRequest): Promise<
 
 declare function deleteItem(id: string | number): Promise<any>;
 
-declare function PUT$4(request: NextRequest, { params }: {
+interface UpdateItemCollectionRequest {
+    barcode?: string;
+    code?: string;
+    price?: number;
+    colorId?: number;
+    sizeValueId?: number;
+    unitLevel?: number;
+    isActive?: boolean;
+    [key: string]: any;
+}
+/**
+ * Update an item collection by itemId and collection id
+ */
+declare function putItemCollection(itemId: string | number, id: string | number, data: UpdateItemCollectionRequest): Promise<UpdateItemResponse>;
+
+interface ItemCollectionActivateResponse {
+    success?: boolean;
+    message?: string;
+    [key: string]: any;
+}
+/**
+ * Activate an item collection for a given item
+ */
+declare function putItemCollectionActivate(itemId: string | number, id: string | number): Promise<ItemCollectionActivateResponse>;
+
+interface ItemCollectionDeactivateResponse {
+    success?: boolean;
+    message?: string;
+    [key: string]: any;
+}
+/**
+ * Deactivate an item collection for a given item
+ */
+declare function putItemCollectionDeactivate(itemId: string | number, id: string | number): Promise<ItemCollectionDeactivateResponse>;
+
+declare function PUT$7(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
 }): Promise<NextResponse<any>>;
 
-declare function PUT$3(request: NextRequest, { params }: {
+declare function PUT$6(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
 }): Promise<NextResponse<any>>;
 
-declare function PUT$2(request: NextRequest, { params }: {
+declare function PUT$5(request: NextRequest, { params }: {
     params: Promise<{
         id: string;
     }>;
@@ -217,8 +252,29 @@ declare function DELETE(request: NextRequest, { params }: {
     }>;
 }): Promise<Response>;
 
-declare function PUT$1(request: NextRequest): Promise<NextResponse<any>>;
+declare function PUT$4(request: NextRequest): Promise<NextResponse<any>>;
 
-declare function PUT(request: NextRequest): Promise<NextResponse<any>>;
+declare function PUT$3(request: NextRequest): Promise<NextResponse<any>>;
 
-export { type CopyParentResponse, POST$2 as CopyParentStorePOST, POST$1 as CopyParentToChildStoresPOST, type CopyParentToChildStoresRequest, type CopyParentToChildStoresResponse, POST as CopyToStorePOST, type CopyToStoreRequest, type CopyToStoreResponse, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$5 as GetProductsGET, ItemsFilterParameters, Product, GET$4 as ProductInfoGET, GET$3 as ProductInfoV2GET, ProductResponse, PUT$1 as PutCollectionsActivateByFilterPUT, PUT as PutCollectionsDeactivateByFilterPUT, PUT$4 as PutItemActivatePUT, PUT$3 as PutItemDeactivatePUT, PUT$2 as PutItemPUT, PUT$5 as PutParentStoreSyncPUT, UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, getProductInfoV2, postCopyParentStore, postCopyParentToChildStores, postCopyToStore, putActivateItem, putCollectionsActivateByFilter, putCollectionsDeactivateByFilter, putDeactivateItem, putItem, putParentStoreSync };
+declare function PUT$2(request: NextRequest, { params }: {
+    params: Promise<{
+        itemId: string;
+        id: string;
+    }>;
+}): Promise<NextResponse<unknown>>;
+
+declare function PUT$1(request: NextRequest, { params }: {
+    params: Promise<{
+        itemId: string;
+        id: string;
+    }>;
+}): Promise<NextResponse<any>>;
+
+declare function PUT(request: NextRequest, { params }: {
+    params: Promise<{
+        itemId: string;
+        id: string;
+    }>;
+}): Promise<NextResponse<any>>;
+
+export { type CopyParentResponse, POST$2 as CopyParentStorePOST, POST$1 as CopyParentToChildStoresPOST, type CopyParentToChildStoresRequest, type CopyParentToChildStoresResponse, POST as CopyToStorePOST, type CopyToStoreRequest, type CopyToStoreResponse, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$5 as GetProductsGET, type ItemCollectionActivateResponse, type ItemCollectionDeactivateResponse, ItemsFilterParameters, Product, GET$4 as ProductInfoGET, GET$3 as ProductInfoV2GET, ProductResponse, PUT$4 as PutCollectionsActivateByFilterPUT, PUT$3 as PutCollectionsDeactivateByFilterPUT, PUT$7 as PutItemActivatePUT, PUT$1 as PutItemCollectionActivatePUT, PUT as PutItemCollectionDeactivatePUT, PUT$2 as PutItemCollectionPUT, PUT$6 as PutItemDeactivatePUT, PUT$5 as PutItemPUT, PUT$8 as PutParentStoreSyncPUT, type UpdateItemCollectionRequest, UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, getProductInfoV2, postCopyParentStore, postCopyParentToChildStores, postCopyToStore, putActivateItem, putCollectionsActivateByFilter, putCollectionsDeactivateByFilter, putDeactivateItem, putItem, putItemCollection, putItemCollectionActivate, putItemCollectionDeactivate, putParentStoreSync };
