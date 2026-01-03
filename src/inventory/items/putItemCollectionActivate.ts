@@ -8,16 +8,16 @@ export interface ItemCollectionActivateResponse {
  * Activate an item collection for a given item
  */
 export async function putItemCollectionActivate(
-  itemId: string | number,
-  id: string | number
+  id: string | number,
+  collectionId: string | number
 ): Promise<ItemCollectionActivateResponse> {
   if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
-    return putWithAuth(Api.putItemCollectionActivate(itemId, id));
+    return putWithAuth(Api.putItemCollectionActivate(id, collectionId));
   }
 
-  const res = await fetch(`/api/items/${itemId}/collections/${id}/activate`, {
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}/activate`, {
     method: "PUT",
   });
 

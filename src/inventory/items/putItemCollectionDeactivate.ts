@@ -8,16 +8,16 @@ export interface ItemCollectionDeactivateResponse {
  * Deactivate an item collection for a given item
  */
 export async function putItemCollectionDeactivate(
-  itemId: string | number,
-  id: string | number
+  id: string | number,
+  collectionId: string | number
 ): Promise<ItemCollectionDeactivateResponse> {
   if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
-    return putWithAuth(Api.putItemCollectionDeactivate(itemId, id));
+    return putWithAuth(Api.putItemCollectionDeactivate(id, collectionId));
   }
 
-  const res = await fetch(`/api/items/${itemId}/collections/${id}/deactivate`, {
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}/deactivate`, {
     method: "PUT",
   });
 

@@ -447,13 +447,13 @@ async function deleteItem(id) {
 }
 
 // src/inventory/items/putItemCollection.ts
-async function putItemCollection(itemId, id, data) {
+async function putItemCollection(id, collectionId, data) {
   if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
-    return putWithAuth(Api2.putItemCollection(itemId, id), data);
+    return putWithAuth(Api2.putItemCollection(id, collectionId), data);
   }
-  const res = await fetch(`/api/items/${itemId}/collections/${id}`, {
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json-patch+json" },
     body: JSON.stringify(data)
@@ -471,13 +471,13 @@ async function putItemCollection(itemId, id, data) {
 }
 
 // src/inventory/items/putItemCollectionActivate.ts
-async function putItemCollectionActivate(itemId, id) {
+async function putItemCollectionActivate(id, collectionId) {
   if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
-    return putWithAuth(Api2.putItemCollectionActivate(itemId, id));
+    return putWithAuth(Api2.putItemCollectionActivate(id, collectionId));
   }
-  const res = await fetch(`/api/items/${itemId}/collections/${id}/activate`, {
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}/activate`, {
     method: "PUT"
   });
   if (!res.ok) {
@@ -493,13 +493,13 @@ async function putItemCollectionActivate(itemId, id) {
 }
 
 // src/inventory/items/putItemCollectionDeactivate.ts
-async function putItemCollectionDeactivate(itemId, id) {
+async function putItemCollectionDeactivate(id, collectionId) {
   if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
-    return putWithAuth(Api2.putItemCollectionDeactivate(itemId, id));
+    return putWithAuth(Api2.putItemCollectionDeactivate(id, collectionId));
   }
-  const res = await fetch(`/api/items/${itemId}/collections/${id}/deactivate`, {
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}/deactivate`, {
     method: "PUT"
   });
   if (!res.ok) {
@@ -593,8 +593,8 @@ import { NextResponse as NextResponse16 } from "next/server";
 async function PUT7(request, { params }) {
   try {
     const data = await request.json();
-    const { itemId, id } = await params;
-    const result = await putItemCollection(itemId, id, data);
+    const { id, collectionId } = await params;
+    const result = await putItemCollection(id, collectionId, data);
     return NextResponse16.json(result);
   } catch (err) {
     return NextResponse16.json(err instanceof Error ? { message: err.message } : err, { status: 500 });
@@ -605,8 +605,8 @@ async function PUT7(request, { params }) {
 import { NextResponse as NextResponse17 } from "next/server";
 async function PUT8(request, { params }) {
   try {
-    const { itemId, id } = await params;
-    const result = await putItemCollectionActivate(itemId, id);
+    const { id, collectionId } = await params;
+    const result = await putItemCollectionActivate(id, collectionId);
     return NextResponse17.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
@@ -617,8 +617,8 @@ async function PUT8(request, { params }) {
 import { NextResponse as NextResponse18 } from "next/server";
 async function PUT9(request, { params }) {
   try {
-    const { itemId, id } = await params;
-    const result = await putItemCollectionDeactivate(itemId, id);
+    const { id, collectionId } = await params;
+    const result = await putItemCollectionDeactivate(id, collectionId);
     return NextResponse18.json(result);
   } catch (err) {
     return toNextResponseFromError(err);

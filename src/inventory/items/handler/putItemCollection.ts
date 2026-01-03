@@ -3,12 +3,12 @@ import { putItemCollection } from "../putItemCollection";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ itemId: string; id: string }> }
+  { params }: { params: Promise<{ id: string; collectionId: string }> }
 ) {
   try {
     const data = await request.json();
-    const { itemId, id } = await params;
-    const result = await putItemCollection(itemId, id, data);
+    const { id, collectionId } = await params;
+    const result = await putItemCollection(id, collectionId, data);
     return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json(err instanceof Error ? { message: err.message } : err, { status: 500 });

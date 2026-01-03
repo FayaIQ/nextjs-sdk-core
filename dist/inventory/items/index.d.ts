@@ -206,7 +206,7 @@ interface UpdateItemCollectionRequest {
 /**
  * Update an item collection by itemId and collection id
  */
-declare function putItemCollection(itemId: string | number, id: string | number, data: UpdateItemCollectionRequest): Promise<UpdateItemResponse>;
+declare function putItemCollection(id: string | number, collectionId: string | number, data: UpdateItemCollectionRequest): Promise<UpdateItemResponse>;
 
 interface ItemCollectionActivateResponse {
     success?: boolean;
@@ -216,7 +216,7 @@ interface ItemCollectionActivateResponse {
 /**
  * Activate an item collection for a given item
  */
-declare function putItemCollectionActivate(itemId: string | number, id: string | number): Promise<ItemCollectionActivateResponse>;
+declare function putItemCollectionActivate(id: string | number, collectionId: string | number): Promise<ItemCollectionActivateResponse>;
 
 interface ItemCollectionDeactivateResponse {
     success?: boolean;
@@ -226,7 +226,7 @@ interface ItemCollectionDeactivateResponse {
 /**
  * Deactivate an item collection for a given item
  */
-declare function putItemCollectionDeactivate(itemId: string | number, id: string | number): Promise<ItemCollectionDeactivateResponse>;
+declare function putItemCollectionDeactivate(id: string | number, collectionId: string | number): Promise<ItemCollectionDeactivateResponse>;
 
 declare function PUT$7(request: NextRequest, { params }: {
     params: Promise<{
@@ -258,22 +258,22 @@ declare function PUT$3(request: NextRequest): Promise<NextResponse<any>>;
 
 declare function PUT$2(request: NextRequest, { params }: {
     params: Promise<{
-        itemId: string;
         id: string;
+        collectionId: string;
     }>;
 }): Promise<NextResponse<unknown>>;
 
 declare function PUT$1(request: NextRequest, { params }: {
     params: Promise<{
-        itemId: string;
         id: string;
+        collectionId: string;
     }>;
 }): Promise<NextResponse<any>>;
 
 declare function PUT(request: NextRequest, { params }: {
     params: Promise<{
-        itemId: string;
         id: string;
+        collectionId: string;
     }>;
 }): Promise<NextResponse<any>>;
 

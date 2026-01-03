@@ -4,11 +4,11 @@ import { toNextResponseFromError } from "../../../core/errorResponse";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ itemId: string; id: string }> }
+  { params }: { params: Promise<{ id: string; collectionId : string }> }
 ) {
   try {
-    const { itemId, id } = await params;
-    const result = await putItemCollectionDeactivate(itemId, id);
+    const { id, collectionId } = await params;
+    const result = await putItemCollectionDeactivate(id, collectionId);
     return NextResponse.json(result);
   } catch (err) {
     return toNextResponseFromError(err);
