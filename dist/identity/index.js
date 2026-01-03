@@ -5,15 +5,15 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-KSNYFQVP.js";
+} from "../chunk-DH3FAFAZ.js";
 import {
   Api
-} from "../chunk-POYSVHPM.js";
+} from "../chunk-LVVDKXTK.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-CIHJ6LT2.js";
-import "../chunk-IQ6COM4B.js";
+} from "../chunk-LNETFEBQ.js";
+import "../chunk-IUIUHPNR.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -172,8 +172,8 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-PN3S5IBC.js");
-    const { Api: Api2 } = await import("../api-BGMUOXBY.js");
+    const { getWithAuth } = await import("../fetcher-VGCQIDM6.js");
+    const { Api: Api2 } = await import("../api-UEHYIAOC.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
     const fullNameTrimmed2 = FullName !== void 0 ? String(FullName).trim() : "";
