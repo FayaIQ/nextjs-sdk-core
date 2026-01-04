@@ -74,11 +74,8 @@ export async function GET(request: NextRequest) {
 
     // Final fallback to node runtime identifier
     if (!userAgent) {
-      userAgent = typeof process !== "undefined" && (process as any)?.version
-        ? `nextjs-sdk-core (node ${(process as any).version})`
-        : `nextjs-sdk-core`;
+      userAgent = "nextjs-sdk-core  handler api/auth/token";
     }
-
     const response = await fetch(Api.signIn, {
       method: "POST",
       headers: {

@@ -1125,7 +1125,7 @@ async function loginUser(credentials, userAgent) {
     if (credentials.playerId) {
       requestBody.playerId = credentials.playerId;
     }
-    const headers = userAgent ? { "User-Agent": userAgent } : void 0;
+    const headers = userAgent ? { "User-Agent": userAgent } : "login in user server side in nextjs-sdk-core";
     const response = await postWithoutAuth(
       Api.signIn,
       requestBody,
@@ -1522,7 +1522,7 @@ async function GET2(request) {
       }
     }
     if (!userAgent) {
-      userAgent = typeof process !== "undefined" && process?.version ? `nextjs-sdk-core (node ${process.version})` : `nextjs-sdk-core`;
+      userAgent = "nextjs-sdk-core  handler api/auth/token";
     }
     const response = await fetch(Api.signIn, {
       method: "POST",

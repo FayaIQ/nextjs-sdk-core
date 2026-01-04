@@ -136,7 +136,7 @@ export async function loginUser(
       requestBody.playerId = credentials.playerId;
     }
     
-    const headers = userAgent ? { "User-Agent": userAgent } : undefined;
+    const headers = userAgent ? { "User-Agent": userAgent } : "login in user server side in nextjs-sdk-core";
 
     const response = await postWithoutAuth<LoginResponse>(
       Api.signIn,
