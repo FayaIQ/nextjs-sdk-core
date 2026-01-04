@@ -365,6 +365,22 @@ async function apiFetch(url, options = {}) {
     }
   }
   const requestHeaders = { ...headers };
+  function getUserAgent() {
+    try {
+      const base = `nextjs-sdk-core`;
+      if (typeof process !== "undefined" && process?.version) {
+        return `${base} (node ${process.version})`;
+      }
+      return base;
+    } catch {
+      return "nextjs-sdk-core";
+    }
+  }
+  if (typeof window === "undefined") {
+    if (!requestHeaders["User-Agent"]) {
+      requestHeaders["User-Agent"] = getUserAgent();
+    }
+  }
   if (token) {
     requestHeaders["Authorization"] = `Bearer ${token}`;
   }
@@ -482,12 +498,21 @@ async function postWithAuth(url, data, headers) {
   });
 }
 async function postWithoutAuth(url, data, headers = {}) {
+  const effectiveHeaders = {
+    "Content-Type": "application/json",
+    ...headers
+  };
+  if (typeof window === "undefined" && !effectiveHeaders["User-Agent"]) {
+    try {
+      const base = `nextjs-sdk-core`;
+      effectiveHeaders["User-Agent"] = typeof process !== "undefined" && process?.version ? `${base} (node ${process.version})` : base;
+    } catch {
+      effectiveHeaders["User-Agent"] = "nextjs-sdk-core";
+    }
+  }
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    },
+    headers: effectiveHeaders,
     body: data ? JSON.stringify(data) : void 0
   });
   if (!response.ok) {

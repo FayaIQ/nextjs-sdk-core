@@ -5,7 +5,7 @@ import {
   getWithAuth,
   postWithAuth,
   putWithAuth
-} from "../../chunk-5MUZR4S6.js";
+} from "../../chunk-DXJNGSNT.js";
 import "../../chunk-VL2U67VR.js";
 
 // src/inventory/orderItem/getOrderItem.ts

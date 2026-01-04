@@ -43,7 +43,7 @@ interface LoginResponse {
  * STRICT mode: username and password are required in credentials
  * AUTO mode: username and password are optional - falls back to env config
  */
-declare function loginUser(credentials: LoginRequest): Promise<LoginResponse>;
+declare function loginUser(credentials: LoginRequest, userAgent?: string): Promise<LoginResponse>;
 
 declare function logoutUser(): Promise<{
     success: boolean;

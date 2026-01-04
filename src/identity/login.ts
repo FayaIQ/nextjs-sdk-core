@@ -65,7 +65,10 @@ export interface LoginResponse {
  * STRICT mode: username and password are required in credentials
  * AUTO mode: username and password are optional - falls back to env config
  */
-export async function loginUser(credentials: LoginRequest): Promise<LoginResponse> {
+export async function loginUser(
+  credentials: LoginRequest,
+  userAgent?: string
+): Promise<LoginResponse> {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
 
@@ -129,12 +132,17 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
       }
     }
     
-    // Add playerId if provided
     if (credentials.playerId) {
       requestBody.playerId = credentials.playerId;
     }
     
-    const response = await postWithoutAuth<LoginResponse>(Api.signIn, requestBody);
+    const headers = userAgent ? { "User-Agent": userAgent } : undefined;
+
+    const response = await postWithoutAuth<LoginResponse>(
+      Api.signIn,
+      requestBody,
+      (headers as Record<string, string>) || {}
+    );
 
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
@@ -229,7 +237,11 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
   // ✅ CLIENT SIDE
   const res = await fetch(`/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // Browsers disallow setting User-Agent; keep a sentinel for other clients
+      "User-Agent": (typeof navigator !== "undefined" && navigator.userAgent) || "login user",
+    },
     body: JSON.stringify(credentials),
   });
 

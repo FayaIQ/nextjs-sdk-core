@@ -2,14 +2,14 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-T3XANWJ3.js";
+} from "../chunk-JRXNFN7T.js";
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-5MUZR4S6.js";
+} from "../chunk-DXJNGSNT.js";
 import "../chunk-VL2U67VR.js";
 
 // src/core/config.ts
@@ -65,7 +65,7 @@ var getAuthConfig = () => {
 };
 
 // src/identity/login.ts
-async function loginUser(credentials) {
+async function loginUser(credentials, userAgent) {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
   if (isServer) {
@@ -117,7 +117,12 @@ async function loginUser(credentials) {
     if (credentials.playerId) {
       requestBody.playerId = credentials.playerId;
     }
-    const response = await postWithoutAuth(Api.signIn, requestBody);
+    const headers = userAgent ? { "User-Agent": userAgent } : void 0;
+    const response = await postWithoutAuth(
+      Api.signIn,
+      requestBody,
+      headers || {}
+    );
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
     }
@@ -193,7 +198,11 @@ async function loginUser(credentials) {
   }
   const res = await fetch(`/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // Browsers disallow setting User-Agent; keep a sentinel for other clients
+      "User-Agent": typeof navigator !== "undefined" && navigator.userAgent || "login user"
+    },
     body: JSON.stringify(credentials)
   });
   if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
@@ -221,7 +230,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-R4TTH3KN.js");
+    const { getWithAuth } = await import("../fetcher-O2HMJ75M.js");
     const { Api: Api2 } = await import("../api-IWWKU55Q.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
@@ -293,7 +302,18 @@ async function POST(request) {
         );
       }
     }
-    const response = await loginUser(credentials);
+    let userAgent;
+    try {
+      userAgent = request?.headersList?.get?.("user-agent") || void 0;
+    } catch {
+    }
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") || void 0;
+      } catch {
+      }
+    }
+    const response = await loginUser(credentials, userAgent);
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
     if (body.thirdPartyToken) {
       console.log("[identity:handler:login] setting tp_id cookie in store");
@@ -401,15 +421,8 @@ async function GET2(request) {
       existingToken = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
     }
     if (existingToken) {
-      console.log("[identity:handler:token] returning existing token from cookie");
       return NextResponse4.json(
-        { access_token: existingToken },
-        {
-          headers: {
-            "Cache-Control": "private, max-age=3600"
-            // Cache for 1 hour
-          }
-        }
+        { access_token: existingToken }
       );
     }
     const tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
@@ -430,9 +443,22 @@ async function GET2(request) {
     } else {
       console.log("[identity:handler:token] signing in with clientId/clientSecret");
     }
+    let userAgent = null;
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") || null;
+      } catch {
+      }
+    }
+    if (!userAgent) {
+      userAgent = typeof process !== "undefined" && process?.version ? `nextjs-sdk-core (node ${process.version})` : `nextjs-sdk-core`;
+    }
     const response = await fetch(Api.signIn, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": userAgent
+      },
       body: JSON.stringify({
         ...requestBody,
         ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}

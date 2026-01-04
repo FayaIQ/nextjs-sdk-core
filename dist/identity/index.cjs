@@ -702,6 +702,22 @@ async function apiFetch(url, options = {}) {
     }
   }
   const requestHeaders = { ...headers };
+  function getUserAgent() {
+    try {
+      const base = `nextjs-sdk-core`;
+      if (typeof process !== "undefined" && process?.version) {
+        return `${base} (node ${process.version})`;
+      }
+      return base;
+    } catch {
+      return "nextjs-sdk-core";
+    }
+  }
+  if (typeof window === "undefined") {
+    if (!requestHeaders["User-Agent"]) {
+      requestHeaders["User-Agent"] = getUserAgent();
+    }
+  }
   if (token) {
     requestHeaders["Authorization"] = `Bearer ${token}`;
   }
@@ -819,12 +835,21 @@ async function postWithAuth(url, data, headers) {
   });
 }
 async function postWithoutAuth(url, data, headers = {}) {
+  const effectiveHeaders = {
+    "Content-Type": "application/json",
+    ...headers
+  };
+  if (typeof window === "undefined" && !effectiveHeaders["User-Agent"]) {
+    try {
+      const base = `nextjs-sdk-core`;
+      effectiveHeaders["User-Agent"] = typeof process !== "undefined" && process?.version ? `${base} (node ${process.version})` : base;
+    } catch {
+      effectiveHeaders["User-Agent"] = "nextjs-sdk-core";
+    }
+  }
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    },
+    headers: effectiveHeaders,
     body: data ? JSON.stringify(data) : void 0
   });
   if (!response.ok) {
@@ -1048,7 +1073,7 @@ var getAuthConfig = () => {
 };
 
 // src/identity/login.ts
-async function loginUser(credentials) {
+async function loginUser(credentials, userAgent) {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
   if (isServer) {
@@ -1100,7 +1125,12 @@ async function loginUser(credentials) {
     if (credentials.playerId) {
       requestBody.playerId = credentials.playerId;
     }
-    const response = await postWithoutAuth(Api.signIn, requestBody);
+    const headers = userAgent ? { "User-Agent": userAgent } : void 0;
+    const response = await postWithoutAuth(
+      Api.signIn,
+      requestBody,
+      headers || {}
+    );
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
     }
@@ -1176,7 +1206,11 @@ async function loginUser(credentials) {
   }
   const res = await fetch(`/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // Browsers disallow setting User-Agent; keep a sentinel for other clients
+      "User-Agent": typeof navigator !== "undefined" && navigator.userAgent || "login user"
+    },
     body: JSON.stringify(credentials)
   });
   if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
@@ -1338,7 +1372,18 @@ async function POST(request) {
         );
       }
     }
-    const response = await loginUser(credentials);
+    let userAgent;
+    try {
+      userAgent = request?.headersList?.get?.("user-agent") || void 0;
+    } catch {
+    }
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") || void 0;
+      } catch {
+      }
+    }
+    const response = await loginUser(credentials, userAgent);
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
     if (body.thirdPartyToken) {
       console.log("[identity:handler:login] setting tp_id cookie in store");
@@ -1447,15 +1492,8 @@ async function GET2(request) {
       existingToken = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
     }
     if (existingToken) {
-      console.log("[identity:handler:token] returning existing token from cookie");
       return import_server5.NextResponse.json(
-        { access_token: existingToken },
-        {
-          headers: {
-            "Cache-Control": "private, max-age=3600"
-            // Cache for 1 hour
-          }
-        }
+        { access_token: existingToken }
       );
     }
     const tpId = cookieStore.get(COOKIE_NAMES2.TP_ID)?.value;
@@ -1476,9 +1514,22 @@ async function GET2(request) {
     } else {
       console.log("[identity:handler:token] signing in with clientId/clientSecret");
     }
+    let userAgent = null;
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") || null;
+      } catch {
+      }
+    }
+    if (!userAgent) {
+      userAgent = typeof process !== "undefined" && process?.version ? `nextjs-sdk-core (node ${process.version})` : `nextjs-sdk-core`;
+    }
     const response = await fetch(Api.signIn, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": userAgent
+      },
       body: JSON.stringify({
         ...requestBody,
         ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}

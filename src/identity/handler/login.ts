@@ -73,11 +73,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Perform login (this automatically saves token, roles, and storeId to cookies)
-    const response = await loginUser(credentials);
+    // Prefer incoming request's user-agent when available
+    let userAgent: string | undefined;
+    try {
+      userAgent = (request as any)?.headersList?.get?.("user-agent") || undefined;
+    } catch {}
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") || undefined;
+      } catch {}
+    }
+
+    const response = await loginUser(credentials, userAgent);
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
 
-    // If login provided a thirdPartyToken, persist it for AUTO mode re-auth
-    // Set it in the cookies store directly (loginUser already sets it, but we ensure it's set here too)
+    // Set it in the cookies store directly (loginUser already sets it, but to ensure it's set here too)
     if (body.thirdPartyToken) {
       console.log("[identity:handler:login] setting tp_id cookie in store");
       const { cookies } = await import("next/headers");

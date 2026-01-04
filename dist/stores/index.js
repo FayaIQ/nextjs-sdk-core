@@ -1,13 +1,13 @@
 import {
   toNextResponseFromError
-} from "../chunk-QCO4JZ4J.js";
-import "../chunk-5MUZR4S6.js";
+} from "../chunk-SOBIHKN5.js";
+import "../chunk-DXJNGSNT.js";
 import "../chunk-VL2U67VR.js";
 
 // src/stores/getStores.ts
 async function getStores() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-R4TTH3KN.js");
+    const { getWithAuth } = await import("../fetcher-O2HMJ75M.js");
     const { Api } = await import("../api-IWWKU55Q.js");
     return getWithAuth(Api.getStores);
   }
@@ -40,7 +40,7 @@ async function getStoreUsersPaging(params = {}) {
     }
   });
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-R4TTH3KN.js");
+    const { getWithAuth } = await import("../fetcher-O2HMJ75M.js");
     const { Api } = await import("../api-IWWKU55Q.js");
     const url = Api.getStoreUsersPaging;
     return getWithAuth(`${url}?${qs.toString()}`);
@@ -56,7 +56,7 @@ async function getStoreUsersPaging(params = {}) {
 // src/stores/getStoreDeliveryZones.ts
 async function getStoreDeliveryZones(storeId) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-R4TTH3KN.js");
+    const { getWithAuth } = await import("../fetcher-O2HMJ75M.js");
     const { Api } = await import("../api-IWWKU55Q.js");
     return getWithAuth(Api.getStoreDeliveryZones(storeId));
   }
@@ -101,7 +101,7 @@ async function GET2(request) {
 // src/stores/getStoreById.ts
 async function getStoreById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-R4TTH3KN.js");
+    const { getWithAuth } = await import("../fetcher-O2HMJ75M.js");
     const { Api } = await import("../api-IWWKU55Q.js");
     return getWithAuth(Api.getStoreById(id));
   }
@@ -133,7 +133,7 @@ async function GET3(request, { params }) {
 // src/stores/getBranches.ts
 async function getBranches() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-R4TTH3KN.js");
+    const { getWithAuth } = await import("../fetcher-O2HMJ75M.js");
     const { Api } = await import("../api-IWWKU55Q.js");
     return getWithAuth(Api.getBranches);
   }

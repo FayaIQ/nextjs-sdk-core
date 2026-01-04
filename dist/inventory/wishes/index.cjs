@@ -357,6 +357,22 @@ async function apiFetch(url, options = {}) {
     }
   }
   const requestHeaders = { ...headers };
+  function getUserAgent() {
+    try {
+      const base = `nextjs-sdk-core`;
+      if (typeof process !== "undefined" && process?.version) {
+        return `${base} (node ${process.version})`;
+      }
+      return base;
+    } catch {
+      return "nextjs-sdk-core";
+    }
+  }
+  if (typeof window === "undefined") {
+    if (!requestHeaders["User-Agent"]) {
+      requestHeaders["User-Agent"] = getUserAgent();
+    }
+  }
   if (token) {
     requestHeaders["Authorization"] = `Bearer ${token}`;
   }
