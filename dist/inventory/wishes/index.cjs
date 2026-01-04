@@ -196,7 +196,7 @@ var init_cookie = __esm({
       ACCESS_TOKEN: "access_token"
     };
     SECURE_COOKIE_OPTIONS = {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -618,6 +618,13 @@ module.exports = __toCommonJS(wishes_exports);
 var AUTH_MODE = process.env.AUTH_MODE || "auto";
 var USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
 async function getTokenImpl() {
+  if (typeof window === "undefined") {
+    const { headers } = await import("next/headers");
+    const headerToken = (await headers()).get("x-access-token");
+    if (headerToken) {
+      return headerToken;
+    }
+  }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();

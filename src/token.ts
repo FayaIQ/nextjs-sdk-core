@@ -13,6 +13,15 @@ const USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
 // SINGLE SOURCE OF TRUTH — NO CACHING
 // ------------------------------------------------
 async function getTokenImpl(): Promise<string> {
+  // 🟢 0. SERVER-SIDE: Check for x-access-token header first
+  if (typeof window === "undefined") {
+    const { headers } = await import("next/headers");
+    const headerToken = (await headers()).get("x-access-token");
+    if (headerToken) {
+      return headerToken;
+    }
+  }
+
   // 🟢 1. STRICT MODE → token must exist in cookie (SSR)
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");

@@ -540,7 +540,7 @@ var init_cookie = __esm({
       ACCESS_TOKEN: "access_token"
     };
     SECURE_COOKIE_OPTIONS = {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -614,6 +614,13 @@ var init_config = __esm({
 
 // src/token.ts
 async function getTokenImpl() {
+  if (typeof window === "undefined") {
+    const { headers } = await import("next/headers");
+    const headerToken = (await headers()).get("x-access-token");
+    if (headerToken) {
+      return headerToken;
+    }
+  }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
@@ -1547,7 +1554,7 @@ async function GET2(request) {
       const { encrypt: encrypt2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
       const encrypted = encrypt2(data.access_token);
       res.cookies.set(CN.CRF, encrypted, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -1558,7 +1565,7 @@ async function GET2(request) {
       console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
     }
     res.cookies.set(COOKIE_NAMES2.ACCESS_TOKEN, data.access_token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
