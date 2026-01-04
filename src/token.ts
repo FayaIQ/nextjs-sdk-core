@@ -78,10 +78,17 @@ async function getTokenImpl(): Promise<string> {
     } catch {}
   }
 
-  // 🟢 3. CLIENT → check for token in localStorage or similar (no auto login)
+  // 🟢 3. CLIENT → check for token in cookie (no auto login)
   if (typeof window !== "undefined") {
-    // On client side, check localStorage for token (assuming it's set elsewhere)
-    const clientToken = localStorage.getItem("access_token");
+
+    // On client side, check for token in cookie
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+      return null;
+    };
+    const clientToken = getCookie("access_token");
     if (clientToken) {
       return clientToken;
     }
