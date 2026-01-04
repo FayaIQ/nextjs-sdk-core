@@ -1110,92 +1110,6 @@ async function getStoreInfo() {
   return response.json();
 }
 
-// src/inventory/items/getProducts.ts
-async function getProducts({
-  filterParams
-}) {
-  const params = filterParams.toURLSearchParams();
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(
-      `${Api2.getProducts}?${params.toString()}`
-    );
-  }
-  const response = await fetch(`/api/products?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch products: ${response.statusText}`);
-  }
-  return response.json();
-}
-
-// src/inventory/items/getProductInfo.ts
-async function getProductInfo(id) {
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(`${Api2.getProductInfo(id)}`);
-  }
-  const response = await fetch(`/api/products/${id}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch order full info: ${response.statusText}`);
-  }
-  return response.json();
-}
-
-// src/inventory/menus/getMenus.ts
-async function getMenus({
-  filterParams
-}) {
-  const params = filterParams.toURLSearchParams();
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(`${Api2.getMenus}?${params.toString()}`, {});
-  } else {
-    return fetch(`/api/menus?${params.toString()}`).then((res) => {
-      if (!res.ok) throw new Error("Failed to fetch from src products");
-      return res.json();
-    });
-  }
-}
-
-// src/inventory/orders/getOrders.ts
-async function getOrders({
-  filterParams
-}) {
-  const params = filterParams.toURLSearchParams();
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { default: getToken2 } = await Promise.resolve().then(() => (init_token(), token_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    const token = await getToken2();
-    return getWithAuth2(
-      `${Api2.getOrders}?${params.toString()}`
-    );
-  }
-  const response = await fetch(`/api/orders?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch orders: ${response.statusText}`);
-  }
-  return response.json();
-}
-
-// src/inventory/brands/getBrands.ts
-async function getBrands() {
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(Api2.getBrands);
-  } else {
-    const response = await fetch("/api/brands");
-    if (!response.ok) {
-      throw new Error("Failed to fetch brands");
-    }
-    return response.json();
-  }
-}
-
 // src/inventory/items/filter-models.ts
 var SortType = /* @__PURE__ */ ((SortType2) => {
   SortType2["None"] = "None";
@@ -1927,6 +1841,96 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
     });
   }
 };
+
+// src/inventory/items/getProducts.ts
+async function getProducts({
+  filterParams
+}) {
+  const validSortValues = Object.values(SortType);
+  if (!filterParams.sortType || !validSortValues.includes(filterParams.sortType)) {
+    filterParams = filterParams.copyWith({ sortType: "None" /* None */ });
+  }
+  const params = filterParams.toURLSearchParams();
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(
+      `${Api2.getProducts}?${params.toString()}`
+    );
+  }
+  const response = await fetch(`/api/products?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch products: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/items/getProductInfo.ts
+async function getProductInfo(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(`${Api2.getProductInfo(id)}`);
+  }
+  const response = await fetch(`/api/products/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch order full info: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/menus/getMenus.ts
+async function getMenus({
+  filterParams
+}) {
+  const params = filterParams.toURLSearchParams();
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(`${Api2.getMenus}?${params.toString()}`, {});
+  } else {
+    return fetch(`/api/menus?${params.toString()}`).then((res) => {
+      if (!res.ok) throw new Error("Failed to fetch from src products");
+      return res.json();
+    });
+  }
+}
+
+// src/inventory/orders/getOrders.ts
+async function getOrders({
+  filterParams
+}) {
+  const params = filterParams.toURLSearchParams();
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { default: getToken2 } = await Promise.resolve().then(() => (init_token(), token_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    const token = await getToken2();
+    return getWithAuth2(
+      `${Api2.getOrders}?${params.toString()}`
+    );
+  }
+  const response = await fetch(`/api/orders?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/brands/getBrands.ts
+async function getBrands() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getBrands);
+  } else {
+    const response = await fetch("/api/brands");
+    if (!response.ok) {
+      throw new Error("Failed to fetch brands");
+    }
+    return response.json();
+  }
+}
 
 // src/index.ts
 init_api();

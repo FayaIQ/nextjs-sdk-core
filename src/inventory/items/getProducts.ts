@@ -1,5 +1,5 @@
 import type { Product, ProductResponse } from "./types";
-import type { ItemsFilterParameters } from "./filter-models";
+import { SortType, ItemsFilterParameters } from "./filter-models";
 
 
 /**
@@ -26,6 +26,14 @@ export async function getProducts({
 }: {
   filterParams: ItemsFilterParameters;
 }): Promise<ProductResponse> {
+  // Ensure sortType is always defined and valid.
+  // If missing or invalid, default to SortType.None (safe default).
+  const validSortValues = Object.values(SortType) as string[];
+  if (!filterParams.sortType || !validSortValues.includes(filterParams.sortType)) {
+    // Use copyWith to avoid mutating caller's instance
+    filterParams = filterParams.copyWith({ sortType: SortType.None });
+  }
+
   const params = filterParams.toURLSearchParams();
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
