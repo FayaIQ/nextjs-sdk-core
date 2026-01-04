@@ -199,7 +199,7 @@ var init_cookie = __esm({
       ACCESS_TOKEN: "access_token"
     };
     SECURE_COOKIE_OPTIONS = {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -1180,6 +1180,9 @@ __export(index_exports, {
   getSecondaryApp: () => getSecondaryApp,
   getStoreInfo: () => getStoreInfo,
   getToken: () => getToken,
+  putItemCollection: () => putItemCollection,
+  putItemCollectionActivate: () => putItemCollectionActivate,
+  putItemCollectionDeactivate: () => putItemCollectionDeactivate,
   setEncryptedCookie: () => setEncryptedCookie,
   setPlainCookie: () => setPlainCookie,
   signOutFirebase: () => signOutFirebase,
@@ -1287,6 +1290,74 @@ async function getBrands() {
     }
     return response.json();
   }
+}
+
+// src/inventory/items/putItemCollection.ts
+async function putItemCollection(id, collectionId, data) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollection(id, collectionId), data);
+  }
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json-patch+json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
+// src/inventory/items/putItemCollectionActivate.ts
+async function putItemCollectionActivate(id, collectionId) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollectionActivate(id, collectionId));
+  }
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}/activate`, {
+    method: "PUT"
+  });
+  if (!res.ok) {
+    let err = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const b = await res.json();
+      err = b.error || b.message || err;
+    } catch {
+    }
+    throw new Error(err);
+  }
+  return res.json();
+}
+
+// src/inventory/items/putItemCollectionDeactivate.ts
+async function putItemCollectionDeactivate(id, collectionId) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollectionDeactivate(id, collectionId));
+  }
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}/deactivate`, {
+    method: "PUT"
+  });
+  if (!res.ok) {
+    let err = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const b = await res.json();
+      err = b.error || b.message || err;
+    } catch {
+    }
+    throw new Error(err);
+  }
+  return res.json();
 }
 
 // src/inventory/items/filter-models.ts
@@ -2634,6 +2705,9 @@ init_crypto();
   getSecondaryApp,
   getStoreInfo,
   getToken,
+  putItemCollection,
+  putItemCollectionActivate,
+  putItemCollectionDeactivate,
   setEncryptedCookie,
   setPlainCookie,
   signOutFirebase,

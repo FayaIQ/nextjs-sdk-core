@@ -1,7 +1,10 @@
 import {
   getProductInfo,
-  getProducts
-} from "../../chunk-6RSE4LHF.js";
+  getProducts,
+  putItemCollection,
+  putItemCollectionActivate,
+  putItemCollectionDeactivate
+} from "../../chunk-JDP4DXTP.js";
 import {
   AgeGroup,
   Gender,
@@ -15,16 +18,16 @@ import {
 } from "../../chunk-B7VMWVKJ.js";
 import {
   toNextResponseFromError
-} from "../../chunk-BRXSBIPO.js";
+} from "../../chunk-JEWXV6LF.js";
 import {
   getWithAuth
-} from "../../chunk-VJ6NUI5T.js";
-import "../../chunk-HHXTBTNV.js";
+} from "../../chunk-5SV6VQOZ.js";
+import "../../chunk-BJ62PX52.js";
 
 // src/inventory/items/getProductInfoV2.ts
 async function getProductInfoV2(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-6OC52XA6.js");
+    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     return getWithAuth2(`${Api2.getProductInfoV2(id)}`);
   }
@@ -81,7 +84,7 @@ async function getItemsPaging(filters) {
 // src/inventory/items/getItemById.ts
 async function getItemById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-6OC52XA6.js");
+    const { getWithAuth: getWithAuth2 } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     return getWithAuth2(Api2.getItemById(id));
   }
@@ -176,7 +179,7 @@ async function GET6(request, { params }) {
 // src/inventory/items/postCopyParentStore.ts
 async function postCopyParentStore(itemIds) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { postWithAuth } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     return postWithAuth(Api2.postCopyParentStore, { itemIds });
   }
@@ -201,7 +204,7 @@ async function postCopyParentStore(itemIds) {
 // src/inventory/items/postCopyParentToChildStores.ts
 async function postCopyParentToChildStores(payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { postWithAuth } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     return postWithAuth(Api2.postCopyParentToChildStores, payload);
   }
@@ -225,7 +228,7 @@ async function postCopyParentToChildStores(payload) {
 // src/inventory/items/postCopyToStore.ts
 async function postCopyToStore(childStoreId, payload) {
   if (typeof window === "undefined") {
-    const { postWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { postWithAuth } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     return postWithAuth(Api2.postCopyToStore(childStoreId), payload);
   }
@@ -295,7 +298,7 @@ async function POST3(request, { params }) {
 // src/inventory/items/putParentStoreSync.ts
 async function putParentStoreSync(itemId, body) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { putWithAuth } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     if (body !== void 0) return putWithAuth(Api2.putItemParentStoreSync(itemId), body);
     return putWithAuth(Api2.putItemParentStoreSync(itemId));
@@ -339,7 +342,7 @@ async function PUT(request, { params }) {
 // src/inventory/items/putActivate.ts
 async function putActivateItem(id) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { putWithAuth } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     return putWithAuth(Api2.putItemActivate(id));
   }
@@ -351,7 +354,7 @@ async function putActivateItem(id) {
 // src/inventory/items/putDeactivate.ts
 async function putDeactivateItem(id) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { putWithAuth } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     return putWithAuth(Api2.putItemDeactivate(id));
   }
@@ -363,7 +366,7 @@ async function putDeactivateItem(id) {
 // src/inventory/items/putCollectionsActivateByFilter.ts
 async function putCollectionsActivateByFilter(payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { putWithAuth } = await import("../../fetcher-ABVPONGV.js");
     return putWithAuth(Api.putItemsCollectionsActivateByFilter(), payload);
   }
   const res = await fetch(`/api/items/collections/activate-by-filter`, {
@@ -387,7 +390,7 @@ async function putCollectionsActivateByFilter(payload) {
 // src/inventory/items/putCollectionsDeactivateByFilter.ts
 async function putCollectionsDeactivateByFilter(payload) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { putWithAuth } = await import("../../fetcher-ABVPONGV.js");
     return putWithAuth(Api.putItemsCollectionsDeactivateByFilter(), payload);
   }
   const res = await fetch(`/api/items/collections/deactivate-by-filter`, {
@@ -411,7 +414,7 @@ async function putCollectionsDeactivateByFilter(payload) {
 // src/inventory/items/putItem.ts
 async function putItem(id, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { putWithAuth } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     console.log("putItem data:", data);
     return putWithAuth(Api2.putItem(id), data);
@@ -437,80 +440,12 @@ async function putItem(id, data) {
 // src/inventory/items/deleteItem.ts
 async function deleteItem(id) {
   if (typeof window === "undefined") {
-    const { deleteWithAuth } = await import("../../fetcher-6OC52XA6.js");
+    const { deleteWithAuth } = await import("../../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
     return deleteWithAuth(Api2.deleteItem(id));
   }
   const res = await fetch(`/api/items/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error(`Failed to delete item: ${res.statusText}`);
-  return res.json();
-}
-
-// src/inventory/items/putItemCollection.ts
-async function putItemCollection(id, collectionId, data) {
-  if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
-    const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
-    return putWithAuth(Api2.putItemCollection(id, collectionId), data);
-  }
-  const res = await fetch(`/api/items/${id}/collections/${collectionId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json-patch+json" },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) {
-    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
-    try {
-      const errorBody = await res.json();
-      errorMessage = errorBody.error || errorBody.message || errorMessage;
-    } catch (parseErr) {
-    }
-    throw new Error(errorMessage);
-  }
-  return res.json();
-}
-
-// src/inventory/items/putItemCollectionActivate.ts
-async function putItemCollectionActivate(id, collectionId) {
-  if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
-    const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
-    return putWithAuth(Api2.putItemCollectionActivate(id, collectionId));
-  }
-  const res = await fetch(`/api/items/${id}/collections/${collectionId}/activate`, {
-    method: "PUT"
-  });
-  if (!res.ok) {
-    let err = `failed: ${res.status} ${res.statusText}`;
-    try {
-      const b = await res.json();
-      err = b.error || b.message || err;
-    } catch {
-    }
-    throw new Error(err);
-  }
-  return res.json();
-}
-
-// src/inventory/items/putItemCollectionDeactivate.ts
-async function putItemCollectionDeactivate(id, collectionId) {
-  if (typeof window === "undefined") {
-    const { putWithAuth } = await import("../../fetcher-6OC52XA6.js");
-    const { Api: Api2 } = await import("../../api-IWWKU55Q.js");
-    return putWithAuth(Api2.putItemCollectionDeactivate(id, collectionId));
-  }
-  const res = await fetch(`/api/items/${id}/collections/${collectionId}/deactivate`, {
-    method: "PUT"
-  });
-  if (!res.ok) {
-    let err = `failed: ${res.status} ${res.statusText}`;
-    try {
-      const b = await res.json();
-      err = b.error || b.message || err;
-    } catch {
-    }
-    throw new Error(err);
-  }
   return res.json();
 }
 

@@ -5,15 +5,15 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-5JNDU45M.js";
+} from "../chunk-DFQEWPZI.js";
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-VJ6NUI5T.js";
-import "../chunk-HHXTBTNV.js";
+} from "../chunk-5SV6VQOZ.js";
+import "../chunk-BJ62PX52.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -74,7 +74,7 @@ async function loginUser(credentials) {
     }
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
-    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-UIF5DEUF.js");
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-QTBNOWAP.js");
     try {
       setEncryptedCookie(cookieStore, COOKIE_NAMES.CRF, response.access_token, {
         maxAge: expiresIn
@@ -172,7 +172,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-6OC52XA6.js");
+    const { getWithAuth } = await import("../fetcher-ABVPONGV.js");
     const { Api: Api2 } = await import("../api-IWWKU55Q.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
@@ -215,7 +215,7 @@ async function POST(request) {
       const cookieStore = await cookies();
       let hasValidToken = false;
       try {
-        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-UIF5DEUF.js");
+        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-QTBNOWAP.js");
         const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
         const existingTpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
         if (existingToken && existingTpId === body.thirdPartyToken) {
@@ -345,7 +345,7 @@ async function GET2(request) {
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-UIF5DEUF.js");
+    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-QTBNOWAP.js");
     console.log("[identity:handler:token] GET checking existing token");
     let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
     if (!existingToken) {
@@ -406,11 +406,11 @@ async function GET2(request) {
     console.log("[identity:handler:token] new token obtained, setting encrypted cookie");
     const res = NextResponse4.json({ access_token: data.access_token });
     try {
-      const { setEncryptedCookie: setEncCookie, COOKIE_NAMES: CN } = await import("../cookie-UIF5DEUF.js");
+      const { setEncryptedCookie: setEncCookie, COOKIE_NAMES: CN } = await import("../cookie-QTBNOWAP.js");
       const { encrypt } = await import("../crypto-J736LS26.js");
       const encrypted = encrypt(data.access_token);
       res.cookies.set(CN.CRF, encrypted, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -421,7 +421,7 @@ async function GET2(request) {
       console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
     }
     res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",

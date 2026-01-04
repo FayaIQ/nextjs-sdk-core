@@ -1,5 +1,5 @@
-import { P as Product, b as ProductResponse, U as UpdateItemRequest } from '../../getProductInfo-zTN7ZqqU.js';
-export { B as Brand, C as CollectionItem, I as ItemColor, h as ItemsCollectionsFilterRequest, M as MultipleMenu, f as PackUnit, e as Packs, d as SizeSet, S as SizeValue, c as UnitInfo, a as getProductInfo, g as getProducts } from '../../getProductInfo-zTN7ZqqU.js';
+import { P as Product, d as ProductResponse } from '../../putItemCollectionDeactivate-D5LoI5-I.js';
+export { B as Brand, C as CollectionItem, n as ItemCollectionActivateResponse, o as ItemCollectionDeactivateResponse, I as ItemColor, j as ItemsCollectionsFilterRequest, M as MultipleMenu, h as PackUnit, f as Packs, e as SizeSet, S as SizeValue, U as UnitInfo, m as UpdateItemCollectionRequest, i as UpdateItemRequest, k as UpdateItemResponse, a as getProductInfo, g as getProducts, l as putItem, p as putItemCollection, b as putItemCollectionActivate, c as putItemCollectionDeactivate } from '../../putItemCollectionDeactivate-D5LoI5-I.js';
 import { I as ItemsFilterParameters } from '../../filter-models-hHJG3Qpk.js';
 export { A as AgeGroup, G as Gender, N as NewArrivalPeriod, P as PagingParameters, S as SortType } from '../../filter-models-hHJG3Qpk.js';
 import { NextRequest, NextResponse } from 'next/server';
@@ -178,55 +178,7 @@ declare function putCollectionsActivateByFilter(payload: any): Promise<any>;
  */
 declare function putCollectionsDeactivateByFilter(payload: any): Promise<any>;
 
-interface UpdateItemResponse {
-    success: boolean;
-    message?: string;
-    code?: string;
-    name?: string;
-}
-/**
- * Update an item by id
- * @param id - Item ID
- * @param data - Fields to update
- */
-declare function putItem(id: string | number, data: UpdateItemRequest): Promise<UpdateItemResponse>;
-
 declare function deleteItem(id: string | number): Promise<any>;
-
-interface UpdateItemCollectionRequest {
-    barcode?: string;
-    code?: string;
-    price?: number;
-    colorId?: number;
-    sizeValueId?: number;
-    unitLevel?: number;
-    isActive?: boolean;
-    [key: string]: any;
-}
-/**
- * Update an item collection by itemId and collection id
- */
-declare function putItemCollection(id: string | number, collectionId: string | number, data: UpdateItemCollectionRequest): Promise<UpdateItemResponse>;
-
-interface ItemCollectionActivateResponse {
-    success?: boolean;
-    message?: string;
-    [key: string]: any;
-}
-/**
- * Activate an item collection for a given item
- */
-declare function putItemCollectionActivate(id: string | number, collectionId: string | number): Promise<ItemCollectionActivateResponse>;
-
-interface ItemCollectionDeactivateResponse {
-    success?: boolean;
-    message?: string;
-    [key: string]: any;
-}
-/**
- * Deactivate an item collection for a given item
- */
-declare function putItemCollectionDeactivate(id: string | number, collectionId: string | number): Promise<ItemCollectionDeactivateResponse>;
 
 declare function PUT$7(request: NextRequest, { params }: {
     params: Promise<{
@@ -277,4 +229,4 @@ declare function PUT(request: NextRequest, { params }: {
     }>;
 }): Promise<NextResponse<any>>;
 
-export { type CopyParentResponse, POST$2 as CopyParentStorePOST, POST$1 as CopyParentToChildStoresPOST, type CopyParentToChildStoresRequest, type CopyParentToChildStoresResponse, POST as CopyToStorePOST, type CopyToStoreRequest, type CopyToStoreResponse, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$5 as GetProductsGET, type ItemCollectionActivateResponse, type ItemCollectionDeactivateResponse, ItemsFilterParameters, Product, GET$4 as ProductInfoGET, GET$3 as ProductInfoV2GET, ProductResponse, PUT$4 as PutCollectionsActivateByFilterPUT, PUT$3 as PutCollectionsDeactivateByFilterPUT, PUT$7 as PutItemActivatePUT, PUT$1 as PutItemCollectionActivatePUT, PUT as PutItemCollectionDeactivatePUT, PUT$2 as PutItemCollectionPUT, PUT$6 as PutItemDeactivatePUT, PUT$5 as PutItemPUT, PUT$8 as PutParentStoreSyncPUT, type UpdateItemCollectionRequest, UpdateItemRequest, type UpdateItemResponse, deleteItem, getItemById, getItemsPaging, getParentProducts, getProductInfoV2, postCopyParentStore, postCopyParentToChildStores, postCopyToStore, putActivateItem, putCollectionsActivateByFilter, putCollectionsDeactivateByFilter, putDeactivateItem, putItem, putItemCollection, putItemCollectionActivate, putItemCollectionDeactivate, putParentStoreSync };
+export { type CopyParentResponse, POST$2 as CopyParentStorePOST, POST$1 as CopyParentToChildStoresPOST, type CopyParentToChildStoresRequest, type CopyParentToChildStoresResponse, POST as CopyToStorePOST, type CopyToStoreRequest, type CopyToStoreResponse, DELETE as DeleteItemDELETE, GET as GetItemByIdGET, GET$1 as GetItemsPagingGET, type GetItemsPagingParams, GET$2 as GetParentProductsGET, GET$5 as GetProductsGET, ItemsFilterParameters, Product, GET$4 as ProductInfoGET, GET$3 as ProductInfoV2GET, ProductResponse, PUT$4 as PutCollectionsActivateByFilterPUT, PUT$3 as PutCollectionsDeactivateByFilterPUT, PUT$7 as PutItemActivatePUT, PUT$1 as PutItemCollectionActivatePUT, PUT as PutItemCollectionDeactivatePUT, PUT$2 as PutItemCollectionPUT, PUT$6 as PutItemDeactivatePUT, PUT$5 as PutItemPUT, PUT$8 as PutParentStoreSyncPUT, deleteItem, getItemById, getItemsPaging, getParentProducts, getProductInfoV2, postCopyParentStore, postCopyParentToChildStores, postCopyToStore, putActivateItem, putCollectionsActivateByFilter, putCollectionsDeactivateByFilter, putDeactivateItem, putParentStoreSync };

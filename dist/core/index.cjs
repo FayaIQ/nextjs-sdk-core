@@ -196,7 +196,7 @@ var init_cookie = __esm({
       ACCESS_TOKEN: "access_token"
     };
     SECURE_COOKIE_OPTIONS = {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",

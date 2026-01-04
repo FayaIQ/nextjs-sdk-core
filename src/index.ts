@@ -5,6 +5,9 @@ export { getProductInfo } from "./inventory/items/getProductInfo";
 export { getMenus } from "./inventory/menus/getMenus";
 export { getOrders } from "./inventory/orders/getOrders";
 export { getBrands } from "./inventory/brands/getBrands";
+export { putItemCollection } from "./inventory/items/putItemCollection";
+export { putItemCollectionActivate } from "./inventory/items/putItemCollectionActivate";
+export { putItemCollectionDeactivate } from "./inventory/items/putItemCollectionDeactivate";
 
 // Type exports
 export * from "./types";
