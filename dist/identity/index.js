@@ -1,19 +1,68 @@
 import {
-  getAuthConfig
-} from "../chunk-JC63QBDJ.js";
-import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-FSYFYAF4.js";
+} from "../chunk-LBC3JVAE.js";
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-JG5IDPYY.js";
-import "../chunk-VKMD74OV.js";
+} from "../chunk-OAE2RUZR.js";
+import "../chunk-GMGTUCJE.js";
+
+// src/core/config.ts
+var getEnvVar = (key, brand) => {
+  if (typeof process === "undefined" || !process.env) return void 0;
+  if (brand) {
+    const brandKey = `${brand.toUpperCase()}_${key}`;
+    if (process.env[brandKey]) return process.env[brandKey];
+  }
+  return process.env[key];
+};
+var getAuthConfig = () => {
+  if (typeof process !== "undefined" && process.env) {
+    const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
+    const envConfig = {
+      clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
+      clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
+      username: getEnvVar("STOREAK_USERNAME", brand2),
+      password: getEnvVar("STOREAK_PASSWORD", brand2)
+    };
+    if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
+      return {
+        ...envConfig,
+        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
+        gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
+      };
+    }
+  }
+  const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
+  const prefix = brand ? `${brand.toUpperCase()}_` : "";
+  const missing = [];
+  const required = [
+    `${prefix}STOREAK_CLIENT_ID`,
+    `${prefix}STOREAK_CLIENT_SECRET`
+  ];
+  required.forEach((name) => {
+    if (!process.env?.[name]) missing.push(name);
+  });
+  if (missing.length > 0) {
+    const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
+    throw new Error(
+      `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
+    );
+  }
+  return {
+    clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
+    clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
+    username: getEnvVar("STOREAK_USERNAME", brand),
+    password: getEnvVar("STOREAK_PASSWORD", brand),
+    language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
+    gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
+  };
+};
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -172,7 +221,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-FIE26OEJ.js");
+    const { getWithAuth } = await import("../fetcher-7S5ODTXB.js");
     const { Api: Api2 } = await import("../api-IWWKU55Q.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";

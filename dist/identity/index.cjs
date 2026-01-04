@@ -550,68 +550,6 @@ var init_cookie = __esm({
   }
 });
 
-// src/core/config.ts
-var config_exports = {};
-__export(config_exports, {
-  getAuthConfig: () => getAuthConfig
-});
-var getEnvVar, getAuthConfig;
-var init_config = __esm({
-  "src/core/config.ts"() {
-    "use strict";
-    getEnvVar = (key, brand) => {
-      if (typeof process === "undefined" || !process.env) return void 0;
-      if (brand) {
-        const brandKey = `${brand.toUpperCase()}_${key}`;
-        if (process.env[brandKey]) return process.env[brandKey];
-      }
-      return process.env[key];
-    };
-    getAuthConfig = () => {
-      if (typeof process !== "undefined" && process.env) {
-        const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
-        const envConfig = {
-          clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
-          clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
-          username: getEnvVar("STOREAK_USERNAME", brand2),
-          password: getEnvVar("STOREAK_PASSWORD", brand2)
-        };
-        if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
-          return {
-            ...envConfig,
-            language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
-            gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
-          };
-        }
-      }
-      const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
-      const prefix = brand ? `${brand.toUpperCase()}_` : "";
-      const missing = [];
-      const required = [
-        `${prefix}STOREAK_CLIENT_ID`,
-        `${prefix}STOREAK_CLIENT_SECRET`
-      ];
-      required.forEach((name) => {
-        if (!process.env?.[name]) missing.push(name);
-      });
-      if (missing.length > 0) {
-        const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
-        throw new Error(
-          `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
-        );
-      }
-      return {
-        clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
-        clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
-        username: getEnvVar("STOREAK_USERNAME", brand),
-        password: getEnvVar("STOREAK_PASSWORD", brand),
-        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
-        gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
-      };
-    };
-  }
-});
-
 // src/token.ts
 async function getTokenImpl() {
   if (typeof window === "undefined") {
@@ -642,6 +580,8 @@ async function getTokenImpl() {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
+      const { headers } = await import("next/headers");
+      const headerToken = (await headers()).get("x-access-token");
       let token = null;
       try {
         const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
@@ -651,67 +591,21 @@ async function getTokenImpl() {
       if (!token) {
         token = cookieStore.get("access_token")?.value || null;
       }
+      if (headerToken) {
+        return headerToken;
+      }
       if (token) return token;
     } catch {
     }
   }
-  if (USE_TOKEN_ROUTE && typeof window !== "undefined") {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || "http://localhost:3000";
-      const res = await fetch(`${baseUrl}/api/auth/token`, {
-        cache: "no-store"
-      });
-      if (res.ok) {
-        const data2 = await res.json();
-        if (data2.access_token) return data2.access_token;
-      }
-    } catch {
+  if (typeof window !== "undefined") {
+    const clientToken = localStorage.getItem("access_token");
+    if (clientToken) {
+      return clientToken;
     }
+    throw new Error("No token available on client side");
   }
-  const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
-  const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-  const authConfig = getAuthConfig2();
-  let thirdPartyToken = void 0;
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      thirdPartyToken = cookieStore.get("tp_id")?.value;
-    } catch {
-    }
-  }
-  const requestBody = {
-    clientId: authConfig.clientId,
-    clientSecret: authConfig.clientSecret,
-    Language: authConfig.language ?? 0,
-    GMT: authConfig.gmt ?? 3,
-    IsFromNotification: false
-  };
-  if (thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = thirdPartyToken;
-  } else if (authConfig.thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = authConfig.thirdPartyToken;
-  }
-  const response = await fetch(Api2.signIn, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    ...AUTH_MODE === "auto" ? { next: { revalidate: 0 } } : {},
-    body: JSON.stringify({
-      ...requestBody,
-      ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}
-    })
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Authentication failed: ${response.status} ${response.statusText}`
-    );
-  }
-  const data = await response.json();
-  console.log("Fetched token from core:", data.access_token);
-  if (!data.access_token) {
-    throw new Error("Token missing in authentication response");
-  }
-  return data.access_token;
+  throw new Error("No token available");
 }
 function getToken() {
   return getTokenImpl();
@@ -1094,7 +988,60 @@ module.exports = __toCommonJS(identity_exports);
 // src/identity/login.ts
 init_api();
 init_fetcher();
-init_config();
+
+// src/core/config.ts
+var getEnvVar = (key, brand) => {
+  if (typeof process === "undefined" || !process.env) return void 0;
+  if (brand) {
+    const brandKey = `${brand.toUpperCase()}_${key}`;
+    if (process.env[brandKey]) return process.env[brandKey];
+  }
+  return process.env[key];
+};
+var getAuthConfig = () => {
+  if (typeof process !== "undefined" && process.env) {
+    const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
+    const envConfig = {
+      clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
+      clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
+      username: getEnvVar("STOREAK_USERNAME", brand2),
+      password: getEnvVar("STOREAK_PASSWORD", brand2)
+    };
+    if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
+      return {
+        ...envConfig,
+        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
+        gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
+      };
+    }
+  }
+  const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
+  const prefix = brand ? `${brand.toUpperCase()}_` : "";
+  const missing = [];
+  const required = [
+    `${prefix}STOREAK_CLIENT_ID`,
+    `${prefix}STOREAK_CLIENT_SECRET`
+  ];
+  required.forEach((name) => {
+    if (!process.env?.[name]) missing.push(name);
+  });
+  if (missing.length > 0) {
+    const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
+    throw new Error(
+      `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
+    );
+  }
+  return {
+    clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
+    clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
+    username: getEnvVar("STOREAK_USERNAME", brand),
+    password: getEnvVar("STOREAK_PASSWORD", brand),
+    language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
+    gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
+  };
+};
+
+// src/identity/login.ts
 async function loginUser(credentials) {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
@@ -1334,7 +1281,6 @@ async function PUT(request) {
 
 // src/identity/handler/login.ts
 var import_server2 = require("next/server");
-init_config();
 init_fetcher();
 async function POST(request) {
   try {
@@ -1483,7 +1429,6 @@ async function GET(request) {
 
 // src/identity/handler/token.ts
 var import_server5 = require("next/server");
-init_config();
 init_api();
 async function GET2(request) {
   try {

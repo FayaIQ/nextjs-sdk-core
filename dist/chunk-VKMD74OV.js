@@ -29,6 +29,7 @@ async function getTokenImpl() {
   if (typeof window === "undefined") {
     try {
       const { cookies } = await import("next/headers");
+      
       const cookieStore = await cookies();
       let token = null;
       try {
