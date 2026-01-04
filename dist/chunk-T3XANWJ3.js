@@ -3,7 +3,7 @@ import {
 } from "./chunk-B7VMWVKJ.js";
 import {
   putWithAuth
-} from "./chunk-OAE2RUZR.js";
+} from "./chunk-5MUZR4S6.js";
 
 // src/identity/users/putUserInfo.ts
 var toIsoBirthdate = (value) => {

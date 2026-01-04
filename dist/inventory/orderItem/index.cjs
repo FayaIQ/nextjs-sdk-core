@@ -273,7 +273,13 @@ async function getTokenImpl() {
     }
   }
   if (typeof window !== "undefined") {
-    const clientToken = localStorage.getItem("access_token");
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+      return null;
+    };
+    const clientToken = getCookie("access_token");
     if (clientToken) {
       return clientToken;
     }

@@ -4,7 +4,7 @@ async function getProducts({
 }) {
   const params = filterParams.toURLSearchParams();
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-7S5ODTXB.js");
+    const { getWithAuth } = await import("./fetcher-R4TTH3KN.js");
     const { Api } = await import("./api-IWWKU55Q.js");
     return getWithAuth(
       `${Api.getProducts}?${params.toString()}`
@@ -20,7 +20,7 @@ async function getProducts({
 // src/inventory/items/getProductInfo.ts
 async function getProductInfo(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-7S5ODTXB.js");
+    const { getWithAuth } = await import("./fetcher-R4TTH3KN.js");
     const { Api } = await import("./api-IWWKU55Q.js");
     return getWithAuth(`${Api.getProductInfo(id)}`);
   }
