@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       } catch {}
     }
 
-    const response = await loginUser(credentials, userAgent);
+    const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
 
     // Set it in the cookies store directly (loginUser already sets it, but to ensure it's set here too)

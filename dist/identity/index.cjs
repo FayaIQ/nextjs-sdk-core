@@ -1125,7 +1125,7 @@ async function loginUser(credentials, userAgent) {
     if (credentials.playerId) {
       requestBody.playerId = credentials.playerId;
     }
-    const headers = userAgent ? { "User-Agent": userAgent } : "login in user server side in nextjs-sdk-core";
+    const headers = userAgent ? { "User-Agent": userAgent + "login in user server side in nextjs-sdk-core " } : "login in user server side in nextjs-sdk-core ";
     const response = await postWithoutAuth(
       Api.signIn,
       requestBody,
@@ -1383,7 +1383,7 @@ async function POST(request) {
       } catch {
       }
     }
-    const response = await loginUser(credentials, userAgent);
+    const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
     if (body.thirdPartyToken) {
       console.log("[identity:handler:login] setting tp_id cookie in store");
@@ -1517,7 +1517,7 @@ async function GET2(request) {
     let userAgent = null;
     if (!userAgent) {
       try {
-        userAgent = request.headers.get("user-agent") || null;
+        userAgent = request.headers.get("user-agent") + " nextjs-sdk-core  handler api/auth/token" || null;
       } catch {
       }
     }

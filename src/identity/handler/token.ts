@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     // standard NextRequest headers API
     if (!userAgent) {
       try {
-        userAgent = request.headers.get("user-agent") || null;
+        userAgent = request.headers.get("user-agent") + " nextjs-sdk-core  handler api/auth/token" || null;
       } catch {}
     }
 
