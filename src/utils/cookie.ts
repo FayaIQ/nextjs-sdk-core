@@ -24,7 +24,7 @@ export const COOKIE_NAMES = {
  * Default cookie options for secure httpOnly cookies
  */
 export const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie> = {
-  httpOnly: true,
+  httpOnly: false,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax',
   path: '/',

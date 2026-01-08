@@ -359,6 +359,20 @@ export class Api {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}`;
   }
 
+  // Item collection endpoint (update a specific collection for an item)
+  static putItemCollection(itemId: string | number, id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}`;
+  }
+  
+  // Activate / Deactivate an item collection
+  static putItemCollectionActivate(itemId: string | number, id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Activate`;
+  }
+
+  static putItemCollectionDeactivate(itemId: string | number, id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Deactivate`;
+  }
+
   static getLocationChildren(parentId: string | number): string {
     return `${Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
   }

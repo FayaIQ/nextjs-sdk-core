@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { putItem } from "../putItem";
-import { toNextResponseFromError } from "../../../core/errorResponse";
+import { putItemCollection } from "../putItemCollection";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string; collectionId: string }> }
 ) {
   try {
     const data = await request.json();
-    const {id} = await params;
-    const result = await putItem(id, data);
+    const { id, collectionId } = await params;
+    const result = await putItemCollection(id, collectionId, data);
     return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json(err instanceof Error ? { message: err.message } : err, { status: 500 });

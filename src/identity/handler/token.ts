@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       const encrypted = encrypt(data.access_token);
       
       res.cookies.set(CN.CRF, encrypted, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
     
     // LEGACY: Keep access_token for backward compatibility
     res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
-      httpOnly: true,
+      httpOnly:false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
