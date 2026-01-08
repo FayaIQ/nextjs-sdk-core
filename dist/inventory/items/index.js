@@ -4,7 +4,7 @@ import {
   putItemCollection,
   putItemCollectionActivate,
   putItemCollectionDeactivate
-} from "../../chunk-4CU3Z4BZ.js";
+} from "../../chunk-UXDT4LRU.js";
 import {
   AgeGroup,
   Gender,
@@ -102,6 +102,7 @@ async function GET(request) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const filterParams = ItemsFilterParameters.fromURLSearchParams(searchParams);
+    console.log("Filter Params:", filterParams);
     const products = await getProducts({ filterParams });
     return NextResponse.json(products);
   } catch (error) {
