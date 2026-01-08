@@ -1,5 +1,3 @@
-import "../../chunk-3RG5ZIWI.js";
-
 // src/inventory/itemSource/handler/getItemSource.ts
 import { NextResponse } from "next/server";
 
@@ -7,7 +5,7 @@ import { NextResponse } from "next/server";
 async function getItemsSource() {
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/index.js");
-    const { Api } = await import("../../api-RSV64Y2K.js");
+    const { Api } = await import("../../api-IWWKU55Q.js");
     return getWithAuth(`${Api.getItemsSource}`, {});
   } else {
     return fetch(`/api/itemSource`).then((res) => {

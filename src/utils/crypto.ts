@@ -7,6 +7,7 @@
  * Generate a key: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
  */
 
+import * as nodeCrypto from 'crypto';
 
 function normalizeBase64(input?: string): string {
   if (!input)
@@ -75,8 +76,8 @@ export function encryptSync(
   if (!text) return text;
   
   try {
-    // Only available in Node.js
-    const crypto = require('crypto');
+  // Use Node.js crypto (statically imported) for sync operations
+  const crypto = nodeCrypto;
     const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
     if (!keyBase64) {
       throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
@@ -116,7 +117,7 @@ export function decryptSync(
   if (!payload) return payload;
   
   try {
-    const crypto = require('crypto');
+  const crypto = nodeCrypto;
     const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
     if (!keyBase64) {
       throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");

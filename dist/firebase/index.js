@@ -3,13 +3,12 @@ import {
   signOutFirebase,
   startAuthStateSync,
   startPhoneSignIn
-} from "../chunk-QUBDII3G.js";
+} from "../chunk-ZXJAGBHP.js";
 import {
   getFirebaseApp,
   getPrimaryApp,
   getSecondaryApp
 } from "../chunk-IB4I2AKX.js";
-import "../chunk-3RG5ZIWI.js";
 export {
   getFirebaseApp,
   getFirebaseIdToken,

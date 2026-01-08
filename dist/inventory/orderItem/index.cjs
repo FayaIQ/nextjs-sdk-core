@@ -64,7 +64,7 @@ function base64ToBytes(b64) {
 function encryptSync(text) {
   if (!text) return text;
   try {
-    const crypto2 = require("crypto");
+    const crypto2 = nodeCrypto;
     const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
     if (!keyBase64) {
       throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
@@ -88,7 +88,7 @@ function encryptSync(text) {
 function decryptSync(payload) {
   if (!payload) return payload;
   try {
-    const crypto2 = require("crypto");
+    const crypto2 = nodeCrypto;
     const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
     if (!keyBase64) {
       throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
@@ -111,10 +111,11 @@ function decryptSync(payload) {
     throw e;
   }
 }
-var keyPromise, encoder, decoder;
+var nodeCrypto, keyPromise, encoder, decoder;
 var init_crypto = __esm({
   "src/utils/crypto.ts"() {
     "use strict";
+    nodeCrypto = __toESM(require("crypto"), 1);
     keyPromise = (async () => {
       const raw = base64ToBytes(process.env.ENCRYPTION_KEY_BASE64);
       return crypto.subtle.importKey(
@@ -239,6 +240,9 @@ async function getTokenImpl() {
     try {
       const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+      if (!token) {
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+      }
     } catch {
     }
     if (!token) {

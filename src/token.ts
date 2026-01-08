@@ -34,9 +34,13 @@ async function getTokenImpl(): Promise<string> {
         "./utils/cookie"
       );
       token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+      // Also try legacy encrypted access_token (migration)
+      if (!token) {
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
+      }
     } catch {}
 
-    // Fallback to legacy access_token
+    // Fallback to legacy plain access_token
     if (!token) {
       token = cookieStore.get("access_token")?.value || null;
     }
