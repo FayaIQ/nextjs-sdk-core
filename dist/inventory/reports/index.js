@@ -1,13 +1,13 @@
 import {
   toNextResponseFromError
-} from "../../chunk-YWYY4STJ.js";
-import "../../chunk-DU5RCNSK.js";
-import "../../chunk-FBLW4A4O.js";
+} from "../../chunk-T3LGDUHM.js";
+import "../../chunk-ZRFUXEGJ.js";
+import "../../chunk-3TJWPXRM.js";
 
 // src/inventory/reports/getCustomerOrders.ts
 async function getReportsCustomerOrders(query) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-3366SLXM.js");
+    const { getWithAuth } = await import("../../fetcher-6CRP77AX.js");
     const { Api } = await import("../../api-IWWKU55Q.js");
     return getWithAuth(Api.getReportsCustomerOrders, query);
   }
@@ -25,7 +25,7 @@ async function getReportsCustomerOrders(query) {
 // src/inventory/reports/getOrderSales.ts
 async function getReportsOrderSales(query) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-3366SLXM.js");
+    const { getWithAuth } = await import("../../fetcher-6CRP77AX.js");
     const { Api } = await import("../../api-IWWKU55Q.js");
     return getWithAuth(Api.getReportsOrderSales, query);
   }
