@@ -1,7 +1,7 @@
 import {
   getProductInfo,
   getProducts
-} from "../../chunk-4X5NKCEN.js";
+} from "../../chunk-T3MQJI7O.js";
 import {
   AgeGroup,
   Gender,
@@ -98,6 +98,7 @@ async function GET(request) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const filterParams = ItemsFilterParameters.fromURLSearchParams(searchParams);
+    console.log("Filter Params:", filterParams);
     const products = await getProducts({ filterParams });
     return NextResponse.json(products);
   } catch (error) {

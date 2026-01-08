@@ -35,11 +35,14 @@ export async function getProducts({
   }
 
   const params = filterParams.toURLSearchParams();
+  console.log("Fetching products with params:", params.toString());  
   // Server-side: Use direct API call with authentication
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
 
+    console.log("Server-side fetching products with params:",       `${Api.getProducts}?${params.toString()}`
+);
     return getWithAuth<ProductResponse>(
       `${Api.getProducts}?${params.toString()}`
     );
