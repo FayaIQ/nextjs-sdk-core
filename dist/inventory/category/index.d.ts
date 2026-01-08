@@ -1,5 +1,9 @@
-import { C as Category } from '../../types-CWK-MFSv.js';
 import { NextRequest, NextResponse } from 'next/server';
+
+interface Category {
+    CategoryID: number;
+    name: string;
+}
 
 /**
  * Fetches a list of categories from the server
@@ -28,4 +32,4 @@ declare function GET(request: NextRequest): Promise<NextResponse<Category[]> | N
     error: string;
 }>>;
 
-export { GET as CategoriesGET, Category, getCatigories };
+export { GET as CategoriesGET, type Category, getCatigories };

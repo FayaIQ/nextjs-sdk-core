@@ -10,7 +10,7 @@ export { putItemCollectionActivate } from "./inventory/items/putItemCollectionAc
 export { putItemCollectionDeactivate } from "./inventory/items/putItemCollectionDeactivate";
 
 // Type exports
-export * from "./types";
+export type * from "./types";
 export * from "./inventory/items/filter-models";
 export * from "./api/api";
 export * from "./inventory/orders/order-models";
@@ -33,7 +33,6 @@ export {
 } from "./firebase/auth";
 export type { StartPhoneSignInResult, WhatsAppOTPOptions } from "./firebase/auth";
 export { ItemsFilterParameters } from "./inventory/items/filter-models";
-export  type {Category} from "./inventory/category/types";
 
 // Firebase config
 export { getPrimaryApp, getSecondaryApp, getFirebaseApp } from "./firebase/config";
