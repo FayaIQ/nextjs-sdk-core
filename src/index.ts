@@ -46,6 +46,6 @@ export {
   SECURE_COOKIE_OPTIONS,
 } from "./utils/cookie";
 
-// Crypto utilities (server-side only)
-export { encrypt, decrypt, validateEncryptionKey } from "./utils/crypto";
+// Crypto utilities (server-side encryption/decryption)
+export { encrypt, decrypt, encryptSync, decryptSync } from "./utils/crypto";
 

@@ -296,7 +296,25 @@ async function startAuthStateSync(options) {
         e
       );
     }
-    const STORAGE_KEY = "erp_core_last_tp_id";
+    const STORAGE_KEY = "erp_core_last_sync_hash";
+    const hashToken = async (token) => {
+      try {
+        if (typeof crypto !== "undefined" && crypto.subtle) {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(token);
+          const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        }
+      } catch {
+      }
+      let hash = 2166136261;
+      for (let i = 0; i < token.length; i++) {
+        hash ^= token.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(36);
+    };
     const pushTokenToServer = async (forceRefresh = false) => {
       if (__isSigningIn) {
         console.log(
@@ -311,9 +329,11 @@ async function startAuthStateSync(options) {
         if (!token) return;
         const now = Date.now();
         if (token === __lastSyncedToken && now - __lastSyncTime < 3e3) return;
+        const tokenHash = await hashToken(token);
         try {
-          const lastPersisted = localStorage.getItem(STORAGE_KEY);
-          if (lastPersisted && lastPersisted === token) {
+          const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
+          if (lastPersistedHash && lastPersistedHash === tokenHash) {
+            console.log("[firebase:startAuthStateSync] token already synced (session cache hit)");
             return;
           }
         } catch {
@@ -326,7 +346,7 @@ async function startAuthStateSync(options) {
         __lastSyncedToken = token;
         __lastSyncTime = now;
         try {
-          localStorage.setItem(STORAGE_KEY, token);
+          sessionStorage.setItem(STORAGE_KEY, tokenHash);
         } catch {
         }
         console.log("[firebase:startAuthStateSync] token synced \u2192 server");

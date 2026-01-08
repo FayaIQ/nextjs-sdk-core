@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
     // Import cookie utilities
     const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
     
-    console.log("[identity:handler:token] GET checking existing token");
     
     // Check encrypted crf cookie first
     let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
@@ -33,7 +32,6 @@ export async function GET(request: NextRequest) {
     }
     
     if (existingToken) {
-      console.log("[identity:handler:token] returning existing token from cookie");
       // Return with cache headers to prevent repeated calls
       return NextResponse.json(
         { access_token: existingToken },
@@ -45,8 +43,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Try to use tp_id for re-auth
-    const tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
+    // Try to use encrypted tp_id for re-auth (with fallback to plain)
+    let tpId: string | null = null;
+    try {
+      tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
+    } catch {}
+    
+    // Fallback to plain tp_id cookie
+    if (!tpId) {
+      tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
+    }
     
     const authConfig = getAuthConfig();
     const requestBody: Record<string, any> = {
@@ -58,10 +64,8 @@ export async function GET(request: NextRequest) {
     };
 
     if (tpId) {
-      console.log("[identity:handler:token] using tp_id for sign-in");
       requestBody["ThirdPartyToken"] = tpId;
     } else if ((authConfig as any).thirdPartyToken) {
-      console.log("[identity:handler:token] using config thirdPartyToken");
       requestBody["ThirdPartyToken"] = (authConfig as any).thirdPartyToken;
     } else {
       console.log("[identity:handler:token] signing in with clientId/clientSecret");
@@ -95,24 +99,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log("[identity:handler:token] new token obtained, setting encrypted cookie");
 
     // Return response with encrypted cookie
     const res = NextResponse.json({ access_token: data.access_token });
     
-    // Set encrypted crf cookie
+    // Set encrypted crf cookie using sync encryption
     try {
-      const { setEncryptedCookie: setEncCookie, COOKIE_NAMES: CN } = await import("../../utils/cookie");
-      const { encrypt } = await import("../../utils/crypto");
-      const encrypted = encrypt(data.access_token);
+      const { encryptSync } = await import("../../utils/crypto");
+      const { COOKIE_NAMES: CN } = await import("../../utils/cookie");
+      const encrypted = encryptSync(data.access_token);
       
-      res.cookies.set(CN.CRF, encrypted, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600, // 1 hour
-      });
+      if (encrypted) {
+        res.cookies.set(CN.CRF, encrypted, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600, // 1 hour
+        });
+      }
     } catch (e) {
       console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
     }

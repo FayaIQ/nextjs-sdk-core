@@ -5,15 +5,16 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-DFQEWPZI.js";
+} from "../chunk-KJXA7LQ3.js";
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-5SV6VQOZ.js";
-import "../chunk-BJ62PX52.js";
+} from "../chunk-JS4EYUML.js";
+import "../chunk-66RM7E5I.js";
+import "../chunk-3RG5ZIWI.js";
 
 // src/identity/login.ts
 async function loginUser(credentials) {
@@ -74,14 +75,14 @@ async function loginUser(credentials) {
     }
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
-    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-QTBNOWAP.js");
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-Q6I6BDF4.js");
     try {
       setEncryptedCookie(cookieStore, COOKIE_NAMES.CRF, response.access_token, {
         maxAge: expiresIn
       });
     } catch (e) {
       cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
-        httpOnly: false,
+        httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -89,21 +90,28 @@ async function loginUser(credentials) {
       });
     }
     cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: expiresIn
     });
     if (credentials.thirdPartyToken) {
-      cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600
-        // 1 hour typical Firebase token lifetime
-      });
+      try {
+        setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
+          maxAge: 3600
+          // 1 hour typical Firebase token lifetime
+        });
+      } catch (e) {
+        console.warn("[login] encryption failed for tp_id, using plain", e);
+        cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+        });
+      }
     }
     if (authMode === "auto") {
       const isUser = !!(response.roles && response.roles.length > 0);
@@ -114,7 +122,7 @@ async function loginUser(credentials) {
     if (authMode === "strict") {
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -123,7 +131,7 @@ async function loginUser(credentials) {
       }
       if (response.roles?.length) {
         cookieStore.set("roles", response.roles.join(","), {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -132,7 +140,7 @@ async function loginUser(credentials) {
       }
       if (response.user?.username) {
         cookieStore.set("username", response.user.username, {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -172,8 +180,8 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-ABVPONGV.js");
-    const { Api: Api2 } = await import("../api-IWWKU55Q.js");
+    const { getWithAuth } = await import("../fetcher-AKKDVIEJ.js");
+    const { Api: Api2 } = await import("../api-RSV64Y2K.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
     const fullNameTrimmed2 = FullName !== void 0 ? String(FullName).trim() : "";
@@ -215,9 +223,9 @@ async function POST(request) {
       const cookieStore = await cookies();
       let hasValidToken = false;
       try {
-        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-QTBNOWAP.js");
+        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-Q6I6BDF4.js");
         const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-        const existingTpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
+        const existingTpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
         if (existingToken && existingTpId === body.thirdPartyToken) {
           hasValidToken = true;
         }
@@ -247,16 +255,24 @@ async function POST(request) {
     const response = await loginUser(credentials);
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
     if (body.thirdPartyToken) {
-      console.log("[identity:handler:login] setting tp_id cookie in store");
+      console.log("[identity:handler:login] setting encrypted tp_id cookie");
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      cookieStore.set("tp_id", body.thirdPartyToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600
-      });
+      const { setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-Q6I6BDF4.js");
+      try {
+        setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, {
+          maxAge: 3600
+        });
+      } catch (e) {
+        console.warn("[identity:handler:login] encryption failed for tp_id, using plain", e);
+        cookieStore.set("tp_id", body.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+        });
+      }
     }
     const res = NextResponse.json(
       {
@@ -269,13 +285,28 @@ async function POST(request) {
       { status: 200 }
     );
     if (body.thirdPartyToken) {
-      res.cookies.set("tp_id", body.thirdPartyToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600
-      });
+      try {
+        const { encryptSync } = await import("../crypto-BYBWXNGT.js");
+        const encrypted = encryptSync(body.thirdPartyToken);
+        if (encrypted) {
+          res.cookies.set("tp_id", encrypted, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600
+          });
+        }
+      } catch (e) {
+        console.warn("[identity:handler:login] encryption failed for response tp_id", e);
+        res.cookies.set("tp_id", body.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+        });
+      }
     }
     return res;
   } catch (error) {
@@ -345,14 +376,12 @@ async function GET2(request) {
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-QTBNOWAP.js");
-    console.log("[identity:handler:token] GET checking existing token");
+    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-Q6I6BDF4.js");
     let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
     if (!existingToken) {
       existingToken = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
     }
     if (existingToken) {
-      console.log("[identity:handler:token] returning existing token from cookie");
       return NextResponse4.json(
         { access_token: existingToken },
         {
@@ -363,7 +392,14 @@ async function GET2(request) {
         }
       );
     }
-    const tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
+    let tpId = null;
+    try {
+      tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
+    } catch {
+    }
+    if (!tpId) {
+      tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
+    }
     const authConfig = getAuthConfig();
     const requestBody = {
       clientId: authConfig.clientId,
@@ -373,10 +409,8 @@ async function GET2(request) {
       IsFromNotification: false
     };
     if (tpId) {
-      console.log("[identity:handler:token] using tp_id for sign-in");
       requestBody["ThirdPartyToken"] = tpId;
     } else if (authConfig.thirdPartyToken) {
-      console.log("[identity:handler:token] using config thirdPartyToken");
       requestBody["ThirdPartyToken"] = authConfig.thirdPartyToken;
     } else {
       console.log("[identity:handler:token] signing in with clientId/clientSecret");
@@ -403,20 +437,21 @@ async function GET2(request) {
         { status: 500 }
       );
     }
-    console.log("[identity:handler:token] new token obtained, setting encrypted cookie");
     const res = NextResponse4.json({ access_token: data.access_token });
     try {
-      const { setEncryptedCookie: setEncCookie, COOKIE_NAMES: CN } = await import("../cookie-QTBNOWAP.js");
-      const { encrypt } = await import("../crypto-J736LS26.js");
-      const encrypted = encrypt(data.access_token);
-      res.cookies.set(CN.CRF, encrypted, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600
-        // 1 hour
-      });
+      const { encryptSync } = await import("../crypto-BYBWXNGT.js");
+      const { COOKIE_NAMES: CN } = await import("../cookie-Q6I6BDF4.js");
+      const encrypted = encryptSync(data.access_token);
+      if (encrypted) {
+        res.cookies.set(CN.CRF, encrypted, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+          // 1 hour
+        });
+      }
     } catch (e) {
       console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
     }

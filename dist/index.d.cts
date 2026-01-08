@@ -225,27 +225,30 @@ declare function setPlainCookie(cookieStore: any, name: string, value: string, o
 declare function deleteCookie(cookieStore: any, name: string): void;
 
 /**
- * AES-256-GCM encryption utilities for secure cookie storage.
- * Server-side only - uses Node.js crypto module.
+ * AES-256-GCM encryption utilities for secure token/cookie storage.
+ * Provides both sync (Node.js crypto) and async (Web Crypto API) versions.
  *
- * Requires env var: COOKIE_CRYPTO_KEY (base64-encoded 32 bytes)
+ * Requires env var: ENCRYPTION_KEY_BASE64 (base64-encoded 32 bytes)
  *
  * Generate a key: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
  */
 /**
- * Encrypt a string using AES-256-GCM.
- * Returns base64-encoded string: iv:authTag:ciphertext
+ * Synchronous encryption using Node.js crypto.
+ * Use this for immediate token encryption on the server.
+ *
+ * @param text - Text to encrypt
+ * @returns Base64-encoded encrypted string (IV + ciphertext) or original if falsy
  */
-declare function encrypt(plaintext: string): string;
+declare function encryptSync(text: string | undefined | null): string | null | undefined;
 /**
- * Decrypt a string encrypted with encrypt().
- * Expects base64-encoded string: iv:authTag:ciphertext
+ * Synchronous decryption using Node.js crypto.
+ * Use this for immediate token decryption on the server.
+ *
+ * @param payload - Base64-encoded encrypted string (IV + ciphertext + authTag)
+ * @returns Decrypted text or original if falsy
  */
-declare function decrypt(encryptedData: string): string;
-/**
- * Validate that encryption key is configured correctly.
- * Throws if key is missing or invalid.
- */
-declare function validateEncryptionKey(): void;
+declare function decryptSync(payload: string | undefined | null): string | undefined | null;
+declare function encrypt(text: string | undefined | null): Promise<string | null | undefined>;
+declare function decrypt(payload: string | undefined | null): Promise<string | undefined | null>;
 
-export { Api, type AuthConfig, COOKIE_NAMES, SECURE_COOKIE_OPTIONS, type TokenResponse, decrypt, deleteCookie, encrypt, getEncryptedCookie, getToken, setEncryptedCookie, setPlainCookie, validateEncryptionKey };
+export { Api, type AuthConfig, COOKIE_NAMES, SECURE_COOKIE_OPTIONS, type TokenResponse, decrypt, decryptSync, deleteCookie, encrypt, encryptSync, getEncryptedCookie, getToken, setEncryptedCookie, setPlainCookie };

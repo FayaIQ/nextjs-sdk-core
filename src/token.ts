@@ -58,7 +58,6 @@ async function getTokenImpl(): Promise<string> {
       if (!token) {
         token = cookieStore.get("access_token")?.value || null;
       }
-
       if (token) return token;
     } catch {}
   }
@@ -129,7 +128,6 @@ async function getTokenImpl(): Promise<string> {
   }
 
   const data = (await response.json()) as TokenResponse;
-  console.log("Fetched token from core:", data.access_token);
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
   }

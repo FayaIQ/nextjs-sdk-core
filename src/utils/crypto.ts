@@ -1,146 +1,178 @@
 /**
- * AES-256-GCM encryption utilities for secure cookie storage.
- * Server-side only - uses Node.js crypto module.
+ * AES-256-GCM encryption utilities for secure token/cookie storage.
+ * Provides both sync (Node.js crypto) and async (Web Crypto API) versions.
  * 
- * Requires env var: COOKIE_CRYPTO_KEY (base64-encoded 32 bytes)
+ * Requires env var: ENCRYPTION_KEY_BASE64 (base64-encoded 32 bytes)
  * 
  * Generate a key: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
  */
 
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 
-const ALGORITHM = 'aes-256-gcm';
-const IV_LENGTH = 16; // AES-GCM standard IV length
-const AUTH_TAG_LENGTH = 16;
+function normalizeBase64(input?: string): string {
+  if (!input)
+    throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
+  let b64 = input.replace(/-/g, "+").replace(/_/g, "/");
+  while (b64.length % 4) {
+    b64 += "=";
+  }
+  return b64;
+}
 
-/**
- * Get encryption key from environment.
- * Key should be 32 bytes (256 bits) base64-encoded.
- */
-function getEncryptionKey(): Buffer {
-  const keyB64 = process.env.COOKIE_CRYPTO_KEY;
-  if (!keyB64) {
-    throw new Error(
-      'COOKIE_CRYPTO_KEY environment variable not set. ' +
-      'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64\'))"'
-    );
+function base64ToBytes(b64: string): Uint8Array {
+  const normalized = normalizeBase64(b64);
+  // Prefer Buffer (Node.js) when available for reliable base64 decoding
+  if (typeof Buffer !== "undefined") {
+    const buf = Buffer.from(normalized, "base64");
+    const arr = new Uint8Array(buf.length);
+    for (let i = 0; i < buf.length; i++) arr[i] = buf[i];
+    return arr;
   }
 
+  // Fallback for environments with atob (browsers)
+  if (typeof atob === "function") {
+    const binary = atob(normalized);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  }
+
+  throw new Error(
+    "No available base64 decoder (Buffer or atob). Cannot decode encryption key."
+  );
+}
+
+const keyPromise = (async () => {
+  const raw = base64ToBytes(process.env.ENCRYPTION_KEY_BASE64!);
+  return crypto.subtle.importKey(
+    "raw",
+    raw.buffer as unknown as ArrayBuffer,
+    { name: "AES-GCM" },
+    false,
+    ["encrypt", "decrypt"]
+  );
+})();
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+// ============================================================================
+// SYNC Encryption (Node.js crypto module) - Preferred for server-side tokens
+// ============================================================================
+
+/**
+ * Synchronous encryption using Node.js crypto.
+ * Use this for immediate token encryption on the server.
+ * 
+ * @param text - Text to encrypt
+ * @returns Base64-encoded encrypted string (IV + ciphertext) or original if falsy
+ */
+export function encryptSync(
+  text: string | undefined | null
+): string | null | undefined {
+  if (!text) return text;
+  
   try {
-    const key = Buffer.from(keyB64, 'base64');
+    // Only available in Node.js
+    const crypto = require('crypto');
+    const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    if (!keyBase64) {
+      throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
+    }
+    
+    const key = Buffer.from(normalizeBase64(keyBase64), 'base64');
     if (key.length !== 32) {
-      throw new Error(`COOKIE_CRYPTO_KEY must be 32 bytes, got ${key.length}`);
+      throw new Error("Encryption key must be 32 bytes (256 bits)");
     }
-    return key;
+    
+    const iv = crypto.randomBytes(12); // 96-bit IV for GCM
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    
+    let encrypted = cipher.update(text, 'utf8');
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    const authTag = cipher.getAuthTag();
+    
+    // Combine: IV (12) + ciphertext + authTag (16)
+    const combined = Buffer.concat([iv, encrypted, authTag]);
+    return combined.toString('base64');
   } catch (e) {
-    throw new Error(`Invalid COOKIE_CRYPTO_KEY: ${(e as Error).message}`);
+    console.error('[crypto:encryptSync] failed', e);
+    throw e;
   }
 }
 
 /**
- * Encrypt a string using AES-256-GCM.
- * Returns base64-encoded string: iv:authTag:ciphertext
+ * Synchronous decryption using Node.js crypto.
+ * Use this for immediate token decryption on the server.
+ * 
+ * @param payload - Base64-encoded encrypted string (IV + ciphertext + authTag)
+ * @returns Decrypted text or original if falsy
  */
-export function encrypt(plaintext: string): string {
-  if (typeof window !== 'undefined') {
-    throw new Error('encrypt() must only be called server-side');
-  }
-
-  const key = getEncryptionKey();
-  const iv = randomBytes(IV_LENGTH);
-  const cipher = createCipheriv(ALGORITHM, key, iv);
-
-  const encrypted = Buffer.concat([
-    cipher.update(plaintext, 'utf8'),
-    cipher.final(),
-  ]);
-
-  const authTag = cipher.getAuthTag();
-
-  // Format: iv:authTag:ciphertext (all base64)
-  const combined = Buffer.concat([iv, authTag, encrypted]);
-  return combined.toString('base64');
-}
-
-/**
- * Decrypt a string encrypted with encrypt().
- * Expects base64-encoded string: iv:authTag:ciphertext
- */
-export function decrypt(encryptedData: string): string {
-  if (typeof window !== 'undefined') {
-    throw new Error('decrypt() must only be called server-side');
-  }
-
-  const key = getEncryptionKey();
-  // Normalize base64 input: support URL-safe base64 and missing padding
-  const normalizeBase64 = (s: string) => {
-    let t = s.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
-    const pad = t.length % 4;
-    if (pad === 2) t += '==';
-    else if (pad === 3) t += '=';
-    else if (pad === 1) {
-      // invalid length, but still try
-      t = t.slice(0, t.length - 1);
-    }
-    return t;
-  };
-
-  const combined = Buffer.from(normalizeBase64(encryptedData), 'base64');
-
-  if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) {
-    throw new Error('Invalid encrypted data: too short');
-  }
-
-  const iv = combined.subarray(0, IV_LENGTH);
-  const authTag = combined.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
-  const ciphertext = combined.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
-
-  const decipher = createDecipheriv(ALGORITHM, key, iv);
-  decipher.setAuthTag(authTag);
-
-  const decrypted = Buffer.concat([
-    decipher.update(ciphertext),
-    decipher.final(),
-  ]);
-
-  return decrypted.toString('utf8');
-}
-
-// Attempt to decrypt with tolerant strategy: some older deployments stored authTag at the end.
-export function tryDecryptTolerant(encryptedData: string): string {
+export function decryptSync(
+  payload: string | undefined | null
+): string | undefined | null {
+  if (!payload) return payload;
+  
   try {
-    return decrypt(encryptedData);
-  } catch (e) {
-    // Try alternate layout: [iv][ciphertext][authTag]
-    try {
-      const key = getEncryptionKey();
-      const normalizeBase64 = (s: string) => s.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
-      const combined = Buffer.from(normalizeBase64(encryptedData), 'base64');
-      if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) throw e;
-
-      const iv = combined.subarray(0, IV_LENGTH);
-      const authTag = combined.subarray(combined.length - AUTH_TAG_LENGTH);
-      const ciphertext = combined.subarray(IV_LENGTH, combined.length - AUTH_TAG_LENGTH);
-
-      const decipher = createDecipheriv(ALGORITHM, key, iv);
-      decipher.setAuthTag(authTag);
-
-      const decrypted = Buffer.concat([
-        decipher.update(ciphertext),
-        decipher.final(),
-      ]);
-      return decrypted.toString('utf8');
-    } catch (e2) {
-      // Re-throw original error for clarity
-      throw e;
+    const crypto = require('crypto');
+    const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    if (!keyBase64) {
+      throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
     }
+    
+    const key = Buffer.from(normalizeBase64(keyBase64), 'base64');
+    if (key.length !== 32) {
+      throw new Error("Encryption key must be 32 bytes (256 bits)");
+    }
+    
+    const combined = Buffer.from(payload, 'base64');
+    const iv = combined.slice(0, 12);
+    const authTag = combined.slice(-16);
+    const encrypted = combined.slice(12, -16);
+    
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(authTag);
+    
+    let decrypted = decipher.update(encrypted);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    
+    return decrypted.toString('utf8');
+  } catch (e) {
+    console.error('[crypto:decryptSync] failed', e);
+    throw e;
   }
 }
 
-/**
- * Validate that encryption key is configured correctly.
- * Throws if key is missing or invalid.
- */
-export function validateEncryptionKey(): void {
-  getEncryptionKey();
+// ============================================================================
+// ASYNC Encryption (Web Crypto API) - For edge runtimes without Node.js crypto
+// ============================================================================
+
+export async function encrypt(
+  text: string | undefined | null
+): Promise<string | null | undefined> {
+  if (!text) return text;
+  const key = await keyPromise;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = encoder.encode(text);
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
+  const buf = new Uint8Array(iv.byteLength + ct.byteLength);
+  buf.set(iv, 0);
+  buf.set(new Uint8Array(ct), iv.byteLength);
+  let binary = "";
+  buf.forEach((b) => (binary += String.fromCharCode(b)));
+  return btoa(binary);
+}
+
+export async function decrypt(
+  payload: string | undefined | null
+): Promise<string | undefined | null> {
+  if (!payload) return payload;
+  const combined = base64ToBytes(payload);
+  const iv = combined.slice(0, 12);
+  const ct = combined.slice(12);
+  const key = await keyPromise;
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+  return decoder.decode(pt);
 }

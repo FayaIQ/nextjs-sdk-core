@@ -368,107 +368,128 @@ var init_api = __esm({
 var crypto_exports = {};
 __export(crypto_exports, {
   decrypt: () => decrypt,
+  decryptSync: () => decryptSync,
   encrypt: () => encrypt,
-  tryDecryptTolerant: () => tryDecryptTolerant,
-  validateEncryptionKey: () => validateEncryptionKey
+  encryptSync: () => encryptSync
 });
-function getEncryptionKey() {
-  const keyB64 = process.env.COOKIE_CRYPTO_KEY;
-  if (!keyB64) {
-    throw new Error(
-      `COOKIE_CRYPTO_KEY environment variable not set. Generate one with: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
-    );
+function normalizeBase64(input) {
+  if (!input)
+    throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
+  let b64 = input.replace(/-/g, "+").replace(/_/g, "/");
+  while (b64.length % 4) {
+    b64 += "=";
   }
+  return b64;
+}
+function base64ToBytes(b64) {
+  const normalized = normalizeBase64(b64);
+  if (typeof Buffer !== "undefined") {
+    const buf = Buffer.from(normalized, "base64");
+    const arr = new Uint8Array(buf.length);
+    for (let i = 0; i < buf.length; i++) arr[i] = buf[i];
+    return arr;
+  }
+  if (typeof atob === "function") {
+    const binary = atob(normalized);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  }
+  throw new Error(
+    "No available base64 decoder (Buffer or atob). Cannot decode encryption key."
+  );
+}
+function encryptSync(text) {
+  if (!text) return text;
   try {
-    const key = Buffer.from(keyB64, "base64");
+    const crypto2 = require("crypto");
+    const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    if (!keyBase64) {
+      throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
+    }
+    const key = Buffer.from(normalizeBase64(keyBase64), "base64");
     if (key.length !== 32) {
-      throw new Error(`COOKIE_CRYPTO_KEY must be 32 bytes, got ${key.length}`);
+      throw new Error("Encryption key must be 32 bytes (256 bits)");
     }
-    return key;
+    const iv = crypto2.randomBytes(12);
+    const cipher = crypto2.createCipheriv("aes-256-gcm", key, iv);
+    let encrypted = cipher.update(text, "utf8");
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    const authTag = cipher.getAuthTag();
+    const combined = Buffer.concat([iv, encrypted, authTag]);
+    return combined.toString("base64");
   } catch (e) {
-    throw new Error(`Invalid COOKIE_CRYPTO_KEY: ${e.message}`);
+    console.error("[crypto:encryptSync] failed", e);
+    throw e;
   }
 }
-function encrypt(plaintext) {
-  if (typeof window !== "undefined") {
-    throw new Error("encrypt() must only be called server-side");
-  }
-  const key = getEncryptionKey();
-  const iv = (0, import_crypto.randomBytes)(IV_LENGTH);
-  const cipher = (0, import_crypto.createCipheriv)(ALGORITHM, key, iv);
-  const encrypted = Buffer.concat([
-    cipher.update(plaintext, "utf8"),
-    cipher.final()
-  ]);
-  const authTag = cipher.getAuthTag();
-  const combined = Buffer.concat([iv, authTag, encrypted]);
-  return combined.toString("base64");
-}
-function decrypt(encryptedData) {
-  if (typeof window !== "undefined") {
-    throw new Error("decrypt() must only be called server-side");
-  }
-  const key = getEncryptionKey();
-  const normalizeBase64 = (s) => {
-    let t = s.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
-    const pad = t.length % 4;
-    if (pad === 2) t += "==";
-    else if (pad === 3) t += "=";
-    else if (pad === 1) {
-      t = t.slice(0, t.length - 1);
-    }
-    return t;
-  };
-  const combined = Buffer.from(normalizeBase64(encryptedData), "base64");
-  if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) {
-    throw new Error("Invalid encrypted data: too short");
-  }
-  const iv = combined.subarray(0, IV_LENGTH);
-  const authTag = combined.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
-  const ciphertext = combined.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
-  const decipher = (0, import_crypto.createDecipheriv)(ALGORITHM, key, iv);
-  decipher.setAuthTag(authTag);
-  const decrypted = Buffer.concat([
-    decipher.update(ciphertext),
-    decipher.final()
-  ]);
-  return decrypted.toString("utf8");
-}
-function tryDecryptTolerant(encryptedData) {
+function decryptSync(payload) {
+  if (!payload) return payload;
   try {
-    return decrypt(encryptedData);
-  } catch (e) {
-    try {
-      const key = getEncryptionKey();
-      const normalizeBase64 = (s) => s.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
-      const combined = Buffer.from(normalizeBase64(encryptedData), "base64");
-      if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) throw e;
-      const iv = combined.subarray(0, IV_LENGTH);
-      const authTag = combined.subarray(combined.length - AUTH_TAG_LENGTH);
-      const ciphertext = combined.subarray(IV_LENGTH, combined.length - AUTH_TAG_LENGTH);
-      const decipher = (0, import_crypto.createDecipheriv)(ALGORITHM, key, iv);
-      decipher.setAuthTag(authTag);
-      const decrypted = Buffer.concat([
-        decipher.update(ciphertext),
-        decipher.final()
-      ]);
-      return decrypted.toString("utf8");
-    } catch (e2) {
-      throw e;
+    const crypto2 = require("crypto");
+    const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    if (!keyBase64) {
+      throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
     }
+    const key = Buffer.from(normalizeBase64(keyBase64), "base64");
+    if (key.length !== 32) {
+      throw new Error("Encryption key must be 32 bytes (256 bits)");
+    }
+    const combined = Buffer.from(payload, "base64");
+    const iv = combined.slice(0, 12);
+    const authTag = combined.slice(-16);
+    const encrypted = combined.slice(12, -16);
+    const decipher = crypto2.createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(authTag);
+    let decrypted = decipher.update(encrypted);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString("utf8");
+  } catch (e) {
+    console.error("[crypto:decryptSync] failed", e);
+    throw e;
   }
 }
-function validateEncryptionKey() {
-  getEncryptionKey();
+async function encrypt(text) {
+  if (!text) return text;
+  const key = await keyPromise;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = encoder.encode(text);
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
+  const buf = new Uint8Array(iv.byteLength + ct.byteLength);
+  buf.set(iv, 0);
+  buf.set(new Uint8Array(ct), iv.byteLength);
+  let binary = "";
+  buf.forEach((b) => binary += String.fromCharCode(b));
+  return btoa(binary);
 }
-var import_crypto, ALGORITHM, IV_LENGTH, AUTH_TAG_LENGTH;
+async function decrypt(payload) {
+  if (!payload) return payload;
+  const combined = base64ToBytes(payload);
+  const iv = combined.slice(0, 12);
+  const ct = combined.slice(12);
+  const key = await keyPromise;
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+  return decoder.decode(pt);
+}
+var keyPromise, encoder, decoder;
 var init_crypto = __esm({
   "src/utils/crypto.ts"() {
     "use strict";
-    import_crypto = require("crypto");
-    ALGORITHM = "aes-256-gcm";
-    IV_LENGTH = 16;
-    AUTH_TAG_LENGTH = 16;
+    keyPromise = (async () => {
+      const raw = base64ToBytes(process.env.ENCRYPTION_KEY_BASE64);
+      return crypto.subtle.importKey(
+        "raw",
+        raw.buffer,
+        { name: "AES-GCM" },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    })();
+    encoder = new TextEncoder();
+    decoder = new TextDecoder();
   }
 });
 
@@ -486,7 +507,7 @@ function setEncryptedCookie(cookieStore, name, value, options) {
   if (typeof window !== "undefined") {
     throw new Error("setEncryptedCookie must only be called server-side");
   }
-  const encrypted = encrypt(value);
+  const encrypted = encryptSync(value);
   cookieStore.set(name, encrypted, {
     ...SECURE_COOKIE_OPTIONS,
     ...options
@@ -500,13 +521,10 @@ function getEncryptedCookie(cookieStore, name) {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
     try {
-      return decrypt(cookie.value);
+      const decrypted = decryptSync(cookie.value);
+      return decrypted ?? null;
     } catch (e) {
-      try {
-        return tryDecryptTolerant(cookie.value);
-      } catch (e2) {
-        throw e;
-      }
+      throw e;
     }
   } catch (e) {
     console.error(`[cookie] Failed to decrypt ${name}:`, e);
@@ -700,7 +718,6 @@ async function getTokenImpl() {
     );
   }
   const data = await response.json();
-  console.log("Fetched token from core:", data.access_token);
   if (!data.access_token) {
     throw new Error("Token missing in authentication response");
   }
@@ -1153,7 +1170,7 @@ async function loginUser(credentials) {
       });
     } catch (e) {
       cookieStore.set(COOKIE_NAMES2.CRF, response.access_token, {
-        httpOnly: false,
+        httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -1161,21 +1178,28 @@ async function loginUser(credentials) {
       });
     }
     cookieStore.set(COOKIE_NAMES2.ACCESS_TOKEN, response.access_token, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: expiresIn
     });
     if (credentials.thirdPartyToken) {
-      cookieStore.set(COOKIE_NAMES2.TP_ID, credentials.thirdPartyToken, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600
-        // 1 hour typical Firebase token lifetime
-      });
+      try {
+        setEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID, credentials.thirdPartyToken, {
+          maxAge: 3600
+          // 1 hour typical Firebase token lifetime
+        });
+      } catch (e) {
+        console.warn("[login] encryption failed for tp_id, using plain", e);
+        cookieStore.set(COOKIE_NAMES2.TP_ID, credentials.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+        });
+      }
     }
     if (authMode === "auto") {
       const isUser = !!(response.roles && response.roles.length > 0);
@@ -1186,7 +1210,7 @@ async function loginUser(credentials) {
     if (authMode === "strict") {
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -1195,7 +1219,7 @@ async function loginUser(credentials) {
       }
       if (response.roles?.length) {
         cookieStore.set("roles", response.roles.join(","), {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -1204,7 +1228,7 @@ async function loginUser(credentials) {
       }
       if (response.user?.username) {
         cookieStore.set("username", response.user.username, {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -1352,7 +1376,7 @@ async function POST(request) {
       try {
         const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
         const existingToken = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
-        const existingTpId = cookieStore.get(COOKIE_NAMES2.TP_ID)?.value;
+        const existingTpId = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID);
         if (existingToken && existingTpId === body.thirdPartyToken) {
           hasValidToken = true;
         }
@@ -1382,16 +1406,24 @@ async function POST(request) {
     const response = await loginUser(credentials);
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
     if (body.thirdPartyToken) {
-      console.log("[identity:handler:login] setting tp_id cookie in store");
+      console.log("[identity:handler:login] setting encrypted tp_id cookie");
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      cookieStore.set("tp_id", body.thirdPartyToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600
-      });
+      const { setEncryptedCookie: setEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+      try {
+        setEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID, body.thirdPartyToken, {
+          maxAge: 3600
+        });
+      } catch (e) {
+        console.warn("[identity:handler:login] encryption failed for tp_id, using plain", e);
+        cookieStore.set("tp_id", body.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+        });
+      }
     }
     const res = import_server2.NextResponse.json(
       {
@@ -1404,13 +1436,28 @@ async function POST(request) {
       { status: 200 }
     );
     if (body.thirdPartyToken) {
-      res.cookies.set("tp_id", body.thirdPartyToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600
-      });
+      try {
+        const { encryptSync: encryptSync2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
+        const encrypted = encryptSync2(body.thirdPartyToken);
+        if (encrypted) {
+          res.cookies.set("tp_id", encrypted, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600
+          });
+        }
+      } catch (e) {
+        console.warn("[identity:handler:login] encryption failed for response tp_id", e);
+        res.cookies.set("tp_id", body.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+        });
+      }
     }
     return res;
   } catch (error) {
@@ -1483,13 +1530,11 @@ async function GET2(request) {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     const { getEncryptedCookie: getEncryptedCookie2, setEncryptedCookie: setEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-    console.log("[identity:handler:token] GET checking existing token");
     let existingToken = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
     if (!existingToken) {
       existingToken = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
     }
     if (existingToken) {
-      console.log("[identity:handler:token] returning existing token from cookie");
       return import_server5.NextResponse.json(
         { access_token: existingToken },
         {
@@ -1500,7 +1545,14 @@ async function GET2(request) {
         }
       );
     }
-    const tpId = cookieStore.get(COOKIE_NAMES2.TP_ID)?.value;
+    let tpId = null;
+    try {
+      tpId = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID);
+    } catch {
+    }
+    if (!tpId) {
+      tpId = cookieStore.get(COOKIE_NAMES2.TP_ID)?.value || null;
+    }
     const authConfig = getAuthConfig();
     const requestBody = {
       clientId: authConfig.clientId,
@@ -1510,10 +1562,8 @@ async function GET2(request) {
       IsFromNotification: false
     };
     if (tpId) {
-      console.log("[identity:handler:token] using tp_id for sign-in");
       requestBody["ThirdPartyToken"] = tpId;
     } else if (authConfig.thirdPartyToken) {
-      console.log("[identity:handler:token] using config thirdPartyToken");
       requestBody["ThirdPartyToken"] = authConfig.thirdPartyToken;
     } else {
       console.log("[identity:handler:token] signing in with clientId/clientSecret");
@@ -1540,20 +1590,21 @@ async function GET2(request) {
         { status: 500 }
       );
     }
-    console.log("[identity:handler:token] new token obtained, setting encrypted cookie");
     const res = import_server5.NextResponse.json({ access_token: data.access_token });
     try {
-      const { setEncryptedCookie: setEncCookie, COOKIE_NAMES: CN } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-      const { encrypt: encrypt2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
-      const encrypted = encrypt2(data.access_token);
-      res.cookies.set(CN.CRF, encrypted, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600
-        // 1 hour
-      });
+      const { encryptSync: encryptSync2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
+      const { COOKIE_NAMES: CN } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+      const encrypted = encryptSync2(data.access_token);
+      if (encrypted) {
+        res.cookies.set(CN.CRF, encrypted, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+          // 1 hour
+        });
+      }
     } catch (e) {
       console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
     }
