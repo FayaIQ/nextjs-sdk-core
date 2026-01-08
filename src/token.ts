@@ -33,7 +33,7 @@ async function getTokenImpl(): Promise<string> {
       const { getEncryptedCookie, COOKIE_NAMES } = await import(
         "./utils/cookie"
       );
-      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
       if (token) {
         console.log('[token] Found encrypted CRF cookie');
       }
