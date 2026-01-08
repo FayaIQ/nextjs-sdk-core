@@ -6,7 +6,7 @@ export type TokenResponse = {
 };
 
 // ENV
-const AUTH_MODE = process.env.AUTH_MODE || "auto"; // auto | strict
+const AUTH_MODE = process.env.AUTH_MODE || "strict"; // auto | strict
 const USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
 
 // ------------------------------------------------
@@ -63,9 +63,10 @@ async function getTokenImpl(): Promise<string> {
         const { getEncryptedCookie, COOKIE_NAMES } = await import(
           "./utils/cookie"
         );
-        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
       } catch {}
 
+      
       // Fallback to legacy access_token
       if (!token) {
         token = cookieStore.get("access_token")?.value || null;

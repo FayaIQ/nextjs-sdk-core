@@ -1,6 +1,6 @@
 import {
   getStoreInfo
-} from "../../chunk-5ZOVKQFW.js";
+} from "../../chunk-CNMECPYA.js";
 import "../../chunk-3RG5ZIWI.js";
 
 // src/identity/application/handler/getStores.ts

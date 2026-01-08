@@ -1,6 +1,6 @@
 import {
   getBrands
-} from "../../chunk-FBJTP4AZ.js";
+} from "../../chunk-WIW7JHCW.js";
 import "../../chunk-3RG5ZIWI.js";
 
 // src/inventory/brands/handler/get-brands.ts

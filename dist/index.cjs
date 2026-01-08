@@ -266,7 +266,7 @@ async function getTokenImpl() {
       let token = null;
       try {
         const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
       } catch {
       }
       if (!token) {
@@ -301,7 +301,7 @@ var AUTH_MODE, USE_TOKEN_ROUTE;
 var init_token = __esm({
   "src/token.ts"() {
     "use strict";
-    AUTH_MODE = process.env.AUTH_MODE || "auto";
+    AUTH_MODE = process.env.AUTH_MODE || "strict";
     USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
   }
 });

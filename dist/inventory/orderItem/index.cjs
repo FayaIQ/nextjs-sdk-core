@@ -222,7 +222,7 @@ __export(orderItem_exports, {
 module.exports = __toCommonJS(orderItem_exports);
 
 // src/token.ts
-var AUTH_MODE = process.env.AUTH_MODE || "auto";
+var AUTH_MODE = process.env.AUTH_MODE || "strict";
 var USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
 async function getTokenImpl() {
   if (typeof window === "undefined") {
@@ -258,7 +258,7 @@ async function getTokenImpl() {
       let token = null;
       try {
         const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
       } catch {
       }
       if (!token) {
