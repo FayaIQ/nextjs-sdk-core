@@ -198,8 +198,6 @@ declare const COOKIE_NAMES: {
     readonly TP_ID: "tp_id";
     /** Legacy: crf cookie (for migration - deprecated) */
     readonly CRF: "crf";
-    /** Legacy: access token (for migration - deprecated) */
-    readonly ACCESS_TOKEN: "access_token";
 };
 /**
  * Default cookie options for secure httpOnly cookies
@@ -252,5 +250,10 @@ declare function encryptSync(text: string | undefined | null): string | null | u
 declare function decryptSync(payload: string | undefined | null): string | undefined | null;
 declare function encrypt(text: string | undefined | null): Promise<string | null | undefined>;
 declare function decrypt(payload: string | undefined | null): Promise<string | undefined | null>;
+/**
+ * Universal decryption that tries Node.js crypto first, then Web Crypto API
+ * This ensures compatibility with tokens encrypted by middleware (Web Crypto) and SDK (Node.js crypto)
+ */
+declare function decryptUniversal(payload: string | undefined | null): string | undefined | null;
 
-export { Api, type AuthConfig, COOKIE_NAMES, SECURE_COOKIE_OPTIONS, type TokenResponse, decrypt, decryptSync, deleteCookie, encrypt, encryptSync, getEncryptedCookie, getToken, setEncryptedCookie, setPlainCookie };
+export { Api, type AuthConfig, COOKIE_NAMES, SECURE_COOKIE_OPTIONS, type TokenResponse, decrypt, decryptSync, decryptUniversal, deleteCookie, encrypt, encryptSync, getEncryptedCookie, getToken, setEncryptedCookie, setPlainCookie };

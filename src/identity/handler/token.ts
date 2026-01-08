@@ -15,38 +15,51 @@ import { Api } from "../../api/api";
  * ```
  */
 export async function GET(request: NextRequest) {
+  console.log("[identity:handler:token] GET request received");
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
+    console.log(`[identity:handler:token] Available cookies: ${cookieStore.getAll().map((c: any) => c.name).join(', ')}`);
     
     // Import cookie utilities
     const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
     
     
     // Check encrypted crf cookie first
+    console.log("[identity:handler:token] Checking for existing token in cookies");
     let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    console.log(`[identity:handler:token] CRF cookie token found: ${!!existingToken}`);
     
     // Fallback to legacy access_token if crf not found
     if (!existingToken) {
-      existingToken = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+      existingToken = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+      console.log(`[identity:handler:token] Legacy SESSION_ID cookie found: ${!!existingToken}`);
     }
     
     if (existingToken) {
+      console.log("[identity:handler:token] Returning existing token from cookies");
       // Return with cache headers to prevent repeated calls
       return NextResponse.json(
-        { access_token: existingToken },
+        { SESSION_ID: existingToken },
       );
     }
 
+    console.log("[identity:handler:token] No existing token found, attempting re-auth");
+
     // Try to use encrypted tp_id for re-auth (with fallback to plain)
+    console.log("[identity:handler:token] Checking for tp_id cookie");
     let tpId: string | null = null;
     try {
       tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-    } catch {}
+      console.log(`[identity:handler:token] Encrypted tp_id found: ${!!tpId}`);
+    } catch (e) {
+      console.log("[identity:handler:token] Encrypted tp_id decryption failed");
+    }
     
     // Fallback to plain tp_id cookie
     if (!tpId) {
       tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
+      console.log(`[identity:handler:token] Plain tp_id found: ${!!tpId}`);
     }
     
     const authConfig = getAuthConfig();
@@ -102,19 +115,23 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
+    console.log(`[identity:handler:token] Token response received, has access_token: ${!!data.access_token}`);
     
     if (!data.access_token) {
+      console.error("[identity:handler:token] No access_token in response");
       return NextResponse.json(
         { error: "Token missing in response" },
         { status: 500 }
       );
     }
 
+    console.log(`[identity:handler:token] Access token length: ${data.access_token.length}`);
 
     // Return response with encrypted cookie
     const res = NextResponse.json({ access_token: data.access_token });
     
     // Set session_id cookie - encrypted if possible, otherwise plain
+    console.log("[identity:handler:token] Setting session_id cookie");
     try {
       const { encryptSync } = await import("../../utils/crypto");
       const { COOKIE_NAMES: CN } = await import("../../utils/cookie");
@@ -129,6 +146,8 @@ export async function GET(request: NextRequest) {
           maxAge: 3600, // 1 hour
         });
         console.log("[identity:handler:token] session_id saved (encrypted)");
+      } else {
+        console.warn("[identity:handler:token] encryptSync returned falsy value");
       }
     } catch (e) {
       console.warn("[identity:handler:token] encryption failed, saving plain session_id", e);
@@ -140,8 +159,10 @@ export async function GET(request: NextRequest) {
         path: "/",
         maxAge: 3600, // 1 hour
       });
+      console.log("[identity:handler:token] session_id saved (plain)");
     }
 
+    console.log("[identity:handler:token] Returning response with new token");
     return res;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Token fetch failed";

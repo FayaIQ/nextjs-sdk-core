@@ -62,52 +62,78 @@ function base64ToBytes(b64) {
   );
 }
 function encryptSync(text) {
-  if (!text) return text;
+  console.log(`[crypto:encryptSync] Called with text length: ${text?.length || 0}`);
+  if (!text) {
+    console.log("[crypto:encryptSync] No text provided, returning as-is");
+    return text;
+  }
   try {
+    console.log("[crypto:encryptSync] Starting encryption process");
     const crypto2 = nodeCrypto;
     const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    console.log(`[crypto:encryptSync] ENCRYPTION_KEY_BASE64 present: ${!!keyBase64}`);
     if (!keyBase64) {
+      console.error("[crypto:encryptSync] ENCRYPTION_KEY_BASE64 environment variable is not set");
       throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
     }
     const key = Buffer.from(normalizeBase64(keyBase64), "base64");
+    console.log(`[crypto:encryptSync] Key length: ${key.length} bytes`);
     if (key.length !== 32) {
+      console.error(`[crypto:encryptSync] Invalid key length: ${key.length}, expected 32`);
       throw new Error("Encryption key must be 32 bytes (256 bits)");
     }
     const iv = crypto2.randomBytes(12);
+    console.log(`[crypto:encryptSync] Generated IV: ${iv.toString("hex")}`);
     const cipher = crypto2.createCipheriv("aes-256-gcm", key, iv);
     let encrypted = cipher.update(text, "utf8");
     encrypted = Buffer.concat([encrypted, cipher.final()]);
     const authTag = cipher.getAuthTag();
+    console.log(`[crypto:encryptSync] Auth tag length: ${authTag.length} bytes`);
     const combined = Buffer.concat([iv, encrypted, authTag]);
-    return combined.toString("base64");
+    const result = combined.toString("base64");
+    console.log(`[crypto:encryptSync] Encryption successful, result length: ${result.length}`);
+    return result;
   } catch (e) {
-    console.error("[crypto:encryptSync] failed", e);
+    console.error("[crypto:encryptSync] Encryption failed:", e);
     throw e;
   }
 }
 function decryptSync(payload) {
-  if (!payload) return payload;
+  console.log(`[crypto:decryptSync] Called with payload length: ${payload?.length || 0}`);
+  if (!payload) {
+    console.log("[crypto:decryptSync] No payload provided, returning as-is");
+    return payload;
+  }
   try {
+    console.log("[crypto:decryptSync] Starting decryption process");
     const crypto2 = nodeCrypto;
     const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    console.log(`[crypto:decryptSync] ENCRYPTION_KEY_BASE64 present: ${!!keyBase64}`);
     if (!keyBase64) {
+      console.error("[crypto:decryptSync] ENCRYPTION_KEY_BASE64 environment variable is not set");
       throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
     }
     const key = Buffer.from(normalizeBase64(keyBase64), "base64");
+    console.log(`[crypto:decryptSync] Key length: ${key.length} bytes`);
     if (key.length !== 32) {
+      console.error(`[crypto:decryptSync] Invalid key length: ${key.length}, expected 32`);
       throw new Error("Encryption key must be 32 bytes (256 bits)");
     }
     const combined = Buffer.from(payload, "base64");
+    console.log(`[crypto:decryptSync] Combined buffer length: ${combined.length} bytes`);
     const iv = combined.slice(0, 12);
     const authTag = combined.slice(-16);
     const encrypted = combined.slice(12, -16);
+    console.log(`[crypto:decryptSync] IV length: ${iv.length}, encrypted length: ${encrypted.length}, authTag length: ${authTag.length}`);
     const decipher = crypto2.createDecipheriv("aes-256-gcm", key, iv);
     decipher.setAuthTag(authTag);
     let decrypted = decipher.update(encrypted);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
-    return decrypted.toString("utf8");
+    const result = decrypted.toString("utf8");
+    console.log(`[crypto:decryptSync] Decryption successful, result length: ${result.length}`);
+    return result;
   } catch (e) {
-    console.error("[crypto:decryptSync] failed", e);
+    console.error("[crypto:decryptSync] Decryption failed:", e);
     throw e;
   }
 }
@@ -144,6 +170,34 @@ async function decrypt(payload) {
   const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
   return decoder.decode(pt);
 }
+function decryptUniversal(payload) {
+  console.log(`[crypto:decryptUniversal] Attempting to decrypt payload length: ${payload?.length || 0}`);
+  if (!payload) {
+    console.log("[crypto:decryptUniversal] No payload provided");
+    return payload;
+  }
+  try {
+    console.log("[crypto:decryptUniversal] Trying Node.js crypto decryption");
+    const result = decryptSync(payload);
+    console.log("[crypto:decryptUniversal] Node.js crypto decryption successful");
+    return result;
+  } catch (nodeError) {
+    console.log("[crypto:decryptUniversal] Node.js crypto decryption failed, trying Web Crypto:", nodeError);
+    try {
+      console.log("[crypto:decryptUniversal] Trying Web Crypto API decryption");
+      if (typeof window === "undefined") {
+        console.log("[crypto:decryptUniversal] Server-side, cannot use Web Crypto for sync decryption");
+        throw new Error("Web Crypto not available in sync context");
+      }
+      throw nodeError;
+    } catch (webError) {
+      console.error("[crypto:decryptUniversal] Both decryption methods failed");
+      console.error("[crypto:decryptUniversal] Node.js error:", nodeError);
+      console.error("[crypto:decryptUniversal] Web Crypto error:", webError);
+      throw nodeError;
+    }
+  }
+}
 var nodeCrypto, keyPromise, encoder, decoder;
 var init_crypto = __esm({
   "src/utils/crypto.ts"() {
@@ -175,42 +229,69 @@ __export(cookie_exports, {
   setPlainCookie: () => setPlainCookie
 });
 function setEncryptedCookie(cookieStore, name, value, options) {
+  console.log(`[cookie:setEncryptedCookie] Setting encrypted cookie: ${name}, value length: ${value?.length || 0}`);
   if (typeof window !== "undefined") {
+    console.error("[cookie:setEncryptedCookie] ERROR: Called on client-side");
     throw new Error("setEncryptedCookie must only be called server-side");
   }
-  const encrypted = encryptSync(value);
-  cookieStore.set(name, encrypted, {
-    ...SECURE_COOKIE_OPTIONS,
-    ...options
-  });
+  try {
+    const encrypted = encryptSync(value);
+    console.log(`[cookie:setEncryptedCookie] Encryption successful for ${name}, encrypted length: ${encrypted?.length || 0}`);
+    cookieStore.set(name, encrypted, {
+      ...SECURE_COOKIE_OPTIONS,
+      ...options
+    });
+    console.log(`[cookie:setEncryptedCookie] Cookie ${name} set successfully`);
+  } catch (e) {
+    console.error(`[cookie:setEncryptedCookie] Failed to set encrypted cookie ${name}:`, e);
+    throw e;
+  }
 }
 function getEncryptedCookie(cookieStore, name) {
+  console.log(`[cookie:getEncryptedCookie] Attempting to get encrypted cookie: ${name}`);
   if (typeof window !== "undefined") {
+    console.error("[cookie:getEncryptedCookie] ERROR: Called on client-side");
     throw new Error("getEncryptedCookie must only be called server-side");
   }
   try {
     const cookie = cookieStore.get(name);
-    if (!cookie?.value) return null;
-    console.log(cookie.value);
+    console.log(`[cookie:getEncryptedCookie] Cookie ${name} exists: ${!!cookie}, has value: ${!!cookie?.value}`);
+    if (!cookie?.value) {
+      console.log(`[cookie:getEncryptedCookie] No value found for cookie ${name}`);
+      return null;
+    }
+    console.log(`[cookie:getEncryptedCookie] Raw cookie value length: ${cookie.value.length}`);
+    console.log(`[cookie:getEncryptedCookie] Raw cookie value (first 50 chars): ${cookie.value.substring(0, 50)}...`);
     try {
-      const decrypted = decryptSync(cookie.value);
-      console.log(decrypted);
+      const decrypted = decryptUniversal(cookie.value);
+      console.log(`[cookie:getEncryptedCookie] Universal decryption successful for ${name}, decrypted length: ${decrypted?.length || 0}`);
+      if (decrypted) {
+        console.log(`[cookie:getEncryptedCookie] Decrypted value (first 20 chars): ${decrypted.substring(0, 20)}...`);
+      }
       return decrypted ?? null;
     } catch (e) {
+      console.error(`[cookie:getEncryptedCookie] Universal decryption failed for ${name}:`, e);
       throw e;
     }
   } catch (e) {
-    console.error(`[cookie] Failed to decrypt ${name}:`, e);
+    console.error(`[cookie:getEncryptedCookie] Failed to get/decrypt cookie ${name}:`, e);
     return null;
   }
 }
 function setPlainCookie(cookieStore, name, value, options) {
-  cookieStore.set(name, value, {
-    ...SECURE_COOKIE_OPTIONS,
-    httpOnly: false,
-    // Allow client-side read for flags
-    ...options
-  });
+  console.log(`[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${value?.length || 0}`);
+  try {
+    cookieStore.set(name, value, {
+      ...SECURE_COOKIE_OPTIONS,
+      httpOnly: false,
+      // Allow client-side read for flags
+      ...options
+    });
+    console.log(`[cookie:setPlainCookie] Plain cookie ${name} set successfully`);
+  } catch (e) {
+    console.error(`[cookie:setPlainCookie] Failed to set plain cookie ${name}:`, e);
+    throw e;
+  }
 }
 function deleteCookie(cookieStore, name) {
   cookieStore.delete(name);
@@ -228,12 +309,12 @@ var init_cookie = __esm({
       /** Legacy: third-party token (for migration) */
       TP_ID: "tp_id",
       /** Legacy: crf cookie (for migration - deprecated) */
-      CRF: "crf",
+      CRF: "crf"
       /** Legacy: access token (for migration - deprecated) */
-      ACCESS_TOKEN: "access_token"
+      // ACCESS_TOKEN: 'access_token',
     };
     SECURE_COOKIE_OPTIONS = {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -249,107 +330,162 @@ __export(token_exports, {
   default: () => getToken
 });
 async function getTokenImpl() {
+  console.log(`[token:getTokenImpl] Starting token retrieval. AUTH_MODE: ${AUTH_MODE}, USE_TOKEN_ROUTE: ${USE_TOKEN_ROUTE}, isServer: ${typeof window === "undefined"}`);
   if (typeof window === "undefined") {
+    console.log("[token:getTokenImpl] Server-side execution, checking x-access-token header");
     const { headers } = await import("next/headers");
     const headerToken = (await headers()).get("x-access-token");
+    console.log(`[token:getTokenImpl] x-access-token header present: ${!!headerToken}`);
     if (headerToken) {
+      console.log("[token:getTokenImpl] Returning token from x-access-token header");
       return headerToken;
     }
   }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
+    console.log("[token:getTokenImpl] Strict mode server-side, checking cookies");
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
+    console.log(`[token:getTokenImpl] Available cookies: ${cookieStore.getAll().map((c) => c.name).join(", ")}`);
     let token = null;
     const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+    console.log("[token:getTokenImpl] Trying encrypted session_id");
     try {
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
       if (token) {
-        console.log("[token] Found encrypted session_id");
+        console.log("[token:getTokenImpl] Found encrypted session_id, returning token");
         return token;
       }
     } catch (e) {
-      console.log("[token] session_id decryption failed, trying plain");
+      console.log("[token:getTokenImpl] session_id decryption failed, trying plain");
+    }
+    console.log("[token:getTokenImpl] Trying plain session_id");
+    token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
+    if (token) {
+      console.log("[token:getTokenImpl] Found plain session_id, returning token");
+      return token;
+    }
+    console.log("[token:getTokenImpl] Trying middleware access_token cookie");
+    try {
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
+      if (token) {
+        console.log("[token:getTokenImpl] Found encrypted access_token (middleware), returning token");
+        return token;
+      }
+    } catch (e) {
+      console.log("[token:getTokenImpl] access_token decryption failed, trying plain");
     }
     token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
     if (token) {
-      console.log("[token] Found plain session_id");
+      console.log("[token:getTokenImpl] Found plain access_token (middleware), returning token");
       return token;
     }
+    console.log("[token:getTokenImpl] Trying legacy cookie names");
     try {
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
       if (token) {
-        console.log("[token] Found legacy encrypted crf");
+        console.log("[token:getTokenImpl] Found legacy encrypted crf, returning token");
         return token;
       }
     } catch (e) {
+      console.log("[token:getTokenImpl] Legacy crf decryption failed");
     }
-    token = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
+    token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
     if (token) {
-      console.log("[token] Found legacy plain access_token");
+      console.log("[token:getTokenImpl] Found legacy plain SESSION_ID, returning token");
       return token;
     }
     console.error(
-      "[token] No token found in strict mode. Available cookies:",
+      "[token:getTokenImpl] No token found in strict mode. Available cookies:",
       cookieStore.getAll().map((c) => c.name)
     );
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     err.status = 401;
+    console.error("[token:getTokenImpl] Throwing 401 error:", err.message);
     throw err;
   }
   if (typeof window === "undefined") {
+    console.log("[token:getTokenImpl] Auto mode server-side, checking cookies");
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
+      console.log(`[token:getTokenImpl:auto] Available cookies: ${cookieStore.getAll().map((c) => c.name).join(", ")}`);
       const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
       let token = null;
+      console.log("[token:getTokenImpl:auto] Trying encrypted session_id");
       try {
         token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
         if (token) {
-          console.log("[token:auto] Found encrypted session_id");
+          console.log("[token:getTokenImpl:auto] Found encrypted session_id, returning token");
           return token;
         }
       } catch (e) {
-        console.log("[token:auto] session_id decryption failed, trying plain");
+        console.log("[token:getTokenImpl:auto] session_id decryption failed, trying plain");
+      }
+      console.log("[token:getTokenImpl:auto] Trying plain session_id");
+      token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
+      if (token) {
+        console.log("[token:getTokenImpl:auto] Found plain session_id, returning token");
+        return token;
+      }
+      console.log("[token:getTokenImpl:auto] Trying middleware access_token cookie");
+      try {
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
+        if (token) {
+          console.log("[token:getTokenImpl:auto] Found encrypted access_token (middleware), returning token");
+          return token;
+        }
+      } catch (e) {
+        console.log("[token:getTokenImpl:auto] access_token decryption failed, trying plain");
       }
       token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
       if (token) {
-        console.log("[token:auto] Found plain session_id");
+        console.log("[token:getTokenImpl:auto] Found plain access_token (middleware), returning token");
         return token;
       }
+      console.log("[token:getTokenImpl:auto] Trying legacy cookie names");
       try {
         token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
         if (token) {
-          console.log("[token:auto] Found legacy encrypted crf");
+          console.log("[token:getTokenImpl:auto] Found legacy encrypted crf, returning token");
           return token;
         }
       } catch (e) {
-      }
-      token = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
-      if (token) {
-        console.log("[token:auto] Found legacy plain access_token");
-        return token;
+        console.log("[token:getTokenImpl:auto] Legacy crf decryption failed");
       }
       console.warn(
-        "[token:auto] No token found. Available cookies:",
+        "[token:getTokenImpl:auto] No token found. Available cookies:",
         cookieStore.getAll().map((c) => c.name)
       );
     } catch (e) {
-      console.error("[token:auto] Error reading cookies:", e);
+      console.error("[token:getTokenImpl:auto] Error reading cookies:", e);
     }
   }
   if (typeof window !== "undefined") {
+    console.log("[token:getTokenImpl] Client-side execution, checking cookies");
     const getCookie = (name) => {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
       return null;
     };
-    const clientToken = getCookie("session_id") || getCookie("access_token");
-    if (clientToken) {
-      return clientToken;
+    console.log("[token:getTokenImpl] Checking for session_id cookie");
+    const sessionIdToken = getCookie("session_id");
+    console.log(`[token:getTokenImpl] session_id cookie found: ${!!sessionIdToken}`);
+    if (sessionIdToken) {
+      console.log("[token:getTokenImpl] Returning token from session_id cookie");
+      return sessionIdToken;
     }
+    console.log("[token:getTokenImpl] Checking for legacy access_token cookie");
+    const accessToken = getCookie("access_token");
+    console.log(`[token:getTokenImpl] access_token cookie found: ${!!accessToken}`);
+    if (accessToken) {
+      console.log("[token:getTokenImpl] Returning token from legacy access_token cookie");
+      return accessToken;
+    }
+    console.error("[token:getTokenImpl] No token available on client side");
     throw new Error("No token available on client side");
   }
+  console.error("[token:getTokenImpl] No token available (server-side fallback)");
   throw new Error("No token available");
 }
 function getToken() {
@@ -1175,6 +1311,7 @@ __export(index_exports, {
   apiFetch: () => apiFetch,
   decrypt: () => decrypt,
   decryptSync: () => decryptSync,
+  decryptUniversal: () => decryptUniversal,
   deleteCookie: () => deleteCookie,
   encrypt: () => encrypt,
   encryptSync: () => encryptSync,
@@ -2730,6 +2867,7 @@ init_crypto();
   apiFetch,
   decrypt,
   decryptSync,
+  decryptUniversal,
   deleteCookie,
   encrypt,
   encryptSync,

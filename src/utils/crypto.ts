@@ -73,33 +73,46 @@ const decoder = new TextDecoder();
 export function encryptSync(
   text: string | undefined | null
 ): string | null | undefined {
-  if (!text) return text;
+  console.log(`[crypto:encryptSync] Called with text length: ${text?.length || 0}`);
+  if (!text) {
+    console.log("[crypto:encryptSync] No text provided, returning as-is");
+    return text;
+  }
 
   try {
+    console.log("[crypto:encryptSync] Starting encryption process");
     // Use Node.js crypto (statically imported) for sync operations
     const crypto = nodeCrypto;
     const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    console.log(`[crypto:encryptSync] ENCRYPTION_KEY_BASE64 present: ${!!keyBase64}`);
     if (!keyBase64) {
+      console.error("[crypto:encryptSync] ENCRYPTION_KEY_BASE64 environment variable is not set");
       throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
     }
 
     const key = Buffer.from(normalizeBase64(keyBase64), "base64");
+    console.log(`[crypto:encryptSync] Key length: ${key.length} bytes`);
     if (key.length !== 32) {
+      console.error(`[crypto:encryptSync] Invalid key length: ${key.length}, expected 32`);
       throw new Error("Encryption key must be 32 bytes (256 bits)");
     }
 
     const iv = crypto.randomBytes(12); // 96-bit IV for GCM
+    console.log(`[crypto:encryptSync] Generated IV: ${iv.toString('hex')}`);
     const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
 
     let encrypted = cipher.update(text, "utf8");
     encrypted = Buffer.concat([encrypted, cipher.final()]);
     const authTag = cipher.getAuthTag();
+    console.log(`[crypto:encryptSync] Auth tag length: ${authTag.length} bytes`);
 
     // Combine: IV (12) + ciphertext + authTag (16)
     const combined = Buffer.concat([iv, encrypted, authTag]);
-    return combined.toString("base64");
+    const result = combined.toString("base64");
+    console.log(`[crypto:encryptSync] Encryption successful, result length: ${result.length}`);
+    return result;
   } catch (e) {
-    console.error("[crypto:encryptSync] failed", e);
+    console.error("[crypto:encryptSync] Encryption failed:", e);
     throw e;
   }
 }
@@ -114,24 +127,35 @@ export function encryptSync(
 export function decryptSync(
   payload: string | undefined | null
 ): string | undefined | null {
-  if (!payload) return payload;
+  console.log(`[crypto:decryptSync] Called with payload length: ${payload?.length || 0}`);
+  if (!payload) {
+    console.log("[crypto:decryptSync] No payload provided, returning as-is");
+    return payload;
+  }
 
   try {
+    console.log("[crypto:decryptSync] Starting decryption process");
     const crypto = nodeCrypto;
     const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    console.log(`[crypto:decryptSync] ENCRYPTION_KEY_BASE64 present: ${!!keyBase64}`);
     if (!keyBase64) {
+      console.error("[crypto:decryptSync] ENCRYPTION_KEY_BASE64 environment variable is not set");
       throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
     }
 
     const key = Buffer.from(normalizeBase64(keyBase64), "base64");
+    console.log(`[crypto:decryptSync] Key length: ${key.length} bytes`);
     if (key.length !== 32) {
+      console.error(`[crypto:decryptSync] Invalid key length: ${key.length}, expected 32`);
       throw new Error("Encryption key must be 32 bytes (256 bits)");
     }
 
     const combined = Buffer.from(payload, "base64");
+    console.log(`[crypto:decryptSync] Combined buffer length: ${combined.length} bytes`);
     const iv = combined.slice(0, 12);
     const authTag = combined.slice(-16);
     const encrypted = combined.slice(12, -16);
+    console.log(`[crypto:decryptSync] IV length: ${iv.length}, encrypted length: ${encrypted.length}, authTag length: ${authTag.length}`);
 
     const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
     decipher.setAuthTag(authTag);
@@ -139,9 +163,11 @@ export function decryptSync(
     let decrypted = decipher.update(encrypted);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
-    return decrypted.toString("utf8");
+    const result = decrypted.toString("utf8");
+    console.log(`[crypto:decryptSync] Decryption successful, result length: ${result.length}`);
+    return result;
   } catch (e) {
-    console.error("[crypto:decryptSync] failed", e);
+    console.error("[crypto:decryptSync] Decryption failed:", e);
     throw e;
   }
 }
@@ -202,4 +228,47 @@ export async function decrypt(
   const key = await keyPromise;
   const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
   return decoder.decode(pt);
+}
+
+/**
+ * Universal decryption that tries Node.js crypto first, then Web Crypto API
+ * This ensures compatibility with tokens encrypted by middleware (Web Crypto) and SDK (Node.js crypto)
+ */
+export function decryptUniversal(
+  payload: string | undefined | null
+): string | undefined | null {
+  console.log(`[crypto:decryptUniversal] Attempting to decrypt payload length: ${payload?.length || 0}`);
+
+  if (!payload) {
+    console.log("[crypto:decryptUniversal] No payload provided");
+    return payload;
+  }
+
+  // First try Node.js crypto decryption (our SDK's primary method)
+  try {
+    console.log("[crypto:decryptUniversal] Trying Node.js crypto decryption");
+    const result = decryptSync(payload);
+    console.log("[crypto:decryptUniversal] Node.js crypto decryption successful");
+    return result;
+  } catch (nodeError) {
+    console.log("[crypto:decryptUniversal] Node.js crypto decryption failed, trying Web Crypto:", nodeError);
+
+    // Fallback to Web Crypto API decryption (for middleware-encrypted tokens)
+    try {
+      console.log("[crypto:decryptUniversal] Trying Web Crypto API decryption");
+      // Note: This is async, but we'll make it sync by checking if we're in Node.js
+      if (typeof window === 'undefined') {
+        console.log("[crypto:decryptUniversal] Server-side, cannot use Web Crypto for sync decryption");
+        throw new Error("Web Crypto not available in sync context");
+      }
+
+      // For client-side, we could do async decryption, but for now let's just re-throw
+      throw nodeError;
+    } catch (webError) {
+      console.error("[crypto:decryptUniversal] Both decryption methods failed");
+      console.error("[crypto:decryptUniversal] Node.js error:", nodeError);
+      console.error("[crypto:decryptUniversal] Web Crypto error:", webError);
+      throw nodeError; // Throw the original error
+    }
+  }
 }

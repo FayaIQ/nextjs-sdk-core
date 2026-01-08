@@ -2,15 +2,15 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-7QEDOIFZ.js";
+} from "../chunk-BGLDR6FN.js";
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-WHYITOH7.js";
-import "../chunk-N6SA32UP.js";
+} from "../chunk-DU5RCNSK.js";
+import "../chunk-FBLW4A4O.js";
 
 // src/core/config.ts
 var getEnvVar = (key, brand) => {
@@ -128,7 +128,9 @@ async function loginUser(credentials, userAgent) {
     }
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
-    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-SBNKP3QF.js");
+    console.log(`[login] Setting cookies. expiresIn: ${expiresIn}, access_token length: ${response.access_token?.length || 0}`);
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-44NI4SKY.js");
+    console.log("[login] Attempting to save session_id cookie");
     try {
       setEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
         maxAge: expiresIn
@@ -141,11 +143,13 @@ async function loginUser(credentials, userAgent) {
       });
     }
     if (credentials.thirdPartyToken) {
+      console.log("[login] Third party token present, saving tp_id cookie");
       try {
         setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
           maxAge: 3600
           // 1 hour typical Firebase token lifetime
         });
+        console.log("[login] tp_id saved (encrypted)");
       } catch (e) {
         console.warn("[login] encryption failed for tp_id, using plain", e);
         cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
@@ -155,15 +159,21 @@ async function loginUser(credentials, userAgent) {
           path: "/",
           maxAge: 3600
         });
+        console.log("[login] tp_id saved (plain)");
       }
+    } else {
+      console.log("[login] No third party token present");
     }
     if (authMode === "auto") {
+      console.log("[login] Auto mode: saving isUser flag");
       const isUser = !!(response.roles && response.roles.length > 0);
+      console.log(`[login] isUser determined: ${isUser} (roles count: ${response.roles?.length || 0})`);
       setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
         maxAge: expiresIn
       });
     }
     if (authMode === "strict") {
+      console.log("[login] Strict mode: saving user data");
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
           httpOnly: true,
@@ -228,7 +238,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-PW5CYUTL.js");
+    const { getWithAuth } = await import("../fetcher-3366SLXM.js");
     const { Api: Api2 } = await import("../api-IWWKU55Q.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
@@ -271,7 +281,7 @@ async function POST(request) {
       const cookieStore = await cookies();
       let hasValidToken = false;
       try {
-        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-SBNKP3QF.js");
+        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-44NI4SKY.js");
         const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
         const existingTpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
         if (existingToken && existingTpId === body.thirdPartyToken) {
@@ -317,7 +327,7 @@ async function POST(request) {
       console.log("[identity:handler:login] setting encrypted tp_id cookie");
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const { setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-SBNKP3QF.js");
+      const { setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-44NI4SKY.js");
       try {
         setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, {
           maxAge: 3600
@@ -345,7 +355,7 @@ async function POST(request) {
     );
     if (body.thirdPartyToken) {
       try {
-        const { encryptSync } = await import("../crypto-HS3KP6LI.js");
+        const { encryptSync } = await import("../crypto-AHNJNIEG.js");
         const encrypted = encryptSync(body.thirdPartyToken);
         if (encrypted) {
           res.cookies.set("tp_id", encrypted, {
@@ -432,26 +442,37 @@ async function GET(request) {
 // src/identity/handler/token.ts
 import { NextResponse as NextResponse4 } from "next/server";
 async function GET2(request) {
+  console.log("[identity:handler:token] GET request received");
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-SBNKP3QF.js");
+    console.log(`[identity:handler:token] Available cookies: ${cookieStore.getAll().map((c) => c.name).join(", ")}`);
+    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-44NI4SKY.js");
+    console.log("[identity:handler:token] Checking for existing token in cookies");
     let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    console.log(`[identity:handler:token] CRF cookie token found: ${!!existingToken}`);
     if (!existingToken) {
-      existingToken = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+      existingToken = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+      console.log(`[identity:handler:token] Legacy SESSION_ID cookie found: ${!!existingToken}`);
     }
     if (existingToken) {
+      console.log("[identity:handler:token] Returning existing token from cookies");
       return NextResponse4.json(
-        { access_token: existingToken }
+        { SESSION_ID: existingToken }
       );
     }
+    console.log("[identity:handler:token] No existing token found, attempting re-auth");
+    console.log("[identity:handler:token] Checking for tp_id cookie");
     let tpId = null;
     try {
       tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-    } catch {
+      console.log(`[identity:handler:token] Encrypted tp_id found: ${!!tpId}`);
+    } catch (e) {
+      console.log("[identity:handler:token] Encrypted tp_id decryption failed");
     }
     if (!tpId) {
       tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
+      console.log(`[identity:handler:token] Plain tp_id found: ${!!tpId}`);
     }
     const authConfig = getAuthConfig();
     const requestBody = {
@@ -497,16 +518,20 @@ async function GET2(request) {
       );
     }
     const data = await response.json();
+    console.log(`[identity:handler:token] Token response received, has access_token: ${!!data.access_token}`);
     if (!data.access_token) {
+      console.error("[identity:handler:token] No access_token in response");
       return NextResponse4.json(
         { error: "Token missing in response" },
         { status: 500 }
       );
     }
+    console.log(`[identity:handler:token] Access token length: ${data.access_token.length}`);
     const res = NextResponse4.json({ access_token: data.access_token });
+    console.log("[identity:handler:token] Setting session_id cookie");
     try {
-      const { encryptSync } = await import("../crypto-HS3KP6LI.js");
-      const { COOKIE_NAMES: CN } = await import("../cookie-SBNKP3QF.js");
+      const { encryptSync } = await import("../crypto-AHNJNIEG.js");
+      const { COOKIE_NAMES: CN } = await import("../cookie-44NI4SKY.js");
       const encrypted = encryptSync(data.access_token);
       if (encrypted) {
         res.cookies.set(CN.SESSION_ID, encrypted, {
@@ -518,10 +543,12 @@ async function GET2(request) {
           // 1 hour
         });
         console.log("[identity:handler:token] session_id saved (encrypted)");
+      } else {
+        console.warn("[identity:handler:token] encryptSync returned falsy value");
       }
     } catch (e) {
       console.warn("[identity:handler:token] encryption failed, saving plain session_id", e);
-      const { COOKIE_NAMES: CN } = await import("../cookie-SBNKP3QF.js");
+      const { COOKIE_NAMES: CN } = await import("../cookie-44NI4SKY.js");
       res.cookies.set(CN.SESSION_ID, data.access_token, {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
@@ -530,7 +557,9 @@ async function GET2(request) {
         maxAge: 3600
         // 1 hour
       });
+      console.log("[identity:handler:token] session_id saved (plain)");
     }
+    console.log("[identity:handler:token] Returning response with new token");
     return res;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Token fetch failed";

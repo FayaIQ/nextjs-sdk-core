@@ -147,6 +147,8 @@ declare function GET$1(request: NextRequest): Promise<NextResponse<{
  * ```
  */
 declare function GET(request: NextRequest): Promise<NextResponse<{
+    SESSION_ID: string;
+}> | NextResponse<{
     error: string;
 }> | NextResponse<{
     access_token: any;

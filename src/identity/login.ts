@@ -150,11 +150,13 @@ export async function loginUser(
 
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
+    console.log(`[login] Setting cookies. expiresIn: ${expiresIn}, access_token length: ${response.access_token?.length || 0}`);
     
     // Import cookie utilities for encrypted storage
     const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../utils/cookie");
     
     // Save session token - encrypted if possible, otherwise plain
+    console.log("[login] Attempting to save session_id cookie");
     try {
       setEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
         maxAge: expiresIn,
@@ -170,10 +172,12 @@ export async function loginUser(
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
     if (credentials.thirdPartyToken) {
+      console.log("[login] Third party token present, saving tp_id cookie");
       try {
         setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
           maxAge: 3600, // 1 hour typical Firebase token lifetime
         });
+        console.log("[login] tp_id saved (encrypted)");
       } catch (e) {
         // Fallback to plain cookie if encryption fails
         console.warn("[login] encryption failed for tp_id, using plain", e);
@@ -184,12 +188,17 @@ export async function loginUser(
           path: "/",
           maxAge: 3600,
         });
+        console.log("[login] tp_id saved (plain)");
       }
+    } else {
+      console.log("[login] No third party token present");
     }
 
     // AUTO mode: only save isUser flag based on roles
     if (authMode === "auto") {
+      console.log("[login] Auto mode: saving isUser flag");
       const isUser = !!(response.roles && response.roles.length > 0);
+      console.log(`[login] isUser determined: ${isUser} (roles count: ${response.roles?.length || 0})`);
       setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
         maxAge: expiresIn,
       });
@@ -197,6 +206,7 @@ export async function loginUser(
 
     // STRICT mode: save all user data
     if (authMode === "strict") {
+      console.log("[login] Strict mode: saving user data");
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
           httpOnly: true,
