@@ -31,103 +31,136 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/utils/crypto.ts
-function getEncryptionKey() {
-  const keyB64 = process.env.COOKIE_CRYPTO_KEY;
-  if (!keyB64) {
-    throw new Error(
-      `COOKIE_CRYPTO_KEY environment variable not set. Generate one with: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
-    );
+function normalizeBase64(input) {
+  if (!input)
+    throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
+  let b64 = input.replace(/-/g, "+").replace(/_/g, "/");
+  while (b64.length % 4) {
+    b64 += "=";
   }
+  return b64;
+}
+function base64ToBytes(b64) {
+  const normalized = normalizeBase64(b64);
+  if (typeof Buffer !== "undefined") {
+    const buf = Buffer.from(normalized, "base64");
+    const arr = new Uint8Array(buf.length);
+    for (let i = 0; i < buf.length; i++) arr[i] = buf[i];
+    return arr;
+  }
+  if (typeof atob === "function") {
+    const binary = atob(normalized);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  }
+  throw new Error(
+    "No available base64 decoder (Buffer or atob). Cannot decode encryption key."
+  );
+}
+function encryptSync(text) {
+  if (!text) return text;
   try {
-    const key = Buffer.from(keyB64, "base64");
+    const crypto2 = nodeCrypto;
+    const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    if (!keyBase64) {
+      throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
+    }
+    const key = Buffer.from(normalizeBase64(keyBase64), "base64");
     if (key.length !== 32) {
-      throw new Error(`COOKIE_CRYPTO_KEY must be 32 bytes, got ${key.length}`);
+      throw new Error("Encryption key must be 32 bytes (256 bits)");
     }
-    return key;
+    const iv = crypto2.randomBytes(12);
+    const cipher = crypto2.createCipheriv("aes-256-gcm", key, iv);
+    let encrypted = cipher.update(text, "utf8");
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    const authTag = cipher.getAuthTag();
+    const combined = Buffer.concat([iv, encrypted, authTag]);
+    return combined.toString("base64");
   } catch (e) {
-    throw new Error(`Invalid COOKIE_CRYPTO_KEY: ${e.message}`);
+    console.error("[crypto:encryptSync] failed", e);
+    throw e;
   }
 }
-function encrypt(plaintext) {
-  if (typeof window !== "undefined") {
-    throw new Error("encrypt() must only be called server-side");
-  }
-  const key = getEncryptionKey();
-  const iv = (0, import_crypto.randomBytes)(IV_LENGTH);
-  const cipher = (0, import_crypto.createCipheriv)(ALGORITHM, key, iv);
-  const encrypted = Buffer.concat([
-    cipher.update(plaintext, "utf8"),
-    cipher.final()
-  ]);
-  const authTag = cipher.getAuthTag();
-  const combined = Buffer.concat([iv, authTag, encrypted]);
-  return combined.toString("base64");
-}
-function decrypt(encryptedData) {
-  if (typeof window !== "undefined") {
-    throw new Error("decrypt() must only be called server-side");
-  }
-  const key = getEncryptionKey();
-  const normalizeBase64 = (s) => {
-    let t = s.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
-    const pad = t.length % 4;
-    if (pad === 2) t += "==";
-    else if (pad === 3) t += "=";
-    else if (pad === 1) {
-      t = t.slice(0, t.length - 1);
-    }
-    return t;
-  };
-  const combined = Buffer.from(normalizeBase64(encryptedData), "base64");
-  if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) {
-    throw new Error("Invalid encrypted data: too short");
-  }
-  const iv = combined.subarray(0, IV_LENGTH);
-  const authTag = combined.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
-  const ciphertext = combined.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
-  const decipher = (0, import_crypto.createDecipheriv)(ALGORITHM, key, iv);
-  decipher.setAuthTag(authTag);
-  const decrypted = Buffer.concat([
-    decipher.update(ciphertext),
-    decipher.final()
-  ]);
-  return decrypted.toString("utf8");
-}
-function tryDecryptTolerant(encryptedData) {
+function decryptSync(payload) {
+  if (!payload) return payload;
   try {
-    return decrypt(encryptedData);
-  } catch (e) {
-    try {
-      const key = getEncryptionKey();
-      const normalizeBase64 = (s) => s.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
-      const combined = Buffer.from(normalizeBase64(encryptedData), "base64");
-      if (combined.length < IV_LENGTH + AUTH_TAG_LENGTH) throw e;
-      const iv = combined.subarray(0, IV_LENGTH);
-      const authTag = combined.subarray(combined.length - AUTH_TAG_LENGTH);
-      const ciphertext = combined.subarray(IV_LENGTH, combined.length - AUTH_TAG_LENGTH);
-      const decipher = (0, import_crypto.createDecipheriv)(ALGORITHM, key, iv);
-      decipher.setAuthTag(authTag);
-      const decrypted = Buffer.concat([
-        decipher.update(ciphertext),
-        decipher.final()
-      ]);
-      return decrypted.toString("utf8");
-    } catch (e2) {
-      throw e;
+    const crypto2 = nodeCrypto;
+    const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
+    if (!keyBase64) {
+      throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
     }
+    const key = Buffer.from(normalizeBase64(keyBase64), "base64");
+    if (key.length !== 32) {
+      throw new Error("Encryption key must be 32 bytes (256 bits)");
+    }
+    const combined = Buffer.from(payload, "base64");
+    const iv = combined.slice(0, 12);
+    const authTag = combined.slice(-16);
+    const encrypted = combined.slice(12, -16);
+    const decipher = crypto2.createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(authTag);
+    let decrypted = decipher.update(encrypted);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString("utf8");
+  } catch (e) {
+    console.error("[crypto:decryptSync] failed", e);
+    throw e;
   }
 }
-function validateEncryptionKey() {
-  getEncryptionKey();
+async function encrypt(text) {
+  if (!text) return text;
+  const key = await keyPromise;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = encoder.encode(text);
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    data
+  );
+  const encryptedBytes = new Uint8Array(encrypted);
+  const authTagLength = 16;
+  const ciphertext = encryptedBytes.slice(0, -authTagLength);
+  const authTag = encryptedBytes.slice(-authTagLength);
+  const combined = new Uint8Array(
+    iv.length + ciphertext.length + authTag.length
+  );
+  combined.set(iv, 0);
+  combined.set(ciphertext, iv.length);
+  combined.set(authTag, iv.length + ciphertext.length);
+  let binary = "";
+  combined.forEach((b) => binary += String.fromCharCode(b));
+  return btoa(binary);
 }
-var import_crypto, ALGORITHM, IV_LENGTH, AUTH_TAG_LENGTH;
+async function decrypt(payload) {
+  if (!payload) return payload;
+  const combined = base64ToBytes(payload);
+  const iv = combined.slice(0, 12);
+  const ct = combined.slice(12);
+  const key = await keyPromise;
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+  return decoder.decode(pt);
+}
+var nodeCrypto, keyPromise, encoder, decoder;
 var init_crypto = __esm({
   "src/utils/crypto.ts"() {
     "use strict";
-    import_crypto = require("crypto");
-    ALGORITHM = "aes-256-gcm";
-    IV_LENGTH = 16;
-    AUTH_TAG_LENGTH = 16;
+    nodeCrypto = __toESM(require("crypto"), 1);
+    keyPromise = (async () => {
+      const raw = base64ToBytes(process.env.ENCRYPTION_KEY_BASE64);
+      return crypto.subtle.importKey(
+        "raw",
+        raw.buffer,
+        { name: "AES-GCM" },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    })();
+    encoder = new TextEncoder();
+    decoder = new TextDecoder();
   }
 });
 
@@ -145,7 +178,7 @@ function setEncryptedCookie(cookieStore, name, value, options) {
   if (typeof window !== "undefined") {
     throw new Error("setEncryptedCookie must only be called server-side");
   }
-  const encrypted = encrypt(value);
+  const encrypted = encryptSync(value);
   cookieStore.set(name, encrypted, {
     ...SECURE_COOKIE_OPTIONS,
     ...options
@@ -159,13 +192,10 @@ function getEncryptedCookie(cookieStore, name) {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
     try {
-      return decrypt(cookie.value);
+      const decrypted = decryptSync(cookie.value);
+      return decrypted ?? null;
     } catch (e) {
-      try {
-        return tryDecryptTolerant(cookie.value);
-      } catch (e2) {
-        throw e;
-      }
+      throw e;
     }
   } catch (e) {
     console.error(`[cookie] Failed to decrypt ${name}:`, e);
@@ -209,65 +239,507 @@ var init_cookie = __esm({
   }
 });
 
-// src/core/config.ts
-var config_exports = {};
-__export(config_exports, {
-  getAuthConfig: () => getAuthConfig
+// src/token.ts
+var token_exports = {};
+__export(token_exports, {
+  default: () => getToken
 });
-var getEnvVar, getAuthConfig;
-var init_config = __esm({
-  "src/core/config.ts"() {
-    "use strict";
-    getEnvVar = (key, brand) => {
-      if (typeof process === "undefined" || !process.env) return void 0;
-      if (brand) {
-        const brandKey = `${brand.toUpperCase()}_${key}`;
-        if (process.env[brandKey]) return process.env[brandKey];
+async function getTokenImpl() {
+  if (typeof window === "undefined") {
+    const { headers } = await import("next/headers");
+    const headerToken = (await headers()).get("x-access-token");
+    if (headerToken) {
+      return headerToken;
+    }
+  }
+  if (AUTH_MODE === "strict" && typeof window === "undefined") {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    let token = null;
+    try {
+      const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+      if (token) {
+        console.log("[token] Found encrypted CRF cookie");
       }
-      return process.env[key];
-    };
-    getAuthConfig = () => {
-      if (typeof process !== "undefined" && process.env) {
-        const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
-        const envConfig = {
-          clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
-          clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
-          username: getEnvVar("STOREAK_USERNAME", brand2),
-          password: getEnvVar("STOREAK_PASSWORD", brand2)
-        };
-        if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
-          return {
-            ...envConfig,
-            language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
-            gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
-          };
+      if (!token) {
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+        if (token) {
+          console.log("[token] Found encrypted access_token cookie");
         }
       }
-      const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
-      const prefix = brand ? `${brand.toUpperCase()}_` : "";
-      const missing = [];
-      const required = [
-        `${prefix}STOREAK_CLIENT_ID`,
-        `${prefix}STOREAK_CLIENT_SECRET`
-      ];
-      required.forEach((name) => {
-        if (!process.env?.[name]) missing.push(name);
-      });
-      if (missing.length > 0) {
-        const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
-        throw new Error(
-          `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
-        );
+    } catch (e) {
+      console.error("[token] Decryption error:", e);
+    }
+    if (!token) {
+      token = cookieStore.get("access_token")?.value || null;
+      if (token) {
+        console.log("[token] Found plain access_token cookie");
       }
-      return {
-        clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
-        clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
-        username: getEnvVar("STOREAK_USERNAME", brand),
-        password: getEnvVar("STOREAK_PASSWORD", brand),
-        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
-        gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
-      };
+    }
+    if (token) return token;
+    console.error(
+      "[token] No token found in strict mode. Available cookies:",
+      cookieStore.getAll().map((c) => c.name)
+    );
+    const err = new Error("Unauthorized: Access token missing (strict mode)");
+    err.status = 401;
+    throw err;
+  }
+  if (typeof window === "undefined") {
+    try {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      let token = null;
+      try {
+        const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+        if (token) {
+          console.log("[token:auto] Found encrypted CRF cookie");
+        }
+        if (!token) {
+          token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+          if (token) {
+            console.log("[token:auto] Found encrypted access_token cookie");
+          }
+        }
+      } catch (e) {
+        console.error("[token:auto] Decryption error:", e);
+      }
+      if (!token) {
+        token = cookieStore.get("access_token")?.value || null;
+        if (token) {
+          console.log("[token:auto] Found plain access_token cookie");
+        }
+      }
+      if (token) return token;
+      console.warn(
+        "[token:auto] No token found. Available cookies:",
+        cookieStore.getAll().map((c) => c.name)
+      );
+    } catch (e) {
+      console.error("[token:auto] Error reading cookies:", e);
+    }
+  }
+  if (typeof window !== "undefined") {
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+      return null;
     };
+    const clientToken = getCookie("access_token");
+    if (clientToken) {
+      return clientToken;
+    }
+    throw new Error("No token available on client side");
+  }
+  throw new Error("No token available");
+}
+function getToken() {
+  return getTokenImpl();
+}
+var AUTH_MODE, USE_TOKEN_ROUTE;
+var init_token = __esm({
+  "src/token.ts"() {
+    "use strict";
+    AUTH_MODE = process.env.AUTH_MODE || "strict";
+    USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
+  }
+});
+
+// src/core/fetcher.ts
+var fetcher_exports = {};
+__export(fetcher_exports, {
+  ApiError: () => ApiError,
+  apiFetch: () => apiFetch,
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
+});
+function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()) {
+  if (obj == null || depth > 6) return null;
+  if (typeof obj === "string") {
+    const s = obj.trim();
+    if (s.startsWith("{") || s.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(s);
+        return findMessageInError(parsed, depth + 1, seen) || obj;
+      } catch {
+        return obj;
+      }
+    }
+    return obj;
+  }
+  if (typeof obj !== "object") return null;
+  if (seen.has(obj)) return null;
+  seen.add(obj);
+  if (typeof obj.message === "string" && obj.message) return obj.message;
+  if (typeof obj.code === "string" && obj.code) return obj.code;
+  if (typeof obj.error === "string" && obj.error) return obj.error;
+  const keysToCheck = [
+    "message",
+    "code",
+    "error",
+    "body",
+    "data",
+    "response",
+    "errors"
+  ];
+  for (const k of keysToCheck) {
+    if (k in obj) {
+      const v = obj[k];
+      const found = findMessageInError(v, depth + 1, seen);
+      if (found) return found;
+    }
+  }
+  for (const k of Object.keys(obj)) {
+    try {
+      const found = findMessageInError(obj[k], depth + 1, seen);
+      if (found) return found;
+    } catch {
+    }
+  }
+  return null;
+}
+async function apiFetch(url, options = {}) {
+  const { method = "GET", headers = {}, data, query, token } = options;
+  let endpoint = url;
+  if (query) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== void 0 && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+    const queryString = params.toString();
+    if (queryString) {
+      endpoint += `?${queryString}`;
+    }
+  }
+  const requestHeaders = { ...headers };
+  function getUserAgent() {
+    try {
+      const base = `nextjs-sdk-core`;
+      if (typeof process !== "undefined" && process?.version) {
+        return `${base} (node ${process.version})`;
+      }
+      return base;
+    } catch {
+      return "nextjs-sdk-core";
+    }
+  }
+  if (typeof window === "undefined") {
+    if (!requestHeaders["User-Agent"]) {
+      requestHeaders["User-Agent"] = getUserAgent();
+    }
+  }
+  if (token) {
+    requestHeaders["Authorization"] = `Bearer ${token}`;
+  }
+  if (data && !(data instanceof FormData)) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
+  let body;
+  if (data) {
+    body = data instanceof FormData ? data : JSON.stringify(data);
+  }
+  const response = await fetch(endpoint, {
+    method,
+    headers: requestHeaders,
+    body
+  });
+  if (!response.ok) {
+    try {
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
+        let errorData;
+        try {
+          errorData = JSON.parse(text2);
+        } catch {
+          errorData = text2;
+        }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
+      }
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
+    }
+  }
+  const contentType = response.headers.get("content-type");
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0" || !contentType && response.status === 200) {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(text);
+    return parsed;
+  } catch (err) {
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
+  }
+}
+async function getWithAuth(url, query, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "GET",
+    token,
+    query,
+    headers
+  });
+}
+async function getWithoutAuth(url, query, headers) {
+  return apiFetch(url, {
+    method: "GET",
+    query,
+    headers
+  });
+}
+async function postWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "POST",
+    token,
+    data,
+    headers
+  });
+}
+async function postWithoutAuth(url, data, headers = {}) {
+  const effectiveHeaders = {
+    "Content-Type": "application/json",
+    ...headers
+  };
+  if (typeof window === "undefined" && !effectiveHeaders["User-Agent"]) {
+    try {
+      const base = `nextjs-sdk-core`;
+      effectiveHeaders["User-Agent"] = typeof process !== "undefined" && process?.version ? `${base} (node ${process.version})` : base;
+    } catch {
+      effectiveHeaders["User-Agent"] = "nextjs-sdk-core";
+    }
+  }
+  const response = await fetch(url, {
+    method: "POST",
+    headers: effectiveHeaders,
+    body: data ? JSON.stringify(data) : void 0
+  });
+  if (!response.ok) {
+    try {
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
+        let errorData;
+        try {
+          errorData = JSON.parse(text2);
+        } catch {
+          errorData = text2;
+        }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
+      }
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
+    }
+  }
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0") {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
+  }
+}
+async function putWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "PUT",
+    token,
+    data,
+    headers
+  });
+}
+async function putWithoutAuth(url, data, headers) {
+  return apiFetch(url, {
+    method: "PUT",
+    data,
+    headers
+  });
+}
+async function deleteWithAuth(url, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "DELETE",
+    token,
+    headers
+  });
+}
+async function deleteWithoutAuth(url, headers) {
+  return apiFetch(url, {
+    method: "DELETE",
+    headers
+  });
+}
+async function patchWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "PATCH",
+    token,
+    data,
+    headers
+  });
+}
+async function patchWithoutAuth(url, data, headers) {
+  return apiFetch(url, {
+    method: "PATCH",
+    data,
+    headers
+  });
+}
+var ApiError;
+var init_fetcher = __esm({
+  "src/core/fetcher.ts"() {
+    "use strict";
+    init_token();
+    ApiError = class _ApiError extends Error {
+      constructor(status, body, message) {
+        super(message || `Request failed with status ${status}`);
+        this.status = status;
+        this.body = body;
+        Object.setPrototypeOf(this, _ApiError.prototype);
+      }
+    };
+  }
+});
+
+// src/core/index.ts
+var core_exports = {};
+__export(core_exports, {
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
+});
+var init_core = __esm({
+  "src/core/index.ts"() {
+    "use strict";
+    init_fetcher();
   }
 });
 
@@ -605,489 +1077,9 @@ var init_api = __esm({
   }
 });
 
-// src/token.ts
-var token_exports = {};
-__export(token_exports, {
-  default: () => getToken
-});
-async function getTokenImpl() {
-  if (AUTH_MODE === "strict" && typeof window === "undefined") {
-    const { cookies } = await import("next/headers");
-    const cookieStore = await cookies();
-    let token = null;
-    try {
-      const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
-    } catch {
-    }
-    if (!token) {
-      token = cookieStore.get("access_token")?.value || null;
-    }
-    if (token) return token;
-    const err = new Error("Unauthorized: Access token missing (strict mode)");
-    err.status = 401;
-    throw err;
-  }
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      let token = null;
-      try {
-        const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
-      } catch {
-      }
-      if (!token) {
-        token = cookieStore.get("access_token")?.value || null;
-      }
-      if (token) return token;
-    } catch {
-    }
-  }
-  if (USE_TOKEN_ROUTE && typeof window !== "undefined") {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || "http://localhost:3000";
-      const res = await fetch(`${baseUrl}/api/auth/token`, {
-        cache: "no-store"
-      });
-      if (res.ok) {
-        const data2 = await res.json();
-        if (data2.access_token) return data2.access_token;
-      }
-    } catch {
-    }
-  }
-  const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
-  const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-  const authConfig = getAuthConfig2();
-  let thirdPartyToken = void 0;
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      thirdPartyToken = cookieStore.get("tp_id")?.value;
-    } catch {
-    }
-  }
-  const requestBody = {
-    clientId: authConfig.clientId,
-    clientSecret: authConfig.clientSecret,
-    Language: authConfig.language ?? 0,
-    GMT: authConfig.gmt ?? 3,
-    IsFromNotification: false
-  };
-  if (thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = thirdPartyToken;
-  } else if (authConfig.thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = authConfig.thirdPartyToken;
-  }
-  const response = await fetch(Api2.signIn, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    ...AUTH_MODE === "auto" ? { next: { revalidate: 0 } } : {},
-    body: JSON.stringify({
-      ...requestBody,
-      ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}
-    })
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Authentication failed: ${response.status} ${response.statusText}`
-    );
-  }
-  const data = await response.json();
-  console.log("Fetched token from core:", data.access_token);
-  if (!data.access_token) {
-    throw new Error("Token missing in authentication response");
-  }
-  return data.access_token;
-}
-function getToken() {
-  return getTokenImpl();
-}
-var AUTH_MODE, USE_TOKEN_ROUTE;
-var init_token = __esm({
-  "src/token.ts"() {
-    "use strict";
-    AUTH_MODE = process.env.AUTH_MODE || "auto";
-    USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
-  }
-});
-
-// src/core/fetcher.ts
-var fetcher_exports = {};
-__export(fetcher_exports, {
-  ApiError: () => ApiError,
-  apiFetch: () => apiFetch,
-  deleteWithAuth: () => deleteWithAuth,
-  deleteWithoutAuth: () => deleteWithoutAuth,
-  getWithAuth: () => getWithAuth,
-  getWithoutAuth: () => getWithoutAuth,
-  patchWithAuth: () => patchWithAuth,
-  patchWithoutAuth: () => patchWithoutAuth,
-  postWithAuth: () => postWithAuth,
-  postWithoutAuth: () => postWithoutAuth,
-  putWithAuth: () => putWithAuth,
-  putWithoutAuth: () => putWithoutAuth
-});
-function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()) {
-  if (obj == null || depth > 6) return null;
-  if (typeof obj === "string") {
-    const s = obj.trim();
-    if (s.startsWith("{") || s.startsWith("[")) {
-      try {
-        const parsed = JSON.parse(s);
-        return findMessageInError(parsed, depth + 1, seen) || obj;
-      } catch {
-        return obj;
-      }
-    }
-    return obj;
-  }
-  if (typeof obj !== "object") return null;
-  if (seen.has(obj)) return null;
-  seen.add(obj);
-  if (typeof obj.message === "string" && obj.message) return obj.message;
-  if (typeof obj.code === "string" && obj.code) return obj.code;
-  if (typeof obj.error === "string" && obj.error) return obj.error;
-  const keysToCheck = [
-    "message",
-    "code",
-    "error",
-    "body",
-    "data",
-    "response",
-    "errors"
-  ];
-  for (const k of keysToCheck) {
-    if (k in obj) {
-      const v = obj[k];
-      const found = findMessageInError(v, depth + 1, seen);
-      if (found) return found;
-    }
-  }
-  for (const k of Object.keys(obj)) {
-    try {
-      const found = findMessageInError(obj[k], depth + 1, seen);
-      if (found) return found;
-    } catch {
-    }
-  }
-  return null;
-}
-async function apiFetch(url, options = {}) {
-  const { method = "GET", headers = {}, data, query, token } = options;
-  let endpoint = url;
-  if (query) {
-    const params = new URLSearchParams();
-    Object.entries(query).forEach(([key, value]) => {
-      if (value !== void 0 && value !== null) {
-        params.append(key, String(value));
-      }
-    });
-    const queryString = params.toString();
-    if (queryString) {
-      endpoint += `?${queryString}`;
-    }
-  }
-  const requestHeaders = { ...headers };
-  if (token) {
-    requestHeaders["Authorization"] = `Bearer ${token}`;
-  }
-  if (data && !(data instanceof FormData)) {
-    requestHeaders["Content-Type"] = "application/json";
-  }
-  let body;
-  if (data) {
-    body = data instanceof FormData ? data : JSON.stringify(data);
-  }
-  const response = await fetch(endpoint, {
-    method,
-    headers: requestHeaders,
-    body
-  });
-  if (!response.ok) {
-    try {
-      const text2 = await response.text();
-      if (text2 && text2.trim()) {
-        let errorData;
-        try {
-          errorData = JSON.parse(text2);
-        } catch {
-          errorData = text2;
-        }
-        if (typeof errorData === "string") {
-          const trimmed = errorData.trim();
-          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-            try {
-              errorData = JSON.parse(errorData);
-            } catch {
-            }
-          }
-        }
-        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
-        throw new ApiError(response.status, errorData, derivedMessage);
-      }
-      throw new ApiError(
-        response.status,
-        null,
-        `Request failed with status ${response.status} ${response.statusText}`
-      );
-    } catch (err) {
-      if (err instanceof ApiError) throw err;
-      throw new ApiError(
-        response.status,
-        null,
-        `Request failed with status ${response.status} ${response.statusText}`
-      );
-    }
-  }
-  const contentType = response.headers.get("content-type");
-  const contentLength = response.headers.get("content-length");
-  if (contentLength === "0" || !contentType && response.status === 200) {
-    return {};
-  }
-  const text = await response.text();
-  if (!text || text.trim() === "") {
-    return {};
-  }
-  try {
-    const parsed = JSON.parse(text);
-    return parsed;
-  } catch (err) {
-    throw new Error(
-      `Failed to parse response as JSON: ${text.substring(0, 100)}`
-    );
-  }
-}
-async function getWithAuth(url, query, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "GET",
-    token,
-    query,
-    headers
-  });
-}
-async function getWithoutAuth(url, query, headers) {
-  return apiFetch(url, {
-    method: "GET",
-    query,
-    headers
-  });
-}
-async function postWithAuth(url, data, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "POST",
-    token,
-    data,
-    headers
-  });
-}
-async function postWithoutAuth(url, data, headers = {}) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    },
-    body: data ? JSON.stringify(data) : void 0
-  });
-  if (!response.ok) {
-    try {
-      const text2 = await response.text();
-      if (text2 && text2.trim()) {
-        let errorData;
-        try {
-          errorData = JSON.parse(text2);
-        } catch {
-          errorData = text2;
-        }
-        if (typeof errorData === "string") {
-          const trimmed = errorData.trim();
-          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-            try {
-              errorData = JSON.parse(errorData);
-            } catch {
-            }
-          }
-        }
-        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
-        throw new ApiError(response.status, errorData, derivedMessage);
-      }
-      throw new ApiError(
-        response.status,
-        null,
-        `POST request failed: ${response.status} ${response.statusText}`
-      );
-    } catch (err) {
-      if (err instanceof ApiError) throw err;
-      throw new ApiError(
-        response.status,
-        null,
-        `POST request failed: ${response.status} ${response.statusText}`
-      );
-    }
-  }
-  const contentLength = response.headers.get("content-length");
-  if (contentLength === "0") {
-    return {};
-  }
-  const text = await response.text();
-  if (!text || text.trim() === "") {
-    return {};
-  }
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    throw new Error(
-      `Failed to parse response as JSON: ${text.substring(0, 100)}`
-    );
-  }
-}
-async function putWithAuth(url, data, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "PUT",
-    token,
-    data,
-    headers
-  });
-}
-async function putWithoutAuth(url, data, headers) {
-  return apiFetch(url, {
-    method: "PUT",
-    data,
-    headers
-  });
-}
-async function deleteWithAuth(url, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "DELETE",
-    token,
-    headers
-  });
-}
-async function deleteWithoutAuth(url, headers) {
-  return apiFetch(url, {
-    method: "DELETE",
-    headers
-  });
-}
-async function patchWithAuth(url, data, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "PATCH",
-    token,
-    data,
-    headers
-  });
-}
-async function patchWithoutAuth(url, data, headers) {
-  return apiFetch(url, {
-    method: "PATCH",
-    data,
-    headers
-  });
-}
-var ApiError;
-var init_fetcher = __esm({
-  "src/core/fetcher.ts"() {
-    "use strict";
-    init_token();
-    ApiError = class _ApiError extends Error {
-      constructor(status, body, message) {
-        super(message || `Request failed with status ${status}`);
-        this.status = status;
-        this.body = body;
-        Object.setPrototypeOf(this, _ApiError.prototype);
-      }
-    };
-  }
-});
-
-// src/core/index.ts
-var core_exports = {};
-__export(core_exports, {
-  deleteWithAuth: () => deleteWithAuth,
-  deleteWithoutAuth: () => deleteWithoutAuth,
-  getWithAuth: () => getWithAuth,
-  getWithoutAuth: () => getWithoutAuth,
-  patchWithAuth: () => patchWithAuth,
-  patchWithoutAuth: () => patchWithoutAuth,
-  postWithAuth: () => postWithAuth,
-  postWithoutAuth: () => postWithoutAuth,
-  putWithAuth: () => putWithAuth,
-  putWithoutAuth: () => putWithoutAuth
-});
-var init_core = __esm({
-  "src/core/index.ts"() {
-    "use strict";
-    init_fetcher();
-  }
-});
-
 // src/firebase/config.ts
-var config_exports2 = {};
-__export(config_exports2, {
+var config_exports = {};
+__export(config_exports, {
   getFirebaseApp: () => getFirebaseApp,
   getPrimaryApp: () => getPrimaryApp,
   getSecondaryApp: () => getSecondaryApp
@@ -1138,7 +1130,7 @@ async function getFirebaseApp() {
   return getPrimaryApp();
 }
 var primaryApp, secondaryApp;
-var init_config2 = __esm({
+var init_config = __esm({
   "src/firebase/config.ts"() {
     "use strict";
     primaryApp = null;
@@ -1166,8 +1158,10 @@ __export(index_exports, {
   SortType: () => SortType,
   apiFetch: () => apiFetch,
   decrypt: () => decrypt,
+  decryptSync: () => decryptSync,
   deleteCookie: () => deleteCookie,
   encrypt: () => encrypt,
+  encryptSync: () => encryptSync,
   getBrands: () => getBrands,
   getEncryptedCookie: () => getEncryptedCookie,
   getFirebaseApp: () => getFirebaseApp,
@@ -1187,8 +1181,7 @@ __export(index_exports, {
   setPlainCookie: () => setPlainCookie,
   signOutFirebase: () => signOutFirebase,
   startAuthStateSync: () => startAuthStateSync,
-  startPhoneSignIn: () => startPhoneSignIn,
-  validateEncryptionKey: () => validateEncryptionKey
+  startPhoneSignIn: () => startPhoneSignIn
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -1204,160 +1197,6 @@ async function getStoreInfo() {
     throw new Error(`Failed to fetch store info: ${response.statusText}`);
   }
   return response.json();
-}
-
-// src/inventory/items/getProducts.ts
-async function getProducts({
-  filterParams
-}) {
-  const params = filterParams.toURLSearchParams();
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(
-      `${Api2.getProducts}?${params.toString()}`
-    );
-  }
-  const response = await fetch(`/api/products?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch products: ${response.statusText}`);
-  }
-  return response.json();
-}
-
-// src/inventory/items/getProductInfo.ts
-async function getProductInfo(id) {
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(`${Api2.getProductInfo(id)}`);
-  }
-  const response = await fetch(`/api/products/${id}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch order full info: ${response.statusText}`);
-  }
-  return response.json();
-}
-
-// src/inventory/menus/getMenus.ts
-async function getMenus({
-  filterParams
-}) {
-  const params = filterParams.toURLSearchParams();
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(`${Api2.getMenus}?${params.toString()}`, {});
-  } else {
-    return fetch(`/api/menus?${params.toString()}`).then((res) => {
-      if (!res.ok) throw new Error("Failed to fetch from src products");
-      return res.json();
-    });
-  }
-}
-
-// src/inventory/orders/getOrders.ts
-async function getOrders({
-  filterParams
-}) {
-  const params = filterParams.toURLSearchParams();
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { default: getToken2 } = await Promise.resolve().then(() => (init_token(), token_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    const token = await getToken2();
-    return getWithAuth2(
-      `${Api2.getOrders}?${params.toString()}`
-    );
-  }
-  const response = await fetch(`/api/orders?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch orders: ${response.statusText}`);
-  }
-  return response.json();
-}
-
-// src/inventory/brands/getBrands.ts
-async function getBrands() {
-  if (typeof window === "undefined") {
-    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return getWithAuth2(Api2.getBrands);
-  } else {
-    const response = await fetch("/api/brands");
-    if (!response.ok) {
-      throw new Error("Failed to fetch brands");
-    }
-    return response.json();
-  }
-}
-
-// src/inventory/items/putItemCollection.ts
-async function putItemCollection(id, collectionId, data) {
-  if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return putWithAuth2(Api2.putItemCollection(id, collectionId), data);
-  }
-  const res = await fetch(`/api/items/${id}/collections/${collectionId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json-patch+json" },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) {
-    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
-    try {
-      const errorBody = await res.json();
-      errorMessage = errorBody.error || errorBody.message || errorMessage;
-    } catch (parseErr) {
-    }
-    throw new Error(errorMessage);
-  }
-  return res.json();
-}
-
-// src/inventory/items/putItemCollectionActivate.ts
-async function putItemCollectionActivate(id, collectionId) {
-  if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return putWithAuth2(Api2.putItemCollectionActivate(id, collectionId));
-  }
-  const res = await fetch(`/api/items/${id}/collections/${collectionId}/activate`, {
-    method: "PUT"
-  });
-  if (!res.ok) {
-    let err = `failed: ${res.status} ${res.statusText}`;
-    try {
-      const b = await res.json();
-      err = b.error || b.message || err;
-    } catch {
-    }
-    throw new Error(err);
-  }
-  return res.json();
-}
-
-// src/inventory/items/putItemCollectionDeactivate.ts
-async function putItemCollectionDeactivate(id, collectionId) {
-  if (typeof window === "undefined") {
-    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
-    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    return putWithAuth2(Api2.putItemCollectionDeactivate(id, collectionId));
-  }
-  const res = await fetch(`/api/items/${id}/collections/${collectionId}/deactivate`, {
-    method: "PUT"
-  });
-  if (!res.ok) {
-    let err = `failed: ${res.status} ${res.statusText}`;
-    try {
-      const b = await res.json();
-      err = b.error || b.message || err;
-    } catch {
-    }
-    throw new Error(err);
-  }
-  return res.json();
 }
 
 // src/inventory/items/filter-models.ts
@@ -2092,6 +1931,169 @@ var ItemsFilterParameters = class _ItemsFilterParameters {
   }
 };
 
+// src/inventory/items/getProducts.ts
+async function getProducts({
+  filterParams
+}) {
+  const validSortValues = Object.values(SortType);
+  if (!filterParams.sortType || !validSortValues.includes(filterParams.sortType)) {
+    filterParams = filterParams.copyWith({ sortType: "None" /* None */ });
+  }
+  const params = filterParams.toURLSearchParams();
+  console.log("Fetching products with params:", params.toString());
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    console.log(
+      "Server-side fetching products with params:",
+      `${Api2.getProducts}?${params.toString()}`
+    );
+    return getWithAuth2(
+      `${Api2.getProducts}?${params.toString()}`
+    );
+  }
+  const response = await fetch(`/api/products?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch products: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/items/getProductInfo.ts
+async function getProductInfo(id) {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(`${Api2.getProductInfo(id)}`);
+  }
+  const response = await fetch(`/api/products/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch order full info: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/menus/getMenus.ts
+async function getMenus({
+  filterParams
+}) {
+  const params = filterParams.toURLSearchParams();
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(`${Api2.getMenus}?${params.toString()}`, {});
+  } else {
+    return fetch(`/api/menus?${params.toString()}`).then((res) => {
+      if (!res.ok) throw new Error("Failed to fetch from src products");
+      return res.json();
+    });
+  }
+}
+
+// src/inventory/orders/getOrders.ts
+async function getOrders({
+  filterParams
+}) {
+  const params = filterParams.toURLSearchParams();
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { default: getToken2 } = await Promise.resolve().then(() => (init_token(), token_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    const token = await getToken2();
+    return getWithAuth2(
+      `${Api2.getOrders}?${params.toString()}`
+    );
+  }
+  const response = await fetch(`/api/orders?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// src/inventory/brands/getBrands.ts
+async function getBrands() {
+  if (typeof window === "undefined") {
+    const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_core(), core_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return getWithAuth2(Api2.getBrands);
+  } else {
+    const response = await fetch("/api/brands");
+    if (!response.ok) {
+      throw new Error("Failed to fetch brands");
+    }
+    return response.json();
+  }
+}
+
+// src/inventory/items/putItemCollection.ts
+async function putItemCollection(id, collectionId, data) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollection(id, collectionId), data);
+  }
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json-patch+json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    let errorMessage = ` failed: ${res.status} ${res.statusText}`;
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody.error || errorBody.message || errorMessage;
+    } catch (parseErr) {
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
+// src/inventory/items/putItemCollectionActivate.ts
+async function putItemCollectionActivate(id, collectionId) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollectionActivate(id, collectionId));
+  }
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}/activate`, {
+    method: "PUT"
+  });
+  if (!res.ok) {
+    let err = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const b = await res.json();
+      err = b.error || b.message || err;
+    } catch {
+    }
+    throw new Error(err);
+  }
+  return res.json();
+}
+
+// src/inventory/items/putItemCollectionDeactivate.ts
+async function putItemCollectionDeactivate(id, collectionId) {
+  if (typeof window === "undefined") {
+    const { putWithAuth: putWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
+    const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
+    return putWithAuth2(Api2.putItemCollectionDeactivate(id, collectionId));
+  }
+  const res = await fetch(`/api/items/${id}/collections/${collectionId}/deactivate`, {
+    method: "PUT"
+  });
+  if (!res.ok) {
+    let err = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const b = await res.json();
+      err = b.error || b.message || err;
+    } catch {
+    }
+    throw new Error(err);
+  }
+  return res.json();
+}
+
 // src/index.ts
 init_api();
 
@@ -2449,7 +2451,7 @@ async function startPhoneSignIn(phoneNumber, options) {
     throw new Error("startPhoneSignIn must be called in the browser");
   }
   console.log("[firebase:startPhoneSignIn]", { phoneNumber });
-  const { getSecondaryApp: getSecondaryApp2 } = await Promise.resolve().then(() => (init_config2(), config_exports2));
+  const { getSecondaryApp: getSecondaryApp2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const { getFunctions, httpsCallable } = await import("firebase/functions");
   const secondaryApp2 = await getSecondaryApp2();
   const functions = getFunctions(secondaryApp2);
@@ -2479,7 +2481,7 @@ async function startPhoneSignIn(phoneNumber, options) {
         });
         const customToken = response.data.token;
         console.log("[firebase:confirmPhoneCode] custom token received");
-        const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config2(), config_exports2));
+        const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config(), config_exports));
         const {
           getAuth,
           signInWithCustomToken,
@@ -2555,7 +2557,7 @@ async function getFirebaseIdToken(forceRefresh = false) {
   const [{ getAuth }, { getIdToken }, { getPrimaryApp: getPrimaryApp2 }] = await Promise.all([
     import("firebase/auth"),
     import("firebase/auth"),
-    Promise.resolve().then(() => (init_config2(), config_exports2))
+    Promise.resolve().then(() => (init_config(), config_exports))
   ]);
   const app = await getPrimaryApp2();
   const auth = getAuth(app);
@@ -2575,7 +2577,7 @@ async function signOutFirebase() {
   if (typeof window === "undefined") return;
   const [{ getAuth, signOut }, { getPrimaryApp: getPrimaryApp2 }] = await Promise.all([
     import("firebase/auth"),
-    Promise.resolve().then(() => (init_config2(), config_exports2))
+    Promise.resolve().then(() => (init_config(), config_exports))
   ]);
   const app = await getPrimaryApp2();
   const auth = getAuth(app);
@@ -2599,7 +2601,7 @@ async function startAuthStateSync(options) {
       setPersistence,
       browserLocalPersistence
     } = await import("firebase/auth");
-    const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config2(), config_exports2));
+    const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config(), config_exports));
     const app = await getPrimaryApp2();
     const auth = getAuth(app);
     const endpoint = options?.loginEndpoint || "/api/auth/login";
@@ -2612,7 +2614,25 @@ async function startAuthStateSync(options) {
         e
       );
     }
-    const STORAGE_KEY = "erp_core_last_tp_id";
+    const STORAGE_KEY = "erp_core_last_sync_hash";
+    const hashToken = async (token) => {
+      try {
+        if (typeof crypto !== "undefined" && crypto.subtle) {
+          const encoder2 = new TextEncoder();
+          const data = encoder2.encode(token);
+          const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        }
+      } catch {
+      }
+      let hash = 2166136261;
+      for (let i = 0; i < token.length; i++) {
+        hash ^= token.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(36);
+    };
     const pushTokenToServer = async (forceRefresh = false) => {
       if (__isSigningIn) {
         console.log(
@@ -2627,9 +2647,11 @@ async function startAuthStateSync(options) {
         if (!token) return;
         const now = Date.now();
         if (token === __lastSyncedToken && now - __lastSyncTime < 3e3) return;
+        const tokenHash = await hashToken(token);
         try {
-          const lastPersisted = localStorage.getItem(STORAGE_KEY);
-          if (lastPersisted && lastPersisted === token) {
+          const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
+          if (lastPersistedHash && lastPersistedHash === tokenHash) {
+            console.log("[firebase:startAuthStateSync] token already synced (session cache hit)");
             return;
           }
         } catch {
@@ -2642,7 +2664,7 @@ async function startAuthStateSync(options) {
         __lastSyncedToken = token;
         __lastSyncTime = now;
         try {
-          localStorage.setItem(STORAGE_KEY, token);
+          sessionStorage.setItem(STORAGE_KEY, tokenHash);
         } catch {
         }
         console.log("[firebase:startAuthStateSync] token synced \u2192 server");
@@ -2669,7 +2691,7 @@ async function startAuthStateSync(options) {
 }
 
 // src/index.ts
-init_config2();
+init_config();
 init_cookie();
 init_crypto();
 // Annotate the CommonJS export names for ESM import in node:
@@ -2691,8 +2713,10 @@ init_crypto();
   SortType,
   apiFetch,
   decrypt,
+  decryptSync,
   deleteCookie,
   encrypt,
+  encryptSync,
   getBrands,
   getEncryptedCookie,
   getFirebaseApp,
@@ -2712,6 +2736,5 @@ init_crypto();
   setPlainCookie,
   signOutFirebase,
   startAuthStateSync,
-  startPhoneSignIn,
-  validateEncryptionKey
+  startPhoneSignIn
 });

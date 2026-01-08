@@ -3,7 +3,7 @@
  * Server-side only - works with Next.js cookies API.
  */
 
-import { encrypt, decrypt, tryDecryptTolerant } from './crypto';
+import { encryptSync, decryptSync } from './crypto';
 import type { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 
 /**
@@ -45,7 +45,7 @@ export function setEncryptedCookie(
     throw new Error('setEncryptedCookie must only be called server-side');
   }
 
-  const encrypted = encrypt(value);
+  const encrypted = encryptSync(value);
   cookieStore.set(name, encrypted, {
     ...SECURE_COOKIE_OPTIONS,
     ...options,
@@ -70,13 +70,10 @@ export function getEncryptedCookie(
     if (!cookie?.value) return null;
     // Try strict decrypt first; fall back to tolerant decrypt for older cookies
     try {
-      return decrypt(cookie.value);
+      const decrypted = decryptSync(cookie.value);
+      return decrypted ?? null;
     } catch (e) {
-      try {
-        return tryDecryptTolerant(cookie.value);
-      } catch (e2) {
-        throw e; // let outer catch log original error
-      }
+      throw e; // let outer catch log original error
     }
   } catch (e) {
     console.error(`[cookie] Failed to decrypt ${name}:`, e);

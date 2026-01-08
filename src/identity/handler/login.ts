@@ -41,14 +41,14 @@ export async function POST(request: NextRequest) {
       try {
         const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
         const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-        const existingTpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
+        const existingTpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
         
         if (existingToken && existingTpId === body.thirdPartyToken) {
           hasValidToken = true;
         }
       } catch {}
       
-      // Fallback to legacy cookies
+      // Fallback to legacy plain cookies
       if (!hasValidToken) {
         const existingToken = cookieStore.get("access_token")?.value;
         const existingTpId = cookieStore.get("tp_id")?.value;
@@ -73,22 +73,42 @@ export async function POST(request: NextRequest) {
     }
 
     // Perform login (this automatically saves token, roles, and storeId to cookies)
-    const response = await loginUser(credentials);
+    // Prefer incoming request's user-agent when available
+    let userAgent: string | undefined;
+    try {
+      userAgent = (request as any)?.headersList?.get?.("user-agent") || undefined;
+    } catch {}
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") || undefined;
+      } catch {}
+    }
+
+    const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
 
-    // If login provided a thirdPartyToken, persist it for AUTO mode re-auth
-    // Set it in the cookies store directly (loginUser already sets it, but we ensure it's set here too)
+    // If login provided a thirdPartyToken, persist it encrypted for AUTO mode re-auth
     if (body.thirdPartyToken) {
-      console.log("[identity:handler:login] setting tp_id cookie in store");
+      console.log("[identity:handler:login] setting encrypted tp_id cookie");
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      cookieStore.set("tp_id", body.thirdPartyToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600,
-      });
+      const { setEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
+      
+      try {
+        setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, {
+          maxAge: 3600,
+        });
+      } catch (e) {
+        // Fallback to plain cookie if encryption fails
+        console.warn("[identity:handler:login] encryption failed for tp_id, using plain", e);
+        cookieStore.set("tp_id", body.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600,
+        });
+      }
     }
 
     // Respond with success and relevant data
@@ -103,15 +123,32 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    // Also set in response for client
+    // Also set encrypted tp_id in response cookie for client
     if (body.thirdPartyToken) {
-      res.cookies.set("tp_id", body.thirdPartyToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600,
-      });
+      try {
+        const { encryptSync } = await import("../../utils/crypto");
+        const encrypted = encryptSync(body.thirdPartyToken);
+        
+        if (encrypted) {
+          res.cookies.set("tp_id", encrypted, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600,
+          });
+        }
+      } catch (e) {
+        // Fallback to plain if encryption fails
+        console.warn("[identity:handler:login] encryption failed for response tp_id", e);
+        res.cookies.set("tp_id", body.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600,
+        });
+      }
     }
     return res;
   } catch (error: any) {

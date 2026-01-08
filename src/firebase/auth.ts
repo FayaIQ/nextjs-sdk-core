@@ -309,7 +309,30 @@ export async function startAuthStateSync(options?: {
       );
     }
 
-    const STORAGE_KEY = "erp_core_last_tp_id";
+    // Use sessionStorage (cleared on tab close) with a hash instead of the raw token
+    const STORAGE_KEY = "erp_core_last_sync_hash";
+    
+    // Simple hash function for deduplication (not for security)
+    const hashToken = async (token: string): Promise<string> => {
+      try {
+        // Use SubtleCrypto if available for a quick hash
+        if (typeof crypto !== "undefined" && crypto.subtle) {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(token);
+          const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+      } catch {}
+      // Fallback: simple string hash (FNV-1a variant)
+      let hash = 2166136261;
+      for (let i = 0; i < token.length; i++) {
+        hash ^= token.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(36);
+    };
+
     const pushTokenToServer = async (forceRefresh = false) => {
       // Skip if currently signing in to prevent duplicate token syncs
       if (__isSigningIn) {
@@ -329,10 +352,13 @@ export async function startAuthStateSync(options?: {
         const now = Date.now();
         // In-memory debounce
         if (token === __lastSyncedToken && now - __lastSyncTime < 3000) return;
-        // Persistent guard: if token equals the one we already synced on last session reload, skip
+        
+        // Persistent guard using hash: check sessionStorage (safer than localStorage)
+        const tokenHash = await hashToken(token);
         try {
-          const lastPersisted = localStorage.getItem(STORAGE_KEY);
-          if (lastPersisted && lastPersisted === token) {
+          const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
+          if (lastPersistedHash && lastPersistedHash === tokenHash) {
+            console.log("[firebase:startAuthStateSync] token already synced (session cache hit)");
             return;
           }
         } catch {}
@@ -345,8 +371,10 @@ export async function startAuthStateSync(options?: {
 
         __lastSyncedToken = token;
         __lastSyncTime = now;
+        
+        // Store only the hash in sessionStorage (cleared when tab closes)
         try {
-          localStorage.setItem(STORAGE_KEY, token);
+          sessionStorage.setItem(STORAGE_KEY, tokenHash);
         } catch {}
         console.log("[firebase:startAuthStateSync] token synced → server");
       } catch (e) {

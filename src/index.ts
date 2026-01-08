@@ -10,7 +10,7 @@ export { putItemCollectionActivate } from "./inventory/items/putItemCollectionAc
 export { putItemCollectionDeactivate } from "./inventory/items/putItemCollectionDeactivate";
 
 // Type exports
-export * from "./types";
+export type * from "./types";
 export * from "./inventory/items/filter-models";
 export * from "./api/api";
 export * from "./inventory/orders/order-models";
@@ -32,6 +32,7 @@ export {
   startAuthStateSync,
 } from "./firebase/auth";
 export type { StartPhoneSignInResult, WhatsAppOTPOptions } from "./firebase/auth";
+export { ItemsFilterParameters } from "./inventory/items/filter-models";
 
 // Firebase config
 export { getPrimaryApp, getSecondaryApp, getFirebaseApp } from "./firebase/config";
@@ -46,6 +47,6 @@ export {
   SECURE_COOKIE_OPTIONS,
 } from "./utils/cookie";
 
-// Crypto utilities (server-side only)
-export { encrypt, decrypt, validateEncryptionKey } from "./utils/crypto";
+// Crypto utilities (server-side encryption/decryption)
+export { encrypt, decrypt, encryptSync, decryptSync } from "./utils/crypto";
 

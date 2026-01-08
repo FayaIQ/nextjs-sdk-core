@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
     // Import cookie utilities
     const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
     
-    console.log("[identity:handler:token] GET checking existing token");
     
     // Check encrypted crf cookie first
     let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
@@ -33,20 +32,22 @@ export async function GET(request: NextRequest) {
     }
     
     if (existingToken) {
-      console.log("[identity:handler:token] returning existing token from cookie");
       // Return with cache headers to prevent repeated calls
       return NextResponse.json(
         { access_token: existingToken },
-        {
-          headers: {
-            'Cache-Control': 'private, max-age=3600', // Cache for 1 hour
-          },
-        }
       );
     }
 
-    // Try to use tp_id for re-auth
-    const tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value;
+    // Try to use encrypted tp_id for re-auth (with fallback to plain)
+    let tpId: string | null = null;
+    try {
+      tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
+    } catch {}
+    
+    // Fallback to plain tp_id cookie
+    if (!tpId) {
+      tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
+    }
     
     const authConfig = getAuthConfig();
     const requestBody: Record<string, any> = {
@@ -58,23 +59,37 @@ export async function GET(request: NextRequest) {
     };
 
     if (tpId) {
-      console.log("[identity:handler:token] using tp_id for sign-in");
       requestBody["ThirdPartyToken"] = tpId;
     } else if ((authConfig as any).thirdPartyToken) {
-      console.log("[identity:handler:token] using config thirdPartyToken");
       requestBody["ThirdPartyToken"] = (authConfig as any).thirdPartyToken;
     } else {
       console.log("[identity:handler:token] signing in with clientId/clientSecret");
     }
 
+    // Include a User-Agent header for downstream telemetry.
+    // Prefer the incoming request's User-Agent when available.
+    let userAgent: string | null = null;
+
+    // standard NextRequest headers API
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") + " nextjs-sdk-core  handler api/auth/token" || null;
+      } catch {}
+    }
+
+    // Final fallback to node runtime identifier
+    if (!userAgent) {
+      userAgent = "nextjs-sdk-core  handler api/auth/token";
+    }
     const response = await fetch(Api.signIn, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": userAgent,
+      },
       body: JSON.stringify({
         ...requestBody,
-        ...(requestBody["ThirdPartyToken"]
-          ? { ThirdPartyAuthType: 100 }
-          : {}),
+        ...(requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}),
       }),
     });
 
@@ -95,36 +110,53 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log("[identity:handler:token] new token obtained, setting encrypted cookie");
 
     // Return response with encrypted cookie
     const res = NextResponse.json({ access_token: data.access_token });
     
-    // Set encrypted crf cookie
+    // Set encrypted crf cookie using sync encryption
     try {
-      const { setEncryptedCookie: setEncCookie, COOKIE_NAMES: CN } = await import("../../utils/cookie");
-      const { encrypt } = await import("../../utils/crypto");
-      const encrypted = encrypt(data.access_token);
+      const { encryptSync } = await import("../../utils/crypto");
+      const { COOKIE_NAMES: CN } = await import("../../utils/cookie");
+      const encrypted = encryptSync(data.access_token);
       
-      res.cookies.set(CN.CRF, encrypted, {
+      if (encrypted) {
+        res.cookies.set(CN.CRF, encrypted, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600, // 1 hour
+        });
+      }
+    } catch (e) {
+      console.warn("[identity:handler:token] encryption failed for crf, using plain cookie", e);
+    }
+    
+    // LEGACY: Keep encrypted access_token for backward compatibility
+    try {
+      const { encryptSync } = await import("../../utils/crypto");
+      const encrypted = encryptSync(data.access_token);
+      
+      if (encrypted) {
+        res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, encrypted, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600, // 1 hour
+        });
+      }
+    } catch (e) {
+      console.warn("[identity:handler:token] encryption failed for access_token, using plain cookie", e);
+      res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
         maxAge: 3600, // 1 hour
       });
-    } catch (e) {
-      console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
     }
-    
-    // LEGACY: Keep access_token for backward compatibility
-    res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
-      httpOnly:false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 3600, // 1 hour
-    });
 
     return res;
   } catch (error) {

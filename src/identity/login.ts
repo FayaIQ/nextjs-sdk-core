@@ -65,7 +65,10 @@ export interface LoginResponse {
  * STRICT mode: username and password are required in credentials
  * AUTO mode: username and password are optional - falls back to env config
  */
-export async function loginUser(credentials: LoginRequest): Promise<LoginResponse> {
+export async function loginUser(
+  credentials: LoginRequest,
+  userAgent?: string
+): Promise<LoginResponse> {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
 
@@ -129,12 +132,17 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
       }
     }
     
-    // Add playerId if provided
     if (credentials.playerId) {
       requestBody.playerId = credentials.playerId;
     }
     
-    const response = await postWithoutAuth<LoginResponse>(Api.signIn, requestBody);
+    const headers = userAgent ? { "User-Agent": userAgent + "login in user server side in nextjs-sdk-core " } : "login in user server side in nextjs-sdk-core ";
+
+    const response = await postWithoutAuth<LoginResponse>(
+      Api.signIn,
+      requestBody,
+      (headers as Record<string, string>) || {}
+    );
 
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
@@ -152,9 +160,10 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
         maxAge: expiresIn,
       });
     } catch (e) {
-      // Fallback to plain cookie if encryption fails (missing COOKIE_CRYPTO_KEY)
+      // Fallback to plain cookie if encryption fails (missing ENCRYPTION_KEY_BASE64)
+      console.warn("[login] encryption failed for crf, using plain", e);
       cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
-        httpOnly: false,
+        httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
@@ -162,24 +171,40 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
       });
     }
     
-    // LEGACY: Keep access_token for backward compatibility during migration
-    cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: expiresIn,
-    });
-
-    // If request included Firebase ID token, cache it for re-login in AUTO mode
-    if (credentials.thirdPartyToken) {
-      cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
-        httpOnly: false,
+    // LEGACY: Keep encrypted access_token for backward compatibility during migration
+    try {
+      setEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
+        maxAge: expiresIn,
+      });
+    } catch (e) {
+      // Fallback to plain cookie if encryption fails
+      console.warn("[login] encryption failed for access_token, using plain", e);
+      cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
+        httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: 3600, // 1 hour typical Firebase token lifetime
+        maxAge: expiresIn,
       });
+    }
+
+    // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
+    if (credentials.thirdPartyToken) {
+      try {
+        setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
+          maxAge: 3600, // 1 hour typical Firebase token lifetime
+        });
+      } catch (e) {
+        // Fallback to plain cookie if encryption fails
+        console.warn("[login] encryption failed for tp_id, using plain", e);
+        cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600,
+        });
+      }
     }
 
     // AUTO mode: only save isUser flag based on roles
@@ -194,7 +219,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
     if (authMode === "strict") {
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -204,7 +229,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
 
       if (response.roles?.length) {
         cookieStore.set("roles", response.roles.join(","), {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -214,7 +239,7 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
 
       if (response.user?.username) {
         cookieStore.set("username", response.user.username, {
-          httpOnly: false,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
@@ -229,7 +254,11 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
   // ✅ CLIENT SIDE
   const res = await fetch(`/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // Browsers disallow setting User-Agent; keep a sentinel for other clients
+      "User-Agent": (typeof navigator !== "undefined" && navigator.userAgent) || "login user",
+    },
     body: JSON.stringify(credentials),
   });
 

@@ -6,13 +6,22 @@ export type TokenResponse = {
 };
 
 // ENV
-const AUTH_MODE = process.env.AUTH_MODE || "auto"; // auto | strict
+const AUTH_MODE = process.env.AUTH_MODE || "strict"; // auto | strict
 const USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
 
 // ------------------------------------------------
 // SINGLE SOURCE OF TRUTH — NO CACHING
 // ------------------------------------------------
 async function getTokenImpl(): Promise<string> {
+  // 🟢 0. SERVER-SIDE: Check for x-access-token header first
+  if (typeof window === "undefined") {
+    const { headers } = await import("next/headers");
+    const headerToken = (await headers()).get("x-access-token");
+    if (headerToken) {
+      return headerToken;
+    }
+  }
+
   // 🟢 1. STRICT MODE → token must exist in cookie (SSR)
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");
@@ -25,15 +34,32 @@ async function getTokenImpl(): Promise<string> {
         "./utils/cookie"
       );
       token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-    } catch {}
+      if (token) {
+        console.log('[token] Found encrypted CRF cookie');
+      }
+      // Also try encrypted access_token (migration/fallback)
+      if (!token) {
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
+        if (token) {
+          console.log('[token] Found encrypted access_token cookie');
+        }
+      }
+    } catch (e) {
+      console.error('[token] Decryption error:', e);
+    }
 
-    // Fallback to legacy access_token
+    // Fallback to legacy plain access_token
     if (!token) {
       token = cookieStore.get("access_token")?.value || null;
+      if (token) {
+        console.log('[token] Found plain access_token cookie');
+      }
     }
 
     if (token) return token;
 
+    console.error('[token] No token found in strict mode. Available cookies:', 
+      cookieStore.getAll().map((c: any) => c.name));
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     (err as any).status = 401;
     throw err;
@@ -52,89 +78,57 @@ async function getTokenImpl(): Promise<string> {
           "./utils/cookie"
         );
         token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-      } catch {}
+        if (token) {
+          console.log('[token:auto] Found encrypted CRF cookie');
+        }
+        // Also try encrypted access_token (migration/fallback)
+        if (!token) {
+          token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
+          if (token) {
+            console.log('[token:auto] Found encrypted access_token cookie');
+          }
+        }
+      } catch (e) {
+        console.error('[token:auto] Decryption error:', e);
+      }
 
-      // Fallback to legacy access_token
+      // Fallback to legacy plain access_token
       if (!token) {
         token = cookieStore.get("access_token")?.value || null;
+        if (token) {
+          console.log('[token:auto] Found plain access_token cookie');
+        }
       }
 
       if (token) return token;
-    } catch {}
+      
+      console.warn('[token:auto] No token found. Available cookies:', 
+        cookieStore.getAll().map((c: any) => c.name));
+    } catch (e) {
+      console.error('[token:auto] Error reading cookies:', e);
+    }
   }
 
-  // 🟢 3. CLIENT → use /api/auth/token if enabled
-  if (USE_TOKEN_ROUTE && typeof window !== "undefined") {
-    try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL ||
-        (process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`) ||
-        "http://localhost:3000";
+  // 🟢 3. CLIENT → check for token in cookie (no auto login)
+  if (typeof window !== "undefined") {
 
-      const res = await fetch(`${baseUrl}/api/auth/token`, {
-        cache: "no-store",
-      } as any);
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.access_token) return data.access_token;
-      }
-    } catch {}
+    // On client side, check for token in cookie
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+      return null;
+    };
+    const clientToken = getCookie("access_token");
+    if (clientToken) {
+      return clientToken;
+    }
+    // No auto login, throw error
+    throw new Error("No token available on client side");
   }
 
-  // 🟢 4. FULL LOGIN (NO CACHE)
-  const { getAuthConfig } = await import("./core/config");
-  const { Api } = await import("./api/api");
-
-  const authConfig = getAuthConfig();
-
-  let thirdPartyToken: string | undefined = undefined;
-
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      thirdPartyToken = cookieStore.get("tp_id")?.value;
-    } catch {}
-  }
-
-  const requestBody: Record<string, any> = {
-    clientId: authConfig.clientId,
-    clientSecret: authConfig.clientSecret,
-    Language: authConfig.language ?? 0,
-    GMT: authConfig.gmt ?? 3,
-    IsFromNotification: false,
-  };
-
-  if (thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = thirdPartyToken;
-  } else if ((authConfig as any).thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = (authConfig as any).thirdPartyToken;
-  }
-
-  const response = await fetch(Api.signIn, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    ...(AUTH_MODE === "auto" ? { next: { revalidate: 0 } } : {}),
-    body: JSON.stringify({
-      ...requestBody,
-      ...(requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}),
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Authentication failed: ${response.status} ${response.statusText}`
-    );
-  }
-
-  const data = (await response.json()) as TokenResponse;
-  console.log("Fetched token from core:", data.access_token);
-  if (!data.access_token) {
-    throw new Error("Token missing in authentication response");
-  }
-
-  return data.access_token;
+  // If we reach here on server without token, throw error (no auto login)
+  throw new Error("No token available");
 }
 
 // -------------------------------
