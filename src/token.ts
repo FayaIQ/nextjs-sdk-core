@@ -33,12 +33,19 @@ async function getTokenImpl(): Promise<string> {
       const { getEncryptedCookie, COOKIE_NAMES } = await import(
         "./utils/cookie"
       );
-      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
+      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
       if (token) {
         console.log('[token] Found encrypted CRF cookie');
       }
+      // Also try encrypted access_token (migration/fallback)
+      if (!token) {
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
+        if (token) {
+          console.log('[token] Found encrypted access_token cookie');
+        }
+      }
     } catch (e) {
-      console.error('[token] Decryption error for CRF:', e);
+      console.error('[token] Decryption error:', e);
     }
 
     // Fallback to legacy plain access_token
@@ -74,8 +81,15 @@ async function getTokenImpl(): Promise<string> {
         if (token) {
           console.log('[token:auto] Found encrypted CRF cookie');
         }
+        // Also try encrypted access_token (migration/fallback)
+        if (!token) {
+          token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
+          if (token) {
+            console.log('[token:auto] Found encrypted access_token cookie');
+          }
+        }
       } catch (e) {
-        console.error('[token:auto] Decryption error for CRF:', e);
+        console.error('[token:auto] Decryption error:', e);
       }
 
       // Fallback to legacy plain access_token

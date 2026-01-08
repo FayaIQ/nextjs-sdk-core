@@ -588,8 +588,14 @@ async function getTokenImpl() {
       if (token) {
         console.log("[token] Found encrypted CRF cookie");
       }
+      if (!token) {
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+        if (token) {
+          console.log("[token] Found encrypted access_token cookie");
+        }
+      }
     } catch (e) {
-      console.error("[token] Decryption error for CRF:", e);
+      console.error("[token] Decryption error:", e);
     }
     if (!token) {
       token = cookieStore.get("access_token")?.value || null;
@@ -617,8 +623,14 @@ async function getTokenImpl() {
         if (token) {
           console.log("[token:auto] Found encrypted CRF cookie");
         }
+        if (!token) {
+          token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+          if (token) {
+            console.log("[token:auto] Found encrypted access_token cookie");
+          }
+        }
       } catch (e) {
-        console.error("[token:auto] Decryption error for CRF:", e);
+        console.error("[token:auto] Decryption error:", e);
       }
       if (!token) {
         token = cookieStore.get("access_token")?.value || null;
@@ -1179,6 +1191,7 @@ async function loginUser(credentials, userAgent) {
         maxAge: expiresIn
       });
     } catch (e) {
+      console.warn("[login] encryption failed for crf, using plain", e);
       cookieStore.set(COOKIE_NAMES2.CRF, response.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -1187,13 +1200,20 @@ async function loginUser(credentials, userAgent) {
         maxAge: expiresIn
       });
     }
-    cookieStore.set(COOKIE_NAMES2.ACCESS_TOKEN, response.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: expiresIn
-    });
+    try {
+      setEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN, response.access_token, {
+        maxAge: expiresIn
+      });
+    } catch (e) {
+      console.warn("[login] encryption failed for access_token, using plain", e);
+      cookieStore.set(COOKIE_NAMES2.ACCESS_TOKEN, response.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: expiresIn
+      });
+    }
     if (credentials.thirdPartyToken) {
       try {
         setEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID, credentials.thirdPartyToken, {
@@ -1636,16 +1656,32 @@ async function GET2(request) {
         });
       }
     } catch (e) {
-      console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
+      console.warn("[identity:handler:token] encryption failed for crf, using plain cookie", e);
     }
-    res.cookies.set(COOKIE_NAMES2.ACCESS_TOKEN, data.access_token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 3600
-      // 1 hour
-    });
+    try {
+      const { encryptSync: encryptSync2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
+      const encrypted = encryptSync2(data.access_token);
+      if (encrypted) {
+        res.cookies.set(COOKIE_NAMES2.ACCESS_TOKEN, encrypted, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600
+          // 1 hour
+        });
+      }
+    } catch (e) {
+      console.warn("[identity:handler:token] encryption failed for access_token, using plain cookie", e);
+      res.cookies.set(COOKIE_NAMES2.ACCESS_TOKEN, data.access_token, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 3600
+        // 1 hour
+      });
+    }
     return res;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Token fetch failed";

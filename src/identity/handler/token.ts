@@ -130,17 +130,33 @@ export async function GET(request: NextRequest) {
         });
       }
     } catch (e) {
-      console.warn("[identity:handler:token] encryption failed, using plain cookie", e);
+      console.warn("[identity:handler:token] encryption failed for crf, using plain cookie", e);
     }
     
-    // LEGACY: Keep access_token for backward compatibility
-    res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
-      httpOnly:false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 3600, // 1 hour
-    });
+    // LEGACY: Keep encrypted access_token for backward compatibility
+    try {
+      const { encryptSync } = await import("../../utils/crypto");
+      const encrypted = encryptSync(data.access_token);
+      
+      if (encrypted) {
+        res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, encrypted, {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600, // 1 hour
+        });
+      }
+    } catch (e) {
+      console.warn("[identity:handler:token] encryption failed for access_token, using plain cookie", e);
+      res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 3600, // 1 hour
+      });
+    }
 
     return res;
   } catch (error) {

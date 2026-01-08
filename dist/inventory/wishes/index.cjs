@@ -239,8 +239,14 @@ async function getTokenImpl() {
       if (token) {
         console.log("[token] Found encrypted CRF cookie");
       }
+      if (!token) {
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+        if (token) {
+          console.log("[token] Found encrypted access_token cookie");
+        }
+      }
     } catch (e) {
-      console.error("[token] Decryption error for CRF:", e);
+      console.error("[token] Decryption error:", e);
     }
     if (!token) {
       token = cookieStore.get("access_token")?.value || null;
@@ -268,8 +274,14 @@ async function getTokenImpl() {
         if (token) {
           console.log("[token:auto] Found encrypted CRF cookie");
         }
+        if (!token) {
+          token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+          if (token) {
+            console.log("[token:auto] Found encrypted access_token cookie");
+          }
+        }
       } catch (e) {
-        console.error("[token:auto] Decryption error for CRF:", e);
+        console.error("[token:auto] Decryption error:", e);
       }
       if (!token) {
         token = cookieStore.get("access_token")?.value || null;

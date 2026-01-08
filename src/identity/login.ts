@@ -160,7 +160,8 @@ export async function loginUser(
         maxAge: expiresIn,
       });
     } catch (e) {
-      // Fallback to plain cookie if encryption fails (missing COOKIE_CRYPTO_KEY)
+      // Fallback to plain cookie if encryption fails (missing ENCRYPTION_KEY_BASE64)
+      console.warn("[login] encryption failed for crf, using plain", e);
       cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -170,14 +171,22 @@ export async function loginUser(
       });
     }
     
-    // LEGACY: Keep access_token for backward compatibility during migration
-    cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: expiresIn,
-    });
+    // LEGACY: Keep encrypted access_token for backward compatibility during migration
+    try {
+      setEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
+        maxAge: expiresIn,
+      });
+    } catch (e) {
+      // Fallback to plain cookie if encryption fails
+      console.warn("[login] encryption failed for access_token, using plain", e);
+      cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: expiresIn,
+      });
+    }
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
     if (credentials.thirdPartyToken) {
