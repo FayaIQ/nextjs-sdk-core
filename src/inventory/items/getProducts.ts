@@ -32,7 +32,7 @@ export async function getProducts({
     const { getWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
 
-    console.log("Server-side filter params:", params.toString());
+    console.log("Server-side filter params:", `${Api.getProducts}?${params.toString()}`);
     return getWithAuth<ProductResponse>(
       `${Api.getProducts}?${params.toString()}`
     );

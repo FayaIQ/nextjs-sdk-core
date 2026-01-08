@@ -28,15 +28,15 @@ import {
   getBrands
 } from "./chunk-LW3WSCXP.js";
 import {
-  getMenus
-} from "./chunk-P3AY3RUD.js";
-import {
   getProductInfo,
   getProducts,
   putItemCollection,
   putItemCollectionActivate,
   putItemCollectionDeactivate
-} from "./chunk-UXDT4LRU.js";
+} from "./chunk-VJW5O2CX.js";
+import {
+  getMenus
+} from "./chunk-P3AY3RUD.js";
 import {
   AgeGroup,
   Gender,
