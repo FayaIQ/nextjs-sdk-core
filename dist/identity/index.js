@@ -2,15 +2,15 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-JMVX6RJE.js";
+} from "../chunk-6XXCBOBF.js";
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-C2M6INHU.js";
-import "../chunk-JEU35UOP.js";
+} from "../chunk-VQZXRZ53.js";
+import "../chunk-2XID4666.js";
 
 // src/core/config.ts
 var getEnvVar = (key, brand) => {
@@ -237,7 +237,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-MS7N5FIJ.js");
+    const { getWithAuth } = await import("../fetcher-FJANA6ZL.js");
     const { Api: Api2 } = await import("../api-IWWKU55Q.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";

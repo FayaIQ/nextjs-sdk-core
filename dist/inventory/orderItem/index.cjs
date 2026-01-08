@@ -240,15 +240,23 @@ async function getTokenImpl() {
     try {
       const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
-      if (!token) {
-        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+      if (token) {
+        console.log("[token] Found encrypted CRF cookie");
       }
-    } catch {
+    } catch (e) {
+      console.error("[token] Decryption error for CRF:", e);
     }
     if (!token) {
       token = cookieStore.get("access_token")?.value || null;
+      if (token) {
+        console.log("[token] Found plain access_token cookie");
+      }
     }
     if (token) return token;
+    console.error(
+      "[token] No token found in strict mode. Available cookies:",
+      cookieStore.getAll().map((c) => c.name)
+    );
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     err.status = 401;
     throw err;
@@ -257,22 +265,29 @@ async function getTokenImpl() {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const { headers } = await import("next/headers");
-      const headerToken = (await headers()).get("x-access-token");
       let token = null;
       try {
         const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
-      } catch {
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+        if (token) {
+          console.log("[token:auto] Found encrypted CRF cookie");
+        }
+      } catch (e) {
+        console.error("[token:auto] Decryption error for CRF:", e);
       }
       if (!token) {
         token = cookieStore.get("access_token")?.value || null;
-      }
-      if (headerToken) {
-        return headerToken;
+        if (token) {
+          console.log("[token:auto] Found plain access_token cookie");
+        }
       }
       if (token) return token;
-    } catch {
+      console.warn(
+        "[token:auto] No token found. Available cookies:",
+        cookieStore.getAll().map((c) => c.name)
+      );
+    } catch (e) {
+      console.error("[token:auto] Error reading cookies:", e);
     }
   }
   if (typeof window !== "undefined") {
