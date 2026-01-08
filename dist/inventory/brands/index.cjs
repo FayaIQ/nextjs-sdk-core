@@ -158,8 +158,10 @@ function getEncryptedCookie(cookieStore, name) {
   try {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
+    console.log(cookie.value);
     try {
       const decrypted = decryptSync(cookie.value);
+      console.log(decrypted);
       return decrypted ?? null;
     } catch (e) {
       throw e;

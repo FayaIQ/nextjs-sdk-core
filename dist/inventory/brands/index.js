@@ -1,6 +1,6 @@
 import {
   getBrands
-} from "../../chunk-KKH6H4CH.js";
+} from "../../chunk-IDLYEP2F.js";
 
 // src/inventory/brands/handler/get-brands.ts
 import { NextResponse } from "next/server";

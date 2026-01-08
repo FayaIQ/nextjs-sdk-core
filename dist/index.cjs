@@ -116,12 +116,23 @@ async function encrypt(text) {
   const key = await keyPromise;
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const data = encoder.encode(text);
-  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
-  const buf = new Uint8Array(iv.byteLength + ct.byteLength);
-  buf.set(iv, 0);
-  buf.set(new Uint8Array(ct), iv.byteLength);
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    data
+  );
+  const encryptedBytes = new Uint8Array(encrypted);
+  const authTagLength = 16;
+  const ciphertext = encryptedBytes.slice(0, -authTagLength);
+  const authTag = encryptedBytes.slice(-authTagLength);
+  const combined = new Uint8Array(
+    iv.length + ciphertext.length + authTag.length
+  );
+  combined.set(iv, 0);
+  combined.set(ciphertext, iv.length);
+  combined.set(authTag, iv.length + ciphertext.length);
   let binary = "";
-  buf.forEach((b) => binary += String.fromCharCode(b));
+  combined.forEach((b) => binary += String.fromCharCode(b));
   return btoa(binary);
 }
 async function decrypt(payload) {
@@ -180,8 +191,10 @@ function getEncryptedCookie(cookieStore, name) {
   try {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
+    console.log(cookie.value);
     try {
       const decrypted = decryptSync(cookie.value);
+      console.log(decrypted);
       return decrypted ?? null;
     } catch (e) {
       throw e;
