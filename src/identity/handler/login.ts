@@ -73,7 +73,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Perform login (this automatically saves token, roles, and storeId to cookies)
-    const response = await loginUser(credentials);
+    // Prefer incoming request's user-agent when available
+    let userAgent: string | undefined;
+    try {
+      userAgent = (request as any)?.headersList?.get?.("user-agent") || undefined;
+    } catch {}
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") || undefined;
+      } catch {}
+    }
+
+    const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
 
     // If login provided a thirdPartyToken, persist it encrypted for AUTO mode re-auth

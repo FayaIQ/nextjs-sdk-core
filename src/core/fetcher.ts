@@ -126,6 +126,27 @@ export async function apiFetch<T>(
   // Prepare headers
   const requestHeaders: Record<string, string> = { ...headers };
 
+  // Add User-Agent for server-side requests. Browsers block setting User-Agent,
+  // so only add it on Node/server runtime.
+  function getUserAgent(): string {
+    try {
+      const base = `nextjs-sdk-core`;
+      if (typeof process !== "undefined" && process?.version) {
+        return `${base} (node ${process.version})`;
+      }
+      return base;
+    } catch {
+      return "nextjs-sdk-core";
+    }
+  }
+
+  if (typeof window === "undefined") {
+    // Only set User-Agent server-side
+    if (!requestHeaders["User-Agent"]) {
+      requestHeaders["User-Agent"] = getUserAgent();
+    }
+  }
+
   if (token) {
     requestHeaders["Authorization"] = `Bearer ${token}`;
   }
@@ -348,12 +369,26 @@ export async function postWithoutAuth<T>(
   data?: RequestData,
   headers: Record<string, string> = {}
 ): Promise<T> {
+  // Ensure server-side User-Agent is included when possible
+  const effectiveHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...headers,
+  };
+  if (typeof window === "undefined" && !effectiveHeaders["User-Agent"]) {
+    try {
+      const base = `nextjs-sdk-core`;
+      effectiveHeaders["User-Agent"] =
+        typeof process !== "undefined" && process?.version
+          ? `${base} (node ${process.version})`
+          : base;
+    } catch {
+      effectiveHeaders["User-Agent"] = "nextjs-sdk-core";
+    }
+  }
+
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
+    headers: effectiveHeaders,
     body: data ? JSON.stringify(data) : undefined,
   });
 

@@ -32,6 +32,8 @@ export {
   startAuthStateSync,
 } from "./firebase/auth";
 export type { StartPhoneSignInResult, WhatsAppOTPOptions } from "./firebase/auth";
+export { ItemsFilterParameters } from "./inventory/items/filter-models";
+export  type {Category} from "./inventory/category/types";
 
 // Firebase config
 export { getPrimaryApp, getSecondaryApp, getFirebaseApp } from "./firebase/config";

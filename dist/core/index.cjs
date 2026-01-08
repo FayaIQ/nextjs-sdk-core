@@ -205,402 +205,6 @@ var init_cookie = __esm({
   }
 });
 
-// src/core/config.ts
-var config_exports = {};
-__export(config_exports, {
-  getAuthConfig: () => getAuthConfig
-});
-var getEnvVar, getAuthConfig;
-var init_config = __esm({
-  "src/core/config.ts"() {
-    "use strict";
-    getEnvVar = (key, brand) => {
-      if (typeof process === "undefined" || !process.env) return void 0;
-      if (brand) {
-        const brandKey = `${brand.toUpperCase()}_${key}`;
-        if (process.env[brandKey]) return process.env[brandKey];
-      }
-      return process.env[key];
-    };
-    getAuthConfig = () => {
-      if (typeof process !== "undefined" && process.env) {
-        const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
-        const envConfig = {
-          clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
-          clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
-          username: getEnvVar("STOREAK_USERNAME", brand2),
-          password: getEnvVar("STOREAK_PASSWORD", brand2)
-        };
-        if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
-          return {
-            ...envConfig,
-            language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
-            gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
-          };
-        }
-      }
-      const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
-      const prefix = brand ? `${brand.toUpperCase()}_` : "";
-      const missing = [];
-      const required = [
-        `${prefix}STOREAK_CLIENT_ID`,
-        `${prefix}STOREAK_CLIENT_SECRET`
-      ];
-      required.forEach((name) => {
-        if (!process.env?.[name]) missing.push(name);
-      });
-      if (missing.length > 0) {
-        const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
-        throw new Error(
-          `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
-        );
-      }
-      return {
-        clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
-        clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
-        username: getEnvVar("STOREAK_USERNAME", brand),
-        password: getEnvVar("STOREAK_PASSWORD", brand),
-        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
-        gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
-      };
-    };
-  }
-});
-
-// src/api/api.ts
-var api_exports = {};
-__export(api_exports, {
-  Api: () => Api
-});
-var _Api, Api;
-var init_api = __esm({
-  "src/api/api.ts"() {
-    "use strict";
-    _Api = class _Api {
-      static getStoreDeliveryZones(storeId) {
-        return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
-      }
-      static getProductInfo(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
-      }
-      static getProductInfoV2(id) {
-        return `${_Api.INVENTORY_BASE}/v2/Items/${id}/FullInfo`;
-      }
-      static getMenuById(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Menus/${id}`;
-      }
-      static getOfferById(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
-      }
-      static deleteOffer(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}`;
-      }
-      static getStoreInvoiceDiscount(storeId, coupon) {
-        return `${_Api.STORES_BASE}/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
-          String(coupon)
-        )}`;
-      }
-      static getOffersDeliveryZones(deliveryZoneId) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/DeliveryZoneDiscount/${deliveryZoneId}`;
-      }
-      static postOffersAddItemsByFilter(offerId, forceUpdate) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
-          String(forceUpdate)
-        )}`;
-      }
-      static postOffersDeliveryZones(offerId) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/DeliveryZones`;
-      }
-      static getOffersGroups(offerId) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups`;
-      }
-      static putOffersGroup(offerId, id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
-      }
-      static deleteOffersGroup(offerId, id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
-      }
-      static putOffersCustomerDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/CustomerDiscount`;
-      }
-      static putOffersExtraItemDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ExtraItemDiscount`;
-      }
-      static putOffersInvoiceDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/InvoiceDiscount`;
-      }
-      static putOffersItemsDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount`;
-      }
-      static putOffersItemsDiscountCustomers(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemsDiscount/Customers`;
-      }
-      static putOffersShippingDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ShippingDiscount`;
-      }
-      static putOffersPointDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/PointDiscount`;
-      }
-      static putOffersItemCollectionDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/ItemCollectionDiscount`;
-      }
-      static putOffersMultiCouponDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/MultiCouponDiscount`;
-      }
-      static putOffersDarkDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
-      }
-      static getStoreById(id) {
-        return `${_Api.STORES_BASE}/v1/Stores/${id}`;
-      }
-      static putOrderPayment(orderId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
-      }
-      static putOrderPaymentStatus(orderId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment/Status`;
-      }
-      // Payments endpoints
-      static getStorePayments(storeId) {
-        return `${_Api.INVENTORY_BASE}/v1/Stores/${storeId}/Payments`;
-      }
-      static getPayment(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
-      }
-      static putPayment(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
-      }
-      static deletePayment(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Payments/${id}`;
-      }
-      static getItemById(id) {
-        return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
-      }
-      // Dynamic endpoints with IDs
-      // Wishlist endpoints (lowercase per spec)
-      static postWish(id) {
-        return `${_Api.INVENTORY_BASE}/v1/items/${id}/wish`;
-      }
-      static deleteWish(id) {
-        return `${_Api.INVENTORY_BASE}/v1/items/${id}/unwish`;
-      }
-      static getCategoryProducts(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile?CurrentPage=1&PageSize=1000&menuId=${id}`;
-      }
-      static getOrder(id) {
-        return `${_Api.INVENTORY_BASE}/v3/Orders/${id}`;
-      }
-      static getAddress(id) {
-        return `${_Api.GPS_BASE}/v1/Addresses/${id}`;
-      }
-      // Order item endpoints (v3)
-      static getOrderItem(orderId, itemId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
-      }
-      static postOrderItem(orderId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems`;
-      }
-      static putOrderItemCancel(orderId, itemId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
-      }
-      static putOrderCancel(orderId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Cancel`;
-      }
-      static putOrderItemUndoCancel(orderId, itemId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
-      }
-      static putOrderItemUpdate(orderId, itemId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/update`;
-      }
-      static putOrderApprove(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ApproveDeliveryOrder`;
-      }
-      static putOrderDisapprove(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/DisapproveDeliveryOrder`;
-      }
-      static putChangeStatusOrder(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ChangeDeliveryOrderStatus`;
-      }
-      static cancelOrder(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Cancel`;
-      }
-      static getOrdersDelagates(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates`;
-      }
-      static postOrdersDelagates(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates`;
-      }
-      static putOrdersDelagatesLoggedIn(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Delagates/LoggedInUser`;
-      }
-      static deleteDelagate(orderId, delegateId) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
-      }
-      static putOrderDiscount(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/Discount`;
-      }
-      static putOrderReferenceId(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceId`;
-      }
-      static putOrderReferenceDeliveryId(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Orders/${id}/ReferenceDeliveryId`;
-      }
-      // Copy items to a specific child store
-      static postCopyToStore(childStoreId) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/Copy/Store/${childStoreId}`;
-      }
-      // Sync parent store data to child store for a given item
-      static putItemParentStoreSync(itemId) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Parent/Store/Sync`;
-      }
-      // Item activation endpoints
-      static putItemActivate(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Activate`;
-      }
-      static putItemDeactivate(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Deactivate`;
-      }
-      // Item collections activate/deactivate by filter
-      static putItemsCollectionsActivateByFilter() {
-        return `${_Api.INVENTORY_BASE}/v1/Items/Collections/ActivateByFilter`;
-      }
-      static putItemsCollectionsDeactivateByFilter() {
-        return `${_Api.INVENTORY_BASE}/v1/Items/Collections/DeActivateByFilter`;
-      }
-      // Item update endpoint
-      static putItem(id) {
-        return `${_Api.INVENTORY_BASE}/v3/Items/${id}`;
-      }
-      static deleteItem(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${id}`;
-      }
-      // Item collection endpoint (update a specific collection for an item)
-      static putItemCollection(itemId, id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}`;
-      }
-      // Activate / Deactivate an item collection
-      static putItemCollectionActivate(itemId, id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Activate`;
-      }
-      static putItemCollectionDeactivate(itemId, id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Deactivate`;
-      }
-      static getLocationChildren(parentId) {
-        return `${_Api.GPS_BASE}/v1/Locations/${parentId}/Children/Dropdown`;
-      }
-      //
-      static getInvoiceDiscount(code) {
-        const clean = encodeURIComponent(code);
-        return `${_Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount/${clean}`;
-      }
-      static patchCartItem(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
-          String(id)
-        )}`;
-      }
-      static deleteCartItem(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
-          String(id)
-        )}`;
-      }
-    };
-    _Api.LOCAL_BASE = "http://localhost:3000";
-    _Api.IDENTITY_BASE = `https://storeak-identity-service.azurewebsites.net/api`;
-    _Api.NEWS_BASE = `https://storeak-news-service.azurewebsites.net/api`;
-    _Api.STORES_BASE = `https://storeak-stores-service.azurewebsites.net/api`;
-    _Api.GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
-    _Api.THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
-    _Api.INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
-    _Api.CRM_BASE = `https://storeak-crm-service.azurewebsites.net/api`;
-    _Api.IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
-    _Api.signIn = `${_Api.IDENTITY_BASE}/v1/token`;
-    _Api.refreshToken = `${_Api.IDENTITY_BASE}/v1/token/refresh`;
-    _Api.sessionLogout = `${_Api.IDENTITY_BASE}/v1/session/logout`;
-    _Api.clearCart = `${_Api.INVENTORY_BASE}/v1/Carts/Clear`;
-    _Api.getUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
-    _Api.postUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
-    _Api.putUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
-    _Api.patchUserInfo = `${_Api.IDENTITY_BASE}/v1/Users`;
-    _Api.putUserAvatar = `${_Api.IDENTITY_BASE}/v1/Users/avatar`;
-    _Api.putUserPassword = `${_Api.IDENTITY_BASE}/v1/Users/password`;
-    _Api.getUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
-    _Api.putUserPreferences = `${_Api.IDENTITY_BASE}/v1/Users/preferences`;
-    _Api.phoneVerificationSend = `${_Api.IDENTITY_BASE}/v1/verification/phone/send`;
-    _Api.phoneVerificationVerify = `${_Api.IDENTITY_BASE}/v1/verification/phone/verify`;
-    // stores
-    _Api.getStores = `${_Api.STORES_BASE}/v1/Stores/Dropdown`;
-    // Store users
-    _Api.getStoreUsersPaging = `${_Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
-    // Other services
-    _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
-    _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
-    _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
-    _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
-    // Offers endpoints
-    _Api.getOffersPaging = `${_Api.INVENTORY_BASE}/v1/Offers/Paging`;
-    _Api.getOffersCustomerItemLoggedIn = `${_Api.INVENTORY_BASE}/v1/Offers/CustomerItem/LoggedIn`;
-    _Api.getOffersItemsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Items/DropDown`;
-    _Api.getOffersSlideShowsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/SlideShows/DropDown`;
-    _Api.getOffersItemsStores = `${_Api.INVENTORY_BASE}/v1/Offers/Items/Stores`;
-    _Api.getOffersPointsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Points/DropDown`;
-    _Api.getOffersNewsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/News/DropDown`;
-    _Api.getOffersCouponsDropdown = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
-    _Api.postOffersItemsDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
-    _Api.postOffersItemsDiscountCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount/Customers`;
-    _Api.postOffersExtraItemDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ExtraItemDiscount`;
-    _Api.postOffersCustomerDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/CustomerDiscount`;
-    _Api.postOffersInvoiceDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/InvoiceDiscount`;
-    _Api.postOffersMultiCouponDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/MultiCouponDiscount`;
-    _Api.postOffersShippingDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ShippingDiscount`;
-    _Api.postOffersPointDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/PointDiscount`;
-    _Api.postOffersItemCollectionDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/ItemCollectionDiscount`;
-    _Api.postOffersDarkDiscount = `${_Api.INVENTORY_BASE}/v1/Offers/DarkDiscount`;
-    _Api.getOffersCustomers = `${_Api.INVENTORY_BASE}/v1/Offers/Customers`;
-    _Api.getCouponOffers = `${_Api.INVENTORY_BASE}/v1/Offers/Coupons/DropDown`;
-    _Api.getBranches = `${_Api.STORES_BASE}/v1/stores/Info/StoreAndBranchesOrderedByAddresses`;
-    _Api.getBrands = `${_Api.INVENTORY_BASE}/v1/Complex/MenuBrand`;
-    _Api.getWishes = `${_Api.INVENTORY_BASE}/v1/wishes/paging`;
-    _Api.getOrders = `${_Api.INVENTORY_BASE}/v1/Orders/Paging`;
-    // CRM - Clients
-    _Api.getClientsPaging = `${_Api.CRM_BASE}/v1/Clients/Paging`;
-    _Api.getClients = `${_Api.CRM_BASE}/v1/Clients`;
-    _Api.postClients = `${_Api.CRM_BASE}/v1/Clients`;
-    _Api.postOrders = `${_Api.INVENTORY_BASE}/v2/Orders`;
-    _Api.getStoreInfo = `${_Api.STORES_BASE}/v1/Stores/Info`;
-    _Api.getCities = `${_Api.GPS_BASE}/v1/Locations`;
-    _Api.getDeliveryZones = `${_Api.GPS_BASE}/v1/DeliveryZones`;
-    _Api.getReportsCustomerOrders = `${_Api.INVENTORY_BASE}/v1/Reports/CustomerOrders`;
-    _Api.getReportsOrderSales = `${_Api.INVENTORY_BASE}/v1/Reports/OrderSales`;
-    _Api.postPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
-    _Api.getPayments = `${_Api.INVENTORY_BASE}/v1/Payments`;
-    _Api.getPaymentsReport = `${_Api.INVENTORY_BASE}/v1/Payments/Report`;
-    _Api.getSlideShows = `${_Api.THEME_BASE}/v1/SlideShows/Paging?pageSize=20`;
-    // orders endpoints
-    _Api.getOrderFullInfo = `${_Api.INVENTORY_BASE}/v1/Orders/List/FullInfo`;
-    _Api.putOrderApproveList = `${_Api.INVENTORY_BASE}/v1/Orders/ApproveDeliveryOrder/List`;
-    _Api.putOrderDisapproveList = `${_Api.INVENTORY_BASE}/v1/Orders/DisapproveDeliveryOrder/List`;
-    _Api.postOrderDelagatesList = `${_Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
-    // category
-    _Api.getCatigories = `${_Api.INVENTORY_BASE}/v1/Categories/Dropdown`;
-    // identity
-    _Api.getApplicationsStores = `${_Api.IDENTITY_BASE}/v1/Applications/Store/DropDown`;
-    _Api.getCustomersDropdown = `${_Api.IDENTITY_BASE}/v1/Users/Customers/DropDown`;
-    _Api.getItemsSource = `${_Api.INVENTORY_BASE}/v1/StoreItemSources/Dropdown`;
-    /////////////////////////////////////////
-    //GPS
-    _Api.getCountries = `${_Api.GPS_BASE}/v1/Locations/Countries/Dropdown`;
-    _Api.getParentProducts = `${_Api.INVENTORY_BASE}/v1/Items/ParentStore/Paging`;
-    // Items copy endpoints
-    _Api.postCopyParentStore = `${_Api.INVENTORY_BASE}/v1/Items/Copy/ParentStore`;
-    // Copy from parent to child stores (bulk)
-    _Api.postCopyParentToChildStores = `${_Api.INVENTORY_BASE}/v1/Items/Copy/Parent/To/Child/Stores`;
-    _Api.getCheckoutQuote = `${_Api.INVENTORY_BASE}/v1/Checkout/Quote`;
-    // Cart endpoints
-    _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
-    _Api.postCartItems = `${_Api.INVENTORY_BASE}/v1/Carts/Items`;
-    Api = _Api;
-  }
-});
-
 // src/core/index.ts
 var core_exports = {};
 __export(core_exports, {
@@ -621,6 +225,13 @@ module.exports = __toCommonJS(core_exports);
 var AUTH_MODE = process.env.AUTH_MODE || "auto";
 var USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
 async function getTokenImpl() {
+  if (typeof window === "undefined") {
+    const { headers } = await import("next/headers");
+    const headerToken = (await headers()).get("x-access-token");
+    if (headerToken) {
+      return headerToken;
+    }
+  }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
@@ -642,6 +253,8 @@ async function getTokenImpl() {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
+      const { headers } = await import("next/headers");
+      const headerToken = (await headers()).get("x-access-token");
       let token = null;
       try {
         const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
@@ -651,66 +264,27 @@ async function getTokenImpl() {
       if (!token) {
         token = cookieStore.get("access_token")?.value || null;
       }
+      if (headerToken) {
+        return headerToken;
+      }
       if (token) return token;
     } catch {
     }
   }
-  if (USE_TOKEN_ROUTE && typeof window !== "undefined") {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || "http://localhost:3000";
-      const res = await fetch(`${baseUrl}/api/auth/token`, {
-        cache: "no-store"
-      });
-      if (res.ok) {
-        const data2 = await res.json();
-        if (data2.access_token) return data2.access_token;
-      }
-    } catch {
+  if (typeof window !== "undefined") {
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+      return null;
+    };
+    const clientToken = getCookie("access_token");
+    if (clientToken) {
+      return clientToken;
     }
+    throw new Error("No token available on client side");
   }
-  const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
-  const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-  const authConfig = getAuthConfig2();
-  let thirdPartyToken = void 0;
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      thirdPartyToken = cookieStore.get("tp_id")?.value;
-    } catch {
-    }
-  }
-  const requestBody = {
-    clientId: authConfig.clientId,
-    clientSecret: authConfig.clientSecret,
-    Language: authConfig.language ?? 0,
-    GMT: authConfig.gmt ?? 3,
-    IsFromNotification: false
-  };
-  if (thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = thirdPartyToken;
-  } else if (authConfig.thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = authConfig.thirdPartyToken;
-  }
-  const response = await fetch(Api2.signIn, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    ...AUTH_MODE === "auto" ? { next: { revalidate: 0 } } : {},
-    body: JSON.stringify({
-      ...requestBody,
-      ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}
-    })
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Authentication failed: ${response.status} ${response.statusText}`
-    );
-  }
-  const data = await response.json();
-  if (!data.access_token) {
-    throw new Error("Token missing in authentication response");
-  }
-  return data.access_token;
+  throw new Error("No token available");
 }
 function getToken() {
   return getTokenImpl();
@@ -786,6 +360,22 @@ async function apiFetch(url, options = {}) {
     }
   }
   const requestHeaders = { ...headers };
+  function getUserAgent() {
+    try {
+      const base = `nextjs-sdk-core`;
+      if (typeof process !== "undefined" && process?.version) {
+        return `${base} (node ${process.version})`;
+      }
+      return base;
+    } catch {
+      return "nextjs-sdk-core";
+    }
+  }
+  if (typeof window === "undefined") {
+    if (!requestHeaders["User-Agent"]) {
+      requestHeaders["User-Agent"] = getUserAgent();
+    }
+  }
   if (token) {
     requestHeaders["Authorization"] = `Bearer ${token}`;
   }
@@ -903,12 +493,21 @@ async function postWithAuth(url, data, headers) {
   });
 }
 async function postWithoutAuth(url, data, headers = {}) {
+  const effectiveHeaders = {
+    "Content-Type": "application/json",
+    ...headers
+  };
+  if (typeof window === "undefined" && !effectiveHeaders["User-Agent"]) {
+    try {
+      const base = `nextjs-sdk-core`;
+      effectiveHeaders["User-Agent"] = typeof process !== "undefined" && process?.version ? `${base} (node ${process.version})` : base;
+    } catch {
+      effectiveHeaders["User-Agent"] = "nextjs-sdk-core";
+    }
+  }
   const response = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    },
+    headers: effectiveHeaders,
     body: data ? JSON.stringify(data) : void 0
   });
   if (!response.ok) {

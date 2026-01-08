@@ -35,11 +35,6 @@ export async function GET(request: NextRequest) {
       // Return with cache headers to prevent repeated calls
       return NextResponse.json(
         { access_token: existingToken },
-        {
-          headers: {
-            'Cache-Control': 'private, max-age=3600', // Cache for 1 hour
-          },
-        }
       );
     }
 
@@ -71,14 +66,30 @@ export async function GET(request: NextRequest) {
       console.log("[identity:handler:token] signing in with clientId/clientSecret");
     }
 
+    // Include a User-Agent header for downstream telemetry.
+    // Prefer the incoming request's User-Agent when available.
+    let userAgent: string | null = null;
+
+    // standard NextRequest headers API
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") + " nextjs-sdk-core  handler api/auth/token" || null;
+      } catch {}
+    }
+
+    // Final fallback to node runtime identifier
+    if (!userAgent) {
+      userAgent = "nextjs-sdk-core  handler api/auth/token";
+    }
     const response = await fetch(Api.signIn, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": userAgent,
+      },
       body: JSON.stringify({
         ...requestBody,
-        ...(requestBody["ThirdPartyToken"]
-          ? { ThirdPartyAuthType: 100 }
-          : {}),
+        ...(requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}),
       }),
     });
 

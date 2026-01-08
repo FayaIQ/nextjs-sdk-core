@@ -205,64 +205,451 @@ var init_cookie = __esm({
   }
 });
 
-// src/core/config.ts
-var config_exports = {};
-__export(config_exports, {
-  getAuthConfig: () => getAuthConfig
-});
-var getEnvVar, getAuthConfig;
-var init_config = __esm({
-  "src/core/config.ts"() {
-    "use strict";
-    getEnvVar = (key, brand) => {
-      if (typeof process === "undefined" || !process.env) return void 0;
-      if (brand) {
-        const brandKey = `${brand.toUpperCase()}_${key}`;
-        if (process.env[brandKey]) return process.env[brandKey];
+// src/token.ts
+async function getTokenImpl() {
+  if (typeof window === "undefined") {
+    const { headers } = await import("next/headers");
+    const headerToken = (await headers()).get("x-access-token");
+    if (headerToken) {
+      return headerToken;
+    }
+  }
+  if (AUTH_MODE === "strict" && typeof window === "undefined") {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    let token = null;
+    try {
+      const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+    } catch {
+    }
+    if (!token) {
+      token = cookieStore.get("access_token")?.value || null;
+    }
+    if (token) return token;
+    const err = new Error("Unauthorized: Access token missing (strict mode)");
+    err.status = 401;
+    throw err;
+  }
+  if (typeof window === "undefined") {
+    try {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const { headers } = await import("next/headers");
+      const headerToken = (await headers()).get("x-access-token");
+      let token = null;
+      try {
+        const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+      } catch {
       }
-      return process.env[key];
+      if (!token) {
+        token = cookieStore.get("access_token")?.value || null;
+      }
+      if (headerToken) {
+        return headerToken;
+      }
+      if (token) return token;
+    } catch {
+    }
+  }
+  if (typeof window !== "undefined") {
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+      return null;
     };
-    getAuthConfig = () => {
-      if (typeof process !== "undefined" && process.env) {
-        const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
-        const envConfig = {
-          clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
-          clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
-          username: getEnvVar("STOREAK_USERNAME", brand2),
-          password: getEnvVar("STOREAK_PASSWORD", brand2)
-        };
-        if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
-          return {
-            ...envConfig,
-            language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
-            gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
-          };
+    const clientToken = getCookie("access_token");
+    if (clientToken) {
+      return clientToken;
+    }
+    throw new Error("No token available on client side");
+  }
+  throw new Error("No token available");
+}
+function getToken() {
+  return getTokenImpl();
+}
+var AUTH_MODE, USE_TOKEN_ROUTE;
+var init_token = __esm({
+  "src/token.ts"() {
+    "use strict";
+    AUTH_MODE = process.env.AUTH_MODE || "auto";
+    USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
+  }
+});
+
+// src/core/fetcher.ts
+var fetcher_exports = {};
+__export(fetcher_exports, {
+  ApiError: () => ApiError,
+  apiFetch: () => apiFetch,
+  deleteWithAuth: () => deleteWithAuth,
+  deleteWithoutAuth: () => deleteWithoutAuth,
+  getWithAuth: () => getWithAuth,
+  getWithoutAuth: () => getWithoutAuth,
+  patchWithAuth: () => patchWithAuth,
+  patchWithoutAuth: () => patchWithoutAuth,
+  postWithAuth: () => postWithAuth,
+  postWithoutAuth: () => postWithoutAuth,
+  putWithAuth: () => putWithAuth,
+  putWithoutAuth: () => putWithoutAuth
+});
+function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()) {
+  if (obj == null || depth > 6) return null;
+  if (typeof obj === "string") {
+    const s = obj.trim();
+    if (s.startsWith("{") || s.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(s);
+        return findMessageInError(parsed, depth + 1, seen) || obj;
+      } catch {
+        return obj;
+      }
+    }
+    return obj;
+  }
+  if (typeof obj !== "object") return null;
+  if (seen.has(obj)) return null;
+  seen.add(obj);
+  if (typeof obj.message === "string" && obj.message) return obj.message;
+  if (typeof obj.code === "string" && obj.code) return obj.code;
+  if (typeof obj.error === "string" && obj.error) return obj.error;
+  const keysToCheck = [
+    "message",
+    "code",
+    "error",
+    "body",
+    "data",
+    "response",
+    "errors"
+  ];
+  for (const k of keysToCheck) {
+    if (k in obj) {
+      const v = obj[k];
+      const found = findMessageInError(v, depth + 1, seen);
+      if (found) return found;
+    }
+  }
+  for (const k of Object.keys(obj)) {
+    try {
+      const found = findMessageInError(obj[k], depth + 1, seen);
+      if (found) return found;
+    } catch {
+    }
+  }
+  return null;
+}
+async function apiFetch(url, options = {}) {
+  const { method = "GET", headers = {}, data, query, token } = options;
+  let endpoint = url;
+  if (query) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== void 0 && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+    const queryString = params.toString();
+    if (queryString) {
+      endpoint += `?${queryString}`;
+    }
+  }
+  const requestHeaders = { ...headers };
+  function getUserAgent() {
+    try {
+      const base = `nextjs-sdk-core`;
+      if (typeof process !== "undefined" && process?.version) {
+        return `${base} (node ${process.version})`;
+      }
+      return base;
+    } catch {
+      return "nextjs-sdk-core";
+    }
+  }
+  if (typeof window === "undefined") {
+    if (!requestHeaders["User-Agent"]) {
+      requestHeaders["User-Agent"] = getUserAgent();
+    }
+  }
+  if (token) {
+    requestHeaders["Authorization"] = `Bearer ${token}`;
+  }
+  if (data && !(data instanceof FormData)) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
+  let body;
+  if (data) {
+    body = data instanceof FormData ? data : JSON.stringify(data);
+  }
+  const response = await fetch(endpoint, {
+    method,
+    headers: requestHeaders,
+    body
+  });
+  if (!response.ok) {
+    try {
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
+        let errorData;
+        try {
+          errorData = JSON.parse(text2);
+        } catch {
+          errorData = text2;
         }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
       }
-      const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
-      const prefix = brand ? `${brand.toUpperCase()}_` : "";
-      const missing = [];
-      const required = [
-        `${prefix}STOREAK_CLIENT_ID`,
-        `${prefix}STOREAK_CLIENT_SECRET`
-      ];
-      required.forEach((name) => {
-        if (!process.env?.[name]) missing.push(name);
-      });
-      if (missing.length > 0) {
-        const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
-        throw new Error(
-          `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
-        );
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(
+        response.status,
+        null,
+        `Request failed with status ${response.status} ${response.statusText}`
+      );
+    }
+  }
+  const contentType = response.headers.get("content-type");
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0" || !contentType && response.status === 200) {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(text);
+    return parsed;
+  } catch (err) {
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
+  }
+}
+async function getWithAuth(url, query, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "GET",
+    token,
+    query,
+    headers
+  });
+}
+async function getWithoutAuth(url, query, headers) {
+  return apiFetch(url, {
+    method: "GET",
+    query,
+    headers
+  });
+}
+async function postWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "POST",
+    token,
+    data,
+    headers
+  });
+}
+async function postWithoutAuth(url, data, headers = {}) {
+  const effectiveHeaders = {
+    "Content-Type": "application/json",
+    ...headers
+  };
+  if (typeof window === "undefined" && !effectiveHeaders["User-Agent"]) {
+    try {
+      const base = `nextjs-sdk-core`;
+      effectiveHeaders["User-Agent"] = typeof process !== "undefined" && process?.version ? `${base} (node ${process.version})` : base;
+    } catch {
+      effectiveHeaders["User-Agent"] = "nextjs-sdk-core";
+    }
+  }
+  const response = await fetch(url, {
+    method: "POST",
+    headers: effectiveHeaders,
+    body: data ? JSON.stringify(data) : void 0
+  });
+  if (!response.ok) {
+    try {
+      const text2 = await response.text();
+      if (text2 && text2.trim()) {
+        let errorData;
+        try {
+          errorData = JSON.parse(text2);
+        } catch {
+          errorData = text2;
+        }
+        if (typeof errorData === "string") {
+          const trimmed = errorData.trim();
+          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+            try {
+              errorData = JSON.parse(errorData);
+            } catch {
+            }
+          }
+        }
+        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        throw new ApiError(response.status, errorData, derivedMessage);
       }
-      return {
-        clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
-        clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
-        username: getEnvVar("STOREAK_USERNAME", brand),
-        password: getEnvVar("STOREAK_PASSWORD", brand),
-        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
-        gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
-      };
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(
+        response.status,
+        null,
+        `POST request failed: ${response.status} ${response.statusText}`
+      );
+    }
+  }
+  const contentLength = response.headers.get("content-length");
+  if (contentLength === "0") {
+    return {};
+  }
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(
+      `Failed to parse response as JSON: ${text.substring(0, 100)}`
+    );
+  }
+}
+async function putWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "PUT",
+    token,
+    data,
+    headers
+  });
+}
+async function putWithoutAuth(url, data, headers) {
+  return apiFetch(url, {
+    method: "PUT",
+    data,
+    headers
+  });
+}
+async function deleteWithAuth(url, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "DELETE",
+    token,
+    headers
+  });
+}
+async function deleteWithoutAuth(url, headers) {
+  return apiFetch(url, {
+    method: "DELETE",
+    headers
+  });
+}
+async function patchWithAuth(url, data, headers) {
+  let token = null;
+  try {
+    token = await getToken();
+  } catch (err) {
+    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
+      throw new ApiError(401, null, "Unauthorized");
+    }
+    throw err;
+  }
+  if (!token) {
+    throw new ApiError(401, null, "Unauthorized");
+  }
+  return apiFetch(url, {
+    method: "PATCH",
+    token,
+    data,
+    headers
+  });
+}
+async function patchWithoutAuth(url, data, headers) {
+  return apiFetch(url, {
+    method: "PATCH",
+    data,
+    headers
+  });
+}
+var ApiError;
+var init_fetcher = __esm({
+  "src/core/fetcher.ts"() {
+    "use strict";
+    init_token();
+    ApiError = class _ApiError extends Error {
+      constructor(status, body, message) {
+        super(message || `Request failed with status ${status}`);
+        this.status = status;
+        this.body = body;
+        Object.setPrototypeOf(this, _ApiError.prototype);
+      }
     };
   }
 });
@@ -598,460 +985,6 @@ var init_api = __esm({
     _Api.getCurrentCart = `${_Api.INVENTORY_BASE}/v1/Carts/Current`;
     _Api.postCartItems = `${_Api.INVENTORY_BASE}/v1/Carts/Items`;
     Api = _Api;
-  }
-});
-
-// src/token.ts
-async function getTokenImpl() {
-  if (AUTH_MODE === "strict" && typeof window === "undefined") {
-    const { cookies } = await import("next/headers");
-    const cookieStore = await cookies();
-    let token = null;
-    try {
-      const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
-    } catch {
-    }
-    if (!token) {
-      token = cookieStore.get("access_token")?.value || null;
-    }
-    if (token) return token;
-    const err = new Error("Unauthorized: Access token missing (strict mode)");
-    err.status = 401;
-    throw err;
-  }
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      let token = null;
-      try {
-        const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
-      } catch {
-      }
-      if (!token) {
-        token = cookieStore.get("access_token")?.value || null;
-      }
-      if (token) return token;
-    } catch {
-    }
-  }
-  if (USE_TOKEN_ROUTE && typeof window !== "undefined") {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}` || "http://localhost:3000";
-      const res = await fetch(`${baseUrl}/api/auth/token`, {
-        cache: "no-store"
-      });
-      if (res.ok) {
-        const data2 = await res.json();
-        if (data2.access_token) return data2.access_token;
-      }
-    } catch {
-    }
-  }
-  const { getAuthConfig: getAuthConfig2 } = await Promise.resolve().then(() => (init_config(), config_exports));
-  const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-  const authConfig = getAuthConfig2();
-  let thirdPartyToken = void 0;
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      thirdPartyToken = cookieStore.get("tp_id")?.value;
-    } catch {
-    }
-  }
-  const requestBody = {
-    clientId: authConfig.clientId,
-    clientSecret: authConfig.clientSecret,
-    Language: authConfig.language ?? 0,
-    GMT: authConfig.gmt ?? 3,
-    IsFromNotification: false
-  };
-  if (thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = thirdPartyToken;
-  } else if (authConfig.thirdPartyToken) {
-    requestBody["ThirdPartyToken"] = authConfig.thirdPartyToken;
-  }
-  const response = await fetch(Api2.signIn, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    ...AUTH_MODE === "auto" ? { next: { revalidate: 0 } } : {},
-    body: JSON.stringify({
-      ...requestBody,
-      ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}
-    })
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Authentication failed: ${response.status} ${response.statusText}`
-    );
-  }
-  const data = await response.json();
-  if (!data.access_token) {
-    throw new Error("Token missing in authentication response");
-  }
-  return data.access_token;
-}
-function getToken() {
-  return getTokenImpl();
-}
-var AUTH_MODE, USE_TOKEN_ROUTE;
-var init_token = __esm({
-  "src/token.ts"() {
-    "use strict";
-    AUTH_MODE = process.env.AUTH_MODE || "auto";
-    USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
-  }
-});
-
-// src/core/fetcher.ts
-var fetcher_exports = {};
-__export(fetcher_exports, {
-  ApiError: () => ApiError,
-  apiFetch: () => apiFetch,
-  deleteWithAuth: () => deleteWithAuth,
-  deleteWithoutAuth: () => deleteWithoutAuth,
-  getWithAuth: () => getWithAuth,
-  getWithoutAuth: () => getWithoutAuth,
-  patchWithAuth: () => patchWithAuth,
-  patchWithoutAuth: () => patchWithoutAuth,
-  postWithAuth: () => postWithAuth,
-  postWithoutAuth: () => postWithoutAuth,
-  putWithAuth: () => putWithAuth,
-  putWithoutAuth: () => putWithoutAuth
-});
-function findMessageInError(obj, depth = 0, seen = /* @__PURE__ */ new WeakSet()) {
-  if (obj == null || depth > 6) return null;
-  if (typeof obj === "string") {
-    const s = obj.trim();
-    if (s.startsWith("{") || s.startsWith("[")) {
-      try {
-        const parsed = JSON.parse(s);
-        return findMessageInError(parsed, depth + 1, seen) || obj;
-      } catch {
-        return obj;
-      }
-    }
-    return obj;
-  }
-  if (typeof obj !== "object") return null;
-  if (seen.has(obj)) return null;
-  seen.add(obj);
-  if (typeof obj.message === "string" && obj.message) return obj.message;
-  if (typeof obj.code === "string" && obj.code) return obj.code;
-  if (typeof obj.error === "string" && obj.error) return obj.error;
-  const keysToCheck = [
-    "message",
-    "code",
-    "error",
-    "body",
-    "data",
-    "response",
-    "errors"
-  ];
-  for (const k of keysToCheck) {
-    if (k in obj) {
-      const v = obj[k];
-      const found = findMessageInError(v, depth + 1, seen);
-      if (found) return found;
-    }
-  }
-  for (const k of Object.keys(obj)) {
-    try {
-      const found = findMessageInError(obj[k], depth + 1, seen);
-      if (found) return found;
-    } catch {
-    }
-  }
-  return null;
-}
-async function apiFetch(url, options = {}) {
-  const { method = "GET", headers = {}, data, query, token } = options;
-  let endpoint = url;
-  if (query) {
-    const params = new URLSearchParams();
-    Object.entries(query).forEach(([key, value]) => {
-      if (value !== void 0 && value !== null) {
-        params.append(key, String(value));
-      }
-    });
-    const queryString = params.toString();
-    if (queryString) {
-      endpoint += `?${queryString}`;
-    }
-  }
-  const requestHeaders = { ...headers };
-  if (token) {
-    requestHeaders["Authorization"] = `Bearer ${token}`;
-  }
-  if (data && !(data instanceof FormData)) {
-    requestHeaders["Content-Type"] = "application/json";
-  }
-  let body;
-  if (data) {
-    body = data instanceof FormData ? data : JSON.stringify(data);
-  }
-  const response = await fetch(endpoint, {
-    method,
-    headers: requestHeaders,
-    body
-  });
-  if (!response.ok) {
-    try {
-      const text2 = await response.text();
-      if (text2 && text2.trim()) {
-        let errorData;
-        try {
-          errorData = JSON.parse(text2);
-        } catch {
-          errorData = text2;
-        }
-        if (typeof errorData === "string") {
-          const trimmed = errorData.trim();
-          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-            try {
-              errorData = JSON.parse(errorData);
-            } catch {
-            }
-          }
-        }
-        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
-        throw new ApiError(response.status, errorData, derivedMessage);
-      }
-      throw new ApiError(
-        response.status,
-        null,
-        `Request failed with status ${response.status} ${response.statusText}`
-      );
-    } catch (err) {
-      if (err instanceof ApiError) throw err;
-      throw new ApiError(
-        response.status,
-        null,
-        `Request failed with status ${response.status} ${response.statusText}`
-      );
-    }
-  }
-  const contentType = response.headers.get("content-type");
-  const contentLength = response.headers.get("content-length");
-  if (contentLength === "0" || !contentType && response.status === 200) {
-    return {};
-  }
-  const text = await response.text();
-  if (!text || text.trim() === "") {
-    return {};
-  }
-  try {
-    const parsed = JSON.parse(text);
-    return parsed;
-  } catch (err) {
-    throw new Error(
-      `Failed to parse response as JSON: ${text.substring(0, 100)}`
-    );
-  }
-}
-async function getWithAuth(url, query, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "GET",
-    token,
-    query,
-    headers
-  });
-}
-async function getWithoutAuth(url, query, headers) {
-  return apiFetch(url, {
-    method: "GET",
-    query,
-    headers
-  });
-}
-async function postWithAuth(url, data, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "POST",
-    token,
-    data,
-    headers
-  });
-}
-async function postWithoutAuth(url, data, headers = {}) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    },
-    body: data ? JSON.stringify(data) : void 0
-  });
-  if (!response.ok) {
-    try {
-      const text2 = await response.text();
-      if (text2 && text2.trim()) {
-        let errorData;
-        try {
-          errorData = JSON.parse(text2);
-        } catch {
-          errorData = text2;
-        }
-        if (typeof errorData === "string") {
-          const trimmed = errorData.trim();
-          if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-            try {
-              errorData = JSON.parse(errorData);
-            } catch {
-            }
-          }
-        }
-        const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
-        throw new ApiError(response.status, errorData, derivedMessage);
-      }
-      throw new ApiError(
-        response.status,
-        null,
-        `POST request failed: ${response.status} ${response.statusText}`
-      );
-    } catch (err) {
-      if (err instanceof ApiError) throw err;
-      throw new ApiError(
-        response.status,
-        null,
-        `POST request failed: ${response.status} ${response.statusText}`
-      );
-    }
-  }
-  const contentLength = response.headers.get("content-length");
-  if (contentLength === "0") {
-    return {};
-  }
-  const text = await response.text();
-  if (!text || text.trim() === "") {
-    return {};
-  }
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    throw new Error(
-      `Failed to parse response as JSON: ${text.substring(0, 100)}`
-    );
-  }
-}
-async function putWithAuth(url, data, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "PUT",
-    token,
-    data,
-    headers
-  });
-}
-async function putWithoutAuth(url, data, headers) {
-  return apiFetch(url, {
-    method: "PUT",
-    data,
-    headers
-  });
-}
-async function deleteWithAuth(url, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "DELETE",
-    token,
-    headers
-  });
-}
-async function deleteWithoutAuth(url, headers) {
-  return apiFetch(url, {
-    method: "DELETE",
-    headers
-  });
-}
-async function patchWithAuth(url, data, headers) {
-  let token = null;
-  try {
-    token = await getToken();
-  } catch (err) {
-    if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
-      throw new ApiError(401, null, "Unauthorized");
-    }
-    throw err;
-  }
-  if (!token) {
-    throw new ApiError(401, null, "Unauthorized");
-  }
-  return apiFetch(url, {
-    method: "PATCH",
-    token,
-    data,
-    headers
-  });
-}
-async function patchWithoutAuth(url, data, headers) {
-  return apiFetch(url, {
-    method: "PATCH",
-    data,
-    headers
-  });
-}
-var ApiError;
-var init_fetcher = __esm({
-  "src/core/fetcher.ts"() {
-    "use strict";
-    init_token();
-    ApiError = class _ApiError extends Error {
-      constructor(status, body, message) {
-        super(message || `Request failed with status ${status}`);
-        this.status = status;
-        this.body = body;
-        Object.setPrototypeOf(this, _ApiError.prototype);
-      }
-    };
   }
 });
 

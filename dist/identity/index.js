@@ -1,23 +1,72 @@
 import {
-  getAuthConfig
-} from "../chunk-JC63QBDJ.js";
-import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-} from "../chunk-KJXA7LQ3.js";
+} from "../chunk-EDGLDLEW.js";
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
-} from "../chunk-JS4EYUML.js";
-import "../chunk-66RM7E5I.js";
+} from "../chunk-OOHF5HOF.js";
+import "../chunk-YLBUMHZ3.js";
 import "../chunk-3RG5ZIWI.js";
 
+// src/core/config.ts
+var getEnvVar = (key, brand) => {
+  if (typeof process === "undefined" || !process.env) return void 0;
+  if (brand) {
+    const brandKey = `${brand.toUpperCase()}_${key}`;
+    if (process.env[brandKey]) return process.env[brandKey];
+  }
+  return process.env[key];
+};
+var getAuthConfig = () => {
+  if (typeof process !== "undefined" && process.env) {
+    const brand2 = process.env.STOREAK_BRAND || process.env.BRAND;
+    const envConfig = {
+      clientId: getEnvVar("STOREAK_CLIENT_ID", brand2),
+      clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand2),
+      username: getEnvVar("STOREAK_USERNAME", brand2),
+      password: getEnvVar("STOREAK_PASSWORD", brand2)
+    };
+    if (envConfig.clientId && envConfig.clientSecret && envConfig.username && envConfig.password) {
+      return {
+        ...envConfig,
+        language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand2) || "0"),
+        gmt: parseInt(getEnvVar("STOREAK_GMT", brand2) || "3")
+      };
+    }
+  }
+  const brand = process.env?.STOREAK_BRAND || process.env?.BRAND;
+  const prefix = brand ? `${brand.toUpperCase()}_` : "";
+  const missing = [];
+  const required = [
+    `${prefix}STOREAK_CLIENT_ID`,
+    `${prefix}STOREAK_CLIENT_SECRET`
+  ];
+  required.forEach((name) => {
+    if (!process.env?.[name]) missing.push(name);
+  });
+  if (missing.length > 0) {
+    const hint = brand ? ` (for brand: ${brand}. Set ${prefix}* variables or use standard STOREAK_* variables)` : "";
+    throw new Error(
+      `Missing required environment variables for authentication: ${missing.join(", ")}${hint}`
+    );
+  }
+  return {
+    clientId: getEnvVar("STOREAK_CLIENT_ID", brand),
+    clientSecret: getEnvVar("STOREAK_CLIENT_SECRET", brand),
+    username: getEnvVar("STOREAK_USERNAME", brand),
+    password: getEnvVar("STOREAK_PASSWORD", brand),
+    language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
+    gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3")
+  };
+};
+
 // src/identity/login.ts
-async function loginUser(credentials) {
+async function loginUser(credentials, userAgent) {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
   if (isServer) {
@@ -69,7 +118,12 @@ async function loginUser(credentials) {
     if (credentials.playerId) {
       requestBody.playerId = credentials.playerId;
     }
-    const response = await postWithoutAuth(Api.signIn, requestBody);
+    const headers = userAgent ? { "User-Agent": userAgent + "login in user server side in nextjs-sdk-core " } : "login in user server side in nextjs-sdk-core ";
+    const response = await postWithoutAuth(
+      Api.signIn,
+      requestBody,
+      headers || {}
+    );
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
     }
@@ -152,7 +206,11 @@ async function loginUser(credentials) {
   }
   const res = await fetch(`/api/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // Browsers disallow setting User-Agent; keep a sentinel for other clients
+      "User-Agent": typeof navigator !== "undefined" && navigator.userAgent || "login user"
+    },
     body: JSON.stringify(credentials)
   });
   if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
@@ -180,7 +238,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../fetcher-AKKDVIEJ.js");
+    const { getWithAuth } = await import("../fetcher-YBGIUWM2.js");
     const { Api: Api2 } = await import("../api-RSV64Y2K.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
@@ -252,7 +310,18 @@ async function POST(request) {
         );
       }
     }
-    const response = await loginUser(credentials);
+    let userAgent;
+    try {
+      userAgent = request?.headersList?.get?.("user-agent") || void 0;
+    } catch {
+    }
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") || void 0;
+      } catch {
+      }
+    }
+    const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
     if (body.thirdPartyToken) {
       console.log("[identity:handler:login] setting encrypted tp_id cookie");
@@ -383,13 +452,7 @@ async function GET2(request) {
     }
     if (existingToken) {
       return NextResponse4.json(
-        { access_token: existingToken },
-        {
-          headers: {
-            "Cache-Control": "private, max-age=3600"
-            // Cache for 1 hour
-          }
-        }
+        { access_token: existingToken }
       );
     }
     let tpId = null;
@@ -415,9 +478,22 @@ async function GET2(request) {
     } else {
       console.log("[identity:handler:token] signing in with clientId/clientSecret");
     }
+    let userAgent = null;
+    if (!userAgent) {
+      try {
+        userAgent = request.headers.get("user-agent") + " nextjs-sdk-core  handler api/auth/token" || null;
+      } catch {
+      }
+    }
+    if (!userAgent) {
+      userAgent = "nextjs-sdk-core  handler api/auth/token";
+    }
     const response = await fetch(Api.signIn, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": userAgent
+      },
       body: JSON.stringify({
         ...requestBody,
         ...requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}

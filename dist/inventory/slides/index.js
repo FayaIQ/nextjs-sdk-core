@@ -3,7 +3,7 @@ import "../../chunk-3RG5ZIWI.js";
 // src/inventory/slides/getSlides.ts
 async function getSlides() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AKKDVIEJ.js");
+    const { getWithAuth } = await import("../../fetcher-YBGIUWM2.js");
     const { Api } = await import("../../api-RSV64Y2K.js");
     return getWithAuth(Api.getSlideShows);
   }

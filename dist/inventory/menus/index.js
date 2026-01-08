@@ -1,6 +1,6 @@
 import {
   getMenus
-} from "../../chunk-P3AY3RUD.js";
+} from "../../chunk-SEJFWFKM.js";
 import {
   ItemsFilterParameters
 } from "../../chunk-Q3KXH3LE.js";
@@ -51,7 +51,7 @@ async function GET2(request) {
 // src/inventory/menus/getMenuById.ts
 async function getMenuById(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("../../fetcher-AKKDVIEJ.js");
+    const { getWithAuth } = await import("../../fetcher-YBGIUWM2.js");
     const { Api } = await import("../../api-RSV64Y2K.js");
     return getWithAuth(Api.getMenuById(id));
   }
