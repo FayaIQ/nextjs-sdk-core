@@ -549,13 +549,15 @@ var init_cookie = __esm({
     "use strict";
     init_crypto();
     COOKIE_NAMES = {
-      /** Encrypted backend access token (httpOnly) */
-      CRF: "crf",
+      /** Primary session token (encrypted when possible) */
+      SESSION_ID: "session_id",
       /** User authentication flag */
       IS_USER: "isUser",
       /** Legacy: third-party token (for migration) */
       TP_ID: "tp_id",
-      /** Legacy: access token (for migration) */
+      /** Legacy: crf cookie (for migration - deprecated) */
+      CRF: "crf",
+      /** Legacy: access token (for migration - deprecated) */
       ACCESS_TOKEN: "access_token"
     };
     SECURE_COOKIE_OPTIONS = {
@@ -582,28 +584,34 @@ async function getTokenImpl() {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     let token = null;
+    const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
     try {
-      const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
       if (token) {
-        console.log("[token] Found encrypted CRF cookie");
-      }
-      if (!token) {
-        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
-        if (token) {
-          console.log("[token] Found encrypted access_token cookie");
-        }
+        console.log("[token] Found encrypted session_id");
+        return token;
       }
     } catch (e) {
-      console.error("[token] Decryption error:", e);
+      console.log("[token] session_id decryption failed, trying plain");
     }
-    if (!token) {
-      token = cookieStore.get("access_token")?.value || null;
+    token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
+    if (token) {
+      console.log("[token] Found plain session_id");
+      return token;
+    }
+    try {
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
       if (token) {
-        console.log("[token] Found plain access_token cookie");
+        console.log("[token] Found legacy encrypted crf");
+        return token;
       }
+    } catch (e) {
     }
-    if (token) return token;
+    token = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
+    if (token) {
+      console.log("[token] Found legacy plain access_token");
+      return token;
+    }
     console.error(
       "[token] No token found in strict mode. Available cookies:",
       cookieStore.getAll().map((c) => c.name)
@@ -616,29 +624,35 @@ async function getTokenImpl() {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
+      const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
       let token = null;
       try {
-        const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
         if (token) {
-          console.log("[token:auto] Found encrypted CRF cookie");
-        }
-        if (!token) {
-          token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
-          if (token) {
-            console.log("[token:auto] Found encrypted access_token cookie");
-          }
+          console.log("[token:auto] Found encrypted session_id");
+          return token;
         }
       } catch (e) {
-        console.error("[token:auto] Decryption error:", e);
+        console.log("[token:auto] session_id decryption failed, trying plain");
       }
-      if (!token) {
-        token = cookieStore.get("access_token")?.value || null;
+      token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
+      if (token) {
+        console.log("[token:auto] Found plain session_id");
+        return token;
+      }
+      try {
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
         if (token) {
-          console.log("[token:auto] Found plain access_token cookie");
+          console.log("[token:auto] Found legacy encrypted crf");
+          return token;
         }
+      } catch (e) {
       }
-      if (token) return token;
+      token = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
+      if (token) {
+        console.log("[token:auto] Found legacy plain access_token");
+        return token;
+      }
       console.warn(
         "[token:auto] No token found. Available cookies:",
         cookieStore.getAll().map((c) => c.name)
@@ -654,7 +668,7 @@ async function getTokenImpl() {
       if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
       return null;
     };
-    const clientToken = getCookie("access_token");
+    const clientToken = getCookie("session_id") || getCookie("access_token");
     if (clientToken) {
       return clientToken;
     }
@@ -1187,30 +1201,13 @@ async function loginUser(credentials, userAgent) {
     const expiresIn = response.expires || 7200;
     const { setEncryptedCookie: setEncryptedCookie2, setPlainCookie: setPlainCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
     try {
-      setEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF, response.access_token, {
+      setEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID, response.access_token, {
         maxAge: expiresIn
       });
+      console.log("[login] session_id saved (encrypted)");
     } catch (e) {
-      console.warn("[login] encryption failed for crf, using plain", e);
-      cookieStore.set(COOKIE_NAMES2.CRF, response.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: expiresIn
-      });
-    }
-    try {
-      setEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN, response.access_token, {
-        maxAge: expiresIn
-      });
-    } catch (e) {
-      console.warn("[login] encryption failed for access_token, using plain", e);
-      cookieStore.set(COOKIE_NAMES2.ACCESS_TOKEN, response.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
+      console.warn("[login] encryption failed, saving plain session_id", e);
+      setPlainCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID, response.access_token, {
         maxAge: expiresIn
       });
     }
@@ -1646,7 +1643,7 @@ async function GET2(request) {
       const { COOKIE_NAMES: CN } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
       const encrypted = encryptSync2(data.access_token);
       if (encrypted) {
-        res.cookies.set(CN.CRF, encrypted, {
+        res.cookies.set(CN.SESSION_ID, encrypted, {
           httpOnly: false,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
@@ -1654,26 +1651,12 @@ async function GET2(request) {
           maxAge: 3600
           // 1 hour
         });
+        console.log("[identity:handler:token] session_id saved (encrypted)");
       }
     } catch (e) {
-      console.warn("[identity:handler:token] encryption failed for crf, using plain cookie", e);
-    }
-    try {
-      const { encryptSync: encryptSync2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
-      const encrypted = encryptSync2(data.access_token);
-      if (encrypted) {
-        res.cookies.set(COOKIE_NAMES2.ACCESS_TOKEN, encrypted, {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 3600
-          // 1 hour
-        });
-      }
-    } catch (e) {
-      console.warn("[identity:handler:token] encryption failed for access_token, using plain cookie", e);
-      res.cookies.set(COOKIE_NAMES2.ACCESS_TOKEN, data.access_token, {
+      console.warn("[identity:handler:token] encryption failed, saving plain session_id", e);
+      const { COOKIE_NAMES: CN } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
+      res.cookies.set(CN.SESSION_ID, data.access_token, {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

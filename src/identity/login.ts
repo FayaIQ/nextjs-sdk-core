@@ -154,36 +154,16 @@ export async function loginUser(
     // Import cookie utilities for encrypted storage
     const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../utils/cookie");
     
-    // Save encrypted access_token as 'crf' cookie (httpOnly, secure)
+    // Save session token - encrypted if possible, otherwise plain
     try {
-      setEncryptedCookie(cookieStore, COOKIE_NAMES.CRF, response.access_token, {
+      setEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
         maxAge: expiresIn,
       });
+      console.log("[login] session_id saved (encrypted)");
     } catch (e) {
       // Fallback to plain cookie if encryption fails (missing ENCRYPTION_KEY_BASE64)
-      console.warn("[login] encryption failed for crf, using plain", e);
-      cookieStore.set(COOKIE_NAMES.CRF, response.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: expiresIn,
-      });
-    }
-    
-    // LEGACY: Keep encrypted access_token for backward compatibility during migration
-    try {
-      setEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
-        maxAge: expiresIn,
-      });
-    } catch (e) {
-      // Fallback to plain cookie if encryption fails
-      console.warn("[login] encryption failed for access_token, using plain", e);
-      cookieStore.set(COOKIE_NAMES.ACCESS_TOKEN, response.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
+      console.warn("[login] encryption failed, saving plain session_id", e);
+      setPlainCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
         maxAge: expiresIn,
       });
     }

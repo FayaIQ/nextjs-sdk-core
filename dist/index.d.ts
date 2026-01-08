@@ -190,13 +190,15 @@ declare function getToken(): Promise<string>;
  * Cookie names used by the SDK
  */
 declare const COOKIE_NAMES: {
-    /** Encrypted backend access token (httpOnly) */
-    readonly CRF: "crf";
+    /** Primary session token (encrypted when possible) */
+    readonly SESSION_ID: "session_id";
     /** User authentication flag */
     readonly IS_USER: "isUser";
     /** Legacy: third-party token (for migration) */
     readonly TP_ID: "tp_id";
-    /** Legacy: access token (for migration) */
+    /** Legacy: crf cookie (for migration - deprecated) */
+    readonly CRF: "crf";
+    /** Legacy: access token (for migration - deprecated) */
     readonly ACCESS_TOKEN: "access_token";
 };
 /**

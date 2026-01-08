@@ -27,36 +27,41 @@ async function getTokenImpl(): Promise<string> {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
 
-    // Try encrypted crf first
     let token: string | null = null;
+    const { getEncryptedCookie, COOKIE_NAMES } = await import("./utils/cookie");
+    
+    // Try encrypted session_id first
     try {
-      const { getEncryptedCookie, COOKIE_NAMES } = await import(
-        "./utils/cookie"
-      );
-      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
       if (token) {
-        console.log('[token] Found encrypted CRF cookie');
-      }
-      // Also try encrypted access_token (migration/fallback)
-      if (!token) {
-        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
-        if (token) {
-          console.log('[token] Found encrypted access_token cookie');
-        }
+        console.log('[token] Found encrypted session_id');
+        return token;
       }
     } catch (e) {
-      console.error('[token] Decryption error:', e);
+      console.log('[token] session_id decryption failed, trying plain');
     }
 
-    // Fallback to legacy plain access_token
-    if (!token) {
-      token = cookieStore.get("access_token")?.value || null;
+    // Try plain session_id
+    token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+    if (token) {
+      console.log('[token] Found plain session_id');
+      return token;
+    }
+
+    // LEGACY: Fallback to old cookie names for migration
+    try {
+      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
       if (token) {
-        console.log('[token] Found plain access_token cookie');
+        console.log('[token] Found legacy encrypted crf');
+        return token;
       }
-    }
+    } catch (e) {}
 
-    if (token) return token;
+    token = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+    if (token) {
+      console.log('[token] Found legacy plain access_token');
+      return token;
+    }
 
     console.error('[token] No token found in strict mode. Available cookies:', 
       cookieStore.getAll().map((c: any) => c.name));
@@ -70,37 +75,42 @@ async function getTokenImpl(): Promise<string> {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
+      const { getEncryptedCookie, COOKIE_NAMES } = await import("./utils/cookie");
 
-      // Try encrypted crf first
       let token: string | null = null;
+      
+      // Try encrypted session_id first
       try {
-        const { getEncryptedCookie, COOKIE_NAMES } = await import(
-          "./utils/cookie"
-        );
-        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
         if (token) {
-          console.log('[token:auto] Found encrypted CRF cookie');
-        }
-        // Also try encrypted access_token (migration/fallback)
-        if (!token) {
-          token = getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
-          if (token) {
-            console.log('[token:auto] Found encrypted access_token cookie');
-          }
+          console.log('[token:auto] Found encrypted session_id');
+          return token;
         }
       } catch (e) {
-        console.error('[token:auto] Decryption error:', e);
+        console.log('[token:auto] session_id decryption failed, trying plain');
       }
 
-      // Fallback to legacy plain access_token
-      if (!token) {
-        token = cookieStore.get("access_token")?.value || null;
+      // Try plain session_id
+      token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+      if (token) {
+        console.log('[token:auto] Found plain session_id');
+        return token;
+      }
+
+      // LEGACY: Fallback to old cookie names for migration
+      try {
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
         if (token) {
-          console.log('[token:auto] Found plain access_token cookie');
+          console.log('[token:auto] Found legacy encrypted crf');
+          return token;
         }
-      }
+      } catch (e) {}
 
-      if (token) return token;
+      token = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+      if (token) {
+        console.log('[token:auto] Found legacy plain access_token');
+        return token;
+      }
       
       console.warn('[token:auto] No token found. Available cookies:', 
         cookieStore.getAll().map((c: any) => c.name));
@@ -119,7 +129,9 @@ async function getTokenImpl(): Promise<string> {
       if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
       return null;
     };
-    const clientToken = getCookie("access_token");
+    
+    // Try session_id first, then legacy access_token
+    const clientToken = getCookie("session_id") || getCookie("access_token");
     if (clientToken) {
       return clientToken;
     }

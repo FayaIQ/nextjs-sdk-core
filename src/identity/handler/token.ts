@@ -114,42 +114,26 @@ export async function GET(request: NextRequest) {
     // Return response with encrypted cookie
     const res = NextResponse.json({ access_token: data.access_token });
     
-    // Set encrypted crf cookie using sync encryption
+    // Set session_id cookie - encrypted if possible, otherwise plain
     try {
       const { encryptSync } = await import("../../utils/crypto");
       const { COOKIE_NAMES: CN } = await import("../../utils/cookie");
       const encrypted = encryptSync(data.access_token);
       
       if (encrypted) {
-        res.cookies.set(CN.CRF, encrypted, {
+        res.cookies.set(CN.SESSION_ID, encrypted, {
           httpOnly: false,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
           maxAge: 3600, // 1 hour
         });
+        console.log("[identity:handler:token] session_id saved (encrypted)");
       }
     } catch (e) {
-      console.warn("[identity:handler:token] encryption failed for crf, using plain cookie", e);
-    }
-    
-    // LEGACY: Keep encrypted access_token for backward compatibility
-    try {
-      const { encryptSync } = await import("../../utils/crypto");
-      const encrypted = encryptSync(data.access_token);
-      
-      if (encrypted) {
-        res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, encrypted, {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 3600, // 1 hour
-        });
-      }
-    } catch (e) {
-      console.warn("[identity:handler:token] encryption failed for access_token, using plain cookie", e);
-      res.cookies.set(COOKIE_NAMES.ACCESS_TOKEN, data.access_token, {
+      console.warn("[identity:handler:token] encryption failed, saving plain session_id", e);
+      const { COOKIE_NAMES: CN } = await import("../../utils/cookie");
+      res.cookies.set(CN.SESSION_ID, data.access_token, {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

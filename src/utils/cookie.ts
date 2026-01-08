@@ -10,13 +10,15 @@ import type { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
  * Cookie names used by the SDK
  */
 export const COOKIE_NAMES = {
-  /** Encrypted backend access token (httpOnly) */
-  CRF: 'crf',
+  /** Primary session token (encrypted when possible) */
+  SESSION_ID: 'session_id',
   /** User authentication flag */
   IS_USER: 'isUser',
   /** Legacy: third-party token (for migration) */
   TP_ID: 'tp_id',
-  /** Legacy: access token (for migration) */
+  /** Legacy: crf cookie (for migration - deprecated) */
+  CRF: 'crf',
+  /** Legacy: access token (for migration - deprecated) */
   ACCESS_TOKEN: 'access_token',
 } as const;
 
