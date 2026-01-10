@@ -1,11 +1,7 @@
 // src/inventory/slides/getSlides.ts
 async function getSlides() {
   if (typeof window === "undefined") {
-<<<<<<< HEAD
-    const { getWithAuth } = await import("../../fetcher-V4JQ7DPQ.js");
-=======
-    const { getWithAuth } = await import("../../fetcher-3366SLXM.js");
->>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
+    const { getWithAuth } = await import("../../fetcher-XAGNMCPG.js");
     const { Api } = await import("../../api-IWWKU55Q.js");
     return getWithAuth(Api.getSlideShows);
   }

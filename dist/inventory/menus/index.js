@@ -1,10 +1,6 @@
 import {
   getMenus
-<<<<<<< HEAD
-} from "../../chunk-AC56RSAR.js";
-=======
-} from "../../chunk-T4IGHAFT.js";
->>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
+} from "../../chunk-RVLYQRWE.js";
 import {
   ItemsFilterParameters
 } from "../../chunk-Q3KXH3LE.js";
@@ -54,11 +50,7 @@ async function GET2(request) {
 // src/inventory/menus/getMenuById.ts
 async function getMenuById(id) {
   if (typeof window === "undefined") {
-<<<<<<< HEAD
-    const { getWithAuth } = await import("../../fetcher-V4JQ7DPQ.js");
-=======
-    const { getWithAuth } = await import("../../fetcher-3366SLXM.js");
->>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
+    const { getWithAuth } = await import("../../fetcher-XAGNMCPG.js");
     const { Api } = await import("../../api-IWWKU55Q.js");
     return getWithAuth(Api.getMenuById(id));
   }

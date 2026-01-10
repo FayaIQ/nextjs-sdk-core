@@ -1,10 +1,6 @@
 import {
   getBrands
-<<<<<<< HEAD
-} from "../../chunk-LLEOO5DC.js";
-=======
-} from "../../chunk-FPQGUBBO.js";
->>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
+} from "../../chunk-FYV2GF4G.js";
 
 // src/inventory/brands/handler/get-brands.ts
 import { NextResponse } from "next/server";

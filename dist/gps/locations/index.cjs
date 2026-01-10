@@ -145,7 +145,6 @@ function decryptSync(payload) {
     throw e;
   }
 }
-<<<<<<< HEAD
 async function encrypt(text) {
   if (!text) return text;
   const key = await keyPromise;
@@ -179,10 +178,7 @@ async function decrypt(payload) {
   const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
   return decoder.decode(pt);
 }
-async function decryptUniversal(payload) {
-=======
 function decryptUniversal(payload) {
->>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
   console.log(`[crypto:decryptUniversal] Attempting to decrypt payload length: ${payload?.length || 0}`);
   if (!payload) {
     console.log("[crypto:decryptUniversal] No payload provided");

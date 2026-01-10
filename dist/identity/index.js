@@ -2,24 +2,15 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
-<<<<<<< HEAD
-} from "../chunk-M4BZMXCK.js";
-=======
-} from "../chunk-BGLDR6FN.js";
->>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
+} from "../chunk-FQIWTD7H.js";
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
-<<<<<<< HEAD
-} from "../chunk-P2EDC6QH.js";
-import "../chunk-BNWD4DSM.js";
-=======
-} from "../chunk-DU5RCNSK.js";
-import "../chunk-FBLW4A4O.js";
->>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
+} from "../chunk-4QEDJH35.js";
+import "../chunk-YJHA2URL.js";
 
 // src/core/config.ts
 var getEnvVar = (key, brand) => {
@@ -247,11 +238,7 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
-<<<<<<< HEAD
-    const { getWithAuth } = await import("../fetcher-V4JQ7DPQ.js");
-=======
-    const { getWithAuth } = await import("../fetcher-3366SLXM.js");
->>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
+    const { getWithAuth } = await import("../fetcher-XAGNMCPG.js");
     const { Api: Api2 } = await import("../api-IWWKU55Q.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
