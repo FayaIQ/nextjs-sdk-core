@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
       let hasValidToken = false;
       try {
         const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
-        const existingToken = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-        const existingTpId = await getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
+        const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+        const existingTpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
         
         if (existingToken && existingTpId === body.thirdPartyToken) {
           hasValidToken = true;

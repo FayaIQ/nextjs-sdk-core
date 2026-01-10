@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     
     // Check encrypted crf cookie first
     console.log("[identity:handler:token] Checking for existing token in cookies");
-    let existingToken = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
     console.log(`[identity:handler:token] CRF cookie token found: ${!!existingToken}`);
     
     // Fallback to legacy access_token if crf not found
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     console.log("[identity:handler:token] Checking for tp_id cookie");
     let tpId: string | null = null;
     try {
-      tpId = await getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
+      tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
       console.log(`[identity:handler:token] Encrypted tp_id found: ${!!tpId}`);
     } catch (e) {
       console.log("[identity:handler:token] Encrypted tp_id decryption failed");

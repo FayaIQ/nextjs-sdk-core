@@ -2,15 +2,24 @@ import {
   PUT,
   putUserInfo,
   toIsoBirthdate
+<<<<<<< HEAD
 } from "../chunk-M4BZMXCK.js";
+=======
+} from "../chunk-BGLDR6FN.js";
+>>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
 import {
   Api
 } from "../chunk-B7VMWVKJ.js";
 import {
   ApiError,
   postWithoutAuth
+<<<<<<< HEAD
 } from "../chunk-P2EDC6QH.js";
 import "../chunk-BNWD4DSM.js";
+=======
+} from "../chunk-DU5RCNSK.js";
+import "../chunk-FBLW4A4O.js";
+>>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
 
 // src/core/config.ts
 var getEnvVar = (key, brand) => {
@@ -129,7 +138,7 @@ async function loginUser(credentials, userAgent) {
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
     console.log(`[login] Setting cookies. expiresIn: ${expiresIn}, access_token length: ${response.access_token?.length || 0}`);
-    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-WWTJYXTV.js");
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../cookie-44NI4SKY.js");
     console.log("[login] Attempting to save session_id cookie");
     try {
       setEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
@@ -238,7 +247,11 @@ async function logoutUser() {
 // src/identity/getCustomersDropdown.ts
 async function getCustomersDropdown(username, FullName) {
   if (typeof window === "undefined") {
+<<<<<<< HEAD
     const { getWithAuth } = await import("../fetcher-V4JQ7DPQ.js");
+=======
+    const { getWithAuth } = await import("../fetcher-3366SLXM.js");
+>>>>>>> parent of cc81c84 (Refactor decryption functions to use async/await for improved handling of encrypted cookies and tokens)
     const { Api: Api2 } = await import("../api-IWWKU55Q.js");
     const params2 = new URLSearchParams();
     const usernameTrimmed2 = username !== void 0 ? String(username).trim() : "";
@@ -281,9 +294,9 @@ async function POST(request) {
       const cookieStore = await cookies();
       let hasValidToken = false;
       try {
-        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-WWTJYXTV.js");
-        const existingToken = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-        const existingTpId = await getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
+        const { getEncryptedCookie, COOKIE_NAMES } = await import("../cookie-44NI4SKY.js");
+        const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+        const existingTpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
         if (existingToken && existingTpId === body.thirdPartyToken) {
           hasValidToken = true;
         }
@@ -327,7 +340,7 @@ async function POST(request) {
       console.log("[identity:handler:login] setting encrypted tp_id cookie");
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const { setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-WWTJYXTV.js");
+      const { setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-44NI4SKY.js");
       try {
         setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, {
           maxAge: 3600
@@ -355,7 +368,7 @@ async function POST(request) {
     );
     if (body.thirdPartyToken) {
       try {
-        const { encryptSync } = await import("../crypto-NNIJ74XH.js");
+        const { encryptSync } = await import("../crypto-AHNJNIEG.js");
         const encrypted = encryptSync(body.thirdPartyToken);
         if (encrypted) {
           res.cookies.set("tp_id", encrypted, {
@@ -447,9 +460,9 @@ async function GET2(request) {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     console.log(`[identity:handler:token] Available cookies: ${cookieStore.getAll().map((c) => c.name).join(", ")}`);
-    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-WWTJYXTV.js");
+    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../cookie-44NI4SKY.js");
     console.log("[identity:handler:token] Checking for existing token in cookies");
-    let existingToken = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
     console.log(`[identity:handler:token] CRF cookie token found: ${!!existingToken}`);
     if (!existingToken) {
       existingToken = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
@@ -465,7 +478,7 @@ async function GET2(request) {
     console.log("[identity:handler:token] Checking for tp_id cookie");
     let tpId = null;
     try {
-      tpId = await getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
+      tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
       console.log(`[identity:handler:token] Encrypted tp_id found: ${!!tpId}`);
     } catch (e) {
       console.log("[identity:handler:token] Encrypted tp_id decryption failed");
@@ -530,8 +543,8 @@ async function GET2(request) {
     const res = NextResponse4.json({ access_token: data.access_token });
     console.log("[identity:handler:token] Setting session_id cookie");
     try {
-      const { encryptSync } = await import("../crypto-NNIJ74XH.js");
-      const { COOKIE_NAMES: CN } = await import("../cookie-WWTJYXTV.js");
+      const { encryptSync } = await import("../crypto-AHNJNIEG.js");
+      const { COOKIE_NAMES: CN } = await import("../cookie-44NI4SKY.js");
       const encrypted = encryptSync(data.access_token);
       if (encrypted) {
         res.cookies.set(CN.SESSION_ID, encrypted, {
@@ -548,7 +561,7 @@ async function GET2(request) {
       }
     } catch (e) {
       console.warn("[identity:handler:token] encryption failed, saving plain session_id", e);
-      const { COOKIE_NAMES: CN } = await import("../cookie-WWTJYXTV.js");
+      const { COOKIE_NAMES: CN } = await import("../cookie-44NI4SKY.js");
       res.cookies.set(CN.SESSION_ID, data.access_token, {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",

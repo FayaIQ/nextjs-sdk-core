@@ -234,9 +234,9 @@ export async function decrypt(
  * Universal decryption that tries Node.js crypto first, then Web Crypto API
  * This ensures compatibility with tokens encrypted by middleware (Web Crypto) and SDK (Node.js crypto)
  */
-export async function decryptUniversal(
+export function decryptUniversal(
   payload: string | undefined | null
-): Promise<string | undefined | null> {
+): string | undefined | null {
   console.log(`[crypto:decryptUniversal] Attempting to decrypt payload length: ${payload?.length || 0}`);
 
   if (!payload) {
@@ -256,9 +256,14 @@ export async function decryptUniversal(
     // Fallback to Web Crypto API decryption (for middleware-encrypted tokens)
     try {
       console.log("[crypto:decryptUniversal] Trying Web Crypto API decryption");
-      const result = await decrypt(payload);
-      console.log("[crypto:decryptUniversal] Web Crypto API decryption successful");
-      return result;
+      // Note: This is async, but we'll make it sync by checking if we're in Node.js
+      if (typeof window === 'undefined') {
+        console.log("[crypto:decryptUniversal] Server-side, cannot use Web Crypto for sync decryption");
+        throw new Error("Web Crypto not available in sync context");
+      }
+
+      // For client-side, we could do async decryption, but for now let's just re-throw
+      throw nodeError;
     } catch (webError) {
       console.error("[crypto:decryptUniversal] Both decryption methods failed");
       console.error("[crypto:decryptUniversal] Node.js error:", nodeError);

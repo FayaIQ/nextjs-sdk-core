@@ -19,7 +19,7 @@ export const COOKIE_NAMES = {
   /** Legacy: crf cookie (for migration - deprecated) */
   CRF: 'crf',
   /** Legacy: access token (for migration - deprecated) */
-  ACCESS_TOKEN: 'access_token',
+  // ACCESS_TOKEN: 'access_token',
 } as const;
 
 /**
@@ -68,10 +68,10 @@ export function setEncryptedCookie(
  * Server-side only.
  * Returns null if cookie doesn't exist or decryption fails.
  */
-export async function getEncryptedCookie(
+export function getEncryptedCookie(
   cookieStore: any,
   name: string
-): Promise<string | null> {
+): string | null {
   console.log(`[cookie:getEncryptedCookie] Attempting to get encrypted cookie: ${name}`);
   if (typeof window !== "undefined") {
     console.error("[cookie:getEncryptedCookie] ERROR: Called on client-side");
@@ -91,7 +91,7 @@ export async function getEncryptedCookie(
 
     // Try universal decrypt (handles both Node.js and Web Crypto encrypted tokens)
     try {
-      const decrypted = await decryptUniversal(cookie.value);
+      const decrypted = decryptUniversal(cookie.value);
       console.log(`[cookie:getEncryptedCookie] Universal decryption successful for ${name}, decrypted length: ${decrypted?.length || 0}`);
       if (decrypted) {
         console.log(`[cookie:getEncryptedCookie] Decrypted value (first 20 chars): ${decrypted.substring(0, 20)}...`);

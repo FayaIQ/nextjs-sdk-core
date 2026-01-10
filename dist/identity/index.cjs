@@ -512,7 +512,7 @@ async function decrypt(payload) {
   const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
   return decoder.decode(pt);
 }
-async function decryptUniversal(payload) {
+function decryptUniversal(payload) {
   console.log(`[crypto:decryptUniversal] Attempting to decrypt payload length: ${payload?.length || 0}`);
   if (!payload) {
     console.log("[crypto:decryptUniversal] No payload provided");
@@ -527,9 +527,11 @@ async function decryptUniversal(payload) {
     console.log("[crypto:decryptUniversal] Node.js crypto decryption failed, trying Web Crypto:", nodeError);
     try {
       console.log("[crypto:decryptUniversal] Trying Web Crypto API decryption");
-      const result = await decrypt(payload);
-      console.log("[crypto:decryptUniversal] Web Crypto API decryption successful");
-      return result;
+      if (typeof window === "undefined") {
+        console.log("[crypto:decryptUniversal] Server-side, cannot use Web Crypto for sync decryption");
+        throw new Error("Web Crypto not available in sync context");
+      }
+      throw nodeError;
     } catch (webError) {
       console.error("[crypto:decryptUniversal] Both decryption methods failed");
       console.error("[crypto:decryptUniversal] Node.js error:", nodeError);
@@ -587,7 +589,7 @@ function setEncryptedCookie(cookieStore, name, value, options) {
     throw e;
   }
 }
-async function getEncryptedCookie(cookieStore, name) {
+function getEncryptedCookie(cookieStore, name) {
   console.log(`[cookie:getEncryptedCookie] Attempting to get encrypted cookie: ${name}`);
   if (typeof window !== "undefined") {
     console.error("[cookie:getEncryptedCookie] ERROR: Called on client-side");
@@ -603,7 +605,7 @@ async function getEncryptedCookie(cookieStore, name) {
     console.log(`[cookie:getEncryptedCookie] Raw cookie value length: ${cookie.value.length}`);
     console.log(`[cookie:getEncryptedCookie] Raw cookie value (first 50 chars): ${cookie.value.substring(0, 50)}...`);
     try {
-      const decrypted = await decryptUniversal(cookie.value);
+      const decrypted = decryptUniversal(cookie.value);
       console.log(`[cookie:getEncryptedCookie] Universal decryption successful for ${name}, decrypted length: ${decrypted?.length || 0}`);
       if (decrypted) {
         console.log(`[cookie:getEncryptedCookie] Decrypted value (first 20 chars): ${decrypted.substring(0, 20)}...`);
@@ -649,9 +651,9 @@ var init_cookie = __esm({
       /** Legacy: third-party token (for migration) */
       TP_ID: "tp_id",
       /** Legacy: crf cookie (for migration - deprecated) */
-      CRF: "crf",
+      CRF: "crf"
       /** Legacy: access token (for migration - deprecated) */
-      ACCESS_TOKEN: "access_token"
+      // ACCESS_TOKEN: 'access_token',
     };
     SECURE_COOKIE_OPTIONS = {
       httpOnly: true,
@@ -735,7 +737,7 @@ async function getTokenImpl() {
     const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
     console.log("[token:getTokenImpl] Trying encrypted session_id");
     try {
-      token = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
       if (token) {
         console.log("[token:getTokenImpl] Found encrypted session_id");
         console.log(`[token:getTokenImpl] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
@@ -753,7 +755,7 @@ async function getTokenImpl() {
     }
     console.log("[token:getTokenImpl] Trying middleware access_token cookie");
     try {
-      token = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
       if (token) {
         console.log("[token:getTokenImpl] Found encrypted access_token (middleware), returning token");
         return token;
@@ -761,14 +763,14 @@ async function getTokenImpl() {
     } catch (e) {
       console.log("[token:getTokenImpl] access_token decryption failed, trying plain");
     }
-    token = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
+    token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
     if (token) {
       console.log("[token:getTokenImpl] Found plain access_token (middleware), returning token");
       return token;
     }
     console.log("[token:getTokenImpl] Trying legacy cookie names");
     try {
-      token = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
       if (token) {
         console.log("[token:getTokenImpl] Found legacy encrypted crf, returning token");
         return token;
@@ -776,9 +778,9 @@ async function getTokenImpl() {
     } catch (e) {
       console.log("[token:getTokenImpl] Legacy crf decryption failed");
     }
-    token = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
+    token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
     if (token) {
-      console.log("[token:getTokenImpl] Found legacy plain access_token, returning token");
+      console.log("[token:getTokenImpl] Found legacy plain SESSION_ID, returning token");
       return token;
     }
     console.error(
@@ -800,7 +802,7 @@ async function getTokenImpl() {
       let token = null;
       console.log("[token:getTokenImpl:auto] Trying encrypted session_id");
       try {
-        token = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
         if (token) {
           console.log("[token:getTokenImpl:auto] Found encrypted session_id");
           console.log(`[token:getTokenImpl:auto] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
@@ -818,7 +820,7 @@ async function getTokenImpl() {
       }
       console.log("[token:getTokenImpl:auto] Trying middleware access_token cookie");
       try {
-        token = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.ACCESS_TOKEN);
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
         if (token) {
           console.log("[token:getTokenImpl:auto] Found encrypted access_token (middleware), returning token");
           return token;
@@ -826,14 +828,14 @@ async function getTokenImpl() {
       } catch (e) {
         console.log("[token:getTokenImpl:auto] access_token decryption failed, trying plain");
       }
-      token = cookieStore.get(COOKIE_NAMES2.ACCESS_TOKEN)?.value || null;
+      token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
       if (token) {
         console.log("[token:getTokenImpl:auto] Found plain access_token (middleware), returning token");
         return token;
       }
       console.log("[token:getTokenImpl:auto] Trying legacy cookie names");
       try {
-        token = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+        token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
         if (token) {
           console.log("[token:getTokenImpl:auto] Found legacy encrypted crf, returning token");
           return token;
@@ -1638,8 +1640,8 @@ async function POST(request) {
       let hasValidToken = false;
       try {
         const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-        const existingToken = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
-        const existingTpId = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID);
+        const existingToken = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+        const existingTpId = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID);
         if (existingToken && existingTpId === body.thirdPartyToken) {
           hasValidToken = true;
         }
@@ -1806,7 +1808,7 @@ async function GET2(request) {
     console.log(`[identity:handler:token] Available cookies: ${cookieStore.getAll().map((c) => c.name).join(", ")}`);
     const { getEncryptedCookie: getEncryptedCookie2, setEncryptedCookie: setEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
     console.log("[identity:handler:token] Checking for existing token in cookies");
-    let existingToken = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
+    let existingToken = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
     console.log(`[identity:handler:token] CRF cookie token found: ${!!existingToken}`);
     if (!existingToken) {
       existingToken = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
@@ -1822,7 +1824,7 @@ async function GET2(request) {
     console.log("[identity:handler:token] Checking for tp_id cookie");
     let tpId = null;
     try {
-      tpId = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID);
+      tpId = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.TP_ID);
       console.log(`[identity:handler:token] Encrypted tp_id found: ${!!tpId}`);
     } catch (e) {
       console.log("[identity:handler:token] Encrypted tp_id decryption failed");

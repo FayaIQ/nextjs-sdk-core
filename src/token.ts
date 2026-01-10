@@ -103,7 +103,7 @@ async function getTokenImpl(): Promise<string> {
     // Try encrypted session_id first
     console.log("[token:getTokenImpl] Trying encrypted session_id");
     try {
-      token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
+      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
       if (token) {
         console.log('[token:getTokenImpl] Found encrypted session_id');
         console.log(`[token:getTokenImpl] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
@@ -125,7 +125,7 @@ async function getTokenImpl(): Promise<string> {
     // MIDDLEWARE: Check access_token cookie (set by consumer middleware)
     console.log("[token:getTokenImpl] Trying middleware access_token cookie");
     try {
-      token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
+      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
       if (token) {
         console.log('[token:getTokenImpl] Found encrypted access_token (middleware), returning token');
         return token;
@@ -135,7 +135,7 @@ async function getTokenImpl(): Promise<string> {
     }
 
     // Try plain access_token
-    token = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+    token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
     if (token) {
       console.log('[token:getTokenImpl] Found plain access_token (middleware), returning token');
       return token;
@@ -144,7 +144,7 @@ async function getTokenImpl(): Promise<string> {
     // LEGACY: Fallback to old cookie names for migration
     console.log("[token:getTokenImpl] Trying legacy cookie names");
     try {
-      token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
       if (token) {
         console.log('[token:getTokenImpl] Found legacy encrypted crf, returning token');
         return token;
@@ -153,9 +153,9 @@ async function getTokenImpl(): Promise<string> {
       console.log('[token:getTokenImpl] Legacy crf decryption failed');
     }
 
-    token = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+    token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
     if (token) {
-      console.log('[token:getTokenImpl] Found legacy plain access_token, returning token');
+      console.log('[token:getTokenImpl] Found legacy plain SESSION_ID, returning token');
       return token;
     }
 
@@ -181,7 +181,7 @@ async function getTokenImpl(): Promise<string> {
       // Try encrypted session_id first
       console.log("[token:getTokenImpl:auto] Trying encrypted session_id");
       try {
-        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
         if (token) {
           console.log('[token:getTokenImpl:auto] Found encrypted session_id');
           console.log(`[token:getTokenImpl:auto] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
@@ -203,7 +203,7 @@ async function getTokenImpl(): Promise<string> {
       // MIDDLEWARE: Check access_token cookie (set by consumer middleware)
       console.log("[token:getTokenImpl:auto] Trying middleware access_token cookie");
       try {
-        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.ACCESS_TOKEN);
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
         if (token) {
           console.log('[token:getTokenImpl:auto] Found encrypted access_token (middleware), returning token');
           return token;
@@ -213,7 +213,7 @@ async function getTokenImpl(): Promise<string> {
       }
 
       // Try plain access_token
-      token = cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
+      token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
       if (token) {
         console.log('[token:getTokenImpl:auto] Found plain access_token (middleware), returning token');
         return token;
@@ -222,7 +222,7 @@ async function getTokenImpl(): Promise<string> {
       // LEGACY: Fallback to old cookie names for migration
       console.log("[token:getTokenImpl:auto] Trying legacy cookie names");
       try {
-        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
         if (token) {
           console.log('[token:getTokenImpl:auto] Found legacy encrypted crf, returning token');
           return token;
