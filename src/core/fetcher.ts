@@ -148,12 +148,20 @@ export async function apiFetch<T>(
   }
 
   if (token) {
-    // Use token as provided (encryption/decryption removed)
-    requestHeaders["Authorization"] = `Bearer ${token}`;
+    // Try to decrypt token if it's encrypted; decryptUniversal returns original value on failure
     try {
-      console.log(`[apiFetch] Authorization header set with token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
-    } catch {
-      console.log('[apiFetch] Authorization header set (token preview unavailable)');
+      const { decryptUniversal } = await import("../utils/crypto");
+      const maybe = decryptUniversal(token);
+      const finalToken = maybe || token;
+      requestHeaders["Authorization"] = `Bearer ${finalToken}`;
+      try {
+        console.log(`[apiFetch] Authorization header set with token preview: ${finalToken.substring(0, 20)}...${finalToken.substring(finalToken.length - 20)}`);
+      } catch {
+        console.log('[apiFetch] Authorization header set (token preview unavailable)');
+      }
+    } catch (e) {
+      // decryption failed unexpectedly: use raw token
+      requestHeaders["Authorization"] = `Bearer ${token}`;
     }
   } else {
     console.log('[apiFetch] No token provided, skipping Authorization header');

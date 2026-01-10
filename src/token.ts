@@ -24,7 +24,16 @@ async function getTokenImpl(): Promise<string> {
     if (headerToken) {
       console.log(`[token:getTokenImpl] Raw header token length: ${headerToken.length}`);
       console.log(`[token:getTokenImpl] Header token preview: ${headerToken.substring(0, 50)}...`);
-      
+      try {
+        const { decryptUniversal } = await import("./utils/crypto");
+        const maybe = decryptUniversal(headerToken);
+        const finalHeaderToken = maybe || headerToken;
+        console.log(`[token:getTokenImpl] Using header token (decrypted if applicable)`);
+        return finalHeaderToken;
+      } catch (e) {
+        console.warn('[token:getTokenImpl] header token decryption failed, using raw header token');
+        return headerToken;
+      }
     
     }
   }

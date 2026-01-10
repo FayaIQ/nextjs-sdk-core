@@ -123,15 +123,32 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    // Also set tp_id in response cookie for client (no encryption)
+    // Also set tp_id in response cookie for client (encrypted preferred)
     if (body.thirdPartyToken) {
-      res.cookies.set("tp_id", body.thirdPartyToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600,
-      });
+      try {
+        const { setEncryptedCookie } = await import("../../utils/cookie");
+        try {
+          setEncryptedCookie(res.cookies, "tp_id", body.thirdPartyToken, { maxAge: 3600 });
+        } catch (e) {
+          console.warn("[identity:handler:login] encrypted tp_id set failed, falling back to plain", e);
+          res.cookies.set("tp_id", body.thirdPartyToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600,
+          });
+        }
+      } catch (e) {
+        // If cookie util import fails, set plain as last resort
+        res.cookies.set("tp_id", body.thirdPartyToken, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "lax",
+          path: "/",
+          maxAge: 3600,
+        });
+      }
     }
     return res;
   } catch (error: any) {
