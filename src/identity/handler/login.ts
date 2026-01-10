@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       
       // Fallback to legacy plain cookies
       if (!hasValidToken) {
-        const existingToken = cookieStore.get("access_token")?.value;
+        const existingToken = cookieStore.get("session_id")?.value;
         const existingTpId = cookieStore.get("tp_id")?.value;
         if (existingToken && existingTpId === body.thirdPartyToken) {
           hasValidToken = true;
