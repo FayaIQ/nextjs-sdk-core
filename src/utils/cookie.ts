@@ -4,7 +4,6 @@
  */
 
 import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { encryptSync, decryptUniversal } from "./crypto";
 
 /**
  * Cookie names used by the SDK
@@ -48,16 +47,8 @@ export function setEncryptedCookie(
   }
 
   try {
-    // Try to encrypt synchronously (Node.js). If encryption fails, fall back to plain.
-    let toStore = value;
-    try {
-      const enc = encryptSync(value);
-      if (enc) toStore = enc;
-    } catch (e) {
-      // encryption failed — store plain value as fallback
-    }
-
-    cookieStore.set(name, toStore, {
+    // Encryption removed: store plain value
+    cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
       ...options,
     });
@@ -83,13 +74,8 @@ export function getEncryptedCookie(
   try {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
-    // Try to decrypt if possible; decryptUniversal will return decrypted value or original
-    try {
-      const dec = decryptUniversal(cookie.value);
-      return dec ?? null;
-    } catch (e) {
-      return cookie.value || null;
-    }
+    // Encryption removed — return plain cookie value
+    return cookie.value || null;
   } catch (e) {
     console.error(`[cookie:getEncryptedCookie] Failed to read ${name}:`, e);
     return null;

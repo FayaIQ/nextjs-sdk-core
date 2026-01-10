@@ -61,7 +61,7 @@ function getEncryptedCookie(cookieStore, name) {
   try {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
-    return cookie.value;
+    return cookie.value || null;
   } catch (e) {
     console.error(`[cookie:getEncryptedCookie] Failed to read ${name}:`, e);
     return null;
@@ -72,7 +72,7 @@ function setPlainCookie(cookieStore, name, value, options) {
   try {
     cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
-      httpOnly: false,
+      httpOnly: true,
       // Allow client-side read for flags
       ...options
     });
@@ -127,6 +127,7 @@ async function getTokenImpl() {
     if (headerToken) {
       console.log(`[token:getTokenImpl] Raw header token length: ${headerToken.length}`);
       console.log(`[token:getTokenImpl] Header token preview: ${headerToken.substring(0, 50)}...`);
+      return headerToken;
     }
   }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {

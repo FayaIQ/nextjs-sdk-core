@@ -47,12 +47,5 @@ export {
   SECURE_COOKIE_OPTIONS,
 } from "./utils/cookie";
 
-// Encryption utilities (also exported for advanced use — server-side only)
-export {
-  encryptSync,
-  decryptSync,
-  encrypt,
-  decrypt,
-  decryptUniversal,
-} from "./utils/crypto";
+// Encryption utilities removed from public API
 
