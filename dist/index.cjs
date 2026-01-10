@@ -50,7 +50,10 @@ function setEncryptedCookie(cookieStore, name, value, options) {
       ...options
     });
   } catch (e) {
-    console.error(`[cookie:setEncryptedCookie] Failed to set cookie ${name}:`, e);
+    console.error(
+      `[cookie:setEncryptedCookie] Failed to set cookie ${name}:`,
+      e
+    );
     throw e;
   }
 }
@@ -68,7 +71,9 @@ function getEncryptedCookie(cookieStore, name) {
   }
 }
 function setPlainCookie(cookieStore, name, value, options) {
-  console.log(`[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${value?.length || 0}`);
+  console.log(
+    `[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${value?.length || 0}`
+  );
   try {
     cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
@@ -76,9 +81,14 @@ function setPlainCookie(cookieStore, name, value, options) {
       // Allow client-side read for flags
       ...options
     });
-    console.log(`[cookie:setPlainCookie] Plain cookie ${name} set successfully`);
+    console.log(
+      `[cookie:setPlainCookie] Plain cookie ${name} set successfully`
+    );
   } catch (e) {
-    console.error(`[cookie:setPlainCookie] Failed to set plain cookie ${name}:`, e);
+    console.error(
+      `[cookie:setPlainCookie] Failed to set plain cookie ${name}:`,
+      e
+    );
     throw e;
   }
 }
@@ -2442,7 +2452,7 @@ async function startPhoneSignIn(phoneNumber, options) {
         const auth = getAuth(primaryApp2);
         try {
           await setPersistence(auth, browserLocalPersistence);
-          console.log("[firebase:confirmPhoneCode] persistence set to LOCAL");
+          console.log(":confirmPhoneCode] persistence set to LOCAL");
         } catch (e) {
           console.warn(
             "[firebase:confirmPhoneCode] failed to set persistence",
@@ -2601,7 +2611,9 @@ async function startAuthStateSync(options) {
         try {
           const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
           if (lastPersistedHash && lastPersistedHash === tokenHash) {
-            console.log("[firebase:startAuthStateSync] token already synced (session cache hit)");
+            console.log(
+              "[firebase:startAuthStateSync] token already synced (session cache hit)"
+            );
             return;
           }
         } catch {
