@@ -75,7 +75,7 @@ function setPlainCookie(cookieStore, name, value, options) {
     `[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${value?.length || 0}`
   );
   try {
-    cookieStore.set(name, decodeURIComponent(value), {
+    cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
       httpOnly: true,
       // Allow client-side read for flags

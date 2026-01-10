@@ -5,13 +5,13 @@ import {
   getEncryptedCookie,
   setEncryptedCookie,
   setPlainCookie
-} from "./chunk-IQENB5L7.js";
+} from "./chunk-JPCPMW3S.js";
 import {
   apiFetch
-} from "./chunk-6SYG7GGP.js";
+} from "./chunk-Z3KYUU4L.js";
 import {
   getToken
-} from "./chunk-EZ3D5S7R.js";
+} from "./chunk-RFJKH2NY.js";
 import {
   Api
 } from "./chunk-B7VMWVKJ.js";
@@ -24,7 +24,7 @@ import {
 // src/identity/application/storeInfo.ts
 async function getStoreInfo() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./core-KO5TSUQB.js");
+    const { getWithAuth } = await import("./core-TJPTXDF3.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     return getWithAuth(Api2.getStoreInfo);
   }
@@ -778,7 +778,7 @@ async function getProducts({
   const params = filterParams.toURLSearchParams();
   console.log("Fetching products with params:", params.toString());
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-5P7MR725.js");
+    const { getWithAuth } = await import("./fetcher-D5555AHZ.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     console.log(
       "Server-side fetching products with params:",
@@ -798,7 +798,7 @@ async function getProducts({
 // src/inventory/items/getProductInfo.ts
 async function getProductInfo(id) {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-5P7MR725.js");
+    const { getWithAuth } = await import("./fetcher-D5555AHZ.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     return getWithAuth(`${Api2.getProductInfo(id)}`);
   }
@@ -815,7 +815,7 @@ async function getMenus({
 }) {
   const params = filterParams.toURLSearchParams();
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./core-KO5TSUQB.js");
+    const { getWithAuth } = await import("./core-TJPTXDF3.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     return getWithAuth(`${Api2.getMenus}?${params.toString()}`, {});
   } else {
@@ -832,8 +832,8 @@ async function getOrders({
 }) {
   const params = filterParams.toURLSearchParams();
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./fetcher-5P7MR725.js");
-    const { default: getToken2 } = await import("./token-7ZSJZAMA.js");
+    const { getWithAuth } = await import("./fetcher-D5555AHZ.js");
+    const { default: getToken2 } = await import("./token-BNVVIWSM.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     const token = await getToken2();
     return getWithAuth(
@@ -850,7 +850,7 @@ async function getOrders({
 // src/inventory/brands/getBrands.ts
 async function getBrands() {
   if (typeof window === "undefined") {
-    const { getWithAuth } = await import("./core-KO5TSUQB.js");
+    const { getWithAuth } = await import("./core-TJPTXDF3.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     return getWithAuth(Api2.getBrands);
   } else {
@@ -865,7 +865,7 @@ async function getBrands() {
 // src/inventory/items/putItemCollection.ts
 async function putItemCollection(id, collectionId, data) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("./fetcher-5P7MR725.js");
+    const { putWithAuth } = await import("./fetcher-D5555AHZ.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     return putWithAuth(Api2.putItemCollection(id, collectionId), data);
   }
@@ -889,7 +889,7 @@ async function putItemCollection(id, collectionId, data) {
 // src/inventory/items/putItemCollectionActivate.ts
 async function putItemCollectionActivate(id, collectionId) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("./fetcher-5P7MR725.js");
+    const { putWithAuth } = await import("./fetcher-D5555AHZ.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     return putWithAuth(Api2.putItemCollectionActivate(id, collectionId));
   }
@@ -911,7 +911,7 @@ async function putItemCollectionActivate(id, collectionId) {
 // src/inventory/items/putItemCollectionDeactivate.ts
 async function putItemCollectionDeactivate(id, collectionId) {
   if (typeof window === "undefined") {
-    const { putWithAuth } = await import("./fetcher-5P7MR725.js");
+    const { putWithAuth } = await import("./fetcher-D5555AHZ.js");
     const { Api: Api2 } = await import("./api-IWWKU55Q.js");
     return putWithAuth(Api2.putItemCollectionDeactivate(id, collectionId));
   }

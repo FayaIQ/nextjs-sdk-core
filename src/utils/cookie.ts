@@ -101,7 +101,7 @@ export function setPlainCookie(
     }`
   );
   try {
-    cookieStore.set(name, decodeURIComponent(value), {
+    cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
       httpOnly: true, // Allow client-side read for flags
       ...options,

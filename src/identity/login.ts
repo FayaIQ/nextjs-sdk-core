@@ -190,7 +190,7 @@ export async function loginUser(
     setPlainCookie(
       cookieStore,
       COOKIE_NAMES.SESSION_ID,
-      response.access_token,
+      decodeURIComponent(response.access_token),
       {
         maxAge: expiresIn,
       }
@@ -209,7 +209,8 @@ export async function loginUser(
       setPlainCookie(
         cookieStore,
         COOKIE_NAMES.TP_ID,
-        credentials.thirdPartyToken,
+        decodeURIComponent(credentials.thirdPartyToken),
+
         {
           maxAge: 3600, // 1 hour typical Firebase token lifetime
         }
