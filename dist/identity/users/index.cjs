@@ -359,7 +359,40 @@ async function getTokenImpl() {
         if (decryptedToken) {
           console.log(`[token:getTokenImpl] Header token decrypted successfully, length: ${decryptedToken.length}`);
           console.log(`[token:getTokenImpl] Decrypted token preview: ${decryptedToken.substring(0, 20)}...${decryptedToken.substring(decryptedToken.length - 20)}`);
-          return decryptedToken;
+          try {
+            const trimmed = decryptedToken.trim();
+            if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+              try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed) {
+                  const candidate = parsed.session_id || parsed.access_token || parsed.token || parsed.accessToken;
+                  if (candidate && typeof candidate === "string") {
+                    console.log("[token:getTokenImpl] Extracted token from decrypted JSON payload");
+                    return candidate;
+                  }
+                }
+              } catch (jsonErr) {
+              }
+            }
+            const looksLikeJWT = trimmed.includes(".") && trimmed.split(".").length === 3;
+            if (!looksLikeJWT) {
+              const base64Pattern = /^[A-Za-z0-9+/=\n\r]+$/;
+              if (base64Pattern.test(trimmed)) {
+                try {
+                  const decoded = Buffer.from(trimmed.replace(/\s+/g, ""), "base64").toString("utf8");
+                  if (decoded && decoded.includes(".") && decoded.split(".").length === 3) {
+                    console.log("[token:getTokenImpl] Base64-decoded decrypted payload into JWT");
+                    return decoded;
+                  }
+                } catch (b64Err) {
+                }
+              }
+            }
+            return decryptedToken;
+          } catch (extractErr) {
+            console.log("[token:getTokenImpl] Error extracting token from decrypted payload, returning decrypted string", extractErr);
+            return decryptedToken;
+          }
         } else {
           console.log("[token:getTokenImpl] Decryption returned null/undefined, using original token");
           return headerToken;
