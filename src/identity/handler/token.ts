@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     console.log(`[identity:handler:token] Available cookies: ${cookieStore.getAll().map((c: any) => c.name).join(', ')}`);
     
     // Import cookie utilities
-    const { getEncryptedCookie, setEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
+    const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
     
     
     // Check encrypted crf cookie first
@@ -133,24 +133,19 @@ export async function GET(request: NextRequest) {
     // Set session_id cookie (encrypted when possible)
     console.log("[identity:handler:token] Setting session_id cookie (encrypted preferred)");
     try {
-      const { COOKIE_NAMES: CN, setEncryptedCookie } = await import("../../utils/cookie");
+      const { COOKIE_NAMES: CN, setPlainCookie } = await import("../../utils/cookie");
+      // Remove legacy cookies and save session_id plainly
       try {
-        // res.cookies implements the same API as cookieStore.set
-        setEncryptedCookie(res.cookies, CN.SESSION_ID, data.access_token, {
-          maxAge: 3600,
-        });
-        console.log("[identity:handler:token] session_id saved (encrypted)");
-      } catch (e) {
-        console.warn("[identity:handler:token] Encrypted save failed, falling back to plain cookie", e);
-        res.cookies.set(CN.SESSION_ID, data.access_token, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "lax",
-          path: "/",
-          maxAge: 3600,
-        });
-        console.log("[identity:handler:token] session_id saved (plain)");
-      }
+        res.cookies.delete(CN.CRF);
+      } catch {}
+      try {
+        res.cookies.delete("access_token");
+      } catch {}
+      try {
+        res.cookies.delete(CN.SESSION_ID);
+      } catch {}
+      setPlainCookie(res.cookies, CN.SESSION_ID, data.access_token, { maxAge: 3600 });
+      console.log("[identity:handler:token] session_id saved (plain)");
     } catch (e) {
       console.error("[identity:handler:token] Failed to set session_id cookie:", e);
       throw e;

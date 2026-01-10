@@ -155,41 +155,36 @@ export async function loginUser(
     // Import cookie utilities for encrypted storage
     const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../utils/cookie");
     
-    // Save session token - encrypted if possible, otherwise plain
-    console.log("[login] Attempting to save session_id cookie");
+    // Save session token (plain)
+    console.log("[login] Saving session_id cookie (plain)");
+    // Remove any legacy/encrypted cookies before writing new plain cookie
     try {
-      setEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
-        maxAge: expiresIn,
-      });
-      console.log("[login] session_id saved (encrypted)");
-    } catch (e) {
-      // Fallback to plain cookie if encryption fails (missing ENCRYPTION_KEY_BASE64)
-      console.warn("[login] encryption failed, saving plain session_id", e);
-      setPlainCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
-        maxAge: expiresIn,
-      });
-    }
+      cookieStore.delete(COOKIE_NAMES.CRF);
+    } catch {}
+    try {
+      cookieStore.delete("access_token");
+    } catch {}
+    try {
+      cookieStore.delete(COOKIE_NAMES.SESSION_ID);
+    } catch {}
+    setPlainCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
+      maxAge: expiresIn,
+    });
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
     if (credentials.thirdPartyToken) {
       console.log("[login] Third party token present, saving tp_id cookie");
+      // Save third-party token plainly for re-login
       try {
-        setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
-          maxAge: 3600, // 1 hour typical Firebase token lifetime
-        });
-        console.log("[login] tp_id saved (encrypted)");
-      } catch (e) {
-        // Fallback to plain cookie if encryption fails
-        console.warn("[login] encryption failed for tp_id, using plain", e);
-        cookieStore.set(COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 3600,
-        });
-        console.log("[login] tp_id saved (plain)");
-      }
+        cookieStore.delete(COOKIE_NAMES.TP_ID);
+      } catch {}
+      try {
+        cookieStore.delete("tp_id");
+      } catch {}
+      setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
+        maxAge: 3600, // 1 hour typical Firebase token lifetime
+      });
+      console.log("[login] tp_id saved (plain)");
     } else {
       console.log("[login] No third party token present");
     }
