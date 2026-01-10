@@ -95,7 +95,7 @@ export function setPlainCookie(
   try {
     cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
-      httpOnly: false, // Allow client-side read for flags
+      httpOnly: true, // Allow client-side read for flags
       ...options,
     });
     console.log(`[cookie:setPlainCookie] Plain cookie ${name} set successfully`);
