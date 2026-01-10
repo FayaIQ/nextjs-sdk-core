@@ -31,6 +31,14 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/utils/crypto.ts
+var crypto_exports = {};
+__export(crypto_exports, {
+  decrypt: () => decrypt,
+  decryptSync: () => decryptSync,
+  decryptUniversal: () => decryptUniversal,
+  encrypt: () => encrypt,
+  encryptSync: () => encryptSync
+});
 function normalizeBase64(input) {
   if (!input)
     throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
@@ -136,6 +144,30 @@ function decryptSync(payload) {
     console.error("[crypto:decryptSync] Decryption failed:", e);
     throw e;
   }
+}
+async function encrypt(text) {
+  if (!text) return text;
+  const key = await keyPromise;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = encoder.encode(text);
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    data
+  );
+  const encryptedBytes = new Uint8Array(encrypted);
+  const authTagLength = 16;
+  const ciphertext = encryptedBytes.slice(0, -authTagLength);
+  const authTag = encryptedBytes.slice(-authTagLength);
+  const combined = new Uint8Array(
+    iv.length + ciphertext.length + authTag.length
+  );
+  combined.set(iv, 0);
+  combined.set(ciphertext, iv.length);
+  combined.set(authTag, iv.length + ciphertext.length);
+  let binary = "";
+  combined.forEach((b) => binary += String.fromCharCode(b));
+  return btoa(binary);
 }
 async function decrypt(payload) {
   if (!payload) return payload;
@@ -311,8 +343,24 @@ async function getTokenImpl() {
     const headerToken = (await headers()).get("x-access-token");
     console.log(`[token:getTokenImpl] x-access-token header present: ${!!headerToken}`);
     if (headerToken) {
-      console.log("[token:getTokenImpl] Returning token from x-access-token header");
-      return headerToken;
+      console.log(`[token:getTokenImpl] Raw header token length: ${headerToken.length}`);
+      console.log(`[token:getTokenImpl] Header token preview: ${headerToken.substring(0, 50)}...`);
+      const { decryptUniversal: decryptUniversal2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
+      try {
+        console.log("[token:getTokenImpl] Attempting to decrypt header token");
+        const decryptedToken = await decryptUniversal2(headerToken);
+        if (decryptedToken) {
+          console.log(`[token:getTokenImpl] Header token decrypted successfully, length: ${decryptedToken.length}`);
+          console.log(`[token:getTokenImpl] Decrypted token preview: ${decryptedToken.substring(0, 20)}...${decryptedToken.substring(decryptedToken.length - 20)}`);
+          return decryptedToken;
+        } else {
+          console.log("[token:getTokenImpl] Decryption returned null/undefined, using original token");
+          return headerToken;
+        }
+      } catch (e) {
+        console.log("[token:getTokenImpl] Header token decryption failed, using as-is (might be plain JWT)");
+        return headerToken;
+      }
     }
   }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
@@ -326,7 +374,9 @@ async function getTokenImpl() {
     try {
       token = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
       if (token) {
-        console.log("[token:getTokenImpl] Found encrypted session_id, returning token");
+        console.log("[token:getTokenImpl] Found encrypted session_id");
+        console.log(`[token:getTokenImpl] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
+        console.log(`[token:getTokenImpl] Token length: ${token.length}`);
         return token;
       }
     } catch (e) {
@@ -389,7 +439,9 @@ async function getTokenImpl() {
       try {
         token = await getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
         if (token) {
-          console.log("[token:getTokenImpl:auto] Found encrypted session_id, returning token");
+          console.log("[token:getTokenImpl:auto] Found encrypted session_id");
+          console.log(`[token:getTokenImpl:auto] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
+          console.log(`[token:getTokenImpl:auto] Token length: ${token.length}`);
           return token;
         }
       } catch (e) {
@@ -568,7 +620,27 @@ async function apiFetch(url, options = {}) {
     }
   }
   if (token) {
-    requestHeaders["Authorization"] = `Bearer ${token}`;
+    let authToken = token;
+    try {
+      const { decryptUniversal: decryptUniversal2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
+      const maybe = await decryptUniversal2(token);
+      if (maybe) {
+        authToken = maybe;
+        console.log("[apiFetch] Token decrypted before use");
+      } else {
+        console.log("[apiFetch] decryptUniversal returned null/undefined, using original token");
+      }
+    } catch (err) {
+      console.log("[apiFetch] Token decryption skipped/failed, using provided token as-is");
+    }
+    requestHeaders["Authorization"] = `Bearer ${authToken}`;
+    try {
+      console.log(`[apiFetch] Authorization header set with token preview: ${authToken.substring(0, 20)}...${authToken.substring(authToken.length - 20)}`);
+    } catch {
+      console.log("[apiFetch] Authorization header set (token preview unavailable)");
+    }
+  } else {
+    console.log("[apiFetch] No token provided, skipping Authorization header");
   }
   if (data && !(data instanceof FormData)) {
     requestHeaders["Content-Type"] = "application/json";
@@ -582,7 +654,9 @@ async function apiFetch(url, options = {}) {
     headers: requestHeaders,
     body
   });
+  console.log(`[apiFetch] ${method} ${endpoint} -> Status: ${response.status} ${response.statusText}`);
   if (!response.ok) {
+    console.log(`[apiFetch] Request failed with status ${response.status}`);
     try {
       const text2 = await response.text();
       if (text2 && text2.trim()) {

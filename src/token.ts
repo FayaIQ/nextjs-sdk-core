@@ -22,8 +22,26 @@ async function getTokenImpl(): Promise<string> {
     const headerToken = (await headers()).get("x-access-token");
     console.log(`[token:getTokenImpl] x-access-token header present: ${!!headerToken}`);
     if (headerToken) {
-      console.log("[token:getTokenImpl] Returning token from x-access-token header");
-      return headerToken;
+      console.log(`[token:getTokenImpl] Raw header token length: ${headerToken.length}`);
+      console.log(`[token:getTokenImpl] Header token preview: ${headerToken.substring(0, 50)}...`);
+      
+      // Try to decrypt the header token if it's encrypted
+      const { decryptUniversal } = await import("./utils/crypto");
+      try {
+        console.log("[token:getTokenImpl] Attempting to decrypt header token");
+        const decryptedToken = await decryptUniversal(headerToken);
+        if (decryptedToken) {
+          console.log(`[token:getTokenImpl] Header token decrypted successfully, length: ${decryptedToken.length}`);
+          console.log(`[token:getTokenImpl] Decrypted token preview: ${decryptedToken.substring(0, 20)}...${decryptedToken.substring(decryptedToken.length - 20)}`);
+          return decryptedToken;
+        } else {
+          console.log("[token:getTokenImpl] Decryption returned null/undefined, using original token");
+          return headerToken;
+        }
+      } catch (e) {
+        console.log("[token:getTokenImpl] Header token decryption failed, using as-is (might be plain JWT)");
+        return headerToken;
+      }
     }
   }
 
@@ -42,7 +60,9 @@ async function getTokenImpl(): Promise<string> {
     try {
       token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
       if (token) {
-        console.log('[token:getTokenImpl] Found encrypted session_id, returning token');
+        console.log('[token:getTokenImpl] Found encrypted session_id');
+        console.log(`[token:getTokenImpl] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
+        console.log(`[token:getTokenImpl] Token length: ${token.length}`);
         return token;
       }
     } catch (e) {
@@ -118,7 +138,9 @@ async function getTokenImpl(): Promise<string> {
       try {
         token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
         if (token) {
-          console.log('[token:getTokenImpl:auto] Found encrypted session_id, returning token');
+          console.log('[token:getTokenImpl:auto] Found encrypted session_id');
+          console.log(`[token:getTokenImpl:auto] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
+          console.log(`[token:getTokenImpl:auto] Token length: ${token.length}`);
           return token;
         }
       } catch (e) {

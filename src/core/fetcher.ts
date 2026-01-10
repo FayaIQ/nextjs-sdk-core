@@ -148,7 +148,32 @@ export async function apiFetch<T>(
   }
 
   if (token) {
-    requestHeaders["Authorization"] = `Bearer ${token}`;
+    // If the consumer passed an encrypted token (middleware/consumer might
+    // encrypt before persisting), try to decrypt it here. We use the
+    // universal decryption which tries Node crypto then Web Crypto.
+    let authToken = token;
+    try {
+      const { decryptUniversal } = await import("../utils/crypto");
+      const maybe = await decryptUniversal(token);
+      if (maybe) {
+        authToken = maybe;
+        console.log('[apiFetch] Token decrypted before use');
+      } else {
+        console.log('[apiFetch] decryptUniversal returned null/undefined, using original token');
+      }
+    } catch (err) {
+      // Non-fatal - if decryption fails, fall back to original token.
+      console.log('[apiFetch] Token decryption skipped/failed, using provided token as-is');
+    }
+
+    requestHeaders["Authorization"] = `Bearer ${authToken}`;
+    try {
+      console.log(`[apiFetch] Authorization header set with token preview: ${authToken.substring(0, 20)}...${authToken.substring(authToken.length - 20)}`);
+    } catch {
+      console.log('[apiFetch] Authorization header set (token preview unavailable)');
+    }
+  } else {
+    console.log('[apiFetch] No token provided, skipping Authorization header');
   }
 
   if (data && !(data instanceof FormData)) {
@@ -167,8 +192,12 @@ export async function apiFetch<T>(
     headers: requestHeaders,
     body,
   });
+  
+  console.log(`[apiFetch] ${method} ${endpoint} -> Status: ${response.status} ${response.statusText}`);
+  
   // Handle response errors - parse body and throw ApiError so callers must handle non-2xx
   if (!response.ok) {
+    console.log(`[apiFetch] Request failed with status ${response.status}`);
     try {
       const text = await response.text();
       if (text && text.trim()) {
