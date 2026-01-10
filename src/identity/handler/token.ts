@@ -130,36 +130,21 @@ export async function GET(request: NextRequest) {
     // Return response with encrypted cookie
     const res = NextResponse.json({ access_token: data.access_token });
     
-    // Set session_id cookie - encrypted if possible, otherwise plain
-    console.log("[identity:handler:token] Setting session_id cookie");
+    // Set session_id cookie (no encryption)
+    console.log("[identity:handler:token] Setting session_id cookie (plain)");
     try {
-      const { encryptSync } = await import("../../utils/crypto");
-      const { COOKIE_NAMES: CN } = await import("../../utils/cookie");
-      const encrypted = encryptSync(data.access_token);
-      
-      if (encrypted) {
-        res.cookies.set(CN.SESSION_ID, encrypted, {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 3600, // 1 hour
-        });
-        console.log("[identity:handler:token] session_id saved (encrypted)");
-      } else {
-        console.warn("[identity:handler:token] encryptSync returned falsy value");
-      }
-    } catch (e) {
-      console.warn("[identity:handler:token] encryption failed, saving plain session_id", e);
       const { COOKIE_NAMES: CN } = await import("../../utils/cookie");
       res.cookies.set(CN.SESSION_ID, data.access_token, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        secure: true,
         sameSite: "lax",
         path: "/",
         maxAge: 3600, // 1 hour
       });
       console.log("[identity:handler:token] session_id saved (plain)");
+    } catch (e) {
+      console.error("[identity:handler:token] Failed to set session_id cookie:", e);
+      throw e;
     }
 
     console.log("[identity:handler:token] Returning response with new token");

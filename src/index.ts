@@ -47,5 +47,5 @@ export {
   SECURE_COOKIE_OPTIONS,
 } from "./utils/cookie";
 
-export { encrypt, decrypt, encryptSync, decryptSync, decryptUniversal } from "./utils/crypto";
+// Encryption utilities removed from public API
 

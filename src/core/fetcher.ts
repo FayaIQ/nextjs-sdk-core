@@ -148,27 +148,10 @@ export async function apiFetch<T>(
   }
 
   if (token) {
-    // If the consumer passed an encrypted token (middleware/consumer might
-    // encrypt before persisting), try to decrypt it here. We use the
-    // universal decryption which tries Node crypto then Web Crypto.
-    let authToken = token;
+    // Use token as provided (encryption/decryption removed)
+    requestHeaders["Authorization"] = `Bearer ${token}`;
     try {
-      const { decryptUniversal } = await import("../utils/crypto");
-      const maybe = await decryptUniversal(token);
-      if (maybe) {
-        authToken = maybe;
-        console.log('[apiFetch] Token decrypted before use');
-      } else {
-        console.log('[apiFetch] decryptUniversal returned null/undefined, using original token');
-      }
-    } catch (err) {
-      // Non-fatal - if decryption fails, fall back to original token.
-      console.log('[apiFetch] Token decryption skipped/failed, using provided token as-is');
-    }
-
-    requestHeaders["Authorization"] = `Bearer ${authToken}`;
-    try {
-      console.log(`[apiFetch] Authorization header set with token preview: ${authToken.substring(0, 20)}...${authToken.substring(authToken.length - 20)}`);
+      console.log(`[apiFetch] Authorization header set with token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
     } catch {
       console.log('[apiFetch] Authorization header set (token preview unavailable)');
     }

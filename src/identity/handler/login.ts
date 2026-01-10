@@ -123,32 +123,15 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    // Also set encrypted tp_id in response cookie for client
+    // Also set tp_id in response cookie for client (no encryption)
     if (body.thirdPartyToken) {
-      try {
-        const { encryptSync } = await import("../../utils/crypto");
-        const encrypted = encryptSync(body.thirdPartyToken);
-        
-        if (encrypted) {
-          res.cookies.set("tp_id", encrypted, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 3600,
-          });
-        }
-      } catch (e) {
-        // Fallback to plain if encryption fails
-        console.warn("[identity:handler:login] encryption failed for response tp_id", e);
-        res.cookies.set("tp_id", body.thirdPartyToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 3600,
-        });
-      }
+      res.cookies.set("tp_id", body.thirdPartyToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 3600,
+      });
     }
     return res;
   } catch (error: any) {

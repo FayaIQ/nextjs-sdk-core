@@ -30,202 +30,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/utils/crypto.ts
-var crypto_exports = {};
-__export(crypto_exports, {
-  decrypt: () => decrypt,
-  decryptSync: () => decryptSync,
-  decryptUniversal: () => decryptUniversal,
-  encrypt: () => encrypt,
-  encryptSync: () => encryptSync
-});
-function normalizeBase64(input) {
-  if (!input)
-    throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
-  let b64 = input.replace(/-/g, "+").replace(/_/g, "/");
-  while (b64.length % 4) {
-    b64 += "=";
-  }
-  return b64;
-}
-function base64ToBytes(b64) {
-  const normalized = normalizeBase64(b64);
-  if (typeof Buffer !== "undefined") {
-    const buf = Buffer.from(normalized, "base64");
-    const arr = new Uint8Array(buf.length);
-    for (let i = 0; i < buf.length; i++) arr[i] = buf[i];
-    return arr;
-  }
-  if (typeof atob === "function") {
-    const binary = atob(normalized);
-    const len = binary.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes;
-  }
-  throw new Error(
-    "No available base64 decoder (Buffer or atob). Cannot decode encryption key."
-  );
-}
-function encryptSync(text) {
-  console.log(`[crypto:encryptSync] Called with text length: ${text?.length || 0}`);
-  if (!text) {
-    console.log("[crypto:encryptSync] No text provided, returning as-is");
-    return text;
-  }
-  try {
-    console.log("[crypto:encryptSync] Starting encryption process");
-    const crypto2 = nodeCrypto;
-    const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
-    console.log(`[crypto:encryptSync] ENCRYPTION_KEY_BASE64 present: ${!!keyBase64}`);
-    if (!keyBase64) {
-      console.error("[crypto:encryptSync] ENCRYPTION_KEY_BASE64 environment variable is not set");
-      throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
-    }
-    const key = Buffer.from(normalizeBase64(keyBase64), "base64");
-    console.log(`[crypto:encryptSync] Key length: ${key.length} bytes`);
-    if (key.length !== 32) {
-      console.error(`[crypto:encryptSync] Invalid key length: ${key.length}, expected 32`);
-      throw new Error("Encryption key must be 32 bytes (256 bits)");
-    }
-    const iv = crypto2.randomBytes(12);
-    console.log(`[crypto:encryptSync] Generated IV: ${iv.toString("hex")}`);
-    const cipher = crypto2.createCipheriv("aes-256-gcm", key, iv);
-    let encrypted = cipher.update(text, "utf8");
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    const authTag = cipher.getAuthTag();
-    console.log(`[crypto:encryptSync] Auth tag length: ${authTag.length} bytes`);
-    const combined = Buffer.concat([iv, encrypted, authTag]);
-    const result = combined.toString("base64");
-    console.log(`[crypto:encryptSync] Encryption successful, result length: ${result.length}`);
-    return result;
-  } catch (e) {
-    console.error("[crypto:encryptSync] Encryption failed:", e);
-    throw e;
-  }
-}
-function decryptSync(payload) {
-  console.log(`[crypto:decryptSync] Called with payload length: ${payload?.length || 0}`);
-  if (!payload) {
-    console.log("[crypto:decryptSync] No payload provided, returning as-is");
-    return payload;
-  }
-  try {
-    console.log("[crypto:decryptSync] Starting decryption process");
-    const crypto2 = nodeCrypto;
-    const keyBase64 = process.env.ENCRYPTION_KEY_BASE64;
-    console.log(`[crypto:decryptSync] ENCRYPTION_KEY_BASE64 present: ${!!keyBase64}`);
-    if (!keyBase64) {
-      console.error("[crypto:decryptSync] ENCRYPTION_KEY_BASE64 environment variable is not set");
-      throw new Error("ENCRYPTION_KEY_BASE64 environment variable is not set");
-    }
-    const key = Buffer.from(normalizeBase64(keyBase64), "base64");
-    console.log(`[crypto:decryptSync] Key length: ${key.length} bytes`);
-    if (key.length !== 32) {
-      console.error(`[crypto:decryptSync] Invalid key length: ${key.length}, expected 32`);
-      throw new Error("Encryption key must be 32 bytes (256 bits)");
-    }
-    const combined = Buffer.from(payload, "base64");
-    console.log(`[crypto:decryptSync] Combined buffer length: ${combined.length} bytes`);
-    const iv = combined.slice(0, 12);
-    const authTag = combined.slice(-16);
-    const encrypted = combined.slice(12, -16);
-    console.log(`[crypto:decryptSync] IV length: ${iv.length}, encrypted length: ${encrypted.length}, authTag length: ${authTag.length}`);
-    const decipher = crypto2.createDecipheriv("aes-256-gcm", key, iv);
-    decipher.setAuthTag(authTag);
-    let decrypted = decipher.update(encrypted);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    const result = decrypted.toString("utf8");
-    console.log(`[crypto:decryptSync] Decryption successful, result length: ${result.length}`);
-    return result;
-  } catch (e) {
-    console.error("[crypto:decryptSync] Decryption failed:", e);
-    throw e;
-  }
-}
-async function encrypt(text) {
-  if (!text) return text;
-  const key = await keyPromise;
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const data = encoder.encode(text);
-  const encrypted = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    key,
-    data
-  );
-  const encryptedBytes = new Uint8Array(encrypted);
-  const authTagLength = 16;
-  const ciphertext = encryptedBytes.slice(0, -authTagLength);
-  const authTag = encryptedBytes.slice(-authTagLength);
-  const combined = new Uint8Array(
-    iv.length + ciphertext.length + authTag.length
-  );
-  combined.set(iv, 0);
-  combined.set(ciphertext, iv.length);
-  combined.set(authTag, iv.length + ciphertext.length);
-  let binary = "";
-  combined.forEach((b) => binary += String.fromCharCode(b));
-  return btoa(binary);
-}
-async function decrypt(payload) {
-  if (!payload) return payload;
-  const combined = base64ToBytes(payload);
-  const iv = combined.slice(0, 12);
-  const ct = combined.slice(12);
-  const key = await keyPromise;
-  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
-  return decoder.decode(pt);
-}
-function decryptUniversal(payload) {
-  console.log(`[crypto:decryptUniversal] Attempting to decrypt payload length: ${payload?.length || 0}`);
-  if (!payload) {
-    console.log("[crypto:decryptUniversal] No payload provided");
-    return payload;
-  }
-  try {
-    console.log("[crypto:decryptUniversal] Trying Node.js crypto decryption");
-    const result = decryptSync(payload);
-    console.log("[crypto:decryptUniversal] Node.js crypto decryption successful");
-    return result;
-  } catch (nodeError) {
-    console.log("[crypto:decryptUniversal] Node.js crypto decryption failed, trying Web Crypto:", nodeError);
-    try {
-      console.log("[crypto:decryptUniversal] Trying Web Crypto API decryption");
-      if (typeof window === "undefined") {
-        console.log("[crypto:decryptUniversal] Server-side, cannot use Web Crypto for sync decryption");
-        throw new Error("Web Crypto not available in sync context");
-      }
-      throw nodeError;
-    } catch (webError) {
-      console.error("[crypto:decryptUniversal] Both decryption methods failed");
-      console.error("[crypto:decryptUniversal] Node.js error:", nodeError);
-      console.error("[crypto:decryptUniversal] Web Crypto error:", webError);
-      throw nodeError;
-    }
-  }
-}
-var nodeCrypto, keyPromise, encoder, decoder;
-var init_crypto = __esm({
-  "src/utils/crypto.ts"() {
-    "use strict";
-    nodeCrypto = __toESM(require("crypto"), 1);
-    keyPromise = (async () => {
-      const raw = base64ToBytes(process.env.ENCRYPTION_KEY_BASE64);
-      return crypto.subtle.importKey(
-        "raw",
-        raw.buffer,
-        { name: "AES-GCM" },
-        false,
-        ["encrypt", "decrypt"]
-      );
-    })();
-    encoder = new TextEncoder();
-    decoder = new TextDecoder();
-  }
-});
-
 // src/utils/cookie.ts
 var cookie_exports = {};
 __export(cookie_exports, {
@@ -237,52 +41,29 @@ __export(cookie_exports, {
   setPlainCookie: () => setPlainCookie
 });
 function setEncryptedCookie(cookieStore, name, value, options) {
-  console.log(`[cookie:setEncryptedCookie] Setting encrypted cookie: ${name}, value length: ${value?.length || 0}`);
   if (typeof window !== "undefined") {
-    console.error("[cookie:setEncryptedCookie] ERROR: Called on client-side");
     throw new Error("setEncryptedCookie must only be called server-side");
   }
   try {
-    const encrypted = encryptSync(value);
-    console.log(`[cookie:setEncryptedCookie] Encryption successful for ${name}, encrypted length: ${encrypted?.length || 0}`);
-    cookieStore.set(name, encrypted, {
+    cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
       ...options
     });
-    console.log(`[cookie:setEncryptedCookie] Cookie ${name} set successfully`);
   } catch (e) {
-    console.error(`[cookie:setEncryptedCookie] Failed to set encrypted cookie ${name}:`, e);
+    console.error(`[cookie:setEncryptedCookie] Failed to set cookie ${name}:`, e);
     throw e;
   }
 }
 function getEncryptedCookie(cookieStore, name) {
-  console.log(`[cookie:getEncryptedCookie] Attempting to get encrypted cookie: ${name}`);
   if (typeof window !== "undefined") {
-    console.error("[cookie:getEncryptedCookie] ERROR: Called on client-side");
     throw new Error("getEncryptedCookie must only be called server-side");
   }
   try {
     const cookie = cookieStore.get(name);
-    console.log(`[cookie:getEncryptedCookie] Cookie ${name} exists: ${!!cookie}, has value: ${!!cookie?.value}`);
-    if (!cookie?.value) {
-      console.log(`[cookie:getEncryptedCookie] No value found for cookie ${name}`);
-      return null;
-    }
-    console.log(`[cookie:getEncryptedCookie] Raw cookie value length: ${cookie.value.length}`);
-    console.log(`[cookie:getEncryptedCookie] Raw cookie value (first 50 chars): ${cookie.value.substring(0, 50)}...`);
-    try {
-      const decrypted = decryptUniversal(cookie.value);
-      console.log(`[cookie:getEncryptedCookie] Universal decryption successful for ${name}, decrypted length: ${decrypted?.length || 0}`);
-      if (decrypted) {
-        console.log(`[cookie:getEncryptedCookie] Decrypted value (first 20 chars): ${decrypted.substring(0, 20)}...`);
-      }
-      return decrypted ?? null;
-    } catch (e) {
-      console.error(`[cookie:getEncryptedCookie] Universal decryption failed for ${name}:`, e);
-      throw e;
-    }
+    if (!cookie?.value) return null;
+    return cookie.value;
   } catch (e) {
-    console.error(`[cookie:getEncryptedCookie] Failed to get/decrypt cookie ${name}:`, e);
+    console.error(`[cookie:getEncryptedCookie] Failed to read ${name}:`, e);
     return null;
   }
 }
@@ -308,7 +89,6 @@ var COOKIE_NAMES, SECURE_COOKIE_OPTIONS;
 var init_cookie = __esm({
   "src/utils/cookie.ts"() {
     "use strict";
-    init_crypto();
     COOKIE_NAMES = {
       /** Primary session token (encrypted when possible) */
       SESSION_ID: "session_id",
@@ -347,55 +127,6 @@ async function getTokenImpl() {
     if (headerToken) {
       console.log(`[token:getTokenImpl] Raw header token length: ${headerToken.length}`);
       console.log(`[token:getTokenImpl] Header token preview: ${headerToken.substring(0, 50)}...`);
-      const { decryptUniversal: decryptUniversal2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
-      try {
-        console.log("[token:getTokenImpl] Attempting to decrypt header token");
-        const decryptedToken = await decryptUniversal2(headerToken);
-        if (decryptedToken) {
-          console.log(`[token:getTokenImpl] Header token decrypted successfully, length: ${decryptedToken.length}`);
-          console.log(`[token:getTokenImpl] Decrypted token preview: ${decryptedToken.substring(0, 20)}...${decryptedToken.substring(decryptedToken.length - 20)}`);
-          try {
-            const trimmed = decryptedToken.trim();
-            if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-              try {
-                const parsed = JSON.parse(trimmed);
-                if (parsed) {
-                  const candidate = parsed.session_id || parsed.access_token || parsed.token || parsed.accessToken;
-                  if (candidate && typeof candidate === "string") {
-                    console.log("[token:getTokenImpl] Extracted token from decrypted JSON payload");
-                    return candidate;
-                  }
-                }
-              } catch (jsonErr) {
-              }
-            }
-            const looksLikeJWT = trimmed.includes(".") && trimmed.split(".").length === 3;
-            if (!looksLikeJWT) {
-              const base64Pattern = /^[A-Za-z0-9+/=\n\r]+$/;
-              if (base64Pattern.test(trimmed)) {
-                try {
-                  const decoded = Buffer.from(trimmed.replace(/\s+/g, ""), "base64").toString("utf8");
-                  if (decoded && decoded.includes(".") && decoded.split(".").length === 3) {
-                    console.log("[token:getTokenImpl] Base64-decoded decrypted payload into JWT");
-                    return decoded;
-                  }
-                } catch (b64Err) {
-                }
-              }
-            }
-            return decryptedToken;
-          } catch (extractErr) {
-            console.log("[token:getTokenImpl] Error extracting token from decrypted payload, returning decrypted string", extractErr);
-            return decryptedToken;
-          }
-        } else {
-          console.log("[token:getTokenImpl] Decryption returned null/undefined, using original token");
-          return headerToken;
-        }
-      } catch (e) {
-        console.log("[token:getTokenImpl] Header token decryption failed, using as-is (might be plain JWT)");
-        return headerToken;
-      }
     }
   }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
@@ -655,22 +386,9 @@ async function apiFetch(url, options = {}) {
     }
   }
   if (token) {
-    let authToken = token;
+    requestHeaders["Authorization"] = `Bearer ${token}`;
     try {
-      const { decryptUniversal: decryptUniversal2 } = await Promise.resolve().then(() => (init_crypto(), crypto_exports));
-      const maybe = await decryptUniversal2(token);
-      if (maybe) {
-        authToken = maybe;
-        console.log("[apiFetch] Token decrypted before use");
-      } else {
-        console.log("[apiFetch] decryptUniversal returned null/undefined, using original token");
-      }
-    } catch (err) {
-      console.log("[apiFetch] Token decryption skipped/failed, using provided token as-is");
-    }
-    requestHeaders["Authorization"] = `Bearer ${authToken}`;
-    try {
-      console.log(`[apiFetch] Authorization header set with token preview: ${authToken.substring(0, 20)}...${authToken.substring(authToken.length - 20)}`);
+      console.log(`[apiFetch] Authorization header set with token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
     } catch {
       console.log("[apiFetch] Authorization header set (token preview unavailable)");
     }
@@ -1392,12 +1110,7 @@ __export(index_exports, {
   Sign: () => Sign,
   SortType: () => SortType,
   apiFetch: () => apiFetch,
-  decrypt: () => decrypt,
-  decryptSync: () => decryptSync,
-  decryptUniversal: () => decryptUniversal,
   deleteCookie: () => deleteCookie,
-  encrypt: () => encrypt,
-  encryptSync: () => encryptSync,
   getBrands: () => getBrands,
   getEncryptedCookie: () => getEncryptedCookie,
   getFirebaseApp: () => getFirebaseApp,
@@ -2854,8 +2567,8 @@ async function startAuthStateSync(options) {
     const hashToken = async (token) => {
       try {
         if (typeof crypto !== "undefined" && crypto.subtle) {
-          const encoder2 = new TextEncoder();
-          const data = encoder2.encode(token);
+          const encoder = new TextEncoder();
+          const data = encoder.encode(token);
           const hashBuffer = await crypto.subtle.digest("SHA-256", data);
           const hashArray = Array.from(new Uint8Array(hashBuffer));
           return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -2929,7 +2642,6 @@ async function startAuthStateSync(options) {
 // src/index.ts
 init_config();
 init_cookie();
-init_crypto();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AgeGroup,
@@ -2948,12 +2660,7 @@ init_crypto();
   Sign,
   SortType,
   apiFetch,
-  decrypt,
-  decryptSync,
-  decryptUniversal,
   deleteCookie,
-  encrypt,
-  encryptSync,
   getBrands,
   getEncryptedCookie,
   getFirebaseApp,
