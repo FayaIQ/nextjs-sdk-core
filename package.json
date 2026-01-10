@@ -1,10 +1,8 @@
 {
   "name": "erp-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "A Next.js SDK for server and client components with simple API functions",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "author": "Your Name",
   "license": "MIT",
@@ -21,15 +19,11 @@
   },
   "files": [
     "dist",
-    "bin",
-    "README_PACKAGE.md",
-    "QUICK_START.md"
+    "bin"
   ],
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/gps/locations/index.ts src/identity/application/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts src/firebase/index.ts --format cjs,esm --dts --dts-resolve",
-    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup src/index.ts src/core/index.ts src/identity/index.ts src/identity/server.ts src/identity/users/index.ts src/crm/index.ts src/inventory/orders/index.ts src/inventory/items/index.ts src/inventory/orderItem/index.ts src/inventory/menus/index.ts src/inventory/offers/index.ts src/inventory/category/index.ts src/inventory/itemSource/index.ts src/inventory/brands/index.ts src/inventory/wishes/index.ts src/identity/application/index.ts src/gps/locations/index.ts src/gps/index.ts src/inventory/payments/index.ts src/inventory/reports/index.ts src/inventory/slides/index.ts src/stores/index.ts src/firebase/index.ts --format cjs,esm --dts --dts-resolve --watch",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run build"
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup src/index.ts --format cjs,esm --dts --dts-resolve",
+    "prepare": "npm run build"
   },
   "exports": {
     ".": {
