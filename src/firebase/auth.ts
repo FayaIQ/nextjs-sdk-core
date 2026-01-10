@@ -121,7 +121,7 @@ export async function startPhoneSignIn(
 
         try {
           await setPersistence(auth, browserLocalPersistence);
-          console.log("[firebase:confirmPhoneCode] persistence set to LOCAL");
+          console.log(":confirmPhoneCode] persistence set to LOCAL");
         } catch (e) {
           console.warn(
             "[firebase:confirmPhoneCode] failed to set persistence",
@@ -311,7 +311,7 @@ export async function startAuthStateSync(options?: {
 
     // Use sessionStorage (cleared on tab close) with a hash instead of the raw token
     const STORAGE_KEY = "erp_core_last_sync_hash";
-    
+
     // Simple hash function for deduplication (not for security)
     const hashToken = async (token: string): Promise<string> => {
       try {
@@ -321,7 +321,7 @@ export async function startAuthStateSync(options?: {
           const data = encoder.encode(token);
           const hashBuffer = await crypto.subtle.digest("SHA-256", data);
           const hashArray = Array.from(new Uint8Array(hashBuffer));
-          return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+          return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
         }
       } catch {}
       // Fallback: simple string hash (FNV-1a variant)
@@ -352,13 +352,15 @@ export async function startAuthStateSync(options?: {
         const now = Date.now();
         // In-memory debounce
         if (token === __lastSyncedToken && now - __lastSyncTime < 3000) return;
-        
+
         // Persistent guard using hash: check sessionStorage (safer than localStorage)
         const tokenHash = await hashToken(token);
         try {
           const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
           if (lastPersistedHash && lastPersistedHash === tokenHash) {
-            console.log("[firebase:startAuthStateSync] token already synced (session cache hit)");
+            console.log(
+              "[firebase:startAuthStateSync] token already synced (session cache hit)"
+            );
             return;
           }
         } catch {}
@@ -371,7 +373,7 @@ export async function startAuthStateSync(options?: {
 
         __lastSyncedToken = token;
         __lastSyncTime = now;
-        
+
         // Store only the hash in sessionStorage (cleared when tab closes)
         try {
           sessionStorage.setItem(STORAGE_KEY, tokenHash);

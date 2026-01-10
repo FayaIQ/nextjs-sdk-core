@@ -10,13 +10,13 @@ import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
  */
 export const COOKIE_NAMES = {
   /** Primary session token (encrypted when possible) */
-  SESSION_ID: 'session_id',
+  SESSION_ID: "session_id",
   /** User authentication flag */
   IS_USER: "isUser",
   /** Legacy: third-party token (for migration) */
-  TP_ID: 'tp_id',
+  TP_ID: "tp_id",
   /** Legacy: crf cookie (for migration - deprecated) */
-  CRF: 'crf',
+  CRF: "crf",
   /** Legacy: access token (for migration - deprecated) */
   // ACCESS_TOKEN: 'access_token',
 } as const;
@@ -53,7 +53,10 @@ export function setEncryptedCookie(
       ...options,
     });
   } catch (e) {
-    console.error(`[cookie:setEncryptedCookie] Failed to set cookie ${name}:`, e);
+    console.error(
+      `[cookie:setEncryptedCookie] Failed to set cookie ${name}:`,
+      e
+    );
     throw e;
   }
 }
@@ -92,16 +95,25 @@ export function setPlainCookie(
   value: string,
   options?: Partial<ResponseCookie>
 ): void {
-  console.log(`[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${value?.length || 0}`);
+  console.log(
+    `[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${
+      value?.length || 0
+    }`
+  );
   try {
-    cookieStore.set(name, value, {
+    cookieStore.set(name, decodeURIComponent(value), {
       ...SECURE_COOKIE_OPTIONS,
       httpOnly: true, // Allow client-side read for flags
       ...options,
     });
-    console.log(`[cookie:setPlainCookie] Plain cookie ${name} set successfully`);
+    console.log(
+      `[cookie:setPlainCookie] Plain cookie ${name} set successfully`
+    );
   } catch (e) {
-    console.error(`[cookie:setPlainCookie] Failed to set plain cookie ${name}:`, e);
+    console.error(
+      `[cookie:setPlainCookie] Failed to set plain cookie ${name}:`,
+      e
+    );
     throw e;
   }
 }

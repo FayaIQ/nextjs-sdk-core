@@ -158,7 +158,6 @@ export async function loginUser(
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
     }
-
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
     console.log(
