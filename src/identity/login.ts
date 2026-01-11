@@ -1,4 +1,3 @@
-
 import { Api } from "../api/api";
 import { postWithoutAuth } from "../core/fetcher";
 import { getAuthConfig } from "../core/config";
@@ -29,7 +28,8 @@ interface FullLoginCredentials {
   GMT?: number;
   IsFromNotification?: boolean;
   [key: string]: string | number | boolean | undefined;
-}/**
+}
+/**
  * User information from login response
  */
 export interface User {
@@ -61,7 +61,7 @@ export interface LoginResponse {
 /**
  * Logs in a user and retrieves an access token.
  * Automatically saves the token, roles, and store ID to cookies.
- * 
+ *
  * STRICT mode: username and password are required in credentials
  * AUTO mode: username and password are optional - falls back to env config
  */
@@ -75,22 +75,26 @@ export async function loginUser(
   // ✅ SERVER SIDE
   if (isServer) {
     // Get client credentials from environment
-  const config = getAuthConfig();
+    const config = getAuthConfig();
     const { cookies } = await import("next/headers");
 
     // In STRICT mode, require username and password in credentials
-    if (authMode === "strict" && (!credentials.username || !credentials.password)) {
+    if (
+      authMode === "strict" &&
+      (!credentials.username || !credentials.password)
+    ) {
       throw new Error("Username and password are required in STRICT mode");
     }
 
     // Merge user credentials with env config
     // In AUTO mode: use env credentials as fallback
     // In STRICT mode: credentials must be provided
-    const thirdPartyToken = credentials.thirdPartyToken || config.thirdPartyToken;
-    
+    const thirdPartyToken =
+      credentials.thirdPartyToken || config.thirdPartyToken;
+
     // Build request body based on auth type
     let requestBody: Record<string, any>;
-    
+
     if (thirdPartyToken) {
       // Third-party authentication (Firebase, etc.)
       requestBody = {
@@ -117,7 +121,9 @@ export async function loginUser(
             IsFromNotification: false,
           };
         } else {
-          throw new Error("Username/password or ThirdPartyToken must be provided");
+          throw new Error(
+            "Username/password or ThirdPartyToken must be provided"
+          );
         }
       } else {
         requestBody = {
@@ -131,12 +137,17 @@ export async function loginUser(
         };
       }
     }
-    
+
     if (credentials.playerId) {
       requestBody.playerId = credentials.playerId;
     }
-    
-    const headers = userAgent ? { "User-Agent": userAgent + "login in user server side in nextjs-sdk-core " } : "login in user server side in nextjs-sdk-core ";
+
+    const headers = userAgent
+      ? {
+          "User-Agent":
+            userAgent + "login in user server side in nextjs-sdk-core ",
+        }
+      : "login in user server side in nextjs-sdk-core ";
 
     const response = await postWithoutAuth<LoginResponse>(
       Api.signIn,
@@ -147,14 +158,19 @@ export async function loginUser(
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
     }
-
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
-    console.log(`[login] Setting cookies. expiresIn: ${expiresIn}, access_token length: ${response.access_token?.length || 0}`);
-    
+    console.log(
+      `[login] Setting cookies. expiresIn: ${expiresIn}, access_token length: ${
+        response.access_token?.length || 0
+      }`
+    );
+
     // Import cookie utilities for encrypted storage
-    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../utils/cookie");
-    
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import(
+      "../utils/cookie"
+    );
+
     // Save session token (plain)
     console.log("[login] Saving session_id cookie (plain)");
     // Remove any legacy/encrypted cookies before writing new plain cookie
@@ -167,9 +183,18 @@ export async function loginUser(
     try {
       cookieStore.delete(COOKIE_NAMES.SESSION_ID);
     } catch {}
-    setPlainCookie(cookieStore, COOKIE_NAMES.SESSION_ID, response.access_token, {
-      maxAge: expiresIn,
-    });
+    console.log(
+      "[SAVING TOKEN] token login plain store",
+      response.access_token.slice(0, 30)
+    );
+    setPlainCookie(
+      cookieStore,
+      COOKIE_NAMES.SESSION_ID,
+      decodeURIComponent(response.access_token),
+      {
+        maxAge: expiresIn,
+      }
+    );
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
     if (credentials.thirdPartyToken) {
@@ -181,9 +206,15 @@ export async function loginUser(
       try {
         cookieStore.delete("tp_id");
       } catch {}
-      setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, credentials.thirdPartyToken, {
-        maxAge: 3600, // 1 hour typical Firebase token lifetime
-      });
+      setPlainCookie(
+        cookieStore,
+        COOKIE_NAMES.TP_ID,
+        decodeURIComponent(credentials.thirdPartyToken),
+
+        {
+          maxAge: 3600, // 1 hour typical Firebase token lifetime
+        }
+      );
       console.log("[login] tp_id saved (plain)");
     } else {
       console.log("[login] No third party token present");
@@ -193,7 +224,11 @@ export async function loginUser(
     if (authMode === "auto") {
       console.log("[login] Auto mode: saving isUser flag");
       const isUser = !!(response.roles && response.roles.length > 0);
-      console.log(`[login] isUser determined: ${isUser} (roles count: ${response.roles?.length || 0})`);
+      console.log(
+        `[login] isUser determined: ${isUser} (roles count: ${
+          response.roles?.length || 0
+        })`
+      );
       setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
         maxAge: expiresIn,
       });
@@ -242,7 +277,9 @@ export async function loginUser(
     headers: {
       "Content-Type": "application/json",
       // Browsers disallow setting User-Agent; keep a sentinel for other clients
-      "User-Agent": (typeof navigator !== "undefined" && navigator.userAgent) || "login user",
+      "User-Agent":
+        (typeof navigator !== "undefined" && navigator.userAgent) ||
+        "login user",
     },
     body: JSON.stringify(credentials),
   });
