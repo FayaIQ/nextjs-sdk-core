@@ -22,7 +22,7 @@
     "bin"
   ],
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup \"src/index.ts\" \"src/**/index.ts\" --format cjs,esm --dts --dts-resolve"
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup --config tsup.config.ts"
   },
   "exports": {
     ".": {
