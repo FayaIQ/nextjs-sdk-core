@@ -26,7 +26,7 @@ export const COOKIE_NAMES = {
  */
 export const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie> = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: true,
   sameSite: "lax",
   path: "/",
   maxAge: 60 * 60 * 24 * 7, // 7 days
