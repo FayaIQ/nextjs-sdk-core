@@ -23,8 +23,8 @@
   ],
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup --config tsup.config.ts",
-    "prepare": "npm run build",
-    "postinstall": "node ./scripts/generate-exports.js"
+    "generate-exports": "node ./scripts/generate-exports.js",
+    "prepare": "npm run generate-exports && npm run build"
   },
   "exports": {
     ".": {
