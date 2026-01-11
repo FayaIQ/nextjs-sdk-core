@@ -49,8 +49,7 @@ async function run() {
     }
 
     // write back package.json
-    await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
-    console.log('Generated exports for:', folders.join(', '));
+  await fs.writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
   } catch (err) {
     console.error('Failed to generate exports:', err);
     process.exitCode = 1;

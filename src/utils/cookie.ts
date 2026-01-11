@@ -95,20 +95,12 @@ export function setPlainCookie(
   value: string,
   options?: Partial<ResponseCookie>
 ): void {
-  console.log(
-    `[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${
-      value?.length || 0
-    }`
-  );
   try {
     cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
       httpOnly: true, // Allow client-side read for flags
       ...options,
     });
-    console.log(
-      `[cookie:setPlainCookie] Plain cookie ${name} set successfully`
-    );
   } catch (e) {
     console.error(
       `[cookie:setPlainCookie] Failed to set plain cookie ${name}:`,

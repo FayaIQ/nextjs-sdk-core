@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const filterParams =
       ItemsFilterParameters.fromURLSearchParams(searchParams);
-      console.log("Filter Params:", filterParams);
 
     const products = await fetchProducts({ filterParams });
 

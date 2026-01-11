@@ -160,11 +160,7 @@ export async function loginUser(
     }
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
-    console.log(
-      `[login] Setting cookies. expiresIn: ${expiresIn}, access_token length: ${
-        response.access_token?.length || 0
-      }`
-    );
+
 
     // Import cookie utilities for encrypted storage
     const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import(
@@ -172,7 +168,6 @@ export async function loginUser(
     );
 
     // Save session token (plain)
-    console.log("[login] Saving session_id cookie (plain)");
     // Remove any legacy/encrypted cookies before writing new plain cookie
     try {
       cookieStore.delete(COOKIE_NAMES.CRF);
@@ -183,10 +178,7 @@ export async function loginUser(
     try {
       cookieStore.delete(COOKIE_NAMES.SESSION_ID);
     } catch {}
-    console.log(
-      "[SAVING TOKEN] token login plain store",
-      response.access_token.slice(0, 30)
-    );
+    // token saved to cookie
     setPlainCookie(
       cookieStore,
       COOKIE_NAMES.SESSION_ID,
@@ -198,7 +190,6 @@ export async function loginUser(
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
     if (credentials.thirdPartyToken) {
-      console.log("[login] Third party token present, saving tp_id cookie");
       // Save third-party token plainly for re-login
       try {
         cookieStore.delete(COOKIE_NAMES.TP_ID);
@@ -215,20 +206,12 @@ export async function loginUser(
           maxAge: 3600, // 1 hour typical Firebase token lifetime
         }
       );
-      console.log("[login] tp_id saved (plain)");
     } else {
-      console.log("[login] No third party token present");
     }
 
     // AUTO mode: only save isUser flag based on roles
     if (authMode === "auto") {
-      console.log("[login] Auto mode: saving isUser flag");
       const isUser = !!(response.roles && response.roles.length > 0);
-      console.log(
-        `[login] isUser determined: ${isUser} (roles count: ${
-          response.roles?.length || 0
-        })`
-      );
       setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
         maxAge: expiresIn,
       });
@@ -236,7 +219,6 @@ export async function loginUser(
 
     // STRICT mode: save all user data
     if (authMode === "strict") {
-      console.log("[login] Strict mode: saving user data");
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
           httpOnly: true,

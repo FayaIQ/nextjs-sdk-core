@@ -151,12 +151,12 @@ export async function apiFetch<T>(
     // Use token as provided (encryption removed)
     requestHeaders["Authorization"] = `Bearer ${token}`;
     try {
-      console.log(`[apiFetch] Authorization header set with token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
+      // Authorization header set
     } catch {
-      console.log('[apiFetch] Authorization header set (token preview unavailable)');
+      // ignore
     }
   } else {
-    console.log('[apiFetch] No token provided, skipping Authorization header');
+    // No token provided
   }
 
   if (data && !(data instanceof FormData)) {
@@ -176,11 +176,11 @@ export async function apiFetch<T>(
     body,
   });
   
-  console.log(`[apiFetch] ${method} ${endpoint} -> Status: ${response.status} ${response.statusText}`);
+  // request completed
   
   // Handle response errors - parse body and throw ApiError so callers must handle non-2xx
   if (!response.ok) {
-    console.log(`[apiFetch] Request failed with status ${response.status}`);
+  // request failed
     try {
       const text = await response.text();
       if (text && text.trim()) {
