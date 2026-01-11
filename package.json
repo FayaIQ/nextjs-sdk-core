@@ -22,7 +22,9 @@
     "bin"
   ],
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup --config tsup.config.ts"
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup --config tsup.config.ts",
+      "prepare": "npm run build"
+
   },
   "exports": {
     ".": {
