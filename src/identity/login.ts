@@ -188,7 +188,7 @@ export async function loginUser(
       {
         maxAge: expiresIn,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
       }
     );
 
@@ -229,7 +229,7 @@ export async function loginUser(
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure: true,
           sameSite: "lax",
           path: "/",
           maxAge: expiresIn,
@@ -239,7 +239,7 @@ export async function loginUser(
       if (response.roles?.length) {
         cookieStore.set("roles", response.roles.join(","), {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure: true,
           sameSite: "lax",
           path: "/",
           maxAge: expiresIn,
@@ -249,7 +249,7 @@ export async function loginUser(
       if (response.user?.username) {
         cookieStore.set("username", response.user.username, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure: true,
           sameSite: "lax",
           path: "/",
           maxAge: expiresIn,

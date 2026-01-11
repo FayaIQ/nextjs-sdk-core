@@ -129,7 +129,13 @@ export async function GET(request: NextRequest) {
       try {
         res.cookies.delete(CN.SESSION_ID);
       } catch {}
-      setPlainCookie(res.cookies, CN.SESSION_ID, data.access_token, { maxAge: 3600 });
+      // Store session token as HttpOnly and secure in production so it isn't
+      // accessible to client-side scripts. This reduces XSS risk.
+      setPlainCookie(res.cookies, CN.SESSION_ID, data.access_token, {
+        maxAge: 3600,
+        httpOnly: true,
+        secure: true,
+      });
     } catch (e) {
       console.error("[identity:handler:token] Failed to set session_id cookie:", e);
       throw e;
