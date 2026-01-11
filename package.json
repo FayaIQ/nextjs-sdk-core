@@ -1,6 +1,6 @@
 {
   "name": "erp-core",
-  "version": "2.0.12",
+  "version": "2.0.14",
   "type": "module",
   "description": "A Next.js SDK for server and client components with simple API functions",
   "types": "dist/index.d.ts",
@@ -37,6 +37,11 @@
       "import": "./dist/core/index.js",
       "require": "./dist/core/index.cjs"
     },
+    "./core/*": {
+      "types": "./dist/core/*.d.ts",
+      "import": "./dist/core/*.js",
+      "require": "./dist/core/*.cjs"
+    },
     "./api": {
       "types": "./dist/api/index.d.ts",
       "import": "./dist/api/index.js",
@@ -62,11 +67,6 @@
       "import": "./dist/gps/locations/index.js",
       "require": "./dist/gps/locations/index.cjs"
     },
-    "./gps/locations/*": {
-      "types": "./dist/gps/locations/*.d.ts",
-      "import": "./dist/gps/locations/*.js",
-      "require": "./dist/gps/locations/*.cjs"
-    },
     "./identity": {
       "types": "./dist/identity/index.d.ts",
       "import": "./dist/identity/index.js",
@@ -82,10 +82,20 @@
       "import": "./dist/identity/application/index.js",
       "require": "./dist/identity/application/index.cjs"
     },
-    "./identity/application/*": {
-      "types": "./dist/identity/application/*.d.ts",
-      "import": "./dist/identity/application/*.js",
-      "require": "./dist/identity/application/*.cjs"
+    "./identity/users": {
+      "types": "./dist/identity/users/index.d.ts",
+      "import": "./dist/identity/users/index.js",
+      "require": "./dist/identity/users/index.cjs"
+    },
+    "./inventory": {
+      "types": "./dist/inventory/index.d.ts",
+      "import": "./dist/inventory/index.js",
+      "require": "./dist/inventory/index.cjs"
+    },
+    "./inventory/*": {
+      "types": "./dist/inventory/*.d.ts",
+      "import": "./dist/inventory/*.js",
+      "require": "./dist/inventory/*.cjs"
     },
     "./inventory/orders": {
       "types": "./dist/inventory/orders/index.d.ts",
@@ -241,16 +251,6 @@
       "types": "./dist/firebase/*.d.ts",
       "import": "./dist/firebase/*.js",
       "require": "./dist/firebase/*.cjs"
-    },
-    "./inventory": {
-      "types": "./dist/inventory/index.d.ts",
-      "import": "./dist/inventory/index.js",
-      "require": "./dist/inventory/index.cjs"
-    },
-    "./inventory/*": {
-      "types": "./dist/inventory/*.d.ts",
-      "import": "./dist/inventory/*.js",
-      "require": "./dist/inventory/*.cjs"
     },
     "./utils": {
       "types": "./dist/utils/index.d.ts",

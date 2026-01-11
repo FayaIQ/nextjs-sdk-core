@@ -29,7 +29,16 @@ async function run() {
     const items = await fs.readdir(srcPath, { withFileTypes: true });
     const folders = items.filter(i => i.isDirectory()).map(d => d.name);
 
-    pkg.exports = pkg.exports || {};
+    // Initialize exports if needed
+    if (!pkg.exports) {
+      pkg.exports = {
+        ".": {
+          types: "./dist/index.d.ts",
+          import: "./dist/index.js",
+          require: "./dist/index.cjs"
+        }
+      };
+    }
 
     for (const name of folders) {
       const mapping = makeMapping(name);
