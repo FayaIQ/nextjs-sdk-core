@@ -4,15 +4,14 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   entry: {
     index: "src/index.ts",
-
     core: "src/core/index.ts",
   api: "src/api/api.ts",
-
     identity: "src/identity/index.ts",
     "identity/application": "src/identity/application/index.ts",
-
+    "users": "src/identity/users/index.ts",
     gps: "src/gps/index.ts",
     "gps/locations": "src/gps/locations/index.ts",
+    inventory : "src/inventory/index.ts",
     "inventory/items": "src/inventory/items/index.ts",
     "inventory/orders": "src/inventory/orders/index.ts",
     "inventory/payments": "src/inventory/payments/index.ts",
