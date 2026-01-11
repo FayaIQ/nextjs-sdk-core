@@ -3,6 +3,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: {
+    // every folder you add , add new 
     index: "src/index.ts",
     "core/index": "src/core/index.ts",
     "api/index": "src/api/api.ts",

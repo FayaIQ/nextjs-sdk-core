@@ -212,8 +212,11 @@ export async function loginUser(
     // AUTO mode: only save isUser flag based on roles
     if (authMode === "auto") {
       const isUser = !!(response.roles && response.roles.length > 0);
+      // Make the isUser flag readable from client-side JavaScript
+      // (not HttpOnly) so consumer apps can check it without server roundtrips.
       setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
         maxAge: expiresIn,
+        httpOnly: false,
       });
     }
 
