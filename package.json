@@ -23,8 +23,8 @@
   ],
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup --config tsup.config.ts",
-      "prepare": "npm run build"
-
+    "prepare": "npm run build",
+    "postinstall": "node ./scripts/generate-exports.js"
   },
   "exports": {
     ".": {
@@ -241,6 +241,26 @@
       "types": "./dist/firebase/*.d.ts",
       "import": "./dist/firebase/*.js",
       "require": "./dist/firebase/*.cjs"
+    },
+    "./inventory": {
+      "types": "./dist/inventory/index.d.ts",
+      "import": "./dist/inventory/index.js",
+      "require": "./dist/inventory/index.cjs"
+    },
+    "./inventory/*": {
+      "types": "./dist/inventory/*.d.ts",
+      "import": "./dist/inventory/*.js",
+      "require": "./dist/inventory/*.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs"
+    },
+    "./utils/*": {
+      "types": "./dist/utils/*.d.ts",
+      "import": "./dist/utils/*.js",
+      "require": "./dist/utils/*.cjs"
     }
   },
   "peerDependencies": {

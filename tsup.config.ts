@@ -26,8 +26,9 @@ export default defineConfig({
     "inventory/wishes": "src/inventory/wishes/index.ts",
 
     crm: "src/crm/index.ts",
-    stores: "src/stores/index.ts",
-    firebase: "src/firebase/index.ts",
+  stores: "src/stores/index.ts",
+  firebase: "src/firebase/index.ts",
+  utils: "src/utils/index.ts",
 
     // Individual slide utility exported directly
     "inventory/slides/getSlides": "src/inventory/slides/getSlides.ts",
