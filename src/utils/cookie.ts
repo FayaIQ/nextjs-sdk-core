@@ -209,6 +209,32 @@ export function tryDecryptString(value: string): string | null {
 }
 
 /**
+ * Try to encrypt an arbitrary string using the configured secret.
+ * Returns the encrypted blob (base64 iv|tag|ciphertext) on success, or null
+ * if no key is configured or encryption fails.
+ * Server-side only.
+ */
+export function tryEncryptString(value: string): string | null {
+  if (typeof window !== "undefined") {
+    throw new Error("tryEncryptString must only be called server-side");
+  }
+  const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+  if (!secret) {
+    // eslint-disable-next-line no-console
+    console.warn('[cookie] tryEncryptString: no encryption key configured; cannot encrypt');
+    return null;
+  }
+
+  try {
+    return encrypt(value, secret);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('[cookie] tryEncryptString: encryption failed', (e as any)?.message || e);
+    return null;
+  }
+}
+
+/**
  * Set a plain (non-encrypted) cookie.
  * Use for non-sensitive flags like isUser.
  */
@@ -236,6 +262,6 @@ export function setPlainCookie(
 /**
  * Delete a cookie by name.
  */
-export function deleteCookie(cookieStore: any, name: string): void {
-  cookieStore.delete(name);
-}
+// NOTE: `deleteCookie` was removed — callers should call `cookieStore.delete(name)`
+// directly. This helper was a thin passthrough and wasn't used anywhere in the
+// codebase; removing it keeps the utilities focused and avoids a confusing API.

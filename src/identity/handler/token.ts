@@ -22,26 +22,50 @@ export async function GET(request: NextRequest) {
     // Import cookie utilities
     const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
     
-    // Check encrypted crf cookie first
-    let existingToken = null;
-    try {
-      existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-    } catch {}
+    // Check raw cookies first and ensure the response always returns an ENCRYPTED blob
+    // Prefer CRF, then SESSION_ID. If the cookie is already encrypted, return raw
+    // blob. If it's plain, try to encrypt it and set an encrypted cookie on the
+    // outgoing response so clients always receive encrypted tokens.
+    const rawCrf = cookieStore.get(COOKIE_NAMES.CRF)?.value || null;
+    const rawSession = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
 
-    // Fallback to SESSION_ID (encrypted) if CRF not found
-    if (!existingToken) {
+    if (rawCrf || rawSession) {
+      const raw = (rawCrf || rawSession) as string;
       try {
-        existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
-      } catch {}
-    }
+        const { tryDecryptString, tryEncryptString, setEncryptedCookie } = await import("../../utils/cookie");
 
-    if (existingToken) {
-      // Debug: indicate which cookie supplied the token
+        // If raw already looks encrypted (decryptable), return it as-is
+  const decrypted = tryDecryptString(raw as string);
+        if (decrypted) {
+          return NextResponse.json({ session_id: raw });
+        }
 
-      // Return with cache headers to prevent repeated calls
-      return NextResponse.json(
-        { session_id: existingToken },
-      );
+        // Otherwise, raw is plaintext; try to encrypt it and emit encrypted cookie
+  const encrypted = tryEncryptString(raw as string);
+        if (encrypted) {
+          const res = NextResponse.json({ session_id: encrypted });
+          // Replace legacy cookies with encrypted session cookie
+          try { res.cookies.delete(COOKIE_NAMES.CRF); } catch {}
+          try { res.cookies.delete("session_id"); } catch {}
+          try { res.cookies.delete(COOKIE_NAMES.SESSION_ID); } catch {}
+          setEncryptedCookie(res.cookies, COOKIE_NAMES.SESSION_ID, raw as string, {
+            maxAge: 3600,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+          });
+          return res;
+        }
+
+        // No key available; return raw plaintext as fallback (with a warning logged by helpers)
+        return NextResponse.json({ session_id: raw });
+      } catch (e) {
+        // If anything goes wrong, fall back to returning the raw cookie value
+        try {
+          return NextResponse.json({ session_id: raw });
+        } catch {
+          // final fallback: continue to re-auth flow
+        }
+      }
     }
 
 

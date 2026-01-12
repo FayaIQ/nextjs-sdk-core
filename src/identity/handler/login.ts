@@ -87,15 +87,22 @@ export async function POST(request: NextRequest) {
     if (body.thirdPartyToken) {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const { setPlainCookie, COOKIE_NAMES } = await import("../../utils/cookie");
-      // Remove legacy tp_id cookies and save tp_id plainly for re-login
+      const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../../utils/cookie");
+      // Remove legacy tp_id cookies and save tp_id encrypted for re-login
       try {
         cookieStore.delete(COOKIE_NAMES.TP_ID);
       } catch {}
       try {
         cookieStore.delete("tp_id");
       } catch {}
-      setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, { maxAge: 3600 });
+      try {
+        setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, { maxAge: 3600, httpOnly: true, secure: process.env.NODE_ENV === "production" });
+      } catch (e) {
+        // Fallback to plain if encryption not available
+        // eslint-disable-next-line no-console
+        console.warn('[identity:handler:login] failed to encrypt TP_ID for cookie store; storing plain as fallback', (e as any)?.message || e);
+        setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, { maxAge: 3600 });
+      }
     }
 
     // Respond with success and relevant data
@@ -113,17 +120,22 @@ export async function POST(request: NextRequest) {
     // Also set tp_id in response cookie for client (encrypted preferred)
     if (body.thirdPartyToken) {
       try {
-        const { setPlainCookie } = await import("../../utils/cookie");
-        setPlainCookie(res.cookies, "tp_id", body.thirdPartyToken, { maxAge: 3600 });
+        const { setEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
+        setEncryptedCookie(res.cookies, COOKIE_NAMES.TP_ID, body.thirdPartyToken, { maxAge: 3600, httpOnly: true, secure: process.env.NODE_ENV === "production" });
       } catch (e) {
-        // If cookie util import fails, set plain as last resort
-        res.cookies.set("tp_id", body.thirdPartyToken, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "lax",
-          path: "/",
-          maxAge: 3600,
-        });
+        try {
+          const { setPlainCookie } = await import("../../utils/cookie");
+          setPlainCookie(res.cookies, "tp_id", body.thirdPartyToken, { maxAge: 3600 });
+        } catch (e2) {
+          // If cookie util import fails, set plain as last resort
+          res.cookies.set("tp_id", body.thirdPartyToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600,
+          });
+        }
       }
     }
     return res;

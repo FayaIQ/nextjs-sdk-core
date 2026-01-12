@@ -42,7 +42,6 @@ export {
   setEncryptedCookie,
   getEncryptedCookie,
   setPlainCookie,
-  deleteCookie,
   COOKIE_NAMES,
   SECURE_COOKIE_OPTIONS,
 } from "./utils/cookie";
