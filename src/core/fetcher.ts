@@ -293,6 +293,7 @@ export async function getWithAuth<T>(
     // eslint-disable-next-line no-console
     console.log('[getWithAuth] requesting token for', url);
     token = await getToken();
+    console.log('[getWithAuth] token obtained' , token.slice(0,4) + '...' );
   } catch (err: any) {
     // Normalize token-related unauthorized errors to ApiError(401)
     // eslint-disable-next-line no-console
