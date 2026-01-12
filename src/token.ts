@@ -31,7 +31,6 @@ async function getTokenImpl(): Promise<string> {
         const decrypted = tryDecryptString(headerToken);
         if (decrypted) {
           // eslint-disable-next-line no-console
-          console.log('[token:getTokenImpl] found encrypted token in x-access-token header and decrypted it (server-side)');
           return decrypted;
         }
       } catch (e) {
@@ -39,7 +38,6 @@ async function getTokenImpl(): Promise<string> {
       }
 
       // eslint-disable-next-line no-console
-      console.log('[token:getTokenImpl] found token in x-access-token header (server-side)');
       return headerToken;
     }
   }
@@ -57,7 +55,6 @@ async function getTokenImpl(): Promise<string> {
       token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
       if (token) {
         // eslint-disable-next-line no-console
-        console.log('[token:getTokenImpl] token found via getEncryptedCookie (SESSION_ID)');
         return token;
       }
     } catch (e) {
@@ -69,8 +66,6 @@ async function getTokenImpl(): Promise<string> {
     try {
       token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
       if (token) {
-        // eslint-disable-next-line no-console
-        console.log('[token:getTokenImpl] token found via plain cookie (SESSION_ID)');
         return token;
       }
     } catch (e) {

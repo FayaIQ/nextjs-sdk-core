@@ -22,24 +22,21 @@ export async function GET(request: NextRequest) {
     // Import cookie utilities
     const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
     
-    
     // Check encrypted crf cookie first
-    let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    let existingToken = null;
+    try {
+      existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+    } catch {}
 
-    // Fallback to legacy access_token if crf not found
+    // Fallback to SESSION_ID (encrypted) if CRF not found
     if (!existingToken) {
-      existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
+      try {
+        existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
+      } catch {}
     }
 
     if (existingToken) {
       // Debug: indicate which cookie supplied the token
-      try {
-        // eslint-disable-next-line no-console
-        console.log('[identity:handler:token] returning existing token from cookies', {
-          fromCRF: !!cookieStore.get(COOKIE_NAMES.CRF),
-          fromSessionId: !!cookieStore.get(COOKIE_NAMES.SESSION_ID),
-        });
-      } catch {}
 
       // Return with cache headers to prevent repeated calls
       return NextResponse.json(
@@ -52,9 +49,7 @@ export async function GET(request: NextRequest) {
     let tpId: string | null = null;
     try {
       tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-    } catch {
-    }
-    
+    } catch {}
     // Fallback to plain tp_id cookie
     if (!tpId) {
       tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
