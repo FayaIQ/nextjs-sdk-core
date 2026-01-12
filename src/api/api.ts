@@ -37,6 +37,9 @@ export class Api {
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
   static getNews: string = `${Api.NEWS_BASE}/v1/News/Paging/ForCustomer`;
   static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
+  static getItemFeatures(id: string): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
+  }
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
