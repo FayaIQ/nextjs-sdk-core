@@ -148,6 +148,7 @@ export async function apiFetch<T>(
   }
 
   if (token) {
+    console.log('[apiFetch] using token', token.slice(0, 4) + '...');
     // Use token as provided (encryption removed)
     requestHeaders["Authorization"] = `Bearer ${token}`;
     try {
