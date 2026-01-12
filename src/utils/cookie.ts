@@ -25,7 +25,7 @@ export const COOKIE_NAMES = {
  * Default cookie options for secure httpOnly cookies
  */
 export const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie> = {
-  httpOnly: true,
+  httpOnly: false,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax",
   path: "/",
@@ -103,7 +103,7 @@ export function setPlainCookie(
   try {
     cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
-      httpOnly: true, // Allow client-side read for flags
+      httpOnly: false, // Allow client-side read for flags
       ...options,
     });
     console.log(

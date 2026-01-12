@@ -77,7 +77,7 @@ function setPlainCookie(cookieStore, name, value, options) {
   try {
     cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
-      httpOnly: true,
+      httpOnly: false,
       // Allow client-side read for flags
       ...options
     });
@@ -112,7 +112,7 @@ var init_cookie = __esm({
       // ACCESS_TOKEN: 'access_token',
     };
     SECURE_COOKIE_OPTIONS = {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
