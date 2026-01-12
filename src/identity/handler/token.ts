@@ -144,16 +144,12 @@ export async function GET(request: NextRequest) {
       } catch {}
       // Store session token as HttpOnly and secure in production so it isn't
       // accessible to client-side scripts. This reduces XSS risk.
-      setPlainCookie(
-        res.cookies,
-        CN.SESSION_ID,
-        data.access_token,
-        {
-          maxAge: 3600,
-          httpOnly: true,
-          secure: true,
-        }
-      );
+      // Store session token encrypted when possible to match the login path
+      setEncryptedCookie(res.cookies, CN.SESSION_ID, data.access_token, {
+        maxAge: 3600,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+      });
 
       try {
         // eslint-disable-next-line no-console

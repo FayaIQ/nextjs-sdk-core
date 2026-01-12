@@ -181,7 +181,7 @@ export async function loginUser(
     // token saved to cookie
     // Store session token as HttpOnly and secure in production so it isn't
     // accessible to client-side scripts. This reduces XSS risk.
-    setPlainCookie(
+    setEncryptedCookie(
       cookieStore,
       COOKIE_NAMES.SESSION_ID,
       decodeURIComponent(response.access_token),

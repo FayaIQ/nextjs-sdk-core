@@ -329,6 +329,10 @@ export async function startAuthStateSync(options?: {
             return;
           }
         } catch {}
+        console.log(
+          "[firebase:startAuthStateSync] syncing token to server at",
+          endpoint
+        );
 
         await fetch(endpoint, {
           method: "POST",
