@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       // Debug: indicate which cookie supplied the token
       try {
         // eslint-disable-next-line no-console
-        console.debug('[identity:handler:token] returning existing token from cookies', {
+        console.log('[identity:handler:token] returning existing token from cookies', {
           fromCRF: !!cookieStore.get(COOKIE_NAMES.CRF),
           fromSessionId: !!cookieStore.get(COOKIE_NAMES.SESSION_ID),
         });
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
       // Return with cache headers to prevent repeated calls
       return NextResponse.json(
-        { SESSION_ID: existingToken },
+        { session_id: existingToken },
       );
     }
 
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     if (tpId) {
       try {
         // eslint-disable-next-line no-console
-        console.debug('[identity:handler:token] using TP_ID to re-auth', { tpIdPresent: true });
+        console.log('[identity:handler:token] using TP_ID to re-auth', { tpIdPresent: true });
       } catch {}
       requestBody["ThirdPartyToken"] = tpId;
     } else if ((authConfig as any).thirdPartyToken) {
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
 
 
   // Return response with encrypted cookie
-  const res = NextResponse.json({ access_token: data.access_token });
+  const res = NextResponse.json({ session_id: data.access_token });
     
     // Set session_id cookie (encrypted when possible)
     try {
@@ -144,15 +144,20 @@ export async function GET(request: NextRequest) {
       } catch {}
       // Store session token as HttpOnly and secure in production so it isn't
       // accessible to client-side scripts. This reduces XSS risk.
-      setEncryptedCookie(res.cookies, CN.SESSION_ID, data.access_token, {
-        maxAge: 3600,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-      });
+      setPlainCookie(
+        res.cookies,
+        CN.SESSION_ID,
+        data.access_token,
+        {
+          maxAge: 3600,
+          httpOnly: true,
+          secure: true,
+        }
+      );
 
       try {
         // eslint-disable-next-line no-console
-        console.debug('[identity:handler:token] set session cookie on response', {
+        console.log('[identity:handler:token] set session cookie on response', {
           encryptedKeyConfigured: !!(process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY),
           cookieName: CN.SESSION_ID,
         });
