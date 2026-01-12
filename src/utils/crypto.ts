@@ -29,6 +29,12 @@ export async function encryptForCookie(secret: string, plain: string): Promise<s
   const enc = new TextEncoder();
 
   // 1) derive 32-byte key (SHA-256 of secret)
+  // Warn when secret is empty — middleware may still produce an encrypted blob
+  // but the server will not attempt to decrypt if no key is configured.
+  try {
+    // eslint-disable-next-line no-console
+    if (!secret) console.warn('[crypto:encryptForCookie] no secret provided; middleware will encrypt with empty key — ensure server has the same key configured');
+  } catch {}
   const secretBytes = enc.encode(secret);
   const hash = await crypto.subtle.digest("SHA-256", secretBytes); // ArrayBuffer(32)
   const key = await crypto.subtle.importKey(

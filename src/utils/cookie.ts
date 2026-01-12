@@ -139,6 +139,21 @@ export function getEncryptedCookie(
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
     const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    // If no secret is configured but the cookie looks like an encrypted blob,
+    // warn so operators know why decryption won't run.
+    if (!secret) {
+      try {
+        const maybeBuf = Buffer.from(cookie.value, "base64");
+        if (maybeBuf.length >= 12 + 16 + 1) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[cookie] cookie ${name} looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; server will not decrypt it`
+          );
+        }
+      } catch {}
+      return cookie.value || null;
+    }
+
     if (secret) {
       try {
         return decrypt(cookie.value, secret) || null;

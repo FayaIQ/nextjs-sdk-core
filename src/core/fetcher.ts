@@ -177,6 +177,10 @@ export async function apiFetch<T>(
   });
   
   // request completed
+  try {
+    // eslint-disable-next-line no-console
+    console.debug('[apiFetch] request completed', { method, endpoint, status: response.status, ok: response.ok, hasAuth: !!requestHeaders['Authorization'] });
+  } catch {}
   
   // Handle response errors - parse body and throw ApiError so callers must handle non-2xx
   if (!response.ok) {
@@ -209,6 +213,9 @@ export async function apiFetch<T>(
         const derivedMessage =
           findMessageInError(errorData) ||
           (typeof errorData === "string" ? errorData : response.statusText);
+
+        // eslint-disable-next-line no-console
+        console.error('[apiFetch] non-2xx response', { endpoint, status: response.status, derivedMessage });
 
         throw new ApiError(response.status, errorData, derivedMessage);
       }
@@ -249,6 +256,8 @@ export async function apiFetch<T>(
     // Return response as-is without any normalization
     return parsed as T;
   } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[apiFetch] Failed to parse JSON response', { endpoint, err: (err as any)?.message, snippet: text.substring(0, 200) });
     throw new Error(
       `Failed to parse response as JSON: ${text.substring(0, 100)}`
     );
@@ -281,9 +290,13 @@ export async function getWithAuth<T>(
 ): Promise<T> {
   let token: string | null = null;
   try {
+    // eslint-disable-next-line no-console
+    console.debug('[getWithAuth] requesting token for', url);
     token = await getToken();
   } catch (err: any) {
     // Normalize token-related unauthorized errors to ApiError(401)
+    // eslint-disable-next-line no-console
+    console.error('[getWithAuth] getToken error', { err: (err as any)?.message || String(err) });
     if (
       err &&
       (err.status === 401 || /unauthor/i.test(String(err.message || err)))
@@ -345,8 +358,12 @@ export async function postWithAuth<T>(
 ): Promise<T> {
   let token: string | null = null;
   try {
+    // eslint-disable-next-line no-console
+    console.debug('[postWithAuth] requesting token for', url);
     token = await getToken();
   } catch (err: any) {
+    // eslint-disable-next-line no-console
+    console.error('[postWithAuth] getToken error', { err: (err as any)?.message || String(err) });
     if (
       err &&
       (err.status === 401 || /unauthor/i.test(String(err.message || err)))

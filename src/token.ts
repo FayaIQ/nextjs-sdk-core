@@ -14,14 +14,21 @@ const USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
 // ------------------------------------------------
 async function getTokenImpl(): Promise<string> {
 
+  // Debug: entry
+  try {
+    // eslint-disable-next-line no-console
+    console.debug('[token:getTokenImpl] invoked; environment AUTH_MODE=', AUTH_MODE);
+  } catch {}
+
   // 🟢 0. SERVER-SIDE: Check for x-access-token header first
   if (typeof window === "undefined") {
     const { headers } = await import("next/headers");
     const headerToken = (await headers()).get("x-access-token");
     if (headerToken) {
+      // eslint-disable-next-line no-console
+      console.debug('[token:getTokenImpl] found token in x-access-token header (server-side)');
       // Encryption removed — return raw header token
       return headerToken;
-    
     }
   }
 
@@ -32,49 +39,54 @@ async function getTokenImpl(): Promise<string> {
 
     let token: string | null = null;
     const { getEncryptedCookie, COOKIE_NAMES } = await import("./utils/cookie");
-    
+
     // Try encrypted session_id first
     try {
       token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
       if (token) {
+        // eslint-disable-next-line no-console
+        console.debug('[token:getTokenImpl] token found via getEncryptedCookie (SESSION_ID)');
         return token;
       }
     } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[token:getTokenImpl] getEncryptedCookie threw:', (e as any)?.message ?? e);
     }
 
-    // Try plain session_id (use helper which will decrypt if key present)
-    token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
-    if (token) {
-      return token;
+    // Try plain session_id (use cookieStore raw value as a fallback)
+    try {
+      token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+      if (token) {
+        // eslint-disable-next-line no-console
+        console.debug('[token:getTokenImpl] token found via plain cookie (SESSION_ID)');
+        return token;
+      }
+    } catch (e) {
+      // ignore
     }
 
     // MIDDLEWARE: Check access_token cookie (set by consumer middleware)
     try {
-      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
+      token = cookieStore.get('access_token')?.value || null;
       if (token) {
+        // eslint-disable-next-line no-console
+        console.debug('[token:getTokenImpl] token found via cookie access_token (middleware)');
         return token;
       }
-    } catch  {
-    }
-
-    // Try plain access_token (use helper)
-    token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
-    if (token) {
-      return token;
+    } catch (e) {
+      // ignore
     }
 
     // LEGACY: Fallback to old cookie names for migration
     try {
       token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
       if (token) {
+        // eslint-disable-next-line no-console
+        console.debug('[token:getTokenImpl] token found via legacy CRF cookie');
         return token;
       }
     } catch {
-    }
-
-    token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
-    if (token) {
-      return token;
+      // ignore
     }
 
     console.error('[token:getTokenImpl] No token found in strict mode. Available cookies:', 
