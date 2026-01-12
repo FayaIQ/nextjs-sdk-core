@@ -1,6 +1,6 @@
 {
   "name": "erp-core",
-  "version": "1.0.1",
+  "version": "2.0.1",
   "type": "module",
   "description": "A Next.js SDK for server and client components with simple API functions",
   "types": "dist/index.d.ts",
@@ -22,8 +22,9 @@
     "bin"
   ],
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup src/index.ts --format cjs,esm --dts --dts-resolve",
-    "prepare": "npm run build"
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsup --config tsup.config.ts",
+    "generate-exports": "node ./scripts/generate-exports.js",
+    "prepare": "npm run generate-exports && npm run build"
   },
   "exports": {
     ".": {
@@ -35,6 +36,11 @@
       "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.js",
       "require": "./dist/core/index.cjs"
+    },
+    "./core/*": {
+      "types": "./dist/core/*.d.ts",
+      "import": "./dist/core/*.js",
+      "require": "./dist/core/*.cjs"
     },
     "./api": {
       "types": "./dist/api/index.d.ts",
@@ -61,11 +67,6 @@
       "import": "./dist/gps/locations/index.js",
       "require": "./dist/gps/locations/index.cjs"
     },
-    "./gps/locations/*": {
-      "types": "./dist/gps/locations/*.d.ts",
-      "import": "./dist/gps/locations/*.js",
-      "require": "./dist/gps/locations/*.cjs"
-    },
     "./identity": {
       "types": "./dist/identity/index.d.ts",
       "import": "./dist/identity/index.js",
@@ -81,10 +82,20 @@
       "import": "./dist/identity/application/index.js",
       "require": "./dist/identity/application/index.cjs"
     },
-    "./identity/application/*": {
-      "types": "./dist/identity/application/*.d.ts",
-      "import": "./dist/identity/application/*.js",
-      "require": "./dist/identity/application/*.cjs"
+    "./identity/users": {
+      "types": "./dist/identity/users/index.d.ts",
+      "import": "./dist/identity/users/index.js",
+      "require": "./dist/identity/users/index.cjs"
+    },
+    "./inventory": {
+      "types": "./dist/inventory/index.d.ts",
+      "import": "./dist/inventory/index.js",
+      "require": "./dist/inventory/index.cjs"
+    },
+    "./inventory/*": {
+      "types": "./dist/inventory/*.d.ts",
+      "import": "./dist/inventory/*.js",
+      "require": "./dist/inventory/*.cjs"
     },
     "./inventory/orders": {
       "types": "./dist/inventory/orders/index.d.ts",
@@ -240,6 +251,26 @@
       "types": "./dist/firebase/*.d.ts",
       "import": "./dist/firebase/*.js",
       "require": "./dist/firebase/*.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs"
+    },
+    "./utils/*": {
+      "types": "./dist/utils/*.d.ts",
+      "import": "./dist/utils/*.js",
+      "require": "./dist/utils/*.cjs"
+    },
+    "./news/customers": {
+      "types": "./dist/news/customers/index.d.ts",
+      "import": "./dist/news/customers/index.js",
+      "require": "./dist/news/customers/index.cjs"
+    },
+    "./news/customers/*": {
+      "types": "./dist/news/customers/*.d.ts",
+      "import": "./dist/news/customers/*.js",
+      "require": "./dist/news/customers/*.cjs"
     }
   },
   "peerDependencies": {

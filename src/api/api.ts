@@ -35,6 +35,7 @@ export class Api {
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
+  static getNews: string = `${Api.NEWS_BASE}/v1/News/Paging/ForCustomer`;
   static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
@@ -360,16 +361,25 @@ export class Api {
   }
 
   // Item collection endpoint (update a specific collection for an item)
-  static putItemCollection(itemId: string | number, id: string | number): string {
+  static putItemCollection(
+    itemId: string | number,
+    id: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}`;
   }
-  
+
   // Activate / Deactivate an item collection
-  static putItemCollectionActivate(itemId: string | number, id: string | number): string {
+  static putItemCollectionActivate(
+    itemId: string | number,
+    id: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Activate`;
   }
 
-  static putItemCollectionDeactivate(itemId: string | number, id: string | number): string {
+  static putItemCollectionDeactivate(
+    itemId: string | number,
+    id: string | number
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Deactivate`;
   }
 

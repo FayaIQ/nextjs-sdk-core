@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
   try {
     // Parse request body safely
     const body = await request.json().catch(() => ({}));
-    console.log("[identity:handler:login] POST body", { hasUsername: !!body.username, hasPassword: !!body.password, hasThirdPartyToken: !!body.thirdPartyToken });
 
     // Merge provided body with fallback env config
     const config = getAuthConfig();
@@ -29,7 +28,6 @@ export async function POST(request: NextRequest) {
       IsFromNotification: false,
       thirdPartyToken: body.thirdPartyToken ?? config.thirdPartyToken,
     };
-    console.log("[identity:handler:login] credentials prepared", { hasUsername: !!credentials.username, hasPassword: !!credentials.password, hasThirdPartyToken: !!credentials.thirdPartyToken });
 
     // ✅ Server-side dedupe: avoid re-signing if already logged in with same thirdPartyToken
     if (body.thirdPartyToken) {
@@ -58,7 +56,6 @@ export async function POST(request: NextRequest) {
       }
       
       if (hasValidToken) {
-        console.log("[identity:handler:login] already logged in with same thirdPartyToken, skipping re-auth");
         return NextResponse.json(
           {
             success: true,
@@ -85,11 +82,9 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
-    console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
 
     // If login provided a thirdPartyToken, persist it encrypted for AUTO mode re-auth
     if (body.thirdPartyToken) {
-      console.log("[identity:handler:login] setting encrypted tp_id cookie");
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
       const { setPlainCookie, COOKIE_NAMES } = await import("../../utils/cookie");

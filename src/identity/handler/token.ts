@@ -15,51 +15,40 @@ import { Api } from "../../api/api";
  * ```
  */
 export async function GET(request: NextRequest) {
-  console.log("[identity:handler:token] GET request received");
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    console.log(`[identity:handler:token] Available cookies: ${cookieStore.getAll().map((c: any) => c.name).join(', ')}`);
     
     // Import cookie utilities
     const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
     
     
     // Check encrypted crf cookie first
-    console.log("[identity:handler:token] Checking for existing token in cookies");
     let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-    console.log(`[identity:handler:token] CRF cookie token found: ${!!existingToken}`);
     
     // Fallback to legacy access_token if crf not found
     if (!existingToken) {
       existingToken = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
-      console.log(`[identity:handler:token] Legacy SESSION_ID cookie found: ${!!existingToken}`);
     }
     
     if (existingToken) {
-      console.log("[identity:handler:token] Returning existing token from cookies");
       // Return with cache headers to prevent repeated calls
       return NextResponse.json(
         { SESSION_ID: existingToken },
       );
     }
 
-    console.log("[identity:handler:token] No existing token found, attempting re-auth");
 
     // Try to use encrypted tp_id for re-auth (with fallback to plain)
-    console.log("[identity:handler:token] Checking for tp_id cookie");
     let tpId: string | null = null;
     try {
       tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-      console.log(`[identity:handler:token] Encrypted tp_id found: ${!!tpId}`);
-    } catch (e) {
-      console.log("[identity:handler:token] Encrypted tp_id decryption failed");
+    } catch {
     }
     
     // Fallback to plain tp_id cookie
     if (!tpId) {
       tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
-      console.log(`[identity:handler:token] Plain tp_id found: ${!!tpId}`);
     }
     
     const authConfig = getAuthConfig();
@@ -76,7 +65,6 @@ export async function GET(request: NextRequest) {
     } else if ((authConfig as any).thirdPartyToken) {
       requestBody["ThirdPartyToken"] = (authConfig as any).thirdPartyToken;
     } else {
-      console.log("[identity:handler:token] signing in with clientId/clientSecret");
     }
 
     // Include a User-Agent header for downstream telemetry.
@@ -115,7 +103,6 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    console.log(`[identity:handler:token] Token response received, has access_token: ${!!data.access_token}`);
     
     if (!data.access_token) {
       console.error("[identity:handler:token] No access_token in response");
@@ -125,13 +112,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(`[identity:handler:token] Access token length: ${data.access_token.length}`);
 
     // Return response with encrypted cookie
     const res = NextResponse.json({ access_token: data.access_token });
     
     // Set session_id cookie (encrypted when possible)
-    console.log("[identity:handler:token] Setting session_id cookie (encrypted preferred)");
     try {
       const { COOKIE_NAMES: CN, setPlainCookie } = await import("../../utils/cookie");
       // Remove legacy cookies and save session_id plainly
@@ -139,19 +124,23 @@ export async function GET(request: NextRequest) {
         res.cookies.delete(CN.CRF);
       } catch {}
       try {
-        res.cookies.delete("access_token");
+        res.cookies.delete("session_id");
       } catch {}
       try {
         res.cookies.delete(CN.SESSION_ID);
       } catch {}
-      setPlainCookie(res.cookies, CN.SESSION_ID, data.access_token, { maxAge: 3600 });
-      console.log("[identity:handler:token] session_id saved (plain)");
+      // Store session token as HttpOnly and secure in production so it isn't
+      // accessible to client-side scripts. This reduces XSS risk.
+      setPlainCookie(res.cookies, CN.SESSION_ID, data.access_token, {
+        maxAge: 3600,
+        httpOnly: true,
+        secure: true,
+      });
     } catch (e) {
       console.error("[identity:handler:token] Failed to set session_id cookie:", e);
       throw e;
     }
 
-    console.log("[identity:handler:token] Returning response with new token");
     return res;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Token fetch failed";

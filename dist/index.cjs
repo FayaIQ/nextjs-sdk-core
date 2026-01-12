@@ -50,10 +50,6 @@ function setEncryptedCookie(cookieStore, name, value, options) {
       ...options
     });
   } catch (e) {
-    console.error(
-      `[cookie:setEncryptedCookie] Failed to set cookie ${name}:`,
-      e
-    );
     throw e;
   }
 }
@@ -66,14 +62,10 @@ function getEncryptedCookie(cookieStore, name) {
     if (!cookie?.value) return null;
     return cookie.value || null;
   } catch (e) {
-    console.error(`[cookie:getEncryptedCookie] Failed to read ${name}:`, e);
     return null;
   }
 }
 function setPlainCookie(cookieStore, name, value, options) {
-  console.log(
-    `[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${value?.length || 0}`
-  );
   try {
     cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
@@ -81,14 +73,7 @@ function setPlainCookie(cookieStore, name, value, options) {
       // Allow client-side read for flags
       ...options
     });
-    console.log(
-      `[cookie:setPlainCookie] Plain cookie ${name} set successfully`
-    );
   } catch (e) {
-    console.error(
-      `[cookie:setPlainCookie] Failed to set plain cookie ${name}:`,
-      e
-    );
     throw e;
   }
 }
@@ -112,8 +97,8 @@ var init_cookie = __esm({
       // ACCESS_TOKEN: 'access_token',
     };
     SECURE_COOKIE_OPTIONS = {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24 * 7
@@ -128,167 +113,110 @@ __export(token_exports, {
   default: () => getToken
 });
 async function getTokenImpl() {
-  console.log(`[token:getTokenImpl] Starting token retrieval. AUTH_MODE: ${AUTH_MODE}, USE_TOKEN_ROUTE: ${USE_TOKEN_ROUTE}, isServer: ${typeof window === "undefined"}`);
   if (typeof window === "undefined") {
-    console.log("[token:getTokenImpl] Server-side execution, checking x-access-token header");
     const { headers } = await import("next/headers");
     const headerToken = (await headers()).get("x-access-token");
-    console.log(`[token:getTokenImpl] x-access-token header present: ${!!headerToken}`);
     if (headerToken) {
-      console.log(`[token:getTokenImpl] Raw header token length: ${headerToken.length}`);
-      console.log(`[token:getTokenImpl] Header token preview: ${headerToken.substring(0, 50)}...`);
       return headerToken;
     }
   }
   if (AUTH_MODE === "strict" && typeof window === "undefined") {
-    console.log("[token:getTokenImpl] Strict mode server-side, checking cookies");
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    console.log(`[token:getTokenImpl] Available cookies: ${cookieStore.getAll().map((c) => c.name).join(", ")}`);
     let token = null;
     const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
-    console.log("[token:getTokenImpl] Trying encrypted session_id");
     try {
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
       if (token) {
-        console.log("[token:getTokenImpl] Found encrypted session_id");
-        console.log(`[token:getTokenImpl] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
-        console.log(`[token:getTokenImpl] Token length: ${token.length}`);
         return token;
       }
     } catch (e) {
-      console.log("[token:getTokenImpl] session_id decryption failed, trying plain");
     }
-    console.log("[token:getTokenImpl] Trying plain session_id");
     token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
     if (token) {
-      console.log("[token:getTokenImpl] Found plain session_id, returning token");
       return token;
     }
-    console.log("[token:getTokenImpl] Trying middleware access_token cookie");
     try {
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
       if (token) {
-        console.log("[token:getTokenImpl] Found encrypted access_token (middleware), returning token");
         return token;
       }
-    } catch (e) {
-      console.log("[token:getTokenImpl] access_token decryption failed, trying plain");
+    } catch {
     }
     token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
     if (token) {
-      console.log("[token:getTokenImpl] Found plain access_token (middleware), returning token");
       return token;
     }
-    console.log("[token:getTokenImpl] Trying legacy cookie names");
     try {
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
       if (token) {
-        console.log("[token:getTokenImpl] Found legacy encrypted crf, returning token");
         return token;
       }
-    } catch (e) {
-      console.log("[token:getTokenImpl] Legacy crf decryption failed");
+    } catch {
     }
     token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
     if (token) {
-      console.log("[token:getTokenImpl] Found legacy plain SESSION_ID, returning token");
       return token;
     }
-    console.error(
-      "[token:getTokenImpl] No token found in strict mode. Available cookies:",
-      cookieStore.getAll().map((c) => c.name)
-    );
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     err.status = 401;
-    console.error("[token:getTokenImpl] Throwing 401 error:", err.message);
     throw err;
   }
   if (typeof window === "undefined") {
-    console.log("[token:getTokenImpl] Auto mode server-side, checking cookies");
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      console.log(`[token:getTokenImpl:auto] Available cookies: ${cookieStore.getAll().map((c) => c.name).join(", ")}`);
       const { getEncryptedCookie: getEncryptedCookie2, COOKIE_NAMES: COOKIE_NAMES2 } = await Promise.resolve().then(() => (init_cookie(), cookie_exports));
       let token = null;
-      console.log("[token:getTokenImpl:auto] Trying encrypted session_id");
       try {
         token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
         if (token) {
-          console.log("[token:getTokenImpl:auto] Found encrypted session_id");
-          console.log(`[token:getTokenImpl:auto] Token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
-          console.log(`[token:getTokenImpl:auto] Token length: ${token.length}`);
           return token;
         }
-      } catch (e) {
-        console.log("[token:getTokenImpl:auto] session_id decryption failed, trying plain");
+      } catch {
       }
-      console.log("[token:getTokenImpl:auto] Trying plain session_id");
       token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
       if (token) {
-        console.log("[token:getTokenImpl:auto] Found plain session_id, returning token");
         return token;
       }
-      console.log("[token:getTokenImpl:auto] Trying middleware access_token cookie");
       try {
         token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
         if (token) {
-          console.log("[token:getTokenImpl:auto] Found encrypted access_token (middleware), returning token");
           return token;
         }
-      } catch (e) {
-        console.log("[token:getTokenImpl:auto] access_token decryption failed, trying plain");
+      } catch {
       }
       token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
       if (token) {
-        console.log("[token:getTokenImpl:auto] Found plain access_token (middleware), returning token");
         return token;
       }
-      console.log("[token:getTokenImpl:auto] Trying legacy cookie names");
       try {
         token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
         if (token) {
-          console.log("[token:getTokenImpl:auto] Found legacy encrypted crf, returning token");
           return token;
         }
-      } catch (e) {
-        console.log("[token:getTokenImpl:auto] Legacy crf decryption failed");
+      } catch {
       }
-      console.warn(
-        "[token:getTokenImpl:auto] No token found. Available cookies:",
-        cookieStore.getAll().map((c) => c.name)
-      );
     } catch (e) {
-      console.error("[token:getTokenImpl:auto] Error reading cookies:", e);
     }
   }
   if (typeof window !== "undefined") {
-    console.log("[token:getTokenImpl] Client-side execution, checking cookies");
     const getCookie = (name) => {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
       return null;
     };
-    console.log("[token:getTokenImpl] Checking for session_id cookie");
     const sessionIdToken = getCookie("session_id");
-    console.log(`[token:getTokenImpl] session_id cookie found: ${!!sessionIdToken}`);
     if (sessionIdToken) {
-      console.log("[token:getTokenImpl] Returning token from session_id cookie");
       return sessionIdToken;
     }
-    console.log("[token:getTokenImpl] Checking for legacy access_token cookie");
     const accessToken = getCookie("access_token");
-    console.log(`[token:getTokenImpl] access_token cookie found: ${!!accessToken}`);
     if (accessToken) {
-      console.log("[token:getTokenImpl] Returning token from legacy access_token cookie");
       return accessToken;
     }
-    console.error("[token:getTokenImpl] No token available on client side");
     throw new Error("No token available on client side");
   }
-  console.error("[token:getTokenImpl] No token available (server-side fallback)");
   throw new Error("No token available");
 }
 function getToken() {
@@ -399,12 +327,9 @@ async function apiFetch(url, options = {}) {
   if (token) {
     requestHeaders["Authorization"] = `Bearer ${token}`;
     try {
-      console.log(`[apiFetch] Authorization header set with token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
     } catch {
-      console.log("[apiFetch] Authorization header set (token preview unavailable)");
     }
   } else {
-    console.log("[apiFetch] No token provided, skipping Authorization header");
   }
   if (data && !(data instanceof FormData)) {
     requestHeaders["Content-Type"] = "application/json";
@@ -418,9 +343,7 @@ async function apiFetch(url, options = {}) {
     headers: requestHeaders,
     body
   });
-  console.log(`[apiFetch] ${method} ${endpoint} -> Status: ${response.status} ${response.statusText}`);
   if (!response.ok) {
-    console.log(`[apiFetch] Request failed with status ${response.status}`);
     try {
       const text2 = await response.text();
       if (text2 && text2.trim()) {
@@ -972,6 +895,7 @@ var init_api = __esm({
     _Api.getStoreUsersPaging = `${_Api.IDENTITY_BASE}/v1/StoreUsers/Paging`;
     // Other services
     _Api.getProducts = `${_Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
+    _Api.getNews = `${_Api.NEWS_BASE}/v1/News/Paging/ForCustomer`;
     _Api.getItemsPaging = `${_Api.INVENTORY_BASE}/v2/Items/Paging`;
     _Api.getMenus = `${_Api.INVENTORY_BASE}/v1/Menus/Search/true`;
     _Api.getMenusDropdown = `${_Api.INVENTORY_BASE}/v1/Menus/Dropdown`;
@@ -1053,7 +977,6 @@ async function getPrimaryApp() {
     throw new Error("getPrimaryApp must be called on the client");
   }
   if (primaryApp) return primaryApp;
-  console.log("[firebase:getPrimaryApp] initializing primary app");
   const { initializeApp, getApps } = await import("firebase/app");
   const config = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -1067,7 +990,6 @@ async function getPrimaryApp() {
   };
   const existing = getApps().find((app) => app.name === "[DEFAULT]");
   primaryApp = existing || initializeApp(config);
-  console.log("[firebase:getPrimaryApp] primary app ready");
   return primaryApp;
 }
 async function getSecondaryApp() {
@@ -1075,7 +997,6 @@ async function getSecondaryApp() {
     throw new Error("getSecondaryApp must be called on the client");
   }
   if (secondaryApp) return secondaryApp;
-  console.log("[firebase:getSecondaryApp] initializing secondary app");
   const { initializeApp, getApps } = await import("firebase/app");
   const config = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY_SECONDARY,
@@ -1087,7 +1008,6 @@ async function getSecondaryApp() {
   };
   const existing = getApps().find((app) => app.name === "secondary");
   secondaryApp = existing || initializeApp(config, "secondary");
-  console.log("[firebase:getSecondaryApp] secondary app ready");
   return secondaryApp;
 }
 async function getFirebaseApp() {
@@ -1103,8 +1023,8 @@ var init_config = __esm({
 });
 
 // src/index.ts
-var index_exports = {};
-__export(index_exports, {
+var src_exports = {};
+__export(src_exports, {
   AgeGroup: () => AgeGroup,
   Api: () => Api,
   COOKIE_NAMES: () => COOKIE_NAMES,
@@ -1143,7 +1063,7 @@ __export(index_exports, {
   startAuthStateSync: () => startAuthStateSync,
   startPhoneSignIn: () => startPhoneSignIn
 });
-module.exports = __toCommonJS(index_exports);
+module.exports = __toCommonJS(src_exports);
 
 // src/identity/application/storeInfo.ts
 async function getStoreInfo() {
@@ -1900,14 +1820,9 @@ async function getProducts({
     filterParams = filterParams.copyWith({ sortType: "None" /* None */ });
   }
   const params = filterParams.toURLSearchParams();
-  console.log("Fetching products with params:", params.toString());
   if (typeof window === "undefined") {
     const { getWithAuth: getWithAuth2 } = await Promise.resolve().then(() => (init_fetcher(), fetcher_exports));
     const { Api: Api2 } = await Promise.resolve().then(() => (init_api(), api_exports));
-    console.log(
-      "Server-side fetching products with params:",
-      `${Api2.getProducts}?${params.toString()}`
-    );
     return getWithAuth2(
       `${Api2.getProducts}?${params.toString()}`
     );
@@ -2410,7 +2325,6 @@ async function startPhoneSignIn(phoneNumber, options) {
   if (typeof window === "undefined") {
     throw new Error("startPhoneSignIn must be called in the browser");
   }
-  console.log("[firebase:startPhoneSignIn]", { phoneNumber });
   const { getSecondaryApp: getSecondaryApp2 } = await Promise.resolve().then(() => (init_config(), config_exports));
   const { getFunctions, httpsCallable } = await import("firebase/functions");
   const secondaryApp2 = await getSecondaryApp2();
@@ -2422,14 +2336,11 @@ async function startPhoneSignIn(phoneNumber, options) {
       phoneNumber,
       projectName: options?.projectName || "serlab"
     });
-    console.log("[firebase:startPhoneSignIn] OTP sent via WhatsApp");
   } catch (error) {
-    console.error("[firebase:startPhoneSignIn] failed to send OTP", error);
     throw error;
   }
   return {
     confirm: async (code) => {
-      console.log("[firebase:confirmPhoneCode] verifying code");
       __isSigningIn = true;
       const verifyFunctionName = options?.verifyFunctionName || "verifySMS";
       const verifyOtpFunction = httpsCallable(functions, verifyFunctionName);
@@ -2440,7 +2351,6 @@ async function startPhoneSignIn(phoneNumber, options) {
           projectName: options?.projectName || "serlab"
         });
         const customToken = response.data.token;
-        console.log("[firebase:confirmPhoneCode] custom token received");
         const { getPrimaryApp: getPrimaryApp2 } = await Promise.resolve().then(() => (init_config(), config_exports));
         const {
           getAuth,
@@ -2452,18 +2362,10 @@ async function startPhoneSignIn(phoneNumber, options) {
         const auth = getAuth(primaryApp2);
         try {
           await setPersistence(auth, browserLocalPersistence);
-          console.log(":confirmPhoneCode] persistence set to LOCAL");
-        } catch (e) {
-          console.warn(
-            "[firebase:confirmPhoneCode] failed to set persistence",
-            e
-          );
+        } catch {
         }
         try {
           await signInWithCustomToken(auth, customToken);
-          console.log(
-            "[firebase:confirmPhoneCode] user signed in on primary app"
-          );
         } catch (e) {
           const appProjectId = primaryApp2?.options?.projectId;
           const payload = decodeJwtPayload(customToken) || {};
@@ -2471,16 +2373,6 @@ async function startPhoneSignIn(phoneNumber, options) {
           const code2 = e?.code || e?.message || String(e);
           const likelyMismatch = code2?.includes("auth/custom-token-mismatch") || code2?.includes("custom-token-mismatch") || code2?.includes("auth/invalid-custom-token") || code2?.includes("invalid-custom-token") || code2?.includes("CREDENTIAL_MISMATCH");
           if (likelyMismatch) {
-            console.error(
-              "[firebase:confirmPhoneCode] CREDENTIAL_MISMATCH \u2192 token project != client app",
-              {
-                code: code2,
-                clientProjectId: appProjectId,
-                tokenIss: payload.iss,
-                tokenProjectId,
-                tokenAud: payload.aud
-              }
-            );
             throw new Error(
               `CREDENTIAL_MISMATCH: Custom token was minted for project "${tokenProjectId ?? "<unknown>"}" but you are signing into "${appProjectId}". Ensure your verifySMS Cloud Function mints tokens using the PRIMARY project's service account (the same project used by getPrimaryApp).`
             );
@@ -2498,14 +2390,9 @@ async function startPhoneSignIn(phoneNumber, options) {
         });
         const { getIdToken } = await import("firebase/auth");
         const idToken = await getIdToken(auth.currentUser, true);
-        console.log(
-          "[firebase:confirmPhoneCode] ID token obtained (refreshed)"
-        );
         __isSigningIn = false;
-        console.log("[firebase:confirmPhoneCode] sign-in flag cleared");
         return idToken;
       } catch (error) {
-        console.error("[firebase:confirmPhoneCode] verification failed", error);
         __isSigningIn = false;
         throw error;
       }
@@ -2524,12 +2411,8 @@ async function getFirebaseIdToken(forceRefresh = false) {
   const user = auth.currentUser;
   if (!user) return null;
   try {
-    console.log("[firebase:getFirebaseIdToken] fetching token", {
-      forceRefresh
-    });
     return await getIdToken(user, forceRefresh);
   } catch (e) {
-    console.log("[firebase:getFirebaseIdToken] failed to get ID token", e);
     return null;
   }
 }
@@ -2541,7 +2424,6 @@ async function signOutFirebase() {
   ]);
   const app = await getPrimaryApp2();
   const auth = getAuth(app);
-  console.log("[firebase:signOutFirebase] signing out");
   await signOut(auth);
 }
 var __authSyncUnsubscribe = null;
@@ -2567,12 +2449,7 @@ async function startAuthStateSync(options) {
     const endpoint = options?.loginEndpoint || "/api/auth/login";
     try {
       await setPersistence(auth, browserLocalPersistence);
-      console.log("[firebase:startAuthStateSync] persistence set");
     } catch (e) {
-      console.warn(
-        "[firebase:startAuthStateSync] failed to set persistence",
-        e
-      );
     }
     const STORAGE_KEY = "erp_core_last_sync_hash";
     const hashToken = async (token) => {
@@ -2595,9 +2472,6 @@ async function startAuthStateSync(options) {
     };
     const pushTokenToServer = async (forceRefresh = false) => {
       if (__isSigningIn) {
-        console.log(
-          "[firebase:startAuthStateSync] skipping sync during sign-in"
-        );
         return;
       }
       try {
@@ -2611,9 +2485,6 @@ async function startAuthStateSync(options) {
         try {
           const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
           if (lastPersistedHash && lastPersistedHash === tokenHash) {
-            console.log(
-              "[firebase:startAuthStateSync] token already synced (session cache hit)"
-            );
             return;
           }
         } catch {
@@ -2629,9 +2500,7 @@ async function startAuthStateSync(options) {
           sessionStorage.setItem(STORAGE_KEY, tokenHash);
         } catch {
         }
-        console.log("[firebase:startAuthStateSync] token synced \u2192 server");
       } catch (e) {
-        console.error("[firebase:startAuthStateSync] sync failed", e);
         options?.onError?.(e);
       }
     };

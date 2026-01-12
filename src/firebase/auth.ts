@@ -63,7 +63,6 @@ export async function startPhoneSignIn(
     throw new Error("startPhoneSignIn must be called in the browser");
   }
 
-  console.log("[firebase:startPhoneSignIn]", { phoneNumber });
 
   const { getSecondaryApp } = await import("./config");
   const { getFunctions, httpsCallable } = await import("firebase/functions");
@@ -80,7 +79,6 @@ export async function startPhoneSignIn(
       phoneNumber,
       projectName: options?.projectName || "serlab",
     });
-    console.log("[firebase:startPhoneSignIn] OTP sent via WhatsApp");
   } catch (error) {
     console.error("[firebase:startPhoneSignIn] failed to send OTP", error);
     throw error;
@@ -89,7 +87,6 @@ export async function startPhoneSignIn(
   // Return confirmation object with verify method
   return {
     confirm: async (code: string) => {
-      console.log("[firebase:confirmPhoneCode] verifying code");
 
       // Set flag to prevent auth state sync during login
       __isSigningIn = true;
@@ -105,7 +102,6 @@ export async function startPhoneSignIn(
         });
 
         const customToken = (response.data as { token: string }).token;
-        console.log("[firebase:confirmPhoneCode] custom token received");
 
         // Sign in with custom token on PRIMARY app
         const { getPrimaryApp } = await import("./config");
@@ -121,19 +117,13 @@ export async function startPhoneSignIn(
 
         try {
           await setPersistence(auth, browserLocalPersistence);
-          console.log(":confirmPhoneCode] persistence set to LOCAL");
-        } catch (e) {
-          console.warn(
-            "[firebase:confirmPhoneCode] failed to set persistence",
-            e
-          );
+        } catch  {
+        
         }
         // Try to sign in; if mismatch, provide a clear diagnostic error
         try {
           await signInWithCustomToken(auth, customToken);
-          console.log(
-            "[firebase:confirmPhoneCode] user signed in on primary app"
-          );
+          
         } catch (e: any) {
           const appProjectId = (primaryApp as any)?.options?.projectId;
           const payload = decodeJwtPayload(customToken) || {};
@@ -150,16 +140,7 @@ export async function startPhoneSignIn(
             code?.includes("CREDENTIAL_MISMATCH");
 
           if (likelyMismatch) {
-            console.error(
-              "[firebase:confirmPhoneCode] CREDENTIAL_MISMATCH → token project != client app",
-              {
-                code,
-                clientProjectId: appProjectId,
-                tokenIss: payload.iss,
-                tokenProjectId,
-                tokenAud: payload.aud,
-              }
-            );
+          
             throw new Error(
               `CREDENTIAL_MISMATCH: Custom token was minted for project "${
                 tokenProjectId ?? "<unknown>"
@@ -186,14 +167,10 @@ export async function startPhoneSignIn(
         const { getIdToken } = await import("firebase/auth");
         const idToken = await getIdToken(auth.currentUser!, true);
 
-        console.log(
-          "[firebase:confirmPhoneCode] ID token obtained (refreshed)"
-        );
-
+       
         // Clear the flag BEFORE returning so app can proceed
         // The onIdTokenChanged from the refresh above will be skipped because flag is cleared
         __isSigningIn = false;
-        console.log("[firebase:confirmPhoneCode] sign-in flag cleared");
 
         return idToken;
       } catch (error) {
@@ -226,12 +203,8 @@ export async function getFirebaseIdToken(forceRefresh = false) {
   if (!user) return null;
 
   try {
-    console.log("[firebase:getFirebaseIdToken] fetching token", {
-      forceRefresh,
-    });
     return await getIdToken(user, forceRefresh);
   } catch (e) {
-    console.log("[firebase:getFirebaseIdToken] failed to get ID token", e);
     return null;
   }
 }
@@ -250,7 +223,6 @@ export async function signOutFirebase(): Promise<void> {
   const app = await getPrimaryApp();
   const auth = getAuth(app);
 
-  console.log("[firebase:signOutFirebase] signing out");
   await signOut(auth);
 }
 
@@ -301,7 +273,6 @@ export async function startAuthStateSync(options?: {
 
     try {
       await setPersistence(auth, browserLocalPersistence);
-      console.log("[firebase:startAuthStateSync] persistence set");
     } catch (e) {
       console.warn(
         "[firebase:startAuthStateSync] failed to set persistence",
@@ -336,9 +307,6 @@ export async function startAuthStateSync(options?: {
     const pushTokenToServer = async (forceRefresh = false) => {
       // Skip if currently signing in to prevent duplicate token syncs
       if (__isSigningIn) {
-        console.log(
-          "[firebase:startAuthStateSync] skipping sync during sign-in"
-        );
         return;
       }
 
@@ -358,9 +326,6 @@ export async function startAuthStateSync(options?: {
         try {
           const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
           if (lastPersistedHash && lastPersistedHash === tokenHash) {
-            console.log(
-              "[firebase:startAuthStateSync] token already synced (session cache hit)"
-            );
             return;
           }
         } catch {}
@@ -378,7 +343,6 @@ export async function startAuthStateSync(options?: {
         try {
           sessionStorage.setItem(STORAGE_KEY, tokenHash);
         } catch {}
-        console.log("[firebase:startAuthStateSync] token synced → server");
       } catch (e) {
         console.error("[firebase:startAuthStateSync] sync failed", e);
         options?.onError?.(e);

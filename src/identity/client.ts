@@ -22,7 +22,6 @@ export function startSessionKeepAlive(options?: KeepAliveOptions): () => void {
     try {
       await fetch(endpoint, { method: "GET" });
       // Intentionally ignore the body; route will refresh cookies as needed
-      console.log("[identity:startSessionKeepAlive] pinged", endpoint);
     } catch (e) {
       console.warn("[identity:startSessionKeepAlive] ping failed", e);
       options?.onError?.(e);
