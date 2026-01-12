@@ -25,13 +25,22 @@ export async function GET(request: NextRequest) {
     
     // Check encrypted crf cookie first
     let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-    
+
     // Fallback to legacy access_token if crf not found
     if (!existingToken) {
       existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
     }
-    
+
     if (existingToken) {
+      // Debug: indicate which cookie supplied the token
+      try {
+        // eslint-disable-next-line no-console
+        console.debug('[identity:handler:token] returning existing token from cookies', {
+          fromCRF: !!cookieStore.get(COOKIE_NAMES.CRF),
+          fromSessionId: !!cookieStore.get(COOKIE_NAMES.SESSION_ID),
+        });
+      } catch {}
+
       // Return with cache headers to prevent repeated calls
       return NextResponse.json(
         { SESSION_ID: existingToken },
@@ -61,6 +70,10 @@ export async function GET(request: NextRequest) {
     };
 
     if (tpId) {
+      try {
+        // eslint-disable-next-line no-console
+        console.debug('[identity:handler:token] using TP_ID to re-auth', { tpIdPresent: true });
+      } catch {}
       requestBody["ThirdPartyToken"] = tpId;
     } else if ((authConfig as any).thirdPartyToken) {
       requestBody["ThirdPartyToken"] = (authConfig as any).thirdPartyToken;
@@ -113,8 +126,8 @@ export async function GET(request: NextRequest) {
     }
 
 
-    // Return response with encrypted cookie
-    const res = NextResponse.json({ access_token: data.access_token });
+  // Return response with encrypted cookie
+  const res = NextResponse.json({ access_token: data.access_token });
     
     // Set session_id cookie (encrypted when possible)
     try {
@@ -136,6 +149,14 @@ export async function GET(request: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
       });
+
+      try {
+        // eslint-disable-next-line no-console
+        console.debug('[identity:handler:token] set session cookie on response', {
+          encryptedKeyConfigured: !!(process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY),
+          cookieName: CN.SESSION_ID,
+        });
+      } catch {}
     } catch (e) {
       console.error("[identity:handler:token] Failed to set session_id cookie:", e);
       throw e;

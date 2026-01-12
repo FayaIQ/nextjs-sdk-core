@@ -158,6 +158,15 @@ export async function loginUser(
     if (!response?.access_token) {
       throw new Error("Invalid login response: missing access token");
     }
+    // Debug: log auth flow source (third-party or standard) and response metadata
+    try {
+      // eslint-disable-next-line no-console
+      console.debug('[identity:login] login response received', {
+        viaThirdParty: !!credentials.thirdPartyToken,
+        expires: response.expires,
+        hasRoles: !!(response.roles && response.roles.length > 0),
+      });
+    } catch {}
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
 
@@ -188,6 +197,17 @@ export async function loginUser(
       secure: process.env.NODE_ENV === "production",
     });
 
+    // Log whether encryption key is configured when storing session
+    try {
+      // eslint-disable-next-line no-console
+      console.debug('[identity:login] session cookie stored', {
+        encryptedKeyConfigured: !!(process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY),
+        cookieName: COOKIE_NAMES.SESSION_ID,
+        expiresIn,
+        viaThirdParty: !!credentials.thirdPartyToken,
+      });
+    } catch {}
+
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
     if (credentials.thirdPartyToken) {
       // Save third-party token plainly for re-login
@@ -206,6 +226,10 @@ export async function loginUser(
           maxAge: 3600, // 1 hour typical Firebase token lifetime
         }
       );
+      try {
+        // eslint-disable-next-line no-console
+        console.debug('[identity:login] stored TP_ID cookie for re-login (plain)', { maxAge: 3600 });
+      } catch {}
     } else {
     }
 

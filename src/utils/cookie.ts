@@ -158,9 +158,13 @@ export function getEncryptedCookie(
       try {
         return decrypt(cookie.value, secret) || null;
       } catch (e) {
-        // If decryption fails, log a warning and return the raw value as fallback
-        // eslint-disable-next-line no-console
-        console.warn(`[cookie] decryption failed for ${name}`, e);
+        // If decryption fails, log a warning with minimal metadata and return the raw value as fallback
+        try {
+          const len = cookie.value?.length || 0;
+          const prefix = String(cookie.value || "").slice(0, 8);
+          // eslint-disable-next-line no-console
+          console.warn(`[cookie] decryption failed for ${name}; blobLen=${len}, prefix=${prefix}...`, (e as any)?.message || e);
+        } catch {}
         return cookie.value || null;
       }
     }
