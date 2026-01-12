@@ -644,7 +644,7 @@ var init_api = __esm({
         return `${_Api.GPS_BASE}/v1/Stores/${storeId}/DeliveryZones`;
       }
       static getItemFeatures(id) {
-        return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
+        return `${_Api.INVENTORY_BASE}/v1/Items/${id}/Features`;
       }
       static getProductInfo(id) {
         return `${_Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
