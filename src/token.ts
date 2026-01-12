@@ -67,7 +67,7 @@ async function getTokenImpl(): Promise<string> {
 
     // MIDDLEWARE: Check access_token cookie (set by consumer middleware)
     try {
-      token = cookieStore.get('access_token')?.value || null;
+      token = cookieStore.get('session_id')?.value || null;
       if (token) {
         // eslint-disable-next-line no-console
         console.debug('[token:getTokenImpl] token found via cookie access_token (middleware)');
