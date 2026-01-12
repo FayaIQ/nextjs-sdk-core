@@ -17,7 +17,7 @@ async function getTokenImpl(): Promise<string> {
   // Debug: entry
   try {
     // eslint-disable-next-line no-console
-    console.debug('[token:getTokenImpl] invoked; environment AUTH_MODE=', AUTH_MODE);
+    console.log('[token:getTokenImpl] invoked; environment AUTH_MODE=', AUTH_MODE);
   } catch {}
 
   // 🟢 0. SERVER-SIDE: Check for x-access-token header first
@@ -26,7 +26,7 @@ async function getTokenImpl(): Promise<string> {
     const headerToken = (await headers()).get("x-access-token");
     if (headerToken) {
       // eslint-disable-next-line no-console
-      console.debug('[token:getTokenImpl] found token in x-access-token header (server-side)');
+      console.log('[token:getTokenImpl] found token in x-access-token header (server-side)');
       // Encryption removed — return raw header token
       return headerToken;
     }
@@ -45,7 +45,7 @@ async function getTokenImpl(): Promise<string> {
       token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
       if (token) {
         // eslint-disable-next-line no-console
-        console.debug('[token:getTokenImpl] token found via getEncryptedCookie (SESSION_ID)');
+        console.log('[token:getTokenImpl] token found via getEncryptedCookie (SESSION_ID)');
         return token;
       }
     } catch (e) {
@@ -58,7 +58,7 @@ async function getTokenImpl(): Promise<string> {
       token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
       if (token) {
         // eslint-disable-next-line no-console
-        console.debug('[token:getTokenImpl] token found via plain cookie (SESSION_ID)');
+        console.log('[token:getTokenImpl] token found via plain cookie (SESSION_ID)');
         return token;
       }
     } catch (e) {
@@ -70,7 +70,7 @@ async function getTokenImpl(): Promise<string> {
       token = cookieStore.get('session_id')?.value || null;
       if (token) {
         // eslint-disable-next-line no-console
-        console.debug('[token:getTokenImpl] token found via cookie access_token (middleware)');
+        console.log('[token:getTokenImpl] token found via cookie access_token (middleware)');
         return token;
       }
     } catch (e) {
@@ -82,7 +82,7 @@ async function getTokenImpl(): Promise<string> {
       token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
       if (token) {
         // eslint-disable-next-line no-console
-        console.debug('[token:getTokenImpl] token found via legacy CRF cookie');
+        console.log('[token:getTokenImpl] token found via legacy CRF cookie');
         return token;
       }
     } catch {

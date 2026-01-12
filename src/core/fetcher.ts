@@ -179,7 +179,7 @@ export async function apiFetch<T>(
   // request completed
   try {
     // eslint-disable-next-line no-console
-    console.debug('[apiFetch] request completed', { method, endpoint, status: response.status, ok: response.ok, hasAuth: !!requestHeaders['Authorization'] });
+    console.log('[apiFetch] request completed', { method, endpoint, status: response.status, ok: response.ok, hasAuth: !!requestHeaders['Authorization'] });
   } catch {}
   
   // Handle response errors - parse body and throw ApiError so callers must handle non-2xx
@@ -291,7 +291,7 @@ export async function getWithAuth<T>(
   let token: string | null = null;
   try {
     // eslint-disable-next-line no-console
-    console.debug('[getWithAuth] requesting token for', url);
+    console.log('[getWithAuth] requesting token for', url);
     token = await getToken();
   } catch (err: any) {
     // Normalize token-related unauthorized errors to ApiError(401)
@@ -359,7 +359,7 @@ export async function postWithAuth<T>(
   let token: string | null = null;
   try {
     // eslint-disable-next-line no-console
-    console.debug('[postWithAuth] requesting token for', url);
+    console.log('[postWithAuth] requesting token for', url);
     token = await getToken();
   } catch (err: any) {
     // eslint-disable-next-line no-console
