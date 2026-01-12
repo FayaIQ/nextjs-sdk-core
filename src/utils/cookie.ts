@@ -176,6 +176,39 @@ export function getEncryptedCookie(
 }
 
 /**
+ * Try to decrypt an arbitrary string that may be an encrypted cookie blob.
+ * Returns the decrypted string on success, or null on failure / if no key.
+ * Safe for server-side use only.
+ */
+export function tryDecryptString(value: string): string | null {
+  if (typeof window !== "undefined") {
+    throw new Error("tryDecryptString must only be called server-side");
+  }
+  const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+  if (!secret) {
+    // If it looks like an encrypted blob and there's no key, warn for operators
+    try {
+      const maybeBuf = Buffer.from(value, "base64");
+      if (maybeBuf.length >= 12 + 16 + 1) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[cookie] tryDecryptString: value looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; cannot decrypt`
+        );
+      }
+    } catch {}
+    return null;
+  }
+
+  try {
+    return decrypt(value, secret) || null;
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('[cookie] tryDecryptString decryption failed', (e as any)?.message || e);
+    return null;
+  }
+}
+
+/**
  * Set a plain (non-encrypted) cookie.
  * Use for non-sensitive flags like isUser.
  */

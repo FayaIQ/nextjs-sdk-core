@@ -25,9 +25,21 @@ async function getTokenImpl(): Promise<string> {
     const { headers } = await import("next/headers");
     const headerToken = (await headers()).get("x-access-token");
     if (headerToken) {
+      // Try to decrypt header token if it appears to be an encrypted blob
+      try {
+        const { tryDecryptString } = await import("./utils/cookie");
+        const decrypted = tryDecryptString(headerToken);
+        if (decrypted) {
+          // eslint-disable-next-line no-console
+          console.log('[token:getTokenImpl] found encrypted token in x-access-token header and decrypted it (server-side)');
+          return decrypted;
+        }
+      } catch (e) {
+        // ignore decryption errors and fall back to returning header token
+      }
+
       // eslint-disable-next-line no-console
       console.log('[token:getTokenImpl] found token in x-access-token header (server-side)');
-      // Encryption removed — return raw header token
       return headerToken;
     }
   }
