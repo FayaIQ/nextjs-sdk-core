@@ -23,10 +23,11 @@ export const COOKIE_NAMES = {
 
 /**
  * Default cookie options for secure httpOnly cookies
+ * `secure` should only be true in production environments where HTTPS is used.
  */
 export const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie> = {
   httpOnly: true,
-  secure: true,
+  secure: process.env.NODE_ENV === "production",
   sameSite: "lax",
   path: "/",
   maxAge: 60 * 60 * 24 * 7, // 7 days
@@ -35,6 +36,48 @@ export const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie> = {
 /**
  * Set an encrypted cookie value.
  * Server-side only.
+ */
+import { randomBytes, createCipheriv, createDecipheriv, createHash } from "crypto";
+
+/**
+ * Derive a 32-byte key from a passphrase using SHA-256.
+ */
+function deriveKey(secret: string) {
+  return createHash("sha256").update(secret).digest();
+}
+
+/**
+ * Encrypt a UTF-8 string using AES-256-GCM. Returns base64(iv|tag|ciphertext).
+ */
+function encrypt(text: string, secret: string): string {
+  const iv = randomBytes(12); // recommended IV size for GCM
+  const key = deriveKey(secret);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const encrypted = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, encrypted]).toString("base64");
+}
+
+/**
+ * Decrypt a base64(iv|tag|ciphertext) string created by encrypt().
+ */
+function decrypt(data: string, secret: string): string {
+  const buf = Buffer.from(data, "base64");
+  const iv = buf.slice(0, 12);
+  const tag = buf.slice(12, 28); // 16 bytes auth tag
+  const encrypted = buf.slice(28);
+  const key = deriveKey(secret);
+  const decipher = createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(tag);
+  const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+  return decrypted.toString("utf8");
+}
+
+/**
+ * Set an encrypted cookie value.
+ * Server-side only. If an encryption key is provided via
+ * `SESSION_ENCRYPTION_KEY` or `ENCRYPTION_KEY` env var, the value will be encrypted
+ * using AES-256-GCM. Otherwise the value will be stored as plain text.
  */
 export function setEncryptedCookie(
   cookieStore: any,
@@ -46,17 +89,35 @@ export function setEncryptedCookie(
     throw new Error("setEncryptedCookie must only be called server-side");
   }
 
+  const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+  let toStore = value;
+
+  if (!secret) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[cookie] no encryption key configured (SESSION_ENCRYPTION_KEY or ENCRYPTION_KEY); storing ${name} in plaintext`
+    );
+  }
+
+  if (secret) {
+    try {
+      toStore = encrypt(value, secret);
+    } catch (e) {
+      // If encryption fails, fall back to plaintext but warn the operator.
+      // Keep warnings (not noisy logs) so operators can notice unexpected failures.
+      // eslint-disable-next-line no-console
+      console.warn(`[cookie] encryption failed for ${name}, storing plain value`, e);
+      toStore = value;
+    }
+  }
+
   try {
-    // Encryption removed: store plain value
-    cookieStore.set(name, value, {
+    cookieStore.set(name, toStore, {
       ...SECURE_COOKIE_OPTIONS,
       ...options,
     });
   } catch (e) {
-    console.error(
-      `[cookie:setEncryptedCookie] Failed to set cookie ${name}:`,
-      e
-    );
+    console.error(`[cookie:setEncryptedCookie] Failed to set cookie ${name}:`, e);
     throw e;
   }
 }
@@ -77,7 +138,17 @@ export function getEncryptedCookie(
   try {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
-    // Encryption removed — return plain cookie value
+    const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    if (secret) {
+      try {
+        return decrypt(cookie.value, secret) || null;
+      } catch (e) {
+        // If decryption fails, log a warning and return the raw value as fallback
+        // eslint-disable-next-line no-console
+        console.warn(`[cookie] decryption failed for ${name}`, e);
+        return cookie.value || null;
+      }
+    }
     return cookie.value || null;
   } catch (e) {
     console.error(`[cookie:getEncryptedCookie] Failed to read ${name}:`, e);

@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     
     // Fallback to legacy access_token if crf not found
     if (!existingToken) {
-      existingToken = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+      existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
     }
     
     if (existingToken) {
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
     
     // Set session_id cookie (encrypted when possible)
     try {
-      const { COOKIE_NAMES: CN, setPlainCookie } = await import("../../utils/cookie");
+      const { COOKIE_NAMES: CN, setEncryptedCookie, setPlainCookie } = await import("../../utils/cookie");
       // Remove legacy cookies and save session_id plainly
       try {
         res.cookies.delete(CN.CRF);
@@ -131,10 +131,10 @@ export async function GET(request: NextRequest) {
       } catch {}
       // Store session token as HttpOnly and secure in production so it isn't
       // accessible to client-side scripts. This reduces XSS risk.
-      setPlainCookie(res.cookies, CN.SESSION_ID, data.access_token, {
+      setEncryptedCookie(res.cookies, CN.SESSION_ID, data.access_token, {
         maxAge: 3600,
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
       });
     } catch (e) {
       console.error("[identity:handler:token] Failed to set session_id cookie:", e);

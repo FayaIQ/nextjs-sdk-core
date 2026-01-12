@@ -47,5 +47,9 @@ export {
   SECURE_COOKIE_OPTIONS,
 } from "./utils/cookie";
 
+// Re-export Edge-friendly encrypt helper so consumers can import it
+// (useful in middleware to produce values compatible with server decrypt)
+export { encryptForCookie } from "./utils/crypto";
+
 // Encryption utilities removed from public API
 

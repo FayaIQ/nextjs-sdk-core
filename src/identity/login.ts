@@ -181,16 +181,12 @@ export async function loginUser(
     // token saved to cookie
     // Store session token as HttpOnly and secure in production so it isn't
     // accessible to client-side scripts. This reduces XSS risk.
-    setPlainCookie(
-      cookieStore,
-      COOKIE_NAMES.SESSION_ID,
-      decodeURIComponent(response.access_token),
-      {
-        maxAge: expiresIn,
-        httpOnly: true,
-        secure: true,
-      }
-    );
+    // Use encrypted storage when an encryption key is provided.
+    setEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID, decodeURIComponent(response.access_token), {
+      maxAge: expiresIn,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    });
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
     if (credentials.thirdPartyToken) {

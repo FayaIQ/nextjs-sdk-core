@@ -42,8 +42,8 @@ async function getTokenImpl(): Promise<string> {
     } catch (e) {
     }
 
-    // Try plain session_id
-    token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+    // Try plain session_id (use helper which will decrypt if key present)
+    token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
     if (token) {
       return token;
     }
@@ -57,8 +57,8 @@ async function getTokenImpl(): Promise<string> {
     } catch  {
     }
 
-    // Try plain access_token
-    token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+    // Try plain access_token (use helper)
+    token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
     if (token) {
       return token;
     }
@@ -72,7 +72,7 @@ async function getTokenImpl(): Promise<string> {
     } catch {
     }
 
-    token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+    token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
     if (token) {
       return token;
     }
