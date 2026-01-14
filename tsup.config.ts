@@ -43,6 +43,6 @@ export default defineConfig({
     // esbuild supports `drop` to remove console/debugger
     // ensure we merge with any existing drop settings
     // @ts-ignore - tsup's typing for esbuildOptions expects a function
-    // options.drop = Array.isArray(options.drop) ? Array.from(new Set([...options.drop, 'console', 'debugger'])) : ['console', 'debugger'];
+    options.drop = Array.isArray(options.drop) ? Array.from(new Set([...options.drop, 'console', 'debugger'])) : ['console', 'debugger'];
   },
 });
