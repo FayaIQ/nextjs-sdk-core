@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const filterParams =
       ItemsFilterParameters.fromURLSearchParams(searchParams);
 
+      
     const products = await fetchProducts({ filterParams });
 
     return NextResponse.json(products);

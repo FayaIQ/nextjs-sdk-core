@@ -18,7 +18,9 @@ export async function getOrders({
     const { Api } = await import("../../api/api");
 
     const token = await getToken();
+    console.log("Fetching orders with params:", `${Api.getOrders}?${params.toString()}`);
     return getWithAuth<OrdersApiResponse>(
+
       `${Api.getOrders}?${params.toString()}`,
     );
   }
