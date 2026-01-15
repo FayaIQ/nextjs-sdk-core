@@ -52,9 +52,16 @@ export async function getStoreUsersPaging(
 
   // Client-side: proxy through local Next.js API route
   const res = await fetch(`/api/stores/users/paging?${qs.toString()}`);
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Failed to fetch store users: ${res.status} ${res.statusText} ${txt}`);
+   if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+      // ignore
+    }
+    throw new Error(errorMessage);
   }
+
   return res.json();
 }

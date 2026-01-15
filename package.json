@@ -1,6 +1,6 @@
 {
   "name": "erp-core",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "type": "module",
   "description": "A Next.js SDK for server and client components with simple API functions",
   "types": "dist/index.d.ts",
