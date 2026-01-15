@@ -157,6 +157,11 @@ export class Api {
   // CRM - Delegate Types
   static getDelegateTypes: string = `${Api.CRM_BASE}/v1/DelegateTypes`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
+  static postOrderDelagates(orderId: string | number): string { 
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates`;
+  }
+  static putOrderDelagatesListed : string = `${Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+
   static putOrderPayment(orderId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
   }

@@ -9,7 +9,7 @@ export async function postOrderDelegatesList(data: AssignDelegateListRequest): P
     const { postWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
 
-    return postWithAuth<void>(`${Api.postOrders}/Delagates/List`, data);
+    return postWithAuth<void>(`${Api.putOrderDelagatesListed}`, data);
   }
 
   // Client-side: call Next.js API route
