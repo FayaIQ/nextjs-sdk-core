@@ -3,17 +3,17 @@ import { AssignDelegateRequest } from "./order-models";
 /**
  * Assign a delegate to a specific order
  */
-export async function postOrderDelegate(orderId: number, data: AssignDelegateRequest): Promise<void> {
+export async function postOrderDelegate(id: number, data: AssignDelegateRequest): Promise<void> {
   // Server-side: direct API call with auth
   if (typeof window === "undefined") {
     const { postWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
 
-    return postWithAuth<void>(`${Api.postOrders}/${orderId}/Delagates`, data);
+    return postWithAuth<void>(`${Api.postOrders}/${id}/Delagates`, data);
   }
 
   // Client-side: call Next.js API route
-  const res = await fetch(`/api/orders/${orderId}/delegates`, {
+  const res = await fetch(`/api/orders/${id}/delegates`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
