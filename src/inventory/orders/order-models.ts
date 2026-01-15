@@ -697,3 +697,17 @@ export interface PostOrderRequest {
   applyDarkOffer?: boolean;
   orderItems?: PostOrderItemRequest[];
 }
+
+// === Delegate assignment models ===
+export interface AssignDelegateRequest {
+  delagateTypeId: string; // UUID
+  delagateId: string; // UUID
+  orderStatusId: number;
+}
+
+export interface AssignDelegateListRequest {
+  orderIds: number[];
+  delagateTypeId: string; // UUID
+  delagateId: string; // UUID
+  orderStatusId: number;
+}
