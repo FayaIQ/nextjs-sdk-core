@@ -4,10 +4,10 @@ import { toNextResponseFromError } from "../../core/errorResponse";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const {id} = await params;
     const body = await request.json().catch(() => ({}));
     const updated = await putClient(id, body);
     return NextResponse.json(updated, { status: 200 });
