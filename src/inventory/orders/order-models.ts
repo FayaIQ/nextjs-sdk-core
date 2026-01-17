@@ -702,7 +702,7 @@ export interface PostOrderRequest {
 export interface AssignDelegateRequest {
   delagateTypeId: string; // UUID
   delagateId: string; // UUID
-  orderStatusId: number;
+  orderStatusId?: number;
 }
 
 export interface AssignDelegateListRequest {
