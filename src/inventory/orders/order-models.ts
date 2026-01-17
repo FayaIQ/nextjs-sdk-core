@@ -709,5 +709,5 @@ export interface AssignDelegateListRequest {
   orderIds: number[];
   delagateTypeId: string; // UUID
   delagateId: string; // UUID
-  orderStatusId: number;
+  orderStatusId?: number;
 }
