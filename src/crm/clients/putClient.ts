@@ -20,7 +20,8 @@ export async function putClient(id: string, data: PostClientRequest): Promise<Cl
     let errorMessage = `Failed to update client: ${res.status} ${res.statusText}`;
     try {
       const errorBody = await res.json();
-      errorMessage = errorBody.error || errorBody.message || errorMessage;
+      errorMessage =  errorBody.error || errorBody.message  || errorBody || errorMessage;
+      console.error("Error response from API:", errorBody);
     } catch (parseErr) {
       console.error("Failed to parse error response:", parseErr);
     }
