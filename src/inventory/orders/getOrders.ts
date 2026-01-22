@@ -30,8 +30,15 @@ export async function getOrders({
 
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+    let errorMessage = `failed: ${response.status} ${response.statusText}`;
+    try {
+      const body = await response.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+      // ignore
+    }
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  return  response.json();
 }

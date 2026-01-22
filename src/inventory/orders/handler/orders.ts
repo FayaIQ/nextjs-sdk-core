@@ -14,9 +14,7 @@ import { getOrders } from "../getOrders";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    console.log("orders handler - searchParams:", searchParams.toString());
     const filterParams = OrdersFilterParameters.fromURLSearchParams(searchParams);
-    console.log("orders handler - filterParams--------:", filterParams);
     
     const orders = await getOrders({ filterParams });
     return NextResponse.json(orders);
