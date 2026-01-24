@@ -181,7 +181,7 @@ export async function loginUser(
     // token saved to cookie
     // Store session token as HttpOnly and secure in production so it isn't
     // accessible to client-side scripts. This reduces XSS risk.
-    setPlainCookie(
+    setEncryptedCookie(
       cookieStore,
       COOKIE_NAMES.SESSION_ID,
       decodeURIComponent(response.access_token),
@@ -201,15 +201,31 @@ export async function loginUser(
       try {
         cookieStore.delete("tp_id");
       } catch {}
-      setPlainCookie(
-        cookieStore,
-        COOKIE_NAMES.TP_ID,
-        decodeURIComponent(credentials.thirdPartyToken),
-
-        {
-          maxAge: 3600, // 1 hour typical Firebase token lifetime
-        }
-      );
+      // Store TP_ID encrypted for security; decrypt when reading for re-login
+      try {
+        setEncryptedCookie(
+          cookieStore,
+          COOKIE_NAMES.TP_ID,
+          decodeURIComponent(credentials.thirdPartyToken),
+          {
+            maxAge: 3600, // 1 hour typical Firebase token lifetime
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+          }
+        );
+      } catch (e) {
+        // Fallback: if encryption isn't available, store plain but warn
+        // eslint-disable-next-line no-console
+        console.warn('[identity:login] failed to encrypt TP_ID; storing plain as fallback', (e as any)?.message || e);
+        setPlainCookie(
+          cookieStore,
+          COOKIE_NAMES.TP_ID,
+          decodeURIComponent(credentials.thirdPartyToken),
+          {
+            maxAge: 3600,
+          }
+        );
+      }
     } else {
     }
 

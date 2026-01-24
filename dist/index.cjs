@@ -35,17 +35,51 @@ var cookie_exports = {};
 __export(cookie_exports, {
   COOKIE_NAMES: () => COOKIE_NAMES,
   SECURE_COOKIE_OPTIONS: () => SECURE_COOKIE_OPTIONS,
-  deleteCookie: () => deleteCookie,
   getEncryptedCookie: () => getEncryptedCookie,
   setEncryptedCookie: () => setEncryptedCookie,
-  setPlainCookie: () => setPlainCookie
+  setPlainCookie: () => setPlainCookie,
+  tryDecryptString: () => tryDecryptString,
+  tryEncryptString: () => tryEncryptString
 });
+function deriveKey(secret) {
+  return (0, import_crypto.createHash)("sha256").update(secret).digest();
+}
+function encrypt(text, secret) {
+  const iv = (0, import_crypto.randomBytes)(12);
+  const key = deriveKey(secret);
+  const cipher = (0, import_crypto.createCipheriv)("aes-256-gcm", key, iv);
+  const encrypted = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, encrypted]).toString("base64");
+}
+function decrypt(data, secret) {
+  const buf = Buffer.from(data, "base64");
+  const iv = buf.slice(0, 12);
+  const tag = buf.slice(12, 28);
+  const encrypted = buf.slice(28);
+  const key = deriveKey(secret);
+  const decipher = (0, import_crypto.createDecipheriv)("aes-256-gcm", key, iv);
+  decipher.setAuthTag(tag);
+  const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+  return decrypted.toString("utf8");
+}
 function setEncryptedCookie(cookieStore, name, value, options) {
   if (typeof window !== "undefined") {
     throw new Error("setEncryptedCookie must only be called server-side");
   }
+  const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+  let toStore = value;
+  if (!secret) {
+  }
+  if (secret) {
+    try {
+      toStore = encrypt(value, secret);
+    } catch (e) {
+      toStore = value;
+    }
+  }
   try {
-    cookieStore.set(name, value, {
+    cookieStore.set(name, toStore, {
       ...SECURE_COOKIE_OPTIONS,
       ...options
     });
@@ -60,7 +94,63 @@ function getEncryptedCookie(cookieStore, name) {
   try {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
+    const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    if (!secret) {
+      try {
+        const maybeBuf = Buffer.from(cookie.value, "base64");
+        if (maybeBuf.length >= 12 + 16 + 1) {
+        }
+      } catch {
+      }
+      return cookie.value || null;
+    }
+    if (secret) {
+      try {
+        return decrypt(cookie.value, secret) || null;
+      } catch (e) {
+        try {
+          const len = cookie.value?.length || 0;
+          const prefix = String(cookie.value || "").slice(0, 8);
+        } catch {
+        }
+        return cookie.value || null;
+      }
+    }
     return cookie.value || null;
+  } catch (e) {
+    return null;
+  }
+}
+function tryDecryptString(value) {
+  if (typeof window !== "undefined") {
+    throw new Error("tryDecryptString must only be called server-side");
+  }
+  const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+  if (!secret) {
+    try {
+      const maybeBuf = Buffer.from(value, "base64");
+      if (maybeBuf.length >= 12 + 16 + 1) {
+      }
+    } catch {
+    }
+    return null;
+  }
+  try {
+    return decrypt(value, secret) || null;
+  } catch (e) {
+    return null;
+  }
+}
+function tryEncryptString(value) {
+  if (typeof window !== "undefined") {
+    throw new Error("tryEncryptString must only be called server-side");
+  }
+  const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+  if (!secret) {
+    return null;
+  }
+  try {
+    return encrypt(value, secret);
   } catch (e) {
     return null;
   }
@@ -77,13 +167,11 @@ function setPlainCookie(cookieStore, name, value, options) {
     throw e;
   }
 }
-function deleteCookie(cookieStore, name) {
-  cookieStore.delete(name);
-}
-var COOKIE_NAMES, SECURE_COOKIE_OPTIONS;
+var import_crypto, COOKIE_NAMES, SECURE_COOKIE_OPTIONS;
 var init_cookie = __esm({
   "src/utils/cookie.ts"() {
     "use strict";
+    import_crypto = require("crypto");
     COOKIE_NAMES = {
       /** Primary session token (encrypted when possible) */
       SESSION_ID: "session_id",
@@ -98,7 +186,7 @@ var init_cookie = __esm({
     };
     SECURE_COOKIE_OPTIONS = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24 * 7
@@ -113,6 +201,9 @@ __export(token_exports, {
   default: () => getToken
 });
 async function getTokenImpl() {
+  try {
+  } catch {
+  }
   if (typeof window === "undefined") {
     const { headers } = await import("next/headers");
     const headerToken = (await headers()).get("x-access-token");
@@ -132,20 +223,19 @@ async function getTokenImpl() {
       }
     } catch (e) {
     }
-    token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
-    if (token) {
-      return token;
-    }
     try {
-      token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.SESSION_ID);
+      token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
       if (token) {
         return token;
       }
-    } catch {
+    } catch (e) {
     }
-    token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
-    if (token) {
-      return token;
+    try {
+      token = cookieStore.get("session_id")?.value || null;
+      if (token) {
+        return token;
+      }
+    } catch (e) {
     }
     try {
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
@@ -153,10 +243,6 @@ async function getTokenImpl() {
         return token;
       }
     } catch {
-    }
-    token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
-    if (token) {
-      return token;
     }
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     err.status = 401;
@@ -1044,7 +1130,7 @@ __export(src_exports, {
   Sign: () => Sign,
   SortType: () => SortType,
   apiFetch: () => apiFetch,
-  deleteCookie: () => deleteCookie,
+  encryptForCookie: () => encryptForCookie,
   getBrands: () => getBrands,
   getEncryptedCookie: () => getEncryptedCookie,
   getFirebaseApp: () => getFirebaseApp,
@@ -2527,6 +2613,45 @@ async function startAuthStateSync(options) {
 // src/index.ts
 init_config();
 init_cookie();
+
+// src/utils/crypto.ts
+async function encryptForCookie(secret, plain) {
+  const enc = new TextEncoder();
+  try {
+    if (!secret) ;
+  } catch {
+  }
+  const secretBytes = enc.encode(secret);
+  const hash = await crypto.subtle.digest("SHA-256", secretBytes);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    hash,
+    { name: "AES-GCM" },
+    false,
+    ["encrypt"]
+  );
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const cipherBuf = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    enc.encode(plain)
+  );
+  const cipherArr = new Uint8Array(cipherBuf);
+  const tag = cipherArr.slice(-16);
+  const ciphertext = cipherArr.slice(0, cipherArr.length - 16);
+  const out = new Uint8Array(iv.length + tag.length + ciphertext.length);
+  out.set(iv, 0);
+  out.set(tag, iv.length);
+  out.set(ciphertext, iv.length + tag.length);
+  let binary = "";
+  for (let i = 0; i < out.length; i += 32768) {
+    binary += String.fromCharCode.apply(
+      null,
+      Array.from(out.subarray(i, i + 32768))
+    );
+  }
+  return btoa(binary);
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AgeGroup,
@@ -2545,7 +2670,7 @@ init_cookie();
   Sign,
   SortType,
   apiFetch,
-  deleteCookie,
+  encryptForCookie,
   getBrands,
   getEncryptedCookie,
   getFirebaseApp,

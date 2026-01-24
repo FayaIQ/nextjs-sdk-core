@@ -22,20 +22,50 @@ export async function GET(request: NextRequest) {
     // Import cookie utilities
     const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
     
-    
-    // Check encrypted crf cookie first
-    let existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-    
-    // Fallback to legacy access_token if crf not found
-    if (!existingToken) {
-      existingToken = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
-    }
-    
-    if (existingToken) {
-      // Return with cache headers to prevent repeated calls
-      return NextResponse.json(
-        { SESSION_ID: existingToken },
-      );
+    // Check raw cookies first and ensure the response always returns an ENCRYPTED blob
+    // Prefer CRF, then SESSION_ID. If the cookie is already encrypted, return raw
+    // blob. If it's plain, try to encrypt it and set an encrypted cookie on the
+    // outgoing response so clients always receive encrypted tokens.
+    const rawCrf = cookieStore.get(COOKIE_NAMES.CRF)?.value || null;
+    const rawSession = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
+
+    if (rawCrf || rawSession) {
+      const raw = (rawCrf || rawSession) as string;
+      try {
+        const { tryDecryptString, tryEncryptString, setEncryptedCookie } = await import("../../utils/cookie");
+
+        // If raw already looks encrypted (decryptable), return it as-is
+  const decrypted = tryDecryptString(raw as string);
+        if (decrypted) {
+          return NextResponse.json({ session_id: raw });
+        }
+
+        // Otherwise, raw is plaintext; try to encrypt it and emit encrypted cookie
+  const encrypted = tryEncryptString(raw as string);
+        if (encrypted) {
+          const res = NextResponse.json({ session_id: encrypted });
+          // Replace legacy cookies with encrypted session cookie
+          try { res.cookies.delete(COOKIE_NAMES.CRF); } catch {}
+          try { res.cookies.delete("session_id"); } catch {}
+          try { res.cookies.delete(COOKIE_NAMES.SESSION_ID); } catch {}
+          setEncryptedCookie(res.cookies, COOKIE_NAMES.SESSION_ID, raw as string, {
+            maxAge: 3600,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+          });
+          return res;
+        }
+
+        // No key available; return raw plaintext as fallback (with a warning logged by helpers)
+        return NextResponse.json({ session_id: raw });
+      } catch (e) {
+        // If anything goes wrong, fall back to returning the raw cookie value
+        try {
+          return NextResponse.json({ session_id: raw });
+        } catch {
+          // final fallback: continue to re-auth flow
+        }
+      }
     }
 
 
@@ -43,9 +73,7 @@ export async function GET(request: NextRequest) {
     let tpId: string | null = null;
     try {
       tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-    } catch {
-    }
-    
+    } catch {}
     // Fallback to plain tp_id cookie
     if (!tpId) {
       tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
@@ -61,6 +89,10 @@ export async function GET(request: NextRequest) {
     };
 
     if (tpId) {
+      try {
+        // eslint-disable-next-line no-console
+        console.log('[identity:handler:token] using TP_ID to re-auth', { tpIdPresent: true });
+      } catch {}
       requestBody["ThirdPartyToken"] = tpId;
     } else if ((authConfig as any).thirdPartyToken) {
       requestBody["ThirdPartyToken"] = (authConfig as any).thirdPartyToken;
@@ -113,12 +145,12 @@ export async function GET(request: NextRequest) {
     }
 
 
-    // Return response with encrypted cookie
-    const res = NextResponse.json({ access_token: data.access_token });
+  // Return response with encrypted cookie
+  const res = NextResponse.json({ session_id: data.access_token });
     
     // Set session_id cookie (encrypted when possible)
     try {
-      const { COOKIE_NAMES: CN, setPlainCookie } = await import("../../utils/cookie");
+      const { COOKIE_NAMES: CN, setEncryptedCookie, setPlainCookie } = await import("../../utils/cookie");
       // Remove legacy cookies and save session_id plainly
       try {
         res.cookies.delete(CN.CRF);
@@ -131,11 +163,20 @@ export async function GET(request: NextRequest) {
       } catch {}
       // Store session token as HttpOnly and secure in production so it isn't
       // accessible to client-side scripts. This reduces XSS risk.
-      setPlainCookie(res.cookies, CN.SESSION_ID, data.access_token, {
+      // Store session token encrypted when possible to match the login path
+      setEncryptedCookie(res.cookies, CN.SESSION_ID, data.access_token, {
         maxAge: 3600,
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
       });
+
+      try {
+        // eslint-disable-next-line no-console
+        console.log('[identity:handler:token] set session cookie on response', {
+          encryptedKeyConfigured: !!(process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY),
+          cookieName: CN.SESSION_ID,
+        });
+      } catch {}
     } catch (e) {
       console.error("[identity:handler:token] Failed to set session_id cookie:", e);
       throw e;
