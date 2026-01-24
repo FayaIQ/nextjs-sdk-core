@@ -70,11 +70,15 @@ function setEncryptedCookie(cookieStore, name, value, options) {
   const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
   let toStore = value;
   if (!secret) {
+    console.warn(
+      `[cookie] no encryption key configured (SESSION_ENCRYPTION_KEY or ENCRYPTION_KEY); storing ${name} in plaintext`
+    );
   }
   if (secret) {
     try {
       toStore = encrypt(value, secret);
     } catch (e) {
+      console.warn(`[cookie] encryption failed for ${name}, storing plain value`, e);
       toStore = value;
     }
   }
@@ -84,6 +88,7 @@ function setEncryptedCookie(cookieStore, name, value, options) {
       ...options
     });
   } catch (e) {
+    console.error(`[cookie:setEncryptedCookie] Failed to set cookie ${name}:`, e);
     throw e;
   }
 }
@@ -99,6 +104,9 @@ function getEncryptedCookie(cookieStore, name) {
       try {
         const maybeBuf = Buffer.from(cookie.value, "base64");
         if (maybeBuf.length >= 12 + 16 + 1) {
+          console.warn(
+            `[cookie] cookie ${name} looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; server will not decrypt it`
+          );
         }
       } catch {
       }
@@ -111,6 +119,7 @@ function getEncryptedCookie(cookieStore, name) {
         try {
           const len = cookie.value?.length || 0;
           const prefix = String(cookie.value || "").slice(0, 8);
+          console.warn(`[cookie] decryption failed for ${name}; blobLen=${len}, prefix=${prefix}...`, e?.message || e);
         } catch {
         }
         return cookie.value || null;
@@ -118,6 +127,7 @@ function getEncryptedCookie(cookieStore, name) {
     }
     return cookie.value || null;
   } catch (e) {
+    console.error(`[cookie:getEncryptedCookie] Failed to read ${name}:`, e);
     return null;
   }
 }
@@ -130,6 +140,9 @@ function tryDecryptString(value) {
     try {
       const maybeBuf = Buffer.from(value, "base64");
       if (maybeBuf.length >= 12 + 16 + 1) {
+        console.warn(
+          `[cookie] tryDecryptString: value looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; cannot decrypt`
+        );
       }
     } catch {
     }
@@ -138,6 +151,7 @@ function tryDecryptString(value) {
   try {
     return decrypt(value, secret) || null;
   } catch (e) {
+    console.warn("[cookie] tryDecryptString decryption failed", e?.message || e);
     return null;
   }
 }
@@ -147,11 +161,13 @@ function tryEncryptString(value) {
   }
   const secret = process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
   if (!secret) {
+    console.warn("[cookie] tryEncryptString: no encryption key configured; cannot encrypt");
     return null;
   }
   try {
     return encrypt(value, secret);
   } catch (e) {
+    console.warn("[cookie] tryEncryptString: encryption failed", e?.message || e);
     return null;
   }
 }
@@ -164,6 +180,10 @@ function setPlainCookie(cookieStore, name, value, options) {
       ...options
     });
   } catch (e) {
+    console.error(
+      `[cookie:setPlainCookie] Failed to set plain cookie ${name}:`,
+      e
+    );
     throw e;
   }
 }
@@ -202,12 +222,17 @@ __export(token_exports, {
 });
 async function getTokenImpl() {
   try {
+    console.log(
+      "[token:getTokenImpl] invoked; environment AUTH_MODE=",
+      AUTH_MODE
+    );
   } catch {
   }
   if (typeof window === "undefined") {
     const { headers } = await import("next/headers");
     const headerToken = (await headers()).get("x-access-token");
     if (headerToken) {
+      console.log("[token:getTokenImpl] token found via x-access-token header");
       return headerToken;
     }
   }
@@ -222,6 +247,10 @@ async function getTokenImpl() {
         return token;
       }
     } catch (e) {
+      console.warn(
+        "[token:getTokenImpl] getEncryptedCookie threw:",
+        e?.message ?? e
+      );
     }
     try {
       token = cookieStore.get(COOKIE_NAMES2.SESSION_ID)?.value || null;
@@ -233,6 +262,9 @@ async function getTokenImpl() {
     try {
       token = cookieStore.get("session_id")?.value || null;
       if (token) {
+        console.log(
+          "[token:getTokenImpl] token found via cookie access_token (middleware)"
+        );
         return token;
       }
     } catch (e) {
@@ -240,12 +272,18 @@ async function getTokenImpl() {
     try {
       token = getEncryptedCookie2(cookieStore, COOKIE_NAMES2.CRF);
       if (token) {
+        console.log("[token:getTokenImpl] token found via legacy CRF cookie");
         return token;
       }
     } catch {
     }
+    console.error(
+      "[token:getTokenImpl] No token found in strict mode. Available cookies:",
+      cookieStore.getAll().map((c) => c.name)
+    );
     const err = new Error("Unauthorized: Access token missing (strict mode)");
     err.status = 401;
+    console.error("[token:getTokenImpl] Throwing 401 error:", err.message);
     throw err;
   }
   if (typeof window === "undefined") {
@@ -284,6 +322,7 @@ async function getTokenImpl() {
       } catch {
       }
     } catch (e) {
+      console.error("[token:getTokenImpl:auto] Error reading cookies:", e);
     }
   }
   if (typeof window !== "undefined") {
@@ -449,6 +488,7 @@ async function apiFetch(url, options = {}) {
           }
         }
         const derivedMessage = findMessageInError(errorData) || (typeof errorData === "string" ? errorData : response.statusText);
+        console.error("[apiFetch] non-2xx response", { endpoint, status: response.status, derivedMessage });
         throw new ApiError(response.status, errorData, derivedMessage);
       }
       throw new ApiError(
@@ -478,6 +518,7 @@ async function apiFetch(url, options = {}) {
     const parsed = JSON.parse(text);
     return parsed;
   } catch (err) {
+    console.error("[apiFetch] Failed to parse JSON response", { endpoint, err: err?.message, snippet: text.substring(0, 200) });
     throw new Error(
       `Failed to parse response as JSON: ${text.substring(0, 100)}`
     );
@@ -488,6 +529,7 @@ async function getWithAuth(url, query, headers) {
   try {
     token = await getToken();
   } catch (err) {
+    console.error("[getWithAuth] getToken error", { err: err?.message || String(err) });
     if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
       throw new ApiError(401, null, "Unauthorized");
     }
@@ -515,6 +557,7 @@ async function postWithAuth(url, data, headers) {
   try {
     token = await getToken();
   } catch (err) {
+    console.error("[postWithAuth] getToken error", { err: err?.message || String(err) });
     if (err && (err.status === 401 || /unauthor/i.test(String(err.message || err)))) {
       throw new ApiError(401, null, "Unauthorized");
     }
@@ -2426,6 +2469,7 @@ async function startPhoneSignIn(phoneNumber, options) {
       projectName: options?.projectName || "serlab"
     });
   } catch (error) {
+    console.error("[firebase:startPhoneSignIn] failed to send OTP", error);
     throw error;
   }
   return {
@@ -2482,6 +2526,7 @@ async function startPhoneSignIn(phoneNumber, options) {
         __isSigningIn = false;
         return idToken;
       } catch (error) {
+        console.error("[firebase:confirmPhoneCode] verification failed", error);
         __isSigningIn = false;
         throw error;
       }
@@ -2539,6 +2584,10 @@ async function startAuthStateSync(options) {
     try {
       await setPersistence(auth, browserLocalPersistence);
     } catch (e) {
+      console.warn(
+        "[firebase:startAuthStateSync] failed to set persistence",
+        e
+      );
     }
     const STORAGE_KEY = "erp_core_last_sync_hash";
     const hashToken = async (token) => {
@@ -2578,6 +2627,10 @@ async function startAuthStateSync(options) {
           }
         } catch {
         }
+        console.log(
+          "[firebase:startAuthStateSync] syncing token to server at",
+          endpoint
+        );
         await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -2590,6 +2643,7 @@ async function startAuthStateSync(options) {
         } catch {
         }
       } catch (e) {
+        console.error("[firebase:startAuthStateSync] sync failed", e);
         options?.onError?.(e);
       }
     };
@@ -2618,7 +2672,7 @@ init_cookie();
 async function encryptForCookie(secret, plain) {
   const enc = new TextEncoder();
   try {
-    if (!secret) ;
+    if (!secret) console.warn("[crypto:encryptForCookie] no secret provided; middleware will encrypt with empty key \u2014 ensure server has the same key configured");
   } catch {
   }
   const secretBytes = enc.encode(secret);
