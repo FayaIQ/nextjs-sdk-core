@@ -29,7 +29,11 @@ async function getTokenImpl(): Promise<string> {
     if (headerToken) {
       // x-access-token is ALWAYS raw (unencrypted) from middleware
       // Don't try to decrypt it
-      console.log("[token:getTokenImpl] token found via x-access-token header");
+
+      console.log(
+        "[token:getTokenImpl] token found via x-access-token header",
+        headerToken,
+      );
       return headerToken;
     }
   }

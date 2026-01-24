@@ -232,7 +232,10 @@ async function getTokenImpl() {
     const { headers } = await import("next/headers");
     const headerToken = (await headers()).get("x-access-token");
     if (headerToken) {
-      console.log("[token:getTokenImpl] token found via x-access-token header");
+      console.log(
+        "[token:getTokenImpl] token found via x-access-token header",
+        headerToken
+      );
       return headerToken;
     }
   }
