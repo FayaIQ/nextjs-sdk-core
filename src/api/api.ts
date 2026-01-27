@@ -175,7 +175,7 @@ export class Api {
     return `${Api.STORES_BASE}/v1/Stores/${id}`;
   }
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
-  static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
+  static getOrders: string = `${Api.INVENTORY_BASE}/v2/Orders/Paging`;
   // CRM - Clients
   static getClientsPaging: string = `${Api.CRM_BASE}/v1/Clients/Paging`;
   static putClient(id: string | number): string {
