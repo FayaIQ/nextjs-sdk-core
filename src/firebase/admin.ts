@@ -60,8 +60,10 @@ export async function serverSendOtp(options: ServerOtpOptions): Promise<void> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        phoneNumber,
-        projectName,
+        data: {
+          phoneNumber,
+          projectName,
+        },
       }),
     });
 
@@ -123,9 +125,11 @@ export async function serverVerifyOtp(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        phoneNumber,
-        code,
-        projectName,
+        data: {
+          phoneNumber,
+          code,
+          projectName,
+        },
       }),
     });
 
