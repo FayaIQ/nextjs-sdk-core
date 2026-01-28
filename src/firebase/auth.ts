@@ -49,7 +49,7 @@ function extractProjectIdFromIss(iss?: string | null): string | null {
 
 /**
  * Start phone sign-in via WhatsApp OTP.
- * Sends OTP code via Cloud Function on secondary Firebase app.
+ * Calls secure server-side API route to send OTP (keeps Cloud Functions hidden from client).
  *
  * @param phoneNumber - E.164 format (e.g., "+9647XXXXXXXXX")
  * @param options - Optional configuration
@@ -57,28 +57,32 @@ function extractProjectIdFromIss(iss?: string | null): string | null {
  */
 export async function startPhoneSignIn(
   phoneNumber: string,
-  options?: WhatsAppOTPOptions
+  options?: WhatsAppOTPOptions,
 ): Promise<StartPhoneSignInResult> {
   if (typeof window === "undefined") {
     throw new Error("startPhoneSignIn must be called in the browser");
   }
 
-
-  const { getSecondaryApp } = await import("./config");
-  const { getFunctions, httpsCallable } = await import("firebase/functions");
-
-  const secondaryApp = await getSecondaryApp();
-  const functions = getFunctions(secondaryApp);
-  const sendFunctionName = options?.sendFunctionName || "whatsapp";
-
-  // Call Cloud Function to send OTP via WhatsApp
-  const sendOtpFunction = httpsCallable(functions, sendFunctionName);
+  // Call secure server-side API route to send OTP
+  // Server handles Cloud Functions, keeping them hidden from client
+  const sendOtpEndpoint = options?.sendFunctionName || "/api/auth/send-otp";
+  const projectName = options?.projectName || "serlab";
 
   try {
-    await sendOtpFunction({
-      phoneNumber,
-      projectName: options?.projectName || "serlab",
+    const response = await fetch(sendOtpEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phoneNumber,
+        projectName,
+      }),
+      credentials: "include",
     });
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || "Failed to send OTP");
+    }
   } catch (error) {
     console.error("[firebase:startPhoneSignIn] failed to send OTP", error);
     throw error;
@@ -87,92 +91,60 @@ export async function startPhoneSignIn(
   // Return confirmation object with verify method
   return {
     confirm: async (code: string) => {
-
       // Set flag to prevent auth state sync during login
       __isSigningIn = true;
 
-      const verifyFunctionName = options?.verifyFunctionName || "verifySMS";
-      const verifyOtpFunction = httpsCallable(functions, verifyFunctionName);
+      // Call secure server-side API route to verify OTP and complete login
+      // Server handles: OTP verification, token exchange, backend login, cookie setting
+      const verifyOtpEndpoint =
+        options?.verifyFunctionName || "/api/auth/verify-otp";
+      const projectName = options?.projectName || "serlab";
 
       try {
-        const response = await verifyOtpFunction({
-          phoneNumber,
-          code,
-          projectName: options?.projectName || "serlab",
+        const response = await fetch(verifyOtpEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phoneNumber,
+            code,
+            projectName,
+          }),
+          credentials: "include",
         });
 
-        const customToken = (response.data as { token: string }).token;
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || "Failed to verify OTP");
+        }
 
-        // Sign in with custom token on PRIMARY app
+        // Server has already authenticated and set cookies
+        // Now sync to Firebase by getting fresh token
         const { getPrimaryApp } = await import("./config");
-        const {
-          getAuth,
-          signInWithCustomToken,
-          setPersistence,
-          browserLocalPersistence,
-        } = await import("firebase/auth");
+        const { getAuth, setPersistence, browserLocalPersistence } =
+          await import("firebase/auth");
 
         const primaryApp = await getPrimaryApp();
         const auth = getAuth(primaryApp);
 
         try {
           await setPersistence(auth, browserLocalPersistence);
-        } catch  {
-        
-        }
-        // Try to sign in; if mismatch, provide a clear diagnostic error
-        try {
-          await signInWithCustomToken(auth, customToken);
-          
-        } catch (e: any) {
-          const appProjectId = (primaryApp as any)?.options?.projectId;
-          const payload = decodeJwtPayload(customToken) || {};
-          // For Firebase custom tokens, aud is a fixed IdentityToolkit URL.
-          // The projectId is best inferred from the issuer service account email.
-          const tokenProjectId =
-            extractProjectIdFromIss(payload.iss) || payload.project_id || null;
-          const code = e?.code || e?.message || String(e);
-          const likelyMismatch =
-            code?.includes("auth/custom-token-mismatch") ||
-            code?.includes("custom-token-mismatch") ||
-            code?.includes("auth/invalid-custom-token") ||
-            code?.includes("invalid-custom-token") ||
-            code?.includes("CREDENTIAL_MISMATCH");
+        } catch {}
 
-          if (likelyMismatch) {
-          
-            throw new Error(
-              `CREDENTIAL_MISMATCH: Custom token was minted for project "${
-                tokenProjectId ?? "<unknown>"
-              }" but you are signing into "${appProjectId}". ` +
-                `Ensure your verifySMS Cloud Function mints tokens using the PRIMARY project's service account (the same project used by getPrimaryApp).`
-            );
-          }
-          // Re-throw any other error as-is
-          throw e;
-        }
+        // Wait a moment for auth state to update if needed
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Wait for auth state to update
-        const { onAuthStateChanged } = await import("firebase/auth");
-        await new Promise<void>((resolve) => {
-          const unsubscribe = onAuthStateChanged(auth, (user: any) => {
-            if (user) {
-              unsubscribe();
-              resolve();
-            }
-          });
-        });
-
-        // Get fresh ID token with force refresh to ensure it's valid
+        // Get current token (server has authenticated the user)
         const { getIdToken } = await import("firebase/auth");
-        const idToken = await getIdToken(auth.currentUser!, true);
+        const user = auth.currentUser;
+        if (user) {
+          const idToken = await getIdToken(user, true);
+          __isSigningIn = false;
+          return idToken;
+        }
 
-       
-        // Clear the flag BEFORE returning so app can proceed
-        // The onIdTokenChanged from the refresh above will be skipped because flag is cleared
         __isSigningIn = false;
-
-        return idToken;
+        // Return a dummy token - user is authenticated via session cookies
+        return "";
       } catch (error) {
         console.error("[firebase:confirmPhoneCode] verification failed", error);
         __isSigningIn = false; // Clear flag on error
@@ -276,7 +248,7 @@ export async function startAuthStateSync(options?: {
     } catch (e) {
       console.warn(
         "[firebase:startAuthStateSync] failed to set persistence",
-        e
+        e,
       );
     }
 
@@ -331,7 +303,7 @@ export async function startAuthStateSync(options?: {
         } catch {}
         console.log(
           "[firebase:startAuthStateSync] syncing token to server at",
-          endpoint
+          endpoint,
         );
 
         await fetch(endpoint, {

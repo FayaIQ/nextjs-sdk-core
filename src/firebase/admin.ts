@@ -45,10 +45,13 @@ export async function serverSendOtp(options: ServerOtpOptions): Promise<void> {
   const { phoneNumber, projectName, functionUrl } = options;
 
   // Build Cloud Function URL
-  // Format: https://REGION-PROJECT_ID.cloudfunctions.net/whatsapp
+  // Format: https://us-central1-PROJECT_ID.cloudfunctions.net/whatsapp
+  // Derives from NEXT_PUBLIC_FIREBASE_PROJECT_ID_SECONDARY (gardenia-395e3)
+  const projectId =
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_SECONDARY || "gardenia-395e3";
   const url =
     functionUrl ||
-    `${process.env.FIREBASE_FUNCTION_BASE_URL || "https://us-central1-faya-server.cloudfunctions.net"}/whatsapp`;
+    `${process.env.FIREBASE_FUNCTION_BASE_URL || `https://us-central1-${projectId}.cloudfunctions.net`}/whatsapp`;
 
   try {
     const response = await fetch(url, {
@@ -106,9 +109,12 @@ export async function serverVerifyOtp(
   }
 
   // Build Cloud Function URL
+  // Derives from NEXT_PUBLIC_FIREBASE_PROJECT_ID_SECONDARY (gardenia-395e3)
+  const projectId =
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_SECONDARY || "gardenia-395e3";
   const url =
     functionUrl ||
-    `${process.env.FIREBASE_FUNCTION_BASE_URL || "https://us-central1-faya-server.cloudfunctions.net"}/verifySMS`;
+    `${process.env.FIREBASE_FUNCTION_BASE_URL || `https://us-central1-${projectId}.cloudfunctions.net`}/verifySMS`;
 
   try {
     const response = await fetch(url, {
