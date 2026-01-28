@@ -47,13 +47,13 @@ Browser → Your API Routes → Firebase Cloud Functions → Firebase API → Yo
 **app/api/auth/send-otp/route.ts:**
 
 ```typescript
-export { POST } from "erp-core/firebase/handler/send-otp";
+export { sendOtpPOST as POST } from "erp-core/firebase/handler/send-otp";
 ```
 
 **app/api/auth/verify-otp/route.ts:**
 
 ```typescript
-export { POST } from "erp-core/firebase/handler/verify-otp";
+export { verifyOtpPOST as POST } from "erp-core/firebase/handler/verify-otp";
 ```
 
 ### Step 2: Update Client Login Component

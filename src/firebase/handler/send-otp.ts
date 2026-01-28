@@ -26,7 +26,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverSendOtp } from "../admin";
 
-export async function POST(request: NextRequest) {
+export async function sendOtpPOST(request: NextRequest) {
   try {
     const body = await request.json();
     const { phoneNumber, projectName } = body;

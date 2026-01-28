@@ -41,9 +41,7 @@ export interface ServerOtpOptions {
  * @param options - Phone number and project name
  * @throws Error if Cloud Function call fails
  */
-export async function serverSendOtp(
-  options: ServerOtpOptions,
-): Promise<void> {
+export async function serverSendOtp(options: ServerOtpOptions): Promise<void> {
   const { phoneNumber, projectName, functionUrl } = options;
 
   // Build Cloud Function URL
@@ -66,9 +64,7 @@ export async function serverSendOtp(
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(
-        `Cloud Function error (${response.status}): ${error}`,
-      );
+      throw new Error(`Cloud Function error (${response.status}): ${error}`);
     }
   } catch (error) {
     console.error("[firebase:serverSendOtp] failed:", error);
@@ -129,9 +125,7 @@ export async function serverVerifyOtp(
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(
-        `OTP verification failed (${response.status}): ${error}`,
-      );
+      throw new Error(`OTP verification failed (${response.status}): ${error}`);
     }
 
     const data = await response.json();
@@ -240,7 +234,10 @@ export async function validateFirebaseIdToken(
 
     return payload as Record<string, any>;
   } catch (error) {
-    console.error("[firebase:validateFirebaseIdToken] validation failed:", error);
+    console.error(
+      "[firebase:validateFirebaseIdToken] validation failed:",
+      error,
+    );
     throw error;
   }
 }

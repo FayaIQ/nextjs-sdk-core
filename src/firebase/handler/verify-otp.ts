@@ -30,10 +30,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import {
-  serverVerifyOtp,
-  exchangeCustomTokenForIdToken,
-} from "../admin";
+import { serverVerifyOtp, exchangeCustomTokenForIdToken } from "../admin";
 import { LoginPOST } from "../../identity";
 
 /**
@@ -56,7 +53,7 @@ export interface VerifyOtpHandlerConfig {
  * Verifies OTP and completes the login flow entirely server-side.
  * Returns success/roles only - no tokens exposed to client.
  */
-export async function POST(
+export async function verifyOtpPOST(
   request: NextRequest,
   config?: VerifyOtpHandlerConfig,
 ) {
@@ -144,7 +141,11 @@ export async function POST(
       loginData?.token || loginData?.access_token || loginData?.accessToken;
 
     // Optional: Send custom notification (fire-and-forget)
-    if (backendToken && config?.enableCustomNotification && config?.notificationFn) {
+    if (
+      backendToken &&
+      config?.enableCustomNotification &&
+      config?.notificationFn
+    ) {
       try {
         await config.notificationFn({
           timestamp: new Date().toISOString(),

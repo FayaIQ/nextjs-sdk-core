@@ -7,12 +7,15 @@
  * Usage:
  * ```typescript
  * // app/api/auth/send-otp/route.ts
- * export { POST } from "erp-core/firebase/handler/send-otp";
+ * export { sendOtpPOST as POST } from "erp-core/firebase/handler/send-otp";
  *
  * // app/api/auth/verify-otp/route.ts
- * export { POST } from "erp-core/firebase/handler/verify-otp";
+ * export { verifyOtpPOST as POST } from "erp-core/firebase/handler/verify-otp";
  * ```
  */
 
-export * from "./send-otp";
-export * from "./verify-otp";
+export { sendOtpPOST } from "./send-otp";
+export { verifyOtpPOST } from "./verify-otp";
+// Re-export as POST for convenience
+export { sendOtpPOST as sendOtpHandler } from "./send-otp";
+export { verifyOtpPOST as verifyOtpHandler } from "./verify-otp";
