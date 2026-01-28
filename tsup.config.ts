@@ -38,4 +38,13 @@ export default defineConfig({
   dts: true,
   clean: true,
   outDir: "dist",
+  // remove console.* and debugger from production bundles
+  esbuildOptions: (options) => {
+    // esbuild supports `drop` to remove console/debugger
+    // ensure we merge with any existing drop settings
+    // @ts-ignore - tsup's typing for esbuildOptions expects a function
+    options.drop = Array.isArray(options.drop)
+      ? Array.from(new Set([...options.drop, "console", "debugger"]))
+      : ["console", "debugger"];
+  },
 });
