@@ -48,7 +48,7 @@ async function getTokenImpl(): Promise<string> {
 
     // Try encrypted session_id first
     try {
-      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
+      token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
       if (token) {
         // eslint-disable-next-line no-console
         return token;
@@ -87,7 +87,7 @@ async function getTokenImpl(): Promise<string> {
 
     // LEGACY: Fallback to old cookie names for migration
     try {
-      token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+      token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
       if (token) {
         // eslint-disable-next-line no-console
         console.log("[token:getTokenImpl] token found via legacy CRF cookie");
@@ -119,7 +119,7 @@ async function getTokenImpl(): Promise<string> {
 
       // Try encrypted session_id first
       try {
-        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
+        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
         if (token) {
           return token;
         }
@@ -133,7 +133,7 @@ async function getTokenImpl(): Promise<string> {
 
       // MIDDLEWARE: Check access_token cookie (set by consumer middleware)
       try {
-        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
+        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
         if (token) {
           return token;
         }
@@ -147,7 +147,7 @@ async function getTokenImpl(): Promise<string> {
 
       // LEGACY: Fallback to old cookie names for migration
       try {
-        token = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
+        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
         if (token) {
           return token;
         }

@@ -33,19 +33,26 @@ export async function POST(request: NextRequest) {
     if (body.thirdPartyToken) {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      
+
       // Check if we have a valid access_token and matching tp_id
       let hasValidToken = false;
       try {
-        const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
-        const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-        const existingTpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-        
+        const { getEncryptedCookie, COOKIE_NAMES } =
+          await import("../../utils/cookie");
+        const existingToken = await getEncryptedCookie(
+          cookieStore,
+          COOKIE_NAMES.CRF,
+        );
+        const existingTpId = await getEncryptedCookie(
+          cookieStore,
+          COOKIE_NAMES.TP_ID,
+        );
+
         if (existingToken && existingTpId === body.thirdPartyToken) {
           hasValidToken = true;
         }
       } catch {}
-      
+
       // Fallback to legacy plain cookies
       if (!hasValidToken) {
         const existingToken = cookieStore.get("session_id")?.value;
@@ -54,7 +61,7 @@ export async function POST(request: NextRequest) {
           hasValidToken = true;
         }
       }
-      
+
       if (hasValidToken) {
         return NextResponse.json(
           {
@@ -64,7 +71,7 @@ export async function POST(request: NextRequest) {
             roles: [],
             user: null,
           },
-          { status: 200 }
+          { status: 200 },
         );
       }
     }
@@ -73,7 +80,8 @@ export async function POST(request: NextRequest) {
     // Prefer incoming request's user-agent when available
     let userAgent: string | undefined;
     try {
-      userAgent = (request as any)?.headersList?.get?.("user-agent") || undefined;
+      userAgent =
+        (request as any)?.headersList?.get?.("user-agent") || undefined;
     } catch {}
     if (!userAgent) {
       try {
@@ -81,13 +89,17 @@ export async function POST(request: NextRequest) {
       } catch {}
     }
 
-    const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
+    const response = await loginUser(
+      credentials,
+      userAgent + " login in user server side in nextjs-sdk-core api/login",
+    );
 
     // If login provided a thirdPartyToken, persist it encrypted for AUTO mode re-auth
     if (body.thirdPartyToken) {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import("../../utils/cookie");
+      const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } =
+        await import("../../utils/cookie");
       // Remove legacy tp_id cookies and save tp_id encrypted for re-login
       try {
         cookieStore.delete(COOKIE_NAMES.TP_ID);
@@ -96,12 +108,26 @@ export async function POST(request: NextRequest) {
         cookieStore.delete("tp_id");
       } catch {}
       try {
-        setEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, { maxAge: 3600, httpOnly: true, secure: process.env.NODE_ENV === "production" });
+        await setEncryptedCookie(
+          cookieStore,
+          COOKIE_NAMES.TP_ID,
+          body.thirdPartyToken,
+          {
+            maxAge: 3600,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+          },
+        );
       } catch (e) {
         // Fallback to plain if encryption not available
         // eslint-disable-next-line no-console
-        console.warn('[identity:handler:login] failed to encrypt TP_ID for cookie store; storing plain as fallback', (e as any)?.message || e);
-        setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, { maxAge: 3600 });
+        console.warn(
+          "[identity:handler:login] failed to encrypt TP_ID for cookie store; storing plain as fallback",
+          (e as any)?.message || e,
+        );
+        setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, {
+          maxAge: 3600,
+        });
       }
     }
 
@@ -114,18 +140,30 @@ export async function POST(request: NextRequest) {
         roles: response.roles || [],
         user: response.user || null,
       },
-      { status: 200 }
+      { status: 200 },
     );
 
     // Also set tp_id in response cookie for client (encrypted preferred)
     if (body.thirdPartyToken) {
       try {
-        const { setEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
-        setEncryptedCookie(res.cookies, COOKIE_NAMES.TP_ID, body.thirdPartyToken, { maxAge: 3600, httpOnly: true, secure: process.env.NODE_ENV === "production" });
+        const { setEncryptedCookie, COOKIE_NAMES } =
+          await import("../../utils/cookie");
+        await setEncryptedCookie(
+          res.cookies,
+          COOKIE_NAMES.TP_ID,
+          body.thirdPartyToken,
+          {
+            maxAge: 3600,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+          },
+        );
       } catch (e) {
         try {
           const { setPlainCookie } = await import("../../utils/cookie");
-          setPlainCookie(res.cookies, "tp_id", body.thirdPartyToken, { maxAge: 3600 });
+          setPlainCookie(res.cookies, "tp_id", body.thirdPartyToken, {
+            maxAge: 3600,
+          });
         } catch (e2) {
           // If cookie util import fails, set plain as last resort
           res.cookies.set("tp_id", body.thirdPartyToken, {
@@ -147,19 +185,27 @@ export async function POST(request: NextRequest) {
       let serverMessage: string = "Login failed";
       try {
         // Try to find a friendly message in body
-        serverMessage = typeof serverBody === "string" ? serverBody : (serverBody?.message || serverBody?.error || JSON.stringify(serverBody));
+        serverMessage =
+          typeof serverBody === "string"
+            ? serverBody
+            : serverBody?.message ||
+              serverBody?.error ||
+              JSON.stringify(serverBody);
       } catch {}
-      console.error("[identity:handler:login] ApiError", { status, serverMessage });
+      console.error("[identity:handler:login] ApiError", {
+        status,
+        serverMessage,
+      });
       return NextResponse.json(
         { success: false, error: serverMessage, status },
-        { status }
+        { status },
       );
     }
     const message = error?.message || "Login failed unexpectedly";
     console.error("[identity:handler:login] Unexpected error", { message });
     return NextResponse.json(
       { success: false, error: message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

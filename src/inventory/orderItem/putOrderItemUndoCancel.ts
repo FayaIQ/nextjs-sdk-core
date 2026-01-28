@@ -19,6 +19,17 @@ export async function putOrderItemUndoCancel( id: string | number , itemId : str
   }
 
   const res = await fetch(`/api/orders/${id}/orderItems/${itemId}/undo-cancel`, { method: "PUT" });
-  if (!res.ok) throw new Error(`Failed to undo cancel order item: ${res.statusText}`);
+
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+      // ignore
+    }
+    throw new Error(errorMessage);
+  }
+
   return res.json();
 }

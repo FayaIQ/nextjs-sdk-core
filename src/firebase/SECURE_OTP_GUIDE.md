@@ -1,0 +1,336 @@
+/\*\*
+
+- SECURITY: Server-Side Phone OTP Authentication
+-
+- This guide shows how to implement secure phone OTP login using erp-core
+- Firebase handlers. All sensitive operations happen server-side, keeping
+- credentials and tokens hidden from the browser network tab.
+-
+- ============================================================================
+- SETUP
+- ============================================================================
+-
+- 1.  Environment Variables (.env.local)
+- - NEXT_PUBLIC_FIREBASE_API_KEY: Your Firebase API key
+- - FIREBASE_FUNCTION_BASE_URL: Cloud Function base URL
+-      Default: https://us-central1-faya-server.cloudfunctions.net
+-
+- 2.  Cloud Functions Setup
+- Your backend must have two Cloud Functions:
+- - /whatsapp: Sends OTP via WhatsApp
+- - /verifySMS: Verifies OTP and returns custom token
+-
+- ============================================================================
+- OPTION 1: Use Pre-Built Handlers (Easiest)
+- ============================================================================
+-
+- Simply re-export the handlers from erp-core:
+-
+- app/api/auth/send-otp/route.ts:
+- ```typescript
+
+  ```
+- export { POST } from "erp-core/firebase/handler/send-otp";
+- ```
+
+  ```
+-
+- app/api/auth/verify-otp/route.ts:
+- ```typescript
+
+  ```
+- export { POST } from "erp-core/firebase/handler/verify-otp";
+- ```
+
+  ```
+-
+- That's it! Your app now has secure phone OTP login.
+-
+- ============================================================================
+- OPTION 2: Customize Handlers
+- ============================================================================
+-
+- If you need custom validation or logging:
+-
+- app/api/auth/send-otp/route.ts:
+- ```typescript
+
+  ```
+- import { POST as sendOtpHandler } from "erp-core/firebase/handler/send-otp";
+- import { NextRequest } from "next/server";
+-
+- export async function POST(request: NextRequest) {
+- // Add custom validation, rate limiting, logging, etc.
+- const body = await request.json();
+-
+- // Custom rate limiting per phone number
+- const isRateLimited = await checkRateLimit(body.phoneNumber);
+- if (isRateLimited) {
+-     return NextResponse.json({
+-       success: false,
+-       error: "Too many requests. Try again later."
+-     }, { status: 429 });
+- }
+-
+- // Call the standard handler
+- return sendOtpHandler(request);
+- }
+- ```
+
+  ```
+-
+- app/api/auth/verify-otp/route.ts:
+- ```typescript
+
+  ```
+- import { POST as verifyOtpHandler } from "erp-core/firebase/handler/verify-otp";
+- import { NextRequest } from "next/server";
+-
+- export async function POST(request: NextRequest) {
+- // Add custom logging
+- console.log("[verify-otp] Incoming request from", request.headers.get("x-real-ip"));
+-
+- // Call with custom configuration
+- return verifyOtpHandler(request, {
+-     firebaseApiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+-     enableTelegramNotification: true,
+-     // Custom function to notify on new token
+-     notificationFn: async (data) => {
+-       await fetch("https://my-logging.example.com/token", {
+-         method: "POST",
+-         body: JSON.stringify(data)
+-       });
+-     }
+- });
+- }
+- ```
+
+  ```
+-
+- ============================================================================
+- OPTION 3: Manual Implementation (Advanced)
+- ============================================================================
+-
+- If you need full control, use the low-level Firebase admin functions:
+-
+- app/api/auth/send-otp/route.ts:
+- ```typescript
+
+  ```
+- import { serverSendOtp } from "erp-core/firebase";
+- import { NextRequest, NextResponse } from "next/server";
+-
+- export async function POST(request: NextRequest) {
+- try {
+-     const { phoneNumber, projectName } = await request.json();
+-
+-     // Your custom validation and business logic
+-     if (!await isValidPhoneNumber(phoneNumber)) {
+-       return NextResponse.json({
+-         success: false,
+-         error: "Invalid phone number"
+-       }, { status: 400 });
+-     }
+-
+-     // Call the Firebase helper
+-     await serverSendOtp({ phoneNumber, projectName });
+-
+-     // Your custom response
+-     return NextResponse.json({
+-       success: true,
+-       sessionId: generateSessionId()
+-     });
+- } catch (error) {
+-     // Your custom error handling
+-     return NextResponse.json({
+-       success: false,
+-       error: "Internal server error"
+-     }, { status: 500 });
+- }
+- }
+- ```
+
+  ```
+-
+- app/api/auth/verify-otp/route.ts:
+- ```typescript
+
+  ```
+- import {
+- serverVerifyOtp,
+- exchangeCustomTokenForIdToken
+- } from "erp-core/firebase";
+- import { LoginPOST } from "erp-core/identity";
+- import { NextRequest, NextResponse } from "next/server";
+-
+- export async function POST(request: NextRequest) {
+- try {
+-     const { phoneNumber, code, projectName } = await request.json();
+-
+-     // Step 1: Verify OTP and get custom token
+-     const { token: customToken } = await serverVerifyOtp({
+-       phoneNumber,
+-       code,
+-       projectName
+-     });
+-
+-     // Step 2: Exchange for Firebase ID token
+-     const { idToken } = await exchangeCustomTokenForIdToken(
+-       customToken,
+-       process.env.NEXT_PUBLIC_FIREBASE_API_KEY!
+-     );
+-
+-     // Step 3: Authenticate with your backend
+-     const loginRequest = new Request(request.url, {
+-       method: "POST",
+-       headers: { "Content-Type": "application/json" },
+-       body: JSON.stringify({ thirdPartyToken: idToken })
+-     });
+-
+-     const loginResponse = await LoginPOST(loginRequest as any);
+-
+-     if (!loginResponse.ok) {
+-       throw new Error("Login failed");
+-     }
+-
+-     // Your custom response handling
+-     const loginData = await loginResponse.json();
+-     const response = NextResponse.json({
+-       success: true,
+-       roles: loginData.roles
+-     });
+-
+-     // Copy session cookies from login response
+-     loginResponse.headers.forEach((value, key) => {
+-       if (key.toLowerCase() === "set-cookie") {
+-         response.headers.append(key, value);
+-       }
+-     });
+-
+-     return response;
+- } catch (error) {
+-     return NextResponse.json({
+-       success: false,
+-       error: "Authentication failed"
+-     }, { status: 401 });
+- }
+- }
+- ```
+
+  ```
+-
+- ============================================================================
+- CLIENT-SIDE USAGE
+- ============================================================================
+-
+- With your server-side handlers in place, your client code becomes simple:
+-
+- components/Login.tsx:
+- ```typescript
+
+  ```
+- "use client";
+- import { useForm } from "react-hook-form";
+- import { useState } from "react";
+-
+- export function Login() {
+- const [isProcessing, setIsProcessing] = useState(false);
+- const [error, setError] = useState("");
+-
+- async function sendOtp(phoneNumber: string) {
+-     try {
+-       setIsProcessing(true);
+-       const response = await fetch("/api/auth/send-otp", {
+-         method: "POST",
+-         headers: { "Content-Type": "application/json" },
+-         body: JSON.stringify({
+-           phoneNumber: "+964" + phoneNumber.replace(/^0/, ""),
+-           projectName: "your-project"
+-         }),
+-         credentials: "include"
+-       });
+-
+-       const data = await response.json();
+-       if (!data.success) throw new Error(data.error);
+-       // OTP sent - show verification form
+-     } catch (err) {
+-       setError((err as Error).message);
+-     } finally {
+-       setIsProcessing(false);
+-     }
+- }
+-
+- async function verifyOtp(phoneNumber: string, code: string) {
+-     try {
+-       setIsProcessing(true);
+-       const response = await fetch("/api/auth/verify-otp", {
+-         method: "POST",
+-         headers: { "Content-Type": "application/json" },
+-         body: JSON.stringify({
+-           phoneNumber: "+964" + phoneNumber.replace(/^0/, ""),
+-           code,
+-           projectName: "your-project"
+-         }),
+-         credentials: "include"
+-       });
+-
+-       const data = await response.json();
+-       if (!data.success) throw new Error(data.error);
+-       // Login successful - redirect to dashboard
+-       window.location.href = "/";
+-     } catch (err) {
+-       setError((err as Error).message);
+-     } finally {
+-       setIsProcessing(false);
+-     }
+- }
+-
+- return (
+-     <div>
+-       {/* Phone input form with sendOtp handler */}
+-       {/* OTP verification form with verifyOtp handler */}
+-     </div>
+- );
+- }
+- ```
+
+  ```
+-
+- ============================================================================
+- SECURITY BENEFITS
+- ============================================================================
+-
+- ✅ All Firebase API calls hidden from network tab
+- ✅ Credentials never sent to browser
+- ✅ Tokens created on server and synced securely
+- ✅ Client only sees success/failure responses
+- ✅ Full control over error messages (no info leakage)
+- ✅ Easy to add rate limiting, logging, analytics
+- ✅ Integrates seamlessly with erp-core authentication
+-
+- ============================================================================
+- AVAILABLE FUNCTIONS
+- ============================================================================
+-
+- From erp-core/firebase:
+-
+- serverSendOtp(options: ServerOtpOptions): Promise<void>
+- Sends OTP via Cloud Function
+-
+- serverVerifyOtp(options: ServerOtpOptions): Promise<VerifyOtpResponse>
+- Verifies OTP and returns custom token
+-
+- exchangeCustomTokenForIdToken(customToken: string, apiKey: string): Promise<ExchangeTokenResponse>
+- Exchanges custom token for Firebase ID token
+-
+- validateFirebaseIdToken(idToken: string): Promise<Record<string, any>>
+- Validates Firebase ID token on server
+-
+- Pre-built handlers from erp-core/firebase/handler:
+-
+- POST /api/auth/send-otp
+- Sends OTP - call with { phoneNumber: string, projectName: string }
+-
+- POST /api/auth/verify-otp
+- Verifies OTP and logs in - call with { phoneNumber: string, code: string, projectName: string }
+  \*/

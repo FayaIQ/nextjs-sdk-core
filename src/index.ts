@@ -52,3 +52,6 @@ export { encryptForCookie } from "./utils/crypto";
 
 // Encryption utilities removed from public API
 
+// Re-export CRM helpers (clients, delegate types, etc.)
+export * from "./crm";
+

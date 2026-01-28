@@ -39,6 +39,7 @@ export async function getProducts({
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
+    console.log("Fetching products with params:", `${Api.getProducts}?${params.toString()}`);
     return getWithAuth<ProductResponse>(
       `${Api.getProducts}?${params.toString()}`
     );

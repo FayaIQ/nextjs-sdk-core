@@ -4,10 +4,10 @@ import { Api } from "../../api/api";
 
 /**
  * GET /api/auth/token
- * 
+ *
  * Returns access token, checking cookie first, then fetching new one if needed.
  * This route handler can set cookies (unlike during rendering).
- * 
+ *
  * Usage in your Next.js app:
  * ```ts
  * // app/api/auth/token/route.ts
@@ -18,10 +18,11 @@ export async function GET(request: NextRequest) {
   try {
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
-    
+
     // Import cookie utilities
-    const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
-    
+    const { getEncryptedCookie, COOKIE_NAMES } =
+      await import("../../utils/cookie");
+
     // Check raw cookies first and ensure the response always returns an ENCRYPTED blob
     // Prefer CRF, then SESSION_ID. If the cookie is already encrypted, return raw
     // blob. If it's plain, try to encrypt it and set an encrypted cookie on the
@@ -32,27 +33,39 @@ export async function GET(request: NextRequest) {
     if (rawCrf || rawSession) {
       const raw = (rawCrf || rawSession) as string;
       try {
-        const { tryDecryptString, tryEncryptString, setEncryptedCookie } = await import("../../utils/cookie");
+        const { tryDecryptString, tryEncryptString, setEncryptedCookie } =
+          await import("../../utils/cookie");
 
         // If raw already looks encrypted (decryptable), return it as-is
-  const decrypted = tryDecryptString(raw as string);
+        const decrypted = await tryDecryptString(raw as string);
         if (decrypted) {
           return NextResponse.json({ session_id: raw });
         }
 
         // Otherwise, raw is plaintext; try to encrypt it and emit encrypted cookie
-  const encrypted = tryEncryptString(raw as string);
+        const encrypted = await tryEncryptString(raw as string);
         if (encrypted) {
           const res = NextResponse.json({ session_id: encrypted });
           // Replace legacy cookies with encrypted session cookie
-          try { res.cookies.delete(COOKIE_NAMES.CRF); } catch {}
-          try { res.cookies.delete("session_id"); } catch {}
-          try { res.cookies.delete(COOKIE_NAMES.SESSION_ID); } catch {}
-          setEncryptedCookie(res.cookies, COOKIE_NAMES.SESSION_ID, raw as string, {
-            maxAge: 3600,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-          });
+          try {
+            res.cookies.delete(COOKIE_NAMES.CRF);
+          } catch {}
+          try {
+            res.cookies.delete("session_id");
+          } catch {}
+          try {
+            res.cookies.delete(COOKIE_NAMES.SESSION_ID);
+          } catch {}
+          setEncryptedCookie(
+            res.cookies,
+            COOKIE_NAMES.SESSION_ID,
+            raw as string,
+            {
+              maxAge: 3600,
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+            },
+          );
           return res;
         }
 
@@ -68,17 +81,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
-
     // Try to use encrypted tp_id for re-auth (with fallback to plain)
     let tpId: string | null = null;
     try {
-      tpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
+      tpId = await getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
     } catch {}
     // Fallback to plain tp_id cookie
     if (!tpId) {
       tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
     }
-    
+
     const authConfig = getAuthConfig();
     const requestBody: Record<string, any> = {
       clientId: authConfig.clientId,
@@ -91,7 +103,9 @@ export async function GET(request: NextRequest) {
     if (tpId) {
       try {
         // eslint-disable-next-line no-console
-        console.log('[identity:handler:token] using TP_ID to re-auth', { tpIdPresent: true });
+        console.log("[identity:handler:token] using TP_ID to re-auth", {
+          tpIdPresent: true,
+        });
       } catch {}
       requestBody["ThirdPartyToken"] = tpId;
     } else if ((authConfig as any).thirdPartyToken) {
@@ -106,7 +120,9 @@ export async function GET(request: NextRequest) {
     // standard NextRequest headers API
     if (!userAgent) {
       try {
-        userAgent = request.headers.get("user-agent") + " nextjs-sdk-core  handler api/auth/token" || null;
+        userAgent =
+          request.headers.get("user-agent") +
+            " nextjs-sdk-core  handler api/auth/token" || null;
       } catch {}
     }
 
@@ -130,27 +146,30 @@ export async function GET(request: NextRequest) {
       console.error("[identity:handler:token] sign-in failed", response.status);
       return NextResponse.json(
         { error: "Authentication failed" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const data = await response.json();
-    
+
     if (!data.access_token) {
       console.error("[identity:handler:token] No access_token in response");
       return NextResponse.json(
         { error: "Token missing in response" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
+    // Return response with encrypted cookie
+    const res = NextResponse.json({ session_id: data.access_token });
 
-  // Return response with encrypted cookie
-  const res = NextResponse.json({ session_id: data.access_token });
-    
     // Set session_id cookie (encrypted when possible)
     try {
-      const { COOKIE_NAMES: CN, setEncryptedCookie, setPlainCookie } = await import("../../utils/cookie");
+      const {
+        COOKIE_NAMES: CN,
+        setEncryptedCookie,
+        setPlainCookie,
+      } = await import("../../utils/cookie");
       // Remove legacy cookies and save session_id plainly
       try {
         res.cookies.delete(CN.CRF);
@@ -164,7 +183,7 @@ export async function GET(request: NextRequest) {
       // Store session token as HttpOnly and secure in production so it isn't
       // accessible to client-side scripts. This reduces XSS risk.
       // Store session token encrypted when possible to match the login path
-      setEncryptedCookie(res.cookies, CN.SESSION_ID, data.access_token, {
+      await setEncryptedCookie(res.cookies, CN.SESSION_ID, data.access_token, {
         maxAge: 3600,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -172,24 +191,27 @@ export async function GET(request: NextRequest) {
 
       try {
         // eslint-disable-next-line no-console
-        console.log('[identity:handler:token] set session cookie on response', {
-          encryptedKeyConfigured: !!(process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY),
+        console.log("[identity:handler:token] set session cookie on response", {
+          encryptedKeyConfigured: !!(
+            process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY
+          ),
           cookieName: CN.SESSION_ID,
         });
       } catch {}
     } catch (e) {
-      console.error("[identity:handler:token] Failed to set session_id cookie:", e);
+      console.error(
+        "[identity:handler:token] Failed to set session_id cookie:",
+        e,
+      );
       throw e;
     }
 
     return res;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Token fetch failed";
+    const message =
+      error instanceof Error ? error.message : "Token fetch failed";
     console.error("[identity:handler:token] error:", message);
-    
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

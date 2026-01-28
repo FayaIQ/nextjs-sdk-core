@@ -1,13 +1,39 @@
 export class Api {
-  private static LOCAL_BASE = "http://localhost:3000";
-  private static IDENTITY_BASE = `https://storeak-identity-service.azurewebsites.net/api`;
-  private static NEWS_BASE = `https://storeak-news-service.azurewebsites.net/api`;
-  private static STORES_BASE = `https://storeak-stores-service.azurewebsites.net/api`;
-  private static GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
-  private static THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
-  private static INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
-  private static CRM_BASE = `https://storeak-crm-service.azurewebsites.net/api`;
-  public static IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
+  private static LOCAL_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_LOCAL_BASE) ||
+    "http://localhost:3000";
+
+  private static IDENTITY_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_IDENTITY_BASE) ||
+    `https://storeak-identity-service.azurewebsites.net/api`;
+
+  private static NEWS_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_NEWS_BASE) ||
+    `https://storeak-news-service.azurewebsites.net/api`;
+
+  private static STORES_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_STORES_BASE) ||
+    `https://storeak-stores-service.azurewebsites.net/api`;
+
+  private static GPS_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_GPS_BASE) ||
+    `https://storeak-gps-service.azurewebsites.net/api`;
+
+  private static THEME_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_THEME_BASE) ||
+    `https://storeak-Theme-service.azurewebsites.net/api`;
+
+  private static INVENTORY_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_INVENTORY_BASE) ||
+    `https://storeak-inventory-service.azurewebsites.net/api`;
+
+  private static CRM_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_CRM_BASE) ||
+    `https://storeak-crm-service.azurewebsites.net/api`;
+
+  public static IDENTITY_URL =
+    (typeof process !== "undefined" && process.env.STOREAK_IDENTITY_URL) ||
+    `https://storeak-identity-service.azurewebsites.net/api`;
 
   static signIn: string = `${Api.IDENTITY_BASE}/v1/token`;
   static refreshToken: string = `${Api.IDENTITY_BASE}/v1/token/refresh`;
@@ -153,12 +179,22 @@ export class Api {
     return `${Api.STORES_BASE}/v1/Stores/${id}`;
   }
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
-  static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
+  static getOrders: string = `${Api.INVENTORY_BASE}/v2/Orders/Paging`;
   // CRM - Clients
   static getClientsPaging: string = `${Api.CRM_BASE}/v1/Clients/Paging`;
+  static putClient(id: string | number): string {
+    return `${Api.CRM_BASE}/v1/Clients/${id}`;
+  }
   static getClients: string = `${Api.CRM_BASE}/v1/Clients`;
   static postClients: string = `${Api.CRM_BASE}/v1/Clients`;
+  // CRM - Delegate Types
+  static getDelegateTypes: string = `${Api.CRM_BASE}/v1/DelegateTypes`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
+  static postOrderDelagates(orderId: string | number): string { 
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates`;
+  }
+  static putOrderDelagatesListed : string = `${Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+
   static putOrderPayment(orderId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
   }

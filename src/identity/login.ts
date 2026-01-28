@@ -67,7 +67,7 @@ export interface LoginResponse {
  */
 export async function loginUser(
   credentials: LoginRequest,
-  userAgent?: string
+  userAgent?: string,
 ): Promise<LoginResponse> {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
@@ -122,7 +122,7 @@ export async function loginUser(
           };
         } else {
           throw new Error(
-            "Username/password or ThirdPartyToken must be provided"
+            "Username/password or ThirdPartyToken must be provided",
           );
         }
       } else {
@@ -152,7 +152,7 @@ export async function loginUser(
     const response = await postWithoutAuth<LoginResponse>(
       Api.signIn,
       requestBody,
-      (headers as Record<string, string>) || {}
+      (headers as Record<string, string>) || {},
     );
 
     if (!response?.access_token) {
@@ -161,11 +161,9 @@ export async function loginUser(
     const cookieStore = await cookies();
     const expiresIn = response.expires || 7200;
 
-
     // Import cookie utilities for encrypted storage
-    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import(
-      "../utils/cookie"
-    );
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } =
+      await import("../utils/cookie");
 
     // Save session token (plain)
     // Remove any legacy/encrypted cookies before writing new plain cookie
@@ -181,7 +179,7 @@ export async function loginUser(
     // token saved to cookie
     // Store session token as HttpOnly and secure in production so it isn't
     // accessible to client-side scripts. This reduces XSS risk.
-    setEncryptedCookie(
+    await setEncryptedCookie(
       cookieStore,
       COOKIE_NAMES.SESSION_ID,
       decodeURIComponent(response.access_token),
@@ -189,7 +187,7 @@ export async function loginUser(
         maxAge: expiresIn,
         httpOnly: true,
         secure: true,
-      }
+      },
     );
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
@@ -203,7 +201,7 @@ export async function loginUser(
       } catch {}
       // Store TP_ID encrypted for security; decrypt when reading for re-login
       try {
-        setEncryptedCookie(
+        await setEncryptedCookie(
           cookieStore,
           COOKIE_NAMES.TP_ID,
           decodeURIComponent(credentials.thirdPartyToken),
@@ -211,19 +209,22 @@ export async function loginUser(
             maxAge: 3600, // 1 hour typical Firebase token lifetime
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-          }
+          },
         );
       } catch (e) {
         // Fallback: if encryption isn't available, store plain but warn
         // eslint-disable-next-line no-console
-        console.warn('[identity:login] failed to encrypt TP_ID; storing plain as fallback', (e as any)?.message || e);
+        console.warn(
+          "[identity:login] failed to encrypt TP_ID; storing plain as fallback",
+          (e as any)?.message || e,
+        );
         setPlainCookie(
           cookieStore,
           COOKIE_NAMES.TP_ID,
           decodeURIComponent(credentials.thirdPartyToken),
           {
             maxAge: 3600,
-          }
+          },
         );
       }
     } else {
