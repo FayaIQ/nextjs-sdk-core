@@ -63,6 +63,7 @@ export class Api {
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
   static getNews: string = `${Api.NEWS_BASE}/v1/News/Paging/ForCustomer`;
   static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
+  static getFilterParams: string = `${Api.INVENTORY_BASE}/v1/Items/FilterParameters`;
   static getItemFeatures(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/Features`;
   }
@@ -88,12 +89,12 @@ export class Api {
   static getOffersCustomerItemLoggedIn: string = `${Api.INVENTORY_BASE}/v1/Offers/CustomerItem/LoggedIn`;
   static getStoreInvoiceDiscount(
     storeId: string | number,
-    coupon: string
+    coupon: string,
   ): string {
     return `${
       Api.STORES_BASE
     }/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
-      String(coupon)
+      String(coupon),
     )}`;
   }
   static getOffersDeliveryZones(deliveryZoneId: string | number): string {
@@ -108,12 +109,12 @@ export class Api {
   static postOffersItemsDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
   static postOffersAddItemsByFilter(
     offerId: string | number,
-    forceUpdate: boolean | string
+    forceUpdate: boolean | string,
   ): string {
     return `${
       Api.INVENTORY_BASE
     }/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
-      String(forceUpdate)
+      String(forceUpdate),
     )}`;
   }
   static postOffersDeliveryZones(offerId: string | number): string {
@@ -128,7 +129,7 @@ export class Api {
 
   static deleteOffersGroup(
     offerId: string | number,
-    id: string | number
+    id: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
@@ -190,10 +191,10 @@ export class Api {
   // CRM - Delegate Types
   static getDelegateTypes: string = `${Api.CRM_BASE}/v1/DelegateTypes`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
-  static postOrderDelagates(orderId: string | number): string { 
+  static postOrderDelagates(orderId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates`;
   }
-  static putOrderDelagatesListed : string = `${Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+  static putOrderDelagatesListed: string = `${Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
 
   static putOrderPayment(orderId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
@@ -253,7 +254,7 @@ export class Api {
   // Order item endpoints (v3)
   static getOrderItem(
     orderId: string | number,
-    itemId: string | number
+    itemId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
   }
@@ -264,7 +265,7 @@ export class Api {
 
   static putOrderItemCancel(
     orderId: string | number,
-    itemId: string | number
+    itemId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
   }
@@ -274,14 +275,14 @@ export class Api {
 
   static putOrderItemUndoCancel(
     orderId: string | number,
-    itemId: string | number
+    itemId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
   }
 
   static putOrderItemUpdate(
     orderId: string | number,
-    itemId: string | number
+    itemId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/update`;
   }
@@ -326,7 +327,7 @@ export class Api {
 
   static deleteDelagate(
     orderId: string | number,
-    delegateId: string | number
+    delegateId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
   }
@@ -402,7 +403,7 @@ export class Api {
   // Item collection endpoint (update a specific collection for an item)
   static putItemCollection(
     itemId: string | number,
-    id: string | number
+    id: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}`;
   }
@@ -410,14 +411,14 @@ export class Api {
   // Activate / Deactivate an item collection
   static putItemCollectionActivate(
     itemId: string | number,
-    id: string | number
+    id: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Activate`;
   }
 
   static putItemCollectionDeactivate(
     itemId: string | number,
-    id: string | number
+    id: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Deactivate`;
   }
@@ -439,12 +440,12 @@ export class Api {
   static postCartItems: string = `${Api.INVENTORY_BASE}/v1/Carts/Items`;
   static patchCartItem(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
-      String(id)
+      String(id),
     )}`;
   }
   static deleteCartItem(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
-      String(id)
+      String(id),
     )}`;
   }
 }

@@ -139,11 +139,14 @@ export async function serverVerifyOtp(
     }
 
     const data = await response.json();
-    if (!data.token) {
+
+    // Cloud Functions return data wrapped in 'result' object
+    const result = data.result || data;
+    if (!result.token) {
       throw new Error("No token in verification response");
     }
 
-    return data as VerifyOtpResponse;
+    return result as VerifyOtpResponse;
   } catch (error) {
     console.error("[firebase:serverVerifyOtp] failed:", error);
     throw error;

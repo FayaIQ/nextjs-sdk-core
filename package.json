@@ -1,6 +1,6 @@
 {
   "name": "erp-core",
-  "version": "2.0.17",
+  "version": "2.0.165",
   "type": "module",
   "description": "A Next.js SDK for server and client components with simple API functions",
   "types": "dist/index.d.ts",
@@ -271,6 +271,16 @@
       "types": "./dist/news/customers/*.d.ts",
       "import": "./dist/news/customers/*.js",
       "require": "./dist/news/customers/*.cjs"
+    },
+    "./news": {
+      "types": "./dist/news/index.d.ts",
+      "import": "./dist/news/index.js",
+      "require": "./dist/news/index.cjs"
+    },
+    "./news/*": {
+      "types": "./dist/news/*.d.ts",
+      "import": "./dist/news/*.js",
+      "require": "./dist/news/*.cjs"
     }
   },
   "peerDependencies": {
