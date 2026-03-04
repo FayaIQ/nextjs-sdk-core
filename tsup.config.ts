@@ -28,6 +28,8 @@ export default defineConfig({
     "crm/index": "src/crm/index.ts",
     "stores/index": "src/stores/index.ts",
     "firebase/index": "src/firebase/index.ts",
+    "theme/index": "src/theme/index.ts",
+    "theme/getCustomeSections": "src/theme/getCustomeSections.ts",
     "utils/index": "src/utils/index.ts",
     "news/customers/index": "src/news/customers/index.ts",
     // Individual slide utility exported directly
@@ -39,12 +41,4 @@ export default defineConfig({
   clean: true,
   outDir: "dist",
   // remove console.* and debugger from production bundles
-  esbuildOptions: (options) => {
-    // esbuild supports `drop` to remove console/debugger
-    // ensure we merge with any existing drop settings
-    // @ts-ignore - tsup's typing for esbuildOptions expects a function
-    options.drop = Array.isArray(options.drop)
-      ? Array.from(new Set([...options.drop, "console", "debugger"]))
-      : ["console", "debugger"];
-  },
 });

@@ -10,6 +10,24 @@ export interface AuthConfig {
   gmt?: number;
 }
 
+/**
+ * Cookie TTL Configuration
+ * Controls how long session and authentication cookies remain valid
+ * 
+ * Strategy:
+ * - session_id: 2 hours (7200s) for both authenticated and anonymous sessions
+ * - tp_id: Long-lived (1 year) for persistent re-authentication
+ * - isUser: Long-lived (1 year) for persistent client-side state
+ */
+export interface CookieTTLConfig {
+  /** Session cookie TTL in seconds (default: 7200 = 2 hours) */
+  sessionTTL: number;
+  /** Third-party token (tp_id) cookie TTL in seconds (default: 1 year, persistent) */
+  tpIdTTL: number;
+  /** isUser flag cookie TTL in seconds (default: 1 year, persistent) */
+  isUserTTL: number;
+}
+
 // Helper to get environment variable with optional brand prefix
 const getEnvVar = (key: string, brand?: string): string | undefined => {
   if (typeof process === "undefined" || !process.env) return undefined;
@@ -89,4 +107,43 @@ export const getAuthConfig = (): AuthConfig => {
     language: parseInt(getEnvVar("STOREAK_LANGUAGE", brand) || "0"),
     gmt: parseInt(getEnvVar("STOREAK_GMT", brand) || "3"),
   } as AuthConfig;
+};
+
+/**
+ * Get cookie TTL configuration from environment or defaults
+ * 
+ * Environment variables:
+ * - SESSION_COOKIE_TTL: Session cookie TTL in seconds (default: 7200 = 2 hours)
+ * - TP_ID_COOKIE_TTL: Third-party ID token cookie TTL in seconds (default: 31536000 = 1 year)
+ * - IS_USER_COOKIE_TTL: isUser flag cookie TTL in seconds (default: 31536000 = 1 year)
+ * 
+ * Strategy:
+ * - session_id (2 hours) for both authenticated and anonymous sessions
+ * - Long-lived tp_id (1 year) persists for re-authentication
+ * - Long-lived isUser (1 year) persists for client-side state
+ * 
+ * The server uses the persistent tp_id to refresh expired session_id cookies.
+ * User must explicitly logout to clear these persistent cookies.
+ */
+export const getCookieTTLConfig = (): CookieTTLConfig => {
+  const ONE_YEAR = 365 * 24 * 60 * 60; // 31536000 seconds
+  const TWO_HOURS = 2 * 60 * 60; // 7200 seconds
+  
+  const sessionTTL = process.env?.SESSION_COOKIE_TTL 
+    ? parseInt(process.env.SESSION_COOKIE_TTL) 
+    : TWO_HOURS; // 2 hours - balanced security and UX
+  
+  const tpIdTTL = process.env?.TP_ID_COOKIE_TTL 
+    ? parseInt(process.env.TP_ID_COOKIE_TTL) 
+    : ONE_YEAR; // 1 year - persistent for re-auth
+  
+  const isUserTTL = process.env?.IS_USER_COOKIE_TTL 
+    ? parseInt(process.env.IS_USER_COOKIE_TTL) 
+    : ONE_YEAR; // 1 year - persistent for client state
+
+  return {
+    sessionTTL,
+    tpIdTTL,
+    isUserTTL,
+  };
 };

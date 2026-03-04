@@ -19,8 +19,10 @@ export function startSessionKeepAlive(options?: KeepAliveOptions): () => void {
   const intervalMs = options?.intervalMs ?? 45 * 60 * 1000; // 45 minutes by default
 
   const ping = async () => {
+    console.log("[identity:keep-alive] 💓 Pinging session endpoint:", endpoint);
     try {
-      await fetch(endpoint, { method: "GET" });
+      const response = await fetch(endpoint, { method: "GET" });
+      console.log("[identity:keep-alive] ✅ Ping successful, status:", response.status);
       // Intentionally ignore the body; route will refresh cookies as needed
     } catch (e) {
       console.warn("[identity:startSessionKeepAlive] ping failed", e);

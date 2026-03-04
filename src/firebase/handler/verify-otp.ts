@@ -186,13 +186,18 @@ export async function verifyOtpPOST(
       }
     });
 
+    // Get configurable cookie TTLs
+    const { getCookieTTLConfig } = await import("../../core/config");
+    const cookieTTL = getCookieTTLConfig();
+
     // Set isUser cookie for client-side auth state detection
+    // Use persistent TTL (1 year) so user stays logged in across sessions
     response.cookies.set("isUser", "true", {
       httpOnly: false, // Client needs to read this
       secure: true,
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: cookieTTL.isUserTTL,
     });
 
     return response;

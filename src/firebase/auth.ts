@@ -209,11 +209,74 @@ let __authSyncPromise: Promise<() => void> | null = null;
 let __lastSyncedToken: string | null = null;
 let __lastSyncTime = 0;
 let __isSigningIn = false; // Flag to prevent sync during login
+let __tokenRefreshTimer: ReturnType<typeof setTimeout> | null = null; // Timer for proactive token refresh
+
+/**
+ * Schedule proactive token refresh before expiration.
+ * Prevents tp_id cookie from expiring by refreshing the Firebase token early.
+ * 
+ * @param token - Current Firebase ID token
+ * @param auth - Firebase Auth instance
+ */
+const scheduleTokenRefresh = (token: string, auth: any) => {
+  // Clear existing timer
+  if (__tokenRefreshTimer) {
+    clearTimeout(__tokenRefreshTimer);
+    __tokenRefreshTimer = null;
+  }
+
+  // Decode token to get expiration time
+  const payload = decodeJwtPayload(token);
+  if (!payload?.exp) {
+    console.warn("[firebase:scheduleTokenRefresh] Could not decode token expiration");
+    return;
+  }
+
+  const expiresAt = payload.exp * 1000; // Convert to milliseconds
+  const now = Date.now();
+  const timeUntilExpiry = expiresAt - now;
+
+  // Dynamic refresh timing based on token lifetime:
+  // - For tokens > 10 min: refresh 5 min before expiration
+  // - For tokens < 10 min: refresh at 80% of lifetime
+  // This allows testing with short-lived tokens (e.g., 2 min → refresh at 1m36s)
+  let refreshIn: number;
+  const TEN_MINUTES = 10 * 60 * 1000;
+  
+  if (timeUntilExpiry > TEN_MINUTES) {
+    // Long-lived token: refresh 5 minutes before expiration
+    const REFRESH_BEFORE_EXPIRY_MS = 5 * 60 * 1000;
+    refreshIn = Math.max(60000, timeUntilExpiry - REFRESH_BEFORE_EXPIRY_MS);
+  } else {
+    // Short-lived token (testing): refresh at 80% of lifetime
+    refreshIn = Math.max(10000, timeUntilExpiry * 0.8); // Minimum 10 seconds
+  }
+
+  console.log(
+    `[firebase:scheduleTokenRefresh] ⏰ Token expires in ${Math.round(timeUntilExpiry / 1000)}s, refreshing in ${Math.round(refreshIn / 1000)}s`
+  );
+
+  __tokenRefreshTimer = setTimeout(async () => {
+    console.log("[firebase:scheduleTokenRefresh] 🔄 Proactively refreshing token before expiration...");
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const { getIdToken } = await import("firebase/auth");
+        const newToken = await getIdToken(user, true); // Force refresh
+        console.log("[firebase:scheduleTokenRefresh] ✅ Token refreshed successfully");
+        // onIdTokenChanged will fire and handle syncing + rescheduling
+      }
+    } catch (e) {
+      console.error("[firebase:scheduleTokenRefresh] ❌ Token refresh failed:", e);
+    }
+  }, refreshIn);
+};
 
 /**
  * Start auth state synchronization.
  * Listens to Firebase token changes and syncs to backend automatically.
  * Implements singleton pattern, debouncing, and persistent guard.
+ * NOW WITH PROACTIVE TOKEN REFRESH to prevent tp_id expiration.
  *
  * @param options - Configuration options
  * @returns Unsubscribe function
@@ -279,38 +342,50 @@ export async function startAuthStateSync(options?: {
     const pushTokenToServer = async (forceRefresh = false) => {
       // Skip if currently signing in to prevent duplicate token syncs
       if (__isSigningIn) {
+        console.log("[firebase:startAuthStateSync] ⏭️ Skipping push (sign-in in progress)");
         return;
       }
 
       try {
         const user = auth.currentUser;
-        if (!user) return;
+        if (!user) {
+          console.log("[firebase:startAuthStateSync] ℹ️ No current user found during push");
+          return;
+        }
         // Only read the current token; don't force refresh unless explicitly requested
         const token = await getIdToken(user, forceRefresh);
-        if (!token) return;
+        if (!token) {
+          console.log("[firebase:startAuthStateSync] ⚠️ Could not retrieve token during push");
+          return;
+        }
 
         const now = Date.now();
         // In-memory debounce
-        if (token === __lastSyncedToken && now - __lastSyncTime < 3000) return;
+        if (token === __lastSyncedToken && now - __lastSyncTime < 3000) {
+          console.log("[firebase:startAuthStateSync] ⏭️ Skipping push (debounced)");
+          return;
+        }
 
         // Persistent guard using hash: check sessionStorage (safer than localStorage)
         const tokenHash = await hashToken(token);
         try {
           const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
           if (lastPersistedHash && lastPersistedHash === tokenHash) {
+            console.log("[firebase:startAuthStateSync] ⏭️ Skipping push (already synced in this session)");
             return;
           }
         } catch {}
         console.log(
-          "[firebase:startAuthStateSync] syncing token to server at",
+          "[firebase:startAuthStateSync] 🔄 Syncing fresh token to server at",
           endpoint,
         );
 
-        await fetch(endpoint, {
+        const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ thirdPartyToken: token }),
         });
+        console.log("[firebase:startAuthStateSync] ✅ Server responded to token sync:", response.status);
 
         __lastSyncedToken = token;
         __lastSyncTime = now;
@@ -319,25 +394,45 @@ export async function startAuthStateSync(options?: {
         try {
           sessionStorage.setItem(STORAGE_KEY, tokenHash);
         } catch {}
+
+        // Schedule proactive token refresh to prevent tp_id expiration
+        scheduleTokenRefresh(token, auth);
       } catch (e) {
-        console.error("[firebase:startAuthStateSync] sync failed", e);
+        console.error("[firebase:startAuthStateSync] ❌ Sync failed", e);
         options?.onError?.(e);
       }
     };
 
     // Subscribe once
     const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      console.log("[firebase:startAuthStateSync] 🔔 onIdTokenChanged triggered for user:", user?.uid || "none");
       if (!user) return;
       // Only push when the token actually changes; onIdTokenChanged already signals that
       await pushTokenToServer(false);
     });
 
-    // Do NOT push on init; only sync when the token changes
+    // Check if user is already logged in and schedule initial token refresh
+    // This ensures we schedule refresh on page reload without forcing a sync
+    if (auth.currentUser) {
+      try {
+        const token = await getIdToken(auth.currentUser, false);
+        if (token) {
+          console.log("[firebase:startAuthStateSync] 👤 User already logged in, scheduling token refresh");
+          scheduleTokenRefresh(token, auth);
+        }
+      } catch (e) {
+        console.warn("[firebase:startAuthStateSync] ⚠️ Could not schedule initial token refresh:", e);
+      }
+    }
 
     __authSyncUnsubscribe = () => {
       try {
         unsubscribe();
       } catch {}
+      if (__tokenRefreshTimer) {
+        clearTimeout(__tokenRefreshTimer);
+        __tokenRefreshTimer = null;
+      }
       __authSyncPromise = null;
       __authSyncUnsubscribe = null;
     };

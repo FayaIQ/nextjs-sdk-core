@@ -142,6 +142,8 @@ export async function loginUser(
       requestBody.playerId = credentials.playerId;
     }
 
+    console.log("[identity:login] 🚀 Sending login request to backend for:", credentials.username || "third-party user");
+
     const headers = userAgent
       ? {
           "User-Agent":
@@ -156,10 +158,18 @@ export async function loginUser(
     );
 
     if (!response?.access_token) {
+      console.error("[identity:login] ❌ Login failed: No access_token in response");
       throw new Error("Invalid login response: missing access token");
     }
+    
+    console.log("[identity:login] ✅ Login successful, received access_token");
+
     const cookieStore = await cookies();
-    const expiresIn = response.expires || 7200;
+    
+    // Get configurable cookie TTLs (default: 1 hour to match Firebase token expiration)
+    const { getCookieTTLConfig } = await import("../core/config");
+    const cookieTTL = getCookieTTLConfig();
+    const expiresIn = cookieTTL.sessionTTL;
 
     // Import cookie utilities for encrypted storage
     const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } =
@@ -179,6 +189,7 @@ export async function loginUser(
     // token saved to cookie
     // Store session token as HttpOnly and secure in production so it isn't
     // accessible to client-side scripts. This reduces XSS risk.
+    console.log("[identity:login] 🍪 Setting session cookie (expires in:", expiresIn, "s)");
     await setEncryptedCookie(
       cookieStore,
       COOKIE_NAMES.SESSION_ID,
@@ -192,6 +203,7 @@ export async function loginUser(
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
     if (credentials.thirdPartyToken) {
+      console.log("[identity:login] 🔒 Saving TP_ID cookie for silent re-auth");
       // Save third-party token plainly for re-login
       try {
         cookieStore.delete(COOKIE_NAMES.TP_ID);
@@ -206,7 +218,7 @@ export async function loginUser(
           COOKIE_NAMES.TP_ID,
           decodeURIComponent(credentials.thirdPartyToken),
           {
-            maxAge: 3600, // 1 hour typical Firebase token lifetime
+            maxAge: cookieTTL.tpIdTTL,
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
           },
@@ -223,7 +235,7 @@ export async function loginUser(
           COOKIE_NAMES.TP_ID,
           decodeURIComponent(credentials.thirdPartyToken),
           {
-            maxAge: 3600,
+            maxAge: cookieTTL.tpIdTTL,
           },
         );
       }
@@ -235,8 +247,9 @@ export async function loginUser(
       const isUser = !!(response.roles && response.roles.length > 0);
       // Make the isUser flag readable from client-side JavaScript
       // (not HttpOnly) so consumer apps can check it without server roundtrips.
+      // Use persistent TTL (1 year) so user stays logged in across sessions
       setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
-        maxAge: expiresIn,
+        maxAge: cookieTTL.isUserTTL,
         httpOnly: false,
       });
     }

@@ -100,6 +100,11 @@ export async function POST(request: NextRequest) {
       const cookieStore = await cookies();
       const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } =
         await import("../../utils/cookie");
+      
+      // Get configurable cookie TTLs
+      const { getCookieTTLConfig } = await import("../../core/config");
+      const cookieTTL = getCookieTTLConfig();
+      
       // Remove legacy tp_id cookies and save tp_id encrypted for re-login
       try {
         cookieStore.delete(COOKIE_NAMES.TP_ID);
@@ -113,7 +118,7 @@ export async function POST(request: NextRequest) {
           COOKIE_NAMES.TP_ID,
           body.thirdPartyToken,
           {
-            maxAge: 3600,
+            maxAge: cookieTTL.tpIdTTL,
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
           },
@@ -126,7 +131,7 @@ export async function POST(request: NextRequest) {
           (e as any)?.message || e,
         );
         setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, {
-          maxAge: 3600,
+          maxAge: cookieTTL.tpIdTTL,
         });
       }
     }
@@ -145,6 +150,10 @@ export async function POST(request: NextRequest) {
 
     // Also set tp_id in response cookie for client (encrypted preferred)
     if (body.thirdPartyToken) {
+      // Get configurable cookie TTLs (reuse if already imported, otherwise get it)
+      const { getCookieTTLConfig } = await import("../../core/config");
+      const cookieTTL = getCookieTTLConfig();
+      
       try {
         const { setEncryptedCookie, COOKIE_NAMES } =
           await import("../../utils/cookie");
@@ -153,7 +162,7 @@ export async function POST(request: NextRequest) {
           COOKIE_NAMES.TP_ID,
           body.thirdPartyToken,
           {
-            maxAge: 3600,
+            maxAge: cookieTTL.tpIdTTL,
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
           },
@@ -162,7 +171,7 @@ export async function POST(request: NextRequest) {
         try {
           const { setPlainCookie } = await import("../../utils/cookie");
           setPlainCookie(res.cookies, "tp_id", body.thirdPartyToken, {
-            maxAge: 3600,
+            maxAge: cookieTTL.tpIdTTL,
           });
         } catch (e2) {
           // If cookie util import fails, set plain as last resort
@@ -171,7 +180,7 @@ export async function POST(request: NextRequest) {
             secure: true,
             sameSite: "lax",
             path: "/",
-            maxAge: 3600,
+            maxAge: cookieTTL.tpIdTTL,
           });
         }
       }

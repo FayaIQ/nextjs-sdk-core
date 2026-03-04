@@ -223,6 +223,7 @@ export class Api {
   static postPayments: string = `${Api.INVENTORY_BASE}/v1/Payments`;
   static getPayments: string = `${Api.INVENTORY_BASE}/v1/Payments`;
   static getPaymentsReport: string = `${Api.INVENTORY_BASE}/v1/Payments/Report`;
+  static getCustomSections: string = `${Api.THEME_BASE}/v1/Sections`;
   static getSlideShows: string = `${Api.THEME_BASE}/v1/SlideShows/Paging?pageSize=20`;
 
   static getItemById(id: string | number): string {
