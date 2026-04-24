@@ -269,7 +269,9 @@
     "firebase": "^12.6.0",
       "protobufjs": ">=7.5.5",
         "minimatch": ">=9.0.7",
-          "picomatch": ">=4.0.4"
+          "picomatch": ">=4.0.4",
+            "rollup": ">=4.59.0"
+
 
 
 
