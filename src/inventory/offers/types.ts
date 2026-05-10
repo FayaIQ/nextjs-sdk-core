@@ -23,6 +23,16 @@ export interface postOffersInvoiceDiscountRequest extends OfferPostRequest {
   useCouponMultipleTimesBySameUserCount ?: number
 }
 
+export interface postOffersMultiCouponDiscountRequest extends OfferPostRequest {
+  minimumCartValue ?: number,
+  useCouponMultipleTimesBySameUserCount ?: number
+}
+
+export interface postOfferCouponRequest {
+  couponCode: string,
+  useCouponMultipleTimesBySameUserCount ?: number
+}
+
 
 export interface OffersFilters {
   Name?: string | null;

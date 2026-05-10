@@ -169,6 +169,12 @@ export class Api {
   static putOffersMultiCouponDiscount(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${id}/MultiCouponDiscount`;
   }
+  static postOffersMultiCouponDiscountById(id: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${id}/MultiCouponDiscount`;
+  }
+  static postOfferCoupon(offerId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/Coupon`;
+  }
   static putOffersDarkDiscount(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${id}/DarkDiscount`;
   }

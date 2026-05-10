@@ -22,6 +22,10 @@ export * from "./putOffersExtraItemDiscount";
 export * from "./putOffersInvoiceDiscount";
 export * from "./putOffersItemsDiscountCustomers";
 export * from "./putOffersShippingDiscount";
+export * from "./postOffersMultiCouponDiscount";
+export * from "./postOffersMultiCouponDiscountById";
+export * from "./putOffersMultiCouponDiscount";
+export * from "./postOfferCoupon";
 export * from "./types";
 export * from "./offer-model";
 export { GET as GetOffersPagingGET } from "./handler/getOffersPaging";
@@ -48,3 +52,7 @@ export { PUT as PutOffersExtraItemDiscountPUT } from "./handler/putOffersExtraIt
 export { PUT as PutOffersInvoiceDiscountPUT } from "./handler/putOffersInvoiceDiscount";
 export { PUT as PutOffersItemsDiscountCustomersPUT } from "./handler/putOffersItemsDiscountCustomers";
 export { PUT as PutOffersShippingDiscountPUT } from "./handler/putOffersShippingDiscount";
+export { POST as PostOffersMultiCouponDiscountPOST } from "./handler/postOffersMultiCouponDiscount";
+export { POST as PostOffersMultiCouponDiscountByIdPOST } from "./handler/postOffersMultiCouponDiscountById";
+export { PUT as PutOffersMultiCouponDiscountPUT } from "./handler/putOffersMultiCouponDiscount";
+export { POST as PostOfferCouponPOST } from "./handler/postOfferCoupon";
