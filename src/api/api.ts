@@ -123,6 +123,9 @@ export class Api {
   static getOffersGroups(offerId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups`;
   }
+  static getOfferGroupsCoupons(offerId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/Coupons`;
+  }
   static putOffersGroup(offerId: string | number, id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
