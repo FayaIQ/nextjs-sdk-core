@@ -163,6 +163,7 @@ export class ItemsFilterParameters {
   RejectionNote: string | null;
   Deliveryability: boolean | null;
   Availability: boolean | null;
+  HaveSize: boolean | null;
 
   // New parameters
   IsMultiMenuStore: boolean | null;
@@ -186,6 +187,7 @@ export class ItemsFilterParameters {
   CreatedBy: string | null;
   UpdatedBy: string | null;
 
+
   constructor({
     pagingParameters = new PagingParameters(),
     sortType = SortType.None,
@@ -201,12 +203,13 @@ export class ItemsFilterParameters {
     newArrival = null,
     GetBrand = false,
     getColors = false,
+    HaveSize = null,
     getColorsDefaultPictures = null,
     getOffer = false,
     getSize = false,
     getCollections = false,
     branchId = null,
-  storeId = null,
+    storeId = null,
     id = null,
     ids = null,
     excludeId = null,
@@ -220,26 +223,26 @@ export class ItemsFilterParameters {
     ColorId = null,
     SizePatternId = null,
     OfferGuid = null,
-  GetColorsPictures = null,
-  GetGeneralPictures = null,
-  GetSizeSet = null,
-  GetSizeSetValues = null,
-  GetPointOffer = null,
-  GetMenu = null,
-  GetMultipleMenu = null,
-  GetLikes = null,
-  GetWishes = null,
-  GetFavourites = null,
-  GetRating = null,
-  GetTempPicture = null,
-  GetCategory = null,
-  GetUnit = null,
-  GetStoreId = null,
-  GetPoints = null,
-  GetPriceAfterDiscount = null,
-  GetSyncThirdPartyId = null,
-  GetDarkOffer = null,
-  CombineNameAndBarcode = null,
+    GetColorsPictures = null,
+    GetGeneralPictures = null,
+    GetSizeSet = null,
+    GetSizeSetValues = null,
+    GetPointOffer = null,
+    GetMenu = null,
+    GetMultipleMenu = null,
+    GetLikes = null,
+    GetWishes = null,
+    GetFavourites = null,
+    GetRating = null,
+    GetTempPicture = null,
+    GetCategory = null,
+    GetUnit = null,
+    GetStoreId = null,
+    GetPoints = null,
+    GetPriceAfterDiscount = null,
+    GetSyncThirdPartyId = null,
+    GetDarkOffer = null,
+    CombineNameAndBarcode = null,
     availability = null,
     minRating = null,
     hasDiscount = null,
@@ -265,11 +268,11 @@ export class ItemsFilterParameters {
     HaveOffer = null,
     HaveItemCollectionOffer = null,
     IsDeleted = null,
-  CheckQuantityBeforeSale = null,
-  CreatedAt = null,
-  UpdatedAt = null,
-  CreatedBy = null,
-  UpdatedBy = null,
+    CheckQuantityBeforeSale = null,
+    CreatedAt = null,
+    UpdatedAt = null,
+    CreatedBy = null,
+    UpdatedBy = null,
   }: {
     pagingParameters?: PagingParameters;
     sortType?: SortType;
@@ -288,9 +291,10 @@ export class ItemsFilterParameters {
     getColorsDefaultPictures?: boolean | null;
     getOffer?: boolean;
     getSize?: boolean;
+    HaveSize?: boolean | null;
     getCollections?: boolean;
     branchId?: number | null;
-  storeId?: number | null;
+    storeId?: number | null;
     availability?: boolean | null;
     minRating?: number | null;
     hasDiscount?: boolean | null;
@@ -317,10 +321,10 @@ export class ItemsFilterParameters {
     HaveItemCollectionOffer?: boolean | null;
     IsDeleted?: boolean | null;
     CheckQuantityBeforeSale?: boolean | null;
-  CreatedAt?: string | null;
-  UpdatedAt?: string | null;
-  CreatedBy?: string | null;
-  UpdatedBy?: string | null;
+    CreatedAt?: string | null;
+    UpdatedAt?: string | null;
+    CreatedBy?: string | null;
+    UpdatedBy?: string | null;
     // new fields
     id?: number | null;
     ids?: number[] | null;
@@ -375,7 +379,8 @@ export class ItemsFilterParameters {
     this.getSize = getSize;
     this.getCollections = getCollections;
     this.branchId = branchId;
-  this.storeId = storeId;
+    this.HaveSize = HaveSize;
+    this.storeId = storeId;
     this.availability = availability;
     this.minRating = minRating;
     this.hasDiscount = hasDiscount;
@@ -383,40 +388,40 @@ export class ItemsFilterParameters {
     this.ItemQuantityStatus = ItemQuantityStatus;
     this.SyncThirdPartyIds = SyncThirdPartyIds;
     this.SyncThirdPartyId = SyncThirdPartyId;
-  // new fields assignment
-  this.id = id;
-  this.ids = ids;
-  this.excludeId = excludeId;
-  this.CategoryId2 = CategoryId2;
-  this.CategoryId3 = CategoryId3;
-  this.CategoryId4 = CategoryId4;
-  this.NameOrBarcode = NameOrBarcode;
-  this.BarCode = BarCode;
-  this.FilterCollections = FilterCollections;
-  this.SizeValueId = SizeValueId;
-  this.ColorId = ColorId;
-  this.SizePatternId = SizePatternId;
-  this.OfferGuid = OfferGuid;
-  this.GetColorsPictures = GetColorsPictures;
-  this.GetGeneralPictures = GetGeneralPictures;
-  this.GetSizeSet = GetSizeSet;
-  this.GetSizeSetValues = GetSizeSetValues;
-  this.GetPointOffer = GetPointOffer;
-  this.GetMenu = GetMenu;
-  this.GetMultipleMenu = GetMultipleMenu;
-  this.GetLikes = GetLikes;
-  this.GetWishes = GetWishes;
-  this.GetFavourites = GetFavourites;
-  this.GetRating = GetRating;
-  this.GetTempPicture = GetTempPicture;
-  this.GetCategory = GetCategory;
-  this.GetUnit = GetUnit;
-  this.GetStoreId = GetStoreId;
-  this.GetPoints = GetPoints;
-  this.GetPriceAfterDiscount = GetPriceAfterDiscount;
-  this.GetSyncThirdPartyId = GetSyncThirdPartyId;
-  this.GetDarkOffer = GetDarkOffer;
-  this.CombineNameAndBarcode = CombineNameAndBarcode;
+    // new fields assignment
+    this.id = id;
+    this.ids = ids;
+    this.excludeId = excludeId;
+    this.CategoryId2 = CategoryId2;
+    this.CategoryId3 = CategoryId3;
+    this.CategoryId4 = CategoryId4;
+    this.NameOrBarcode = NameOrBarcode;
+    this.BarCode = BarCode;
+    this.FilterCollections = FilterCollections;
+    this.SizeValueId = SizeValueId;
+    this.ColorId = ColorId;
+    this.SizePatternId = SizePatternId;
+    this.OfferGuid = OfferGuid;
+    this.GetColorsPictures = GetColorsPictures;
+    this.GetGeneralPictures = GetGeneralPictures;
+    this.GetSizeSet = GetSizeSet;
+    this.GetSizeSetValues = GetSizeSetValues;
+    this.GetPointOffer = GetPointOffer;
+    this.GetMenu = GetMenu;
+    this.GetMultipleMenu = GetMultipleMenu;
+    this.GetLikes = GetLikes;
+    this.GetWishes = GetWishes;
+    this.GetFavourites = GetFavourites;
+    this.GetRating = GetRating;
+    this.GetTempPicture = GetTempPicture;
+    this.GetCategory = GetCategory;
+    this.GetUnit = GetUnit;
+    this.GetStoreId = GetStoreId;
+    this.GetPoints = GetPoints;
+    this.GetPriceAfterDiscount = GetPriceAfterDiscount;
+    this.GetSyncThirdPartyId = GetSyncThirdPartyId;
+    this.GetDarkOffer = GetDarkOffer;
+    this.CombineNameAndBarcode = CombineNameAndBarcode;
     this.RejectionNote = RejectionNote;
     this.Deliveryability = Deliveryability;
     this.Availability = Availability;
@@ -436,8 +441,8 @@ export class ItemsFilterParameters {
     this.HaveItemCollectionOffer = HaveItemCollectionOffer;
     this.IsDeleted = IsDeleted;
     this.CheckQuantityBeforeSale = CheckQuantityBeforeSale;
-  this.CreatedAt = CreatedAt;
-  this.UpdatedAt = UpdatedAt;
+    this.CreatedAt = CreatedAt;
+    this.UpdatedAt = UpdatedAt;
     this.CreatedBy = CreatedBy;
     this.UpdatedBy = UpdatedBy;
   }
@@ -459,6 +464,8 @@ export class ItemsFilterParameters {
       name: updates.name !== undefined ? updates.name : this.name,
       gender: updates.gender !== undefined ? updates.gender : this.gender,
       age: updates.age !== undefined ? updates.age : this.age,
+      HaveSize:
+        updates.HaveSize !== undefined ? updates.HaveSize : this.HaveSize,
       sourceId:
         updates.sourceId !== undefined ? updates.sourceId : this.sourceId,
       offerId: updates.offerId !== undefined ? updates.offerId : this.offerId,
@@ -721,6 +728,9 @@ export class ItemsFilterParameters {
     if (this.getColorsDefaultPictures) {
       params.set("getColorsDefaultPictures", "true");
     }
+    if (this.HaveSize !== null) {
+      params.set("HaveSize", this.HaveSize.toString());
+    }
     if (this.getOffer) {
       params.set("getOffer", "true");
     }
@@ -910,11 +920,11 @@ export class ItemsFilterParameters {
     if (this.getSize) map.getSize = true;
     if (this.getCollections) map.getCollections = true;
     if (this.branchId !== null) map.branchId = this.branchId;
-  if (this.storeId !== null) {
-    // Use StoreId key in map to match server-side naming conventions.
-    map.StoreId = this.storeId;
-    map.storeId = this.storeId; // keep lowercase alias for consumers
-  }
+    if (this.storeId !== null) {
+      // Use StoreId key in map to match server-side naming conventions.
+      map.StoreId = this.storeId;
+      map.storeId = this.storeId; // keep lowercase alias for consumers
+    }
     // new identifier and collection fields
     if (this.id !== null) map.id = this.id;
     if (this.ids !== null && Array.isArray(this.ids) && this.ids.length > 0)
@@ -994,8 +1004,8 @@ export class ItemsFilterParameters {
       map.CheckQuantityBeforeSale = this.CheckQuantityBeforeSale;
     if (this.CreatedAt !== null) map.CreatedAt = this.CreatedAt;
     if (this.UpdatedAt !== null) map.UpdatedAt = this.UpdatedAt;
-      if (this.CreatedBy !== null) map.CreatedBy = this.CreatedBy;
-      if (this.UpdatedBy !== null) map.UpdatedBy = this.UpdatedBy;
+    if (this.CreatedBy !== null) map.CreatedBy = this.CreatedBy;
+    if (this.UpdatedBy !== null) map.UpdatedBy = this.UpdatedBy;
 
     return map;
   }
@@ -1049,8 +1059,8 @@ export class ItemsFilterParameters {
       storeId: params.get("StoreId")
         ? parseInt(params.get("StoreId")!)
         : params.get("storeId")
-        ? parseInt(params.get("storeId")!)
-        : null,
+          ? parseInt(params.get("storeId")!)
+          : null,
       availability: params.get("availability")
         ? params.get("availability") === "true"
         : null,
@@ -1073,10 +1083,10 @@ export class ItemsFilterParameters {
       id: params.get("id") ? parseInt(params.get("id")!) : null,
       ids: params.get("ids")
         ? params
-            .get("ids")!
-            .split(",")
-            .map((s) => parseInt(s))
-            .filter((n) => !Number.isNaN(n))
+          .get("ids")!
+          .split(",")
+          .map((s) => parseInt(s))
+          .filter((n) => !Number.isNaN(n))
         : null,
       excludeId: params.get("excludeId") ? parseInt(params.get("excludeId")!) : null,
       CategoryId2: params.get("CategoryId2") ? parseInt(params.get("CategoryId2")!) : null,
