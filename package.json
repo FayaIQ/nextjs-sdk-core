@@ -317,13 +317,16 @@
     "typescript"
   ],
   "dependencies": {
-    "firebase": "^12.6.0"
+    "firebase": "^12.6.0",
+    "protobufjs": "^7.5.8"
   },
   "pnpm": {
     "overrides": {
-      "protobufjs": "^7.5.6",
+      "protobufjs": "^7.5.8",
       "rollup": ">=4.59.0",
-      "minimatch": ">=9.0.7"
+      "minimatch": ">=9.0.7",
+      "postcss": ">=8.5.10",
+      "picomatch": ">=4.0.4"
     }
   }
 }
