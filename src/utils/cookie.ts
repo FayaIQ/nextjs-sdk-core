@@ -52,7 +52,7 @@ export async function setEncryptedCookie(
   }
 
   const secret =
-    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || process.env.COOKIE_CRYPTO_KEY;
   let toStore = value;
 
   if (!secret) {
@@ -106,7 +106,7 @@ export async function getEncryptedCookie(
     if (!cookie?.value) return null;
 
     const secret =
-      process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+      process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || process.env.COOKIE_CRYPTO_KEY;
 
     // If no secret is configured but the cookie looks like an encrypted blob, warn
     if (!secret) {
@@ -118,7 +118,7 @@ export async function getEncryptedCookie(
             `[cookie] cookie ${name} looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; server will not decrypt it`,
           );
         }
-      } catch {}
+      } catch { }
       return cookie.value || null;
     }
 
@@ -136,7 +136,7 @@ export async function getEncryptedCookie(
             `[cookie] decryption failed for ${name}; blobLen=${len}, prefix=${prefix}...`,
             (e as any)?.message || e,
           );
-        } catch {}
+        } catch { }
         return cookie.value || null;
       }
     }
@@ -158,7 +158,7 @@ export async function tryDecryptString(value: string): Promise<string | null> {
   }
 
   const secret =
-    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || process.env.COOKIE_CRYPTO_KEY;
 
   if (!secret) {
     // Basic heuristic to check if it looks like encrypted data
@@ -170,7 +170,7 @@ export async function tryDecryptString(value: string): Promise<string | null> {
           `[cookie] tryDecryptString: value looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; cannot decrypt`,
         );
       }
-    } catch {}
+    } catch { }
     return null;
   }
 
@@ -198,7 +198,7 @@ export async function tryEncryptString(value: string): Promise<string | null> {
   }
 
   const secret =
-    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || process.env.COOKIE_CRYPTO_KEY;
 
   if (!secret) {
     // eslint-disable-next-line no-console

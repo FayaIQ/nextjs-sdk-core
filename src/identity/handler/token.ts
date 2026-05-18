@@ -51,18 +51,18 @@ export async function GET(request: NextRequest) {
           // Get configurable cookie TTLs
           const { getCookieTTLConfig } = await import("../../core/config");
           const cookieTTL = getCookieTTLConfig();
-          
+
           const res = NextResponse.json({ session_id: encrypted });
           // Replace legacy cookies with encrypted session cookie
           try {
             res.cookies.delete(COOKIE_NAMES.CRF);
-          } catch {}
+          } catch { }
           try {
             res.cookies.delete("session_id");
-          } catch {}
+          } catch { }
           try {
             res.cookies.delete(COOKIE_NAMES.SESSION_ID);
-          } catch {}
+          } catch { }
           setEncryptedCookie(
             res.cookies,
             COOKIE_NAMES.SESSION_ID,
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     let tpId: string | null = null;
     try {
       tpId = await getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-    } catch {}
+    } catch { }
     // Fallback to plain tp_id cookie
     if (!tpId) {
       tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
@@ -130,8 +130,8 @@ export async function GET(request: NextRequest) {
       try {
         userAgent =
           request.headers.get("user-agent") +
-            " nextjs-sdk-core  handler api/auth/token" || null;
-      } catch {}
+          " nextjs-sdk-core  handler api/auth/token" || null;
+      } catch { }
     }
 
     // Final fallback to node runtime identifier
@@ -187,13 +187,13 @@ export async function GET(request: NextRequest) {
       // Remove legacy cookies and save session_id plainly
       try {
         res.cookies.delete(CN.CRF);
-      } catch {}
+      } catch { }
       try {
         res.cookies.delete("session_id");
-      } catch {}
+      } catch { }
       try {
         res.cookies.delete(CN.SESSION_ID);
-      } catch {}
+      } catch { }
       // Store session token as HttpOnly and secure in production so it isn't
       // accessible to client-side scripts. This reduces XSS risk.
       // Store session token encrypted when possible to match the login path
@@ -207,11 +207,11 @@ export async function GET(request: NextRequest) {
         // eslint-disable-next-line no-console
         console.log("[identity:handler:token] set session cookie on response", {
           encryptedKeyConfigured: !!(
-            process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY
+            process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || process.env.COOKIE_CRYPTO_KEY
           ),
           cookieName: CN.SESSION_ID,
         });
-      } catch {}
+      } catch { }
     } catch (e) {
       console.error(
         "[identity:handler:token] Failed to set session_id cookie:",
