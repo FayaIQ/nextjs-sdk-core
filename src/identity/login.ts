@@ -146,9 +146,9 @@ export async function loginUser(
 
     const headers = userAgent
       ? {
-          "User-Agent":
-            userAgent + "login in user server side in nextjs-sdk-core ",
-        }
+        "User-Agent":
+          userAgent + "login in user server side in nextjs-sdk-core ",
+      }
       : "login in user server side in nextjs-sdk-core ";
 
     const response = await postWithoutAuth<LoginResponse>(
@@ -161,11 +161,11 @@ export async function loginUser(
       console.error("[identity:login] ❌ Login failed: No access_token in response");
       throw new Error("Invalid login response: missing access token");
     }
-    
+
     console.log("[identity:login] ✅ Login successful, received access_token");
 
     const cookieStore = await cookies();
-    
+
     // Get configurable cookie TTLs (default: 1 hour to match Firebase token expiration)
     const { getCookieTTLConfig } = await import("../core/config");
     const cookieTTL = getCookieTTLConfig();
@@ -179,13 +179,13 @@ export async function loginUser(
     // Remove any legacy/encrypted cookies before writing new plain cookie
     try {
       cookieStore.delete(COOKIE_NAMES.CRF);
-    } catch {}
+    } catch { }
     try {
       cookieStore.delete("access_token");
-    } catch {}
+    } catch { }
     try {
       cookieStore.delete(COOKIE_NAMES.SESSION_ID);
-    } catch {}
+    } catch { }
     // token saved to cookie
     // Store session token as HttpOnly and secure in production so it isn't
     // accessible to client-side scripts. This reduces XSS risk.
@@ -207,10 +207,10 @@ export async function loginUser(
       // Save third-party token plainly for re-login
       try {
         cookieStore.delete(COOKIE_NAMES.TP_ID);
-      } catch {}
+      } catch { }
       try {
         cookieStore.delete("tp_id");
-      } catch {}
+      } catch { }
       // Store TP_ID encrypted for security; decrypt when reading for re-login
       try {
         await setEncryptedCookie(
@@ -266,15 +266,15 @@ export async function loginUser(
         });
       }
 
-      if (response.roles?.length) {
-        cookieStore.set("roles", response.roles.join(","), {
-          httpOnly: true,
-          secure: true,
-          sameSite: "lax",
-          path: "/",
-          maxAge: expiresIn,
-        });
-      }
+      // if (response.roles?.length) {
+      //   cookieStore.set("roles", response.roles.join(","), {
+      //     httpOnly: true,
+      //     secure: true,
+      //     sameSite: "lax",
+      //     path: "/",
+      //     maxAge: expiresIn,
+      //   });
+      // }
 
       if (response.user?.username) {
         cookieStore.set("username", response.user.username, {
