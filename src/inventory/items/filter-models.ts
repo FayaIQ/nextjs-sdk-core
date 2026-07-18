@@ -10,6 +10,7 @@ export enum SortType {
   BestSelling = "BestSelling",
   MostViewed = "MostViewed", // For most viewed products
   Name = "Name", // A-Z alphabetical sorting
+  Weight = "Weight",
 }
 /**
  * Gender filter options
