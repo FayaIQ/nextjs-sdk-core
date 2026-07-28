@@ -9,31 +9,23 @@ export { putItemCollection } from "./inventory/items/putItemCollection";
 export { putItemCollectionActivate } from "./inventory/items/putItemCollectionActivate";
 export { putItemCollectionDeactivate } from "./inventory/items/putItemCollectionDeactivate";
 
-// Type and model exports
+// Type and model exports. `export *` keeps TypeScript type-only symbols type-only
+// while avoiding the declaration-bundler parser failure triggered by standalone
+// `export type { ... }` barrels in Git dependency prepare builds.
 export * from "./types";
 export * from "./inventory/items/filter-models";
 export * from "./api/api";
 export * from "./inventory/orders/order-models";
-
-// Configuration exports
-export { AuthConfig } from "./core/config";
+export * from "./core/config";
 
 // Advanced exports for custom use cases
 export { apiFetch } from "./core/fetcher";
 
 export { default as getToken } from "./token";
-export { TokenResponse } from "./token";
+export * from "./token";
 
 // Firebase authentication (client-side only)
-export {
-  startPhoneSignIn,
-  getFirebaseIdToken,
-  signOutFirebase,
-  startAuthStateSync,
-  StartPhoneSignInResult,
-  WhatsAppOTPOptions,
-} from "./firebase/auth";
-export { ItemsFilterParameters } from "./inventory/items/filter-models";
+export * from "./firebase/auth";
 
 // Firebase config
 export { getPrimaryApp, getSecondaryApp, getFirebaseApp } from "./firebase/config";
@@ -48,10 +40,7 @@ export {
 } from "./utils/cookie";
 
 // Re-export Edge-friendly encrypt helper so consumers can import it
-// (useful in middleware to produce values compatible with server decrypt)
 export { encryptForCookie } from "./utils/crypto";
-
-// Encryption utilities removed from public API
 
 // Re-export CRM helpers (clients, delegate types, etc.)
 export * from "./crm";
