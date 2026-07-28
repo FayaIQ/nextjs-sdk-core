@@ -9,20 +9,20 @@ export { putItemCollection } from "./inventory/items/putItemCollection";
 export { putItemCollectionActivate } from "./inventory/items/putItemCollectionActivate";
 export { putItemCollectionDeactivate } from "./inventory/items/putItemCollectionDeactivate";
 
-// Type exports
-export type * from "./types";
+// Type and model exports
+export * from "./types";
 export * from "./inventory/items/filter-models";
 export * from "./api/api";
 export * from "./inventory/orders/order-models";
 
 // Configuration exports
-export type { AuthConfig } from "./core/config";
+export { AuthConfig } from "./core/config";
 
 // Advanced exports for custom use cases
 export { apiFetch } from "./core/fetcher";
 
 export { default as getToken } from "./token";
-export type { TokenResponse } from "./token";
+export { TokenResponse } from "./token";
 
 // Firebase authentication (client-side only)
 export {
@@ -30,8 +30,9 @@ export {
   getFirebaseIdToken,
   signOutFirebase,
   startAuthStateSync,
+  StartPhoneSignInResult,
+  WhatsAppOTPOptions,
 } from "./firebase/auth";
-export type { StartPhoneSignInResult, WhatsAppOTPOptions } from "./firebase/auth";
 export { ItemsFilterParameters } from "./inventory/items/filter-models";
 
 // Firebase config
@@ -54,4 +55,3 @@ export { encryptForCookie } from "./utils/crypto";
 
 // Re-export CRM helpers (clients, delegate types, etc.)
 export * from "./crm";
-
