@@ -31,7 +31,7 @@ export class Api {
     (typeof process !== "undefined" && process.env.STOREAK_CRM_BASE) ||
     `https://storeak-crm-service.azurewebsites.net/api`;
 
-  public static IDENTITY_URL =
+  static IDENTITY_URL =
     (typeof process !== "undefined" && process.env.STOREAK_IDENTITY_URL) ||
     `https://storeak-identity-service.azurewebsites.net/api`;
 
