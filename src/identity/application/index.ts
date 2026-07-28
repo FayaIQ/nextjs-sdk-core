@@ -3,10 +3,8 @@ export { GET as GETStoreInfo } from "./handler/getStoreInfo";
 export {
   GET as GETApplicationsStoreDropDown,
 } from "./handler/getApplicationsStoreDropdown";
-export { getStoreInfo } from "./storeInfo";
-export { getStores } from "./getStores";
-export {
-  getApplicationsStoreDropdown,
-  ApplicationStoreDropdownItem,
-} from "./getApplicationsStoreDropdown";
-export { Store, StoreInfo } from "./types";
+
+export * from "./storeInfo";
+export * from "./getStores";
+export * from "./getApplicationsStoreDropdown";
+export * from "./types";
