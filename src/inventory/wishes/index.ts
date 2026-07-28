@@ -3,8 +3,8 @@ export * from "./getWishes";
 export * from "./postWish";
 export * from "./deleteWish";
 
-// Export types
-export type { Wish, WishesResponse } from "./types";
+// Export public models
+export * from "./types";
 
 // Re-export handlers for Next.js API route wiring
 export { GET as GetWishesGET } from "./handler/getWishes";
