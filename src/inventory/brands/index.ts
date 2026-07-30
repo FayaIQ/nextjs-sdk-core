@@ -3,7 +3,7 @@
  */
 
 export { getBrands } from "./getBrands";
-export type { Brand, GetBrandsResponse } from "./types";
+export * from "./types";
 
 // Handler exports
 export { GET as GetBrandsGET } from "./handler/get-brands";

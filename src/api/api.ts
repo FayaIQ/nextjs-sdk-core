@@ -1,37 +1,37 @@
 export class Api {
-  private static LOCAL_BASE =
+  static LOCAL_BASE =
     (typeof process !== "undefined" && process.env.STOREAK_LOCAL_BASE) ||
     "http://localhost:3000";
 
-  private static IDENTITY_BASE =
+  static IDENTITY_BASE =
     (typeof process !== "undefined" && process.env.STOREAK_IDENTITY_BASE) ||
     `https://storeak-identity-service.azurewebsites.net/api`;
 
-  private static NEWS_BASE =
+  static NEWS_BASE =
     (typeof process !== "undefined" && process.env.STOREAK_NEWS_BASE) ||
     `https://storeak-news-service.azurewebsites.net/api`;
 
-  private static STORES_BASE =
+  static STORES_BASE =
     (typeof process !== "undefined" && process.env.STOREAK_STORES_BASE) ||
     `https://storeak-stores-service.azurewebsites.net/api`;
 
-  private static GPS_BASE =
+  static GPS_BASE =
     (typeof process !== "undefined" && process.env.STOREAK_GPS_BASE) ||
     `https://storeak-gps-service.azurewebsites.net/api`;
 
-  private static THEME_BASE =
+  static THEME_BASE =
     (typeof process !== "undefined" && process.env.STOREAK_THEME_BASE) ||
     `https://storeak-Theme-service.azurewebsites.net/api`;
 
-  private static INVENTORY_BASE =
+  static INVENTORY_BASE =
     (typeof process !== "undefined" && process.env.STOREAK_INVENTORY_BASE) ||
     `https://storeak-inventory-service.azurewebsites.net/api`;
 
-  private static CRM_BASE =
+  static CRM_BASE =
     (typeof process !== "undefined" && process.env.STOREAK_CRM_BASE) ||
     `https://storeak-crm-service.azurewebsites.net/api`;
 
-  public static IDENTITY_URL =
+  static IDENTITY_URL =
     (typeof process !== "undefined" && process.env.STOREAK_IDENTITY_URL) ||
     `https://storeak-identity-service.azurewebsites.net/api`;
 
