@@ -16,13 +16,28 @@ export * from "./api/api";
 export * from "./inventory/orders/order-models";
 
 // Configuration exports
-export type { AuthConfig } from "./core/config";
+export type { AuthConfig, ErpTokenConfig } from "./core/config";
+export { getErpTokenConfig } from "./core/config";
 
 // Advanced exports for custom use cases
 export { apiFetch } from "./core/fetcher";
 
-export { default as getToken } from "./token";
+export { default as getToken, getErpTokenForRequest, markCurrentErpTokenRevoked } from "./token";
+export { ReauthenticationRequiredError } from "./token";
 export type { TokenResponse } from "./token";
+export {
+  configureErpTokenRuntime,
+  getOrGenerateErpToken,
+  isReusableToken,
+  InMemoryErpTokenStore,
+} from "./erp-token-state";
+export type {
+  AuthProof,
+  BotIdentityResolver,
+  CurrentErpTokenState,
+  ErpTokenRuntime,
+  ErpTokenStore,
+} from "./erp-token-state";
 
 // Firebase authentication (client-side only)
 export {
@@ -44,6 +59,7 @@ export {
   setPlainCookie,
   COOKIE_NAMES,
   SECURE_COOKIE_OPTIONS,
+  ensureErpBrowserId,
 } from "./utils/cookie";
 
 // Re-export Edge-friendly encrypt helper so consumers can import it
@@ -54,4 +70,3 @@ export { encryptForCookie } from "./utils/crypto";
 
 // Re-export CRM helpers (clients, delegate types, etc.)
 export * from "./crm";
-

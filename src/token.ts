@@ -1,3 +1,16 @@
+import { Api } from "./api/api";
+import { getAuthConfig } from "./core/config";
+import { postWithoutAuth } from "./core/fetcher";
+import {
+  getErpTokenRuntime,
+  getOrGenerateErpToken,
+  isReusableToken,
+  proofStateKey,
+  tokenStateKey,
+  type IssuedErpToken,
+} from "./erp-token-state";
+import { COOKIE_NAMES } from "./utils/cookie";
+
 export type TokenResponse = {
   access_token: string;
   token_type?: string;
@@ -5,184 +18,136 @@ export type TokenResponse = {
   [key: string]: unknown;
 };
 
-// ENV
-const AUTH_MODE = process.env.AUTH_MODE || "strict"; // auto | strict
-const USE_TOKEN_ROUTE = process.env.USE_TOKEN_ROUTE === "true";
-
-// ------------------------------------------------
-// SINGLE SOURCE OF TRUTH — NO CACHING
-// ------------------------------------------------
-async function getTokenImpl(): Promise<string> {
-  // Debug: entry
-  try {
-    // eslint-disable-next-line no-console
-    console.log(
-      "[token:getTokenImpl] invoked; environment AUTH_MODE=",
-      AUTH_MODE,
-    );
-  } catch {}
-
-  // 🟢 0. SERVER-SIDE: Check for x-access-token header first
-  if (typeof window === "undefined") {
-    const { headers } = await import("next/headers");
-    const headerToken = (await headers()).get("x-access-token");
-    if (headerToken) {
-      // x-access-token is ALWAYS raw (unencrypted) from middleware
-      // Don't try to decrypt it
-      return headerToken;
-    }
+export class ReauthenticationRequiredError extends Error {
+  readonly reauthenticationRequired = true;
+  constructor() {
+    super("Authenticated ERP token expired and no renewable authentication proof is available");
+    this.name = "ReauthenticationRequiredError";
   }
-
-  // 🟢 1. STRICT MODE → token must exist in cookie (SSR)
-  if (AUTH_MODE === "strict" && typeof window === "undefined") {
-    const { cookies } = await import("next/headers");
-    const cookieStore = await cookies();
-
-    let token: string | null = null;
-    const { getEncryptedCookie, COOKIE_NAMES } = await import("./utils/cookie");
-
-    // Try encrypted session_id first
-    try {
-      token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
-      if (token) {
-        // eslint-disable-next-line no-console
-        return token;
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        "[token:getTokenImpl] getEncryptedCookie threw:",
-        (e as any)?.message ?? e,
-      );
-    }
-
-    // Try plain session_id (use cookieStore raw value as a fallback)
-    try {
-      token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
-      if (token) {
-        return token;
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    // MIDDLEWARE: Check access_token cookie (set by consumer middleware)
-    try {
-      token = cookieStore.get("session_id")?.value || null;
-      if (token) {
-        // eslint-disable-next-line no-console
-        console.log(
-          "[token:getTokenImpl] token found via cookie access_token (middleware)",
-        );
-        return token;
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    // LEGACY: Fallback to old cookie names for migration
-    try {
-      token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-      if (token) {
-        // eslint-disable-next-line no-console
-        console.log("[token:getTokenImpl] token found via legacy CRF cookie");
-        return token;
-      }
-    } catch {
-      // ignore
-    }
-
-    console.error(
-      "[token:getTokenImpl] No token found in strict mode. Available cookies:",
-      cookieStore.getAll().map((c: any) => c.name),
-    );
-    const err = new Error("Unauthorized: Access token missing (strict mode)");
-    (err as any).status = 401;
-    console.error("[token:getTokenImpl] Throwing 401 error:", err.message);
-    throw err;
-  }
-
-  // 🟢 2. AUTO MODE → SSR cookie check
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      const { getEncryptedCookie, COOKIE_NAMES } =
-        await import("./utils/cookie");
-
-      let token: string | null = null;
-
-      // Try encrypted session_id first
-      try {
-        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
-        if (token) {
-          return token;
-        }
-      } catch {}
-
-      // Try plain session_id
-      token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
-      if (token) {
-        return token;
-      }
-
-      // MIDDLEWARE: Check access_token cookie (set by consumer middleware)
-      try {
-        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.SESSION_ID);
-        if (token) {
-          return token;
-        }
-      } catch {}
-
-      // Try plain access_token
-      token = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
-      if (token) {
-        return token;
-      }
-
-      // LEGACY: Fallback to old cookie names for migration
-      try {
-        token = await getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-        if (token) {
-          return token;
-        }
-      } catch {}
-    } catch (e) {
-      console.error("[token:getTokenImpl:auto] Error reading cookies:", e);
-    }
-  }
-
-  // 🟢 3. CLIENT → check for token in cookie (no auto login)
-  if (typeof window !== "undefined") {
-    // On client side, check for token in cookie
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
-      return null;
-    };
-
-    // Try session_id first, then legacy access_token
-    const sessionIdToken = getCookie("session_id");
-    if (sessionIdToken) {
-      return sessionIdToken;
-    }
-
-    const accessToken = getCookie("access_token");
-    if (accessToken) {
-      return accessToken;
-    }
-
-    throw new Error("No token available on client side");
-  }
-
-  // If we reach here on server without token, throw error (no auto login)
-  throw new Error("No token available");
 }
 
-// -------------------------------
-// PUBLIC API (NO MEMOIZATION)
-// -------------------------------
+async function issueAnonymousToken(idempotencyKey: string): Promise<IssuedErpToken> {
+  const config = getAuthConfig();
+  const response = await postWithoutAuth<TokenResponse>(Api.signIn, {
+    clientId: config.clientId,
+    clientSecret: config.clientSecret,
+    Language: config.language ?? 0,
+    GMT: config.gmt ?? 3,
+    IsFromNotification: false,
+  }, { "Idempotency-Key": idempotencyKey });
+  if (!response.access_token) throw new Error("ERP sign-in did not return an access token");
+  return {
+    accessToken: response.access_token,
+    backendExpiresAt: response.expires_in ? Date.now() + response.expires_in * 1000 : undefined,
+  };
+}
+
+/**
+ * Server-only raw ERP-token accessor. Browser code receives no ERP token: it
+ * only carries `erp_browser_id`, while the token remains in the shared store.
+ */
+async function getTokenImpl(): Promise<string> {
+  if (typeof window !== "undefined") {
+    throw new Error("ERP access tokens are server-only; call an SDK API route instead");
+  }
+
+  const { headers, cookies } = await import("next/headers");
+  const requestHeaders = await headers();
+  // A consumer middleware may resolve the state once and pass the raw token to
+  // server components. It is still never exposed to client JavaScript.
+  const injected = requestHeaders.get("x-erp-access-token") || requestHeaders.get("x-access-token");
+  if (injected) return injected;
+
+  const cookieStore = await cookies();
+  const browserId = cookieStore.get(COOKIE_NAMES.ERP_BROWSER_ID)?.value;
+  if (!browserId) {
+    const error = new Error("ERP browser identity is missing; initialize /api/auth/token from a qualifying request");
+    (error as Error & { status?: number }).status = 401;
+    throw error;
+  }
+
+  const runtime = getErpTokenRuntime();
+  const tenantKey = runtime.tenantKey || "default";
+  const key = tokenStateKey(tenantKey, browserId);
+  const current = await runtime.store.get(key);
+  const now = runtime.now?.() ?? Date.now();
+  if (current && isReusableToken(current, current, now)) return current.accessToken;
+
+  if (current?.authState === "authenticated") {
+    const proof = await runtime.store.getProof?.(proofStateKey(tenantKey, browserId));
+    if (!proof || proof.expiresAt <= now || !runtime.renewAuthenticatedToken) {
+      throw new ReauthenticationRequiredError();
+    }
+    const renewed = await getOrGenerateErpToken({
+      browserId,
+      tenantKey,
+      authState: "authenticated",
+      actorId: proof.actorId,
+      userId: proof.userId,
+      firebaseUid: proof.firebaseUid,
+      reason: "renew",
+      issue: (idempotencyKey) => runtime.renewAuthenticatedToken!(proof, idempotencyKey),
+    });
+    return renewed.accessToken;
+  }
+
+  const anonymous = await getOrGenerateErpToken({
+    browserId,
+    tenantKey,
+    authState: "anonymous",
+    actorId: `browser:${browserId}`,
+    reason: "anonymous",
+    issue: issueAnonymousToken,
+  });
+  return anonymous.accessToken;
+}
+
 export default function getToken(): Promise<string> {
   return getTokenImpl();
 }
+
+/**
+ * Request-oriented accessor for middleware/API routes. A verified bot company
+ * receives one server-side state key per tenant for the commercial window.
+ * An unverified Googlebot user-agent is intentionally handled as a normal
+ * browser request and cannot join a verified company's state.
+ */
+export async function getErpTokenForRequest(request: Request, browserId: string): Promise<string> {
+  const runtime = getErpTokenRuntime();
+  const tenantKey = runtime.tenantKey || "default";
+  const identity = await runtime.botIdentityResolver?.resolve(request);
+  if (identity?.verified) {
+    const token = await getOrGenerateErpToken({
+      browserId: `bot:${identity.botCompanyId}`,
+      tenantKey,
+      authState: "anonymous",
+      actorId: `bot:${identity.botCompanyId}`,
+      reason: "bot",
+      lockKey: `lock:erp-token:bot:${tenantKey}:${identity.botCompanyId}`,
+      issue: issueAnonymousToken,
+    });
+    return token.accessToken;
+  }
+  return getOrGenerateErpToken({
+    browserId,
+    tenantKey,
+    authState: "anonymous",
+    actorId: `browser:${browserId}`,
+    reason: "anonymous",
+    issue: issueAnonymousToken,
+  }).then((state) => state.accessToken);
+}
+
+/** Mark a rejected token invalid so the next server operation can replace it once. */
+export async function markCurrentErpTokenRevoked(): Promise<void> {
+  if (typeof window !== "undefined") return;
+  const { cookies } = await import("next/headers");
+  const browserId = (await cookies()).get(COOKIE_NAMES.ERP_BROWSER_ID)?.value;
+  if (!browserId) return;
+  const runtime = getErpTokenRuntime();
+  const key = tokenStateKey(runtime.tenantKey || "default", browserId);
+  const state = await runtime.store.get(key);
+  if (state) await runtime.store.set(key, { ...state, revoked: true });
+}
+
+export { issueAnonymousToken };

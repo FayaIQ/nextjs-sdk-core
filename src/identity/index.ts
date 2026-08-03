@@ -10,6 +10,7 @@ export { POST as LoginPOST } from "./handler/login";
 export { POST as LogoutPOST } from "./handler/logout";
 export { GET as CustomersDropdownGET } from "./handler/getCustomersDropdown";
 export { GET as TokenGET } from "./handler/token";
+export { POST as ProofSyncPOST } from "./handler/token";
 
 // Client helpers
-export { startSessionKeepAlive } from "./client";
+export { startSessionKeepAlive, notifyAuthTabs } from "./client";

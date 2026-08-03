@@ -1,37 +1,21 @@
 import { Api } from "../api/api";
+import { getAuthConfig, getErpTokenConfig } from "../core/config";
 import { postWithoutAuth } from "../core/fetcher";
-import { getAuthConfig } from "../core/config";
+import {
+  getErpTokenRuntime,
+  getOrGenerateErpToken,
+  proofStateKey,
+  type AuthProof,
+} from "../erp-token-state";
+import { COOKIE_NAMES, ensureErpBrowserId } from "../utils/cookie";
 
-/**
- * Represents login credentials for Storeak Identity Service
- * In STRICT mode: username and password are required
- * In AUTO mode: username and password are optional (uses env config)
- */
 export interface LoginRequest {
   username?: string;
   password?: string;
   playerId?: string;
-  thirdPartyToken?: string; // Firebase ID token when logging via phone auth
+  thirdPartyToken?: string;
 }
 
-/**
- * Full credentials including config from environment
- */
-interface FullLoginCredentials {
-  clientId: string;
-  playerId?: string;
-  clientSecret: string;
-  username: string;
-  password: string;
-  Language?: number;
-  ThirdPartyToken?: string;
-  GMT?: number;
-  IsFromNotification?: boolean;
-  [key: string]: string | number | boolean | undefined;
-}
-/**
- * User information from login response
- */
 export interface User {
   id: string;
   username: string;
@@ -42,12 +26,9 @@ export interface User {
   storeIDRegisteredWith: number;
   gender: number;
   birthdate: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
-/**
- * Login response from the Storeak Identity Service
- */
 export interface LoginResponse {
   access_token: string;
   token_type: string;
@@ -55,255 +36,102 @@ export interface LoginResponse {
   employeeStoreId?: number;
   roles?: string[];
   user?: User;
-  [key: string]: any;
+  [key: string]: unknown;
+}
+
+async function requestAuthenticatedToken(
+  credentials: LoginRequest,
+  idempotencyKey: string,
+  userAgent?: string,
+): Promise<LoginResponse> {
+  const config = getAuthConfig();
+  const body: Record<string, unknown> = {
+    clientId: config.clientId,
+    clientSecret: config.clientSecret,
+    Language: config.language ?? 0,
+    GMT: config.gmt ?? 3,
+    IsFromNotification: false,
+    ...(credentials.playerId ? { playerId: credentials.playerId } : {}),
+  };
+  if (credentials.thirdPartyToken) {
+    body.ThirdPartyToken = credentials.thirdPartyToken;
+    body.ThirdPartyAuthType = 100;
+  } else {
+    const username = credentials.username || config.username;
+    const password = credentials.password || config.password;
+    if (!username || !password) throw new Error("Username/password or a verified third-party credential is required");
+    body.username = username;
+    body.password = password;
+  }
+  const response = await postWithoutAuth<LoginResponse>(Api.signIn, body, {
+    "Idempotency-Key": idempotencyKey,
+    ...(userAgent ? { "User-Agent": userAgent } : {}),
+  });
+  if (!response.access_token) throw new Error("Invalid login response: missing access token");
+  return response;
 }
 
 /**
- * Logs in a user and retrieves an access token.
- * Automatically saves the token, roles, and store ID to cookies.
- *
- * STRICT mode: username and password are required in credentials
- * AUTO mode: username and password are optional - falls back to env config
+ * Explicit login is an accepted visit boundary. The returned access token is
+ * used only to populate server-side state and is removed from the public
+ * handler response.
  */
-export async function loginUser(
-  credentials: LoginRequest,
-  userAgent?: string,
-): Promise<LoginResponse> {
-  const isServer = typeof window === "undefined";
-  const authMode = process.env.AUTH_MODE || "auto";
-
-  // ✅ SERVER SIDE
-  if (isServer) {
-    // Get client credentials from environment
-    const config = getAuthConfig();
-    const { cookies } = await import("next/headers");
-
-    // In STRICT mode, require username and password in credentials
-    if (
-      authMode === "strict" &&
-      (!credentials.username || !credentials.password)
-    ) {
-      throw new Error("Username and password are required in STRICT mode");
-    }
-
-    // Merge user credentials with env config
-    // In AUTO mode: use env credentials as fallback
-    // In STRICT mode: credentials must be provided
-    const thirdPartyToken =
-      credentials.thirdPartyToken || config.thirdPartyToken;
-
-    // Build request body based on auth type
-    let requestBody: Record<string, any>;
-
-    if (thirdPartyToken) {
-      // Third-party authentication (Firebase, etc.)
-      requestBody = {
-        clientId: config.clientId,
-        clientSecret: config.clientSecret,
-        Language: config.language ?? 0,
-        GMT: config.gmt ?? 3,
-        IsFromNotification: false,
-        ThirdPartyToken: thirdPartyToken,
-        ThirdPartyAuthType: 100, // Firebase auth type
-      };
-    } else {
-      // Standard username/password authentication or anonymous (client credentials only) in AUTO mode
-      const username = credentials.username || config.username;
-      const password = credentials.password || config.password;
-
-      if (!username || !password) {
-        if (authMode === "auto") {
-          requestBody = {
-            clientId: config.clientId,
-            clientSecret: config.clientSecret,
-            Language: config.language ?? 0,
-            GMT: config.gmt ?? 3,
-            IsFromNotification: false,
-          };
-        } else {
-          throw new Error(
-            "Username/password or ThirdPartyToken must be provided",
-          );
-        }
-      } else {
-        requestBody = {
-          clientId: config.clientId,
-          clientSecret: config.clientSecret,
-          username: username,
-          password: password,
-          Language: config.language ?? 0,
-          GMT: config.gmt ?? 3,
-          IsFromNotification: false,
-        };
-      }
-    }
-
-    if (credentials.playerId) {
-      requestBody.playerId = credentials.playerId;
-    }
-
-    console.log("[identity:login] 🚀 Sending login request to backend for:", credentials.username || "third-party user");
-
-    const headers = userAgent
-      ? {
-        "User-Agent":
-          userAgent + "login in user server side in nextjs-sdk-core ",
-      }
-      : "login in user server side in nextjs-sdk-core ";
-
-    const response = await postWithoutAuth<LoginResponse>(
-      Api.signIn,
-      requestBody,
-      (headers as Record<string, string>) || {},
-    );
-
-    if (!response?.access_token) {
-      console.error("[identity:login] ❌ Login failed: No access_token in response");
-      throw new Error("Invalid login response: missing access token");
-    }
-
-    console.log("[identity:login] ✅ Login successful, received access_token");
-
-    const cookieStore = await cookies();
-
-    // Get configurable cookie TTLs (default: 1 hour to match Firebase token expiration)
-    const { getCookieTTLConfig } = await import("../core/config");
-    const cookieTTL = getCookieTTLConfig();
-    const expiresIn = cookieTTL.sessionTTL;
-
-    // Import cookie utilities for encrypted storage
-    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } =
-      await import("../utils/cookie");
-
-    // Save session token (plain)
-    // Remove any legacy/encrypted cookies before writing new plain cookie
-    try {
-      cookieStore.delete(COOKIE_NAMES.CRF);
-    } catch { }
-    try {
-      cookieStore.delete("access_token");
-    } catch { }
-    try {
-      cookieStore.delete(COOKIE_NAMES.SESSION_ID);
-    } catch { }
-    // token saved to cookie
-    // Store session token as HttpOnly and secure in production so it isn't
-    // accessible to client-side scripts. This reduces XSS risk.
-    console.log("[identity:login] 🍪 Setting session cookie (expires in:", expiresIn, "s)");
-    await setEncryptedCookie(
-      cookieStore,
-      COOKIE_NAMES.SESSION_ID,
-      decodeURIComponent(response.access_token),
-      {
-        maxAge: expiresIn,
-        httpOnly: true,
-        secure: true,
-      },
-    );
-
-    // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
-    if (credentials.thirdPartyToken) {
-      console.log("[identity:login] 🔒 Saving TP_ID cookie for silent re-auth");
-      // Save third-party token plainly for re-login
-      try {
-        cookieStore.delete(COOKIE_NAMES.TP_ID);
-      } catch { }
-      try {
-        cookieStore.delete("tp_id");
-      } catch { }
-      // Store TP_ID encrypted for security; decrypt when reading for re-login
-      try {
-        await setEncryptedCookie(
-          cookieStore,
-          COOKIE_NAMES.TP_ID,
-          decodeURIComponent(credentials.thirdPartyToken),
-          {
-            maxAge: cookieTTL.tpIdTTL,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-          },
-        );
-      } catch (e) {
-        // Fallback: if encryption isn't available, store plain but warn
-        // eslint-disable-next-line no-console
-        console.warn(
-          "[identity:login] failed to encrypt TP_ID; storing plain as fallback",
-          (e as any)?.message || e,
-        );
-        setPlainCookie(
-          cookieStore,
-          COOKIE_NAMES.TP_ID,
-          decodeURIComponent(credentials.thirdPartyToken),
-          {
-            maxAge: cookieTTL.tpIdTTL,
-          },
-        );
-      }
-    } else {
-    }
-
-    // AUTO mode: only save isUser flag based on roles
-    if (authMode === "auto") {
-      const isUser = !!(response.roles && response.roles.length > 0);
-      // Make the isUser flag readable from client-side JavaScript
-      // (not HttpOnly) so consumer apps can check it without server roundtrips.
-      // Use persistent TTL (1 year) so user stays logged in across sessions
-      setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
-        maxAge: cookieTTL.isUserTTL,
-        httpOnly: false,
-      });
-    }
-
-    // STRICT mode: save all user data
-    if (authMode === "strict") {
-      if (response.employeeStoreId) {
-        cookieStore.set("employee_store_id", String(response.employeeStoreId), {
-          httpOnly: true,
-          secure: true,
-          sameSite: "lax",
-          path: "/",
-          maxAge: expiresIn,
-        });
-      }
-
-      // if (response.roles?.length) {
-      //   cookieStore.set("roles", response.roles.join(","), {
-      //     httpOnly: true,
-      //     secure: true,
-      //     sameSite: "lax",
-      //     path: "/",
-      //     maxAge: expiresIn,
-      //   });
-      // }
-
-      if (response.user?.username) {
-        cookieStore.set("username", response.user.username, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "lax",
-          path: "/",
-          maxAge: expiresIn,
-        });
-      }
-    }
-
-    return response;
+export async function loginUser(credentials: LoginRequest, userAgent?: string): Promise<LoginResponse> {
+  if (typeof window !== "undefined") {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(credentials),
+    });
+    if (!response.ok) throw new Error(`Login failed: ${response.statusText}`);
+    return response.json();
   }
 
-  // ✅ CLIENT SIDE
-  const res = await fetch(`/api/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      // Browsers disallow setting User-Agent; keep a sentinel for other clients
-      "User-Agent":
-        (typeof navigator !== "undefined" && navigator.userAgent) ||
-        "login user",
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  // Remove legacy credential cookies. The browser keeps only an opaque identity;
+  // proof and ERP token material are held in the configured server store.
+  cookieStore.delete(COOKIE_NAMES.SESSION_ID);
+  cookieStore.delete(COOKIE_NAMES.CRF);
+  cookieStore.delete(COOKIE_NAMES.TP_ID);
+  const browserId = ensureErpBrowserId(cookieStore, getErpTokenConfig().browserCookieTtlSeconds);
+  const runtime = getErpTokenRuntime();
+  const tenantKey = runtime.tenantKey || "default";
+  let proof: AuthProof | null = null;
+  if (credentials.thirdPartyToken && runtime.verifyAuthProof) {
+    proof = await runtime.verifyAuthProof(credentials.thirdPartyToken);
+  }
+
+  // A verified provider identity is preferred. For legacy ERP-only login the
+  // ERP response is the only available verified identity and cannot renew
+  // automatically without an application-provided renewable grant.
+  const actorId = proof?.actorId || `login:${credentials.username || "third-party"}`;
+  let loginResponse: LoginResponse | null = null;
+  const state = await getOrGenerateErpToken({
+    browserId,
+    tenantKey,
+    authState: "authenticated",
+    actorId,
+    userId: proof?.userId,
+    firebaseUid: proof?.firebaseUid,
+    reason: "login",
+    issue: async (idempotencyKey) => {
+      loginResponse = await requestAuthenticatedToken(credentials, idempotencyKey, userAgent);
+      return {
+        accessToken: loginResponse.access_token,
+        backendExpiresAt: loginResponse.expires ? Date.now() + loginResponse.expires * 1000 : undefined,
+      };
     },
-    body: JSON.stringify(credentials),
   });
 
-  if (!res.ok) throw new Error(`Login failed: ${res.statusText}`);
+  if (proof && runtime.store.setProof) {
+    await runtime.store.setProof(proofStateKey(tenantKey, browserId), proof);
+  }
 
-  return res.json();
+  return {
+    ...(loginResponse || { access_token: state.accessToken, token_type: "Bearer", expires: 0 }),
+    // Kept for direct server callers only. Route handlers intentionally omit it.
+    access_token: state.accessToken,
+  } as LoginResponse;
 }

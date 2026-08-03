@@ -11,7 +11,9 @@ import { encryptForCookie, decryptForCookie } from "./crypto";
  * Cookie names used by the SDK
  */
 export const COOKIE_NAMES = {
-  /** Primary session token (encrypted when possible) */
+  /** Opaque browser identity. This is never an ERP access token. */
+  ERP_BROWSER_ID: "erp_browser_id",
+  /** Legacy ERP-token cookie. Read only for cleanup; never use as authentication. */
   SESSION_ID: "session_id",
   /** User authentication flag */
   IS_USER: "isUser",
@@ -32,14 +34,16 @@ export const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie> = {
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax",
   path: "/",
-  maxAge: 60 * 60 * 24 * 7, // 7 days
+  maxAge: 60 * 60 * 24 * 365,
 };
 
 /**
  * Set an encrypted cookie value.
  * Server-side only. If an encryption key is provided via
  * `SESSION_ENCRYPTION_KEY` or `ENCRYPTION_KEY` env var, the value will be encrypted
- * using AES-256-GCM. Otherwise the value will be stored as plain text.
+ * using AES-256-GCM. Sensitive values are never written when encryption is
+ * unavailable; a plaintext fallback turns a server-only secret into an XSS
+ * credential.
  */
 export async function setEncryptedCookie(
   cookieStore: any,
@@ -53,26 +57,11 @@ export async function setEncryptedCookie(
 
   const secret =
     process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || process.env.COOKIE_CRYPTO_KEY;
-  let toStore = value;
-
   if (!secret) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[cookie] no encryption key configured (SESSION_ENCRYPTION_KEY or ENCRYPTION_KEY); storing ${name} in plaintext`,
-    );
-  } else {
-    try {
-      toStore = await encryptForCookie(secret, value);
-    } catch (e) {
-      // If encryption fails, fall back to plaintext but warn the operator.
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[cookie] encryption failed for ${name}, storing plain value`,
-        e,
-      );
-      toStore = value;
-    }
+    throw new Error(`Cannot set sensitive cookie ${name}: cookie encryption key is missing`);
   }
+
+  const toStore = await encryptForCookie(secret, value);
 
   try {
     cookieStore.set(name, toStore, {
@@ -108,18 +97,8 @@ export async function getEncryptedCookie(
     const secret =
       process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || process.env.COOKIE_CRYPTO_KEY;
 
-    // If no secret is configured but the cookie looks like an encrypted blob, warn
     if (!secret) {
-      try {
-        const maybeBuf = Buffer.from(cookie.value, "base64");
-        if (maybeBuf.length >= 12 + 16 + 1) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `[cookie] cookie ${name} looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; server will not decrypt it`,
-          );
-        }
-      } catch { }
-      return cookie.value || null;
+      return null;
     }
 
     if (secret) {
@@ -127,7 +106,7 @@ export async function getEncryptedCookie(
         const decrypted = await decryptForCookie(cookie.value, secret);
         return decrypted || null;
       } catch (e) {
-        // If decryption fails, log a warning and return the raw value as fallback
+        // An undecryptable value is not a valid credential.
         try {
           const len = cookie.value?.length || 0;
           const prefix = String(cookie.value || "").slice(0, 8);
@@ -137,7 +116,7 @@ export async function getEncryptedCookie(
             (e as any)?.message || e,
           );
         } catch { }
-        return cookie.value || null;
+        return null;
       }
     }
     return cookie.value || null;
@@ -145,6 +124,30 @@ export async function getEncryptedCookie(
     console.error(`[cookie:getEncryptedCookie] Failed to read ${name}:`, e);
     return null;
   }
+}
+
+function secureRandomId(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Resolve an opaque, HttpOnly browser identity. It deliberately contains no
+ * ERP token material and is safe to share across tabs through the cookie jar.
+ */
+export function ensureErpBrowserId(cookieStore: any, maxAge: number): string {
+  const existing = cookieStore.get(COOKIE_NAMES.ERP_BROWSER_ID)?.value;
+  if (existing && /^[a-f0-9]{64}$/.test(existing)) return existing;
+  const browserId = secureRandomId();
+  cookieStore.set(COOKIE_NAMES.ERP_BROWSER_ID, browserId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge,
+  });
+  return browserId;
 }
 
 /**

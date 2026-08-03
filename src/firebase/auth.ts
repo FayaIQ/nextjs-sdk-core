@@ -282,7 +282,9 @@ const scheduleTokenRefresh = (token: string, auth: any) => {
  * @returns Unsubscribe function
  */
 export async function startAuthStateSync(options?: {
+  /** Deprecated alias retained for consumers; this is now a proof-sync endpoint. */
   loginEndpoint?: string;
+  proofSyncEndpoint?: string;
   onError?: (e: any) => void;
   refreshOnInit?: boolean;
 }): Promise<() => void> {
@@ -304,7 +306,9 @@ export async function startAuthStateSync(options?: {
 
     const app = await getPrimaryApp();
     const auth = getAuth(app);
-    const endpoint = options?.loginEndpoint || "/api/auth/login";
+    // Firebase refresh only updates validated proof. ERP token issuance remains
+    // an explicit login/logout/expiry/revocation operation on the server.
+    const endpoint = options?.proofSyncEndpoint || options?.loginEndpoint || "/api/auth/proof/sync";
 
     try {
       await setPersistence(auth, browserLocalPersistence);
@@ -383,6 +387,7 @@ export async function startAuthStateSync(options?: {
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ thirdPartyToken: token }),
         });
         console.log("[firebase:startAuthStateSync] ✅ Server responded to token sync:", response.status);

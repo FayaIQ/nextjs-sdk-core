@@ -1,231 +1,76 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthConfig } from "../../core/config";
-import { Api } from "../../api/api";
+import { getErpTokenConfig } from "../../core/config";
+import { getErpTokenRuntime, proofStateKey, tokenStateKey } from "../../erp-token-state";
+import getToken, { ReauthenticationRequiredError } from "../../token";
+import { COOKIE_NAMES, ensureErpBrowserId } from "../../utils/cookie";
+
+function isQualifyingRequest(request: NextRequest): boolean {
+  if (request.method === "HEAD") return false;
+  const path = request.nextUrl.pathname;
+  if (/\.(?:ico|png|jpe?g|gif|svg|css|js|map|woff2?|txt|xml)$/i.test(path)) return false;
+  const headers = request.headers;
+  return headers.get("purpose") !== "prefetch" &&
+    headers.get("sec-purpose") !== "prefetch" &&
+    headers.get("next-router-prefetch") !== "1";
+}
+
+function safeStatus(state: Awaited<ReturnType<ReturnType<typeof getErpTokenRuntime>["store"]["get"]>>) {
+  if (!state) return { initialized: false, authenticated: false };
+  return {
+    initialized: true,
+    authenticated: state.authState === "authenticated",
+    issuedAt: state.issuedAt,
+    businessExpiresAt: state.businessExpiresAt,
+    generation: state.generation,
+  };
+}
 
 /**
- * GET /api/auth/token
- *
- * Returns access token, checking cookie first, then fetching new one if needed.
- * This route handler can set cookies (unlike during rendering).
- *
- * Usage in your Next.js app:
- * ```ts
- * // app/api/auth/token/route.ts
- * export { GET } from "erp-core/identity/handler/token";
- * ```
+ * GET /api/auth/token is a status endpoint. Only `?initialize=1` on a real
+ * application request may initialize the anonymous window; neither branch
+ * returns encrypted or raw ERP-token material.
  */
 export async function GET(request: NextRequest) {
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const browserId = ensureErpBrowserId(cookieStore, getErpTokenConfig().browserCookieTtlSeconds);
+  const runtime = getErpTokenRuntime();
+  const tenantKey = runtime.tenantKey || "default";
+
   try {
-    const { cookies } = await import("next/headers");
-    const cookieStore = await cookies();
-
-    // Import cookie utilities
-    const { getEncryptedCookie, COOKIE_NAMES } =
-      await import("../../utils/cookie");
-
-    // Check raw cookies first and ensure the response always returns an ENCRYPTED blob
-    // Prefer CRF, then SESSION_ID. If the cookie is already encrypted, return raw
-    // blob. If it's plain, try to encrypt it and set an encrypted cookie on the
-    // outgoing response so clients always receive encrypted tokens.
-    const rawCrf = cookieStore.get(COOKIE_NAMES.CRF)?.value || null;
-    const rawSession = cookieStore.get(COOKIE_NAMES.SESSION_ID)?.value || null;
-
-    if (rawCrf || rawSession) {
-      console.log("[identity:handler:token] 🔍 Found existing session cookie, checking validity...");
-      const raw = (rawCrf || rawSession) as string;
-      try {
-        const { tryDecryptString, tryEncryptString, setEncryptedCookie } =
-          await import("../../utils/cookie");
-
-        // If raw already looks encrypted (decryptable), return it as-is
-        const decrypted = await tryDecryptString(raw as string);
-        if (decrypted) {
-          console.log("[identity:handler:token] ✅ Session is valid (encrypted)");
-          return NextResponse.json({ session_id: raw });
-        }
-
-        // Otherwise, raw is plaintext; try to encrypt it and emit encrypted cookie
-        console.log("[identity:handler:token] 🔄 Found plaintext session, upgrading to encrypted...");
-        const encrypted = await tryEncryptString(raw as string);
-        if (encrypted) {
-          // Get configurable cookie TTLs
-          const { getCookieTTLConfig } = await import("../../core/config");
-          const cookieTTL = getCookieTTLConfig();
-
-          const res = NextResponse.json({ session_id: encrypted });
-          // Replace legacy cookies with encrypted session cookie
-          try {
-            res.cookies.delete(COOKIE_NAMES.CRF);
-          } catch { }
-          try {
-            res.cookies.delete("session_id");
-          } catch { }
-          try {
-            res.cookies.delete(COOKIE_NAMES.SESSION_ID);
-          } catch { }
-          setEncryptedCookie(
-            res.cookies,
-            COOKIE_NAMES.SESSION_ID,
-            raw as string,
-            {
-              maxAge: cookieTTL.sessionTTL,
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-            },
-          );
-          return res;
-        }
-
-        // No key available; return raw plaintext as fallback (with a warning logged by helpers)
-        console.warn("[identity:handler:token] ⚠️ Encryption failed, returning raw session");
-        return NextResponse.json({ session_id: raw });
-      } catch (e) {
-        // If anything goes wrong, fall back to returning the raw cookie value
-        console.error("[identity:handler:token] ❌ Error processing existing session:", e);
-        try {
-          return NextResponse.json({ session_id: raw });
-        } catch {
-          // final fallback: continue to re-auth flow
-        }
-      }
+    if (request.nextUrl.searchParams.get("initialize") === "1" && isQualifyingRequest(request)) {
+      await getToken();
     }
-
-    console.log("[identity:handler:token] 🎈 No session found, attempting silent re-auth via TP_ID...");
-
-    // Try to use encrypted tp_id for re-auth (with fallback to plain)
-    let tpId: string | null = null;
-    try {
-      tpId = await getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-    } catch { }
-    // Fallback to plain tp_id cookie
-    if (!tpId) {
-      tpId = cookieStore.get(COOKIE_NAMES.TP_ID)?.value || null;
-    }
-
-    const authConfig = getAuthConfig();
-    const requestBody: Record<string, any> = {
-      clientId: authConfig.clientId,
-      clientSecret: authConfig.clientSecret,
-      Language: authConfig.language ?? 0,
-      GMT: authConfig.gmt ?? 3,
-      IsFromNotification: false,
-    };
-
-    if (tpId) {
-      console.log("[identity:handler:token] 🛡️ Using stored TP_ID for re-auth");
-      requestBody["ThirdPartyToken"] = tpId;
-    } else if ((authConfig as any).thirdPartyToken) {
-      console.log("[identity:handler:token] 🛡️ Using environment thirdPartyToken fallback for re-auth");
-      requestBody["ThirdPartyToken"] = (authConfig as any).thirdPartyToken;
-    } else {
-      console.warn("[identity:handler:token] ❌ No TP_ID found and no fallback configured; cannot re-auth");
-    }
-
-    // Include a User-Agent header for downstream telemetry.
-    // Prefer the incoming request's User-Agent when available.
-    let userAgent: string | null = null;
-
-    // standard NextRequest headers API
-    if (!userAgent) {
-      try {
-        userAgent =
-          request.headers.get("user-agent") +
-          " nextjs-sdk-core  handler api/auth/token" || null;
-      } catch { }
-    }
-
-    // Final fallback to node runtime identifier
-    if (!userAgent) {
-      userAgent = "nextjs-sdk-core  handler api/auth/token";
-    }
-    const response = await fetch(Api.signIn, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "User-Agent": userAgent,
-      },
-      body: JSON.stringify({
-        ...requestBody,
-        ...(requestBody["ThirdPartyToken"] ? { ThirdPartyAuthType: 100 } : {}),
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("[identity:handler:token] sign-in failed", response.status);
-      return NextResponse.json(
-        { error: "Authentication failed" },
-        { status: 401 },
-      );
-    }
-
-    const data = await response.json();
-
-    if (!data.access_token) {
-      console.error("[identity:handler:token] ❌ No access_token in response");
-      return NextResponse.json(
-        { error: "Token missing in response" },
-        { status: 500 },
-      );
-    }
-
-    console.log("[identity:handler:token] ✅ Silent re-auth successful, issuing new session cookie");
-
-    // Return response with encrypted cookie
-    const res = NextResponse.json({ session_id: data.access_token });
-
-    // Get configurable cookie TTLs
-    const { getCookieTTLConfig } = await import("../../core/config");
-    const cookieTTL = getCookieTTLConfig();
-
-    // Set session_id cookie (encrypted when possible)
-    try {
-      const {
-        COOKIE_NAMES: CN,
-        setEncryptedCookie,
-        setPlainCookie,
-      } = await import("../../utils/cookie");
-      // Remove legacy cookies and save session_id plainly
-      try {
-        res.cookies.delete(CN.CRF);
-      } catch { }
-      try {
-        res.cookies.delete("session_id");
-      } catch { }
-      try {
-        res.cookies.delete(CN.SESSION_ID);
-      } catch { }
-      // Store session token as HttpOnly and secure in production so it isn't
-      // accessible to client-side scripts. This reduces XSS risk.
-      // Store session token encrypted when possible to match the login path
-      await setEncryptedCookie(res.cookies, CN.SESSION_ID, data.access_token, {
-        maxAge: cookieTTL.sessionTTL,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-      });
-
-      try {
-        // eslint-disable-next-line no-console
-        console.log("[identity:handler:token] set session cookie on response", {
-          encryptedKeyConfigured: !!(
-            process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY || process.env.COOKIE_CRYPTO_KEY
-          ),
-          cookieName: CN.SESSION_ID,
-        });
-      } catch { }
-    } catch (e) {
-      console.error(
-        "[identity:handler:token] Failed to set session_id cookie:",
-        e,
-      );
-      throw e;
-    }
-
-    return res;
+    const state = await runtime.store.get(tokenStateKey(tenantKey, browserId));
+    return NextResponse.json(safeStatus(state));
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Token fetch failed";
-    console.error("[identity:handler:token] error:", message);
-
+    if (error instanceof ReauthenticationRequiredError) {
+      return NextResponse.json({ authenticated: false, reauthenticationRequired: true }, { status: 401 });
+    }
+    const message = error instanceof Error ? error.message : "Unable to resolve ERP session";
     return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/auth/proof/sync. It validates and stores renewable authentication
+ * proof only; it must never perform ERP sign-in or reset the visit window.
+ */
+export async function POST(request: NextRequest) {
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const browserId = cookieStore.get(COOKIE_NAMES.ERP_BROWSER_ID)?.value;
+  const credential = (await request.json().catch(() => ({}))).thirdPartyToken;
+  const runtime = getErpTokenRuntime();
+  if (!browserId || typeof credential !== "string" || !runtime.verifyAuthProof || !runtime.store.setProof) {
+    return NextResponse.json({ authenticated: false, reauthenticationRequired: true }, { status: 401 });
+  }
+  try {
+    const proof = await runtime.verifyAuthProof(credential);
+    const tenantKey = runtime.tenantKey || "default";
+    await runtime.store.setProof(proofStateKey(tenantKey, browserId), proof);
+    return NextResponse.json({ authenticated: true, proofExpiresAt: proof.expiresAt });
+  } catch {
+    return NextResponse.json({ authenticated: false, reauthenticationRequired: true }, { status: 401 });
   }
 }

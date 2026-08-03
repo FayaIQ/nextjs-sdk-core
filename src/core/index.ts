@@ -13,5 +13,5 @@ export {
 
 export type { ApiRequestOptions, RequestData, QueryParams, Primitive } from "./fetcher";
 
-export { getAuthConfig, getCookieTTLConfig } from "./config";
-export type { AuthConfig, CookieTTLConfig } from "./config";
+export { getAuthConfig, getCookieTTLConfig, getErpTokenConfig } from "./config";
+export type { AuthConfig, ErpTokenConfig } from "./config";

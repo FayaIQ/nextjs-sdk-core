@@ -1,31 +1,16 @@
 import { NextResponse } from "next/server";
-import { logoutUser } from "../logout";
+import { logoutUser, SDK_OWNED_COOKIES } from "../logout";
 
-/**
- * Next.js API handler for logout.
- * Simply deletes authentication cookies - no API call needed.
- *
- * Example usage in your Next.js app:
- * ```ts
- * export { POST } from "my-next-core/identity/handler/logout";
- * ```
- */
 export async function POST() {
   try {
     await logoutUser();
-
-    return NextResponse.json(
-      { success: true, message: "Logged out successfully" },
-      { status: 200 }
-    );
+    const response = NextResponse.json({ success: true, message: "Logged out successfully" });
+    for (const name of SDK_OWNED_COOKIES) response.cookies.delete(name);
+    return response;
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Logout failed";
-    console.error("Logout error:", message);
-
     return NextResponse.json(
-      { success: false, error: message },
-      { status: 500 }
+      { success: false, error: error instanceof Error ? error.message : "Logout failed" },
+      { status: 500 },
     );
   }
 }

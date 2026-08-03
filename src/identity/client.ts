@@ -1,47 +1,35 @@
-// Client-side session keep-alive helper
-// Periodically pings /api/auth/token to ensure ERP access_token is (re)issued
-// using the latest Firebase third-party token stored as tp_id.
-
+/** Safe session-status polling. It never initializes or renews an ERP token. */
 export type KeepAliveOptions = {
-  endpoint?: string; // default: /api/auth/token
-  intervalMs?: number; // default: 45 minutes
-  onError?: (e: any) => void;
+  endpoint?: string;
+  intervalMs?: number;
+  onError?: (error: unknown) => void;
 };
 
-let keepAliveTimer: any = null;
+let statusTimer: ReturnType<typeof setInterval> | null = null;
 
 export function startSessionKeepAlive(options?: KeepAliveOptions): () => void {
-  if (typeof window === "undefined") {
-    console.warn("[identity:startSessionKeepAlive] must be called in the browser");
-    return () => {};
-  }
+  if (typeof window === "undefined") return () => {};
   const endpoint = options?.endpoint || "/api/auth/token";
-  const intervalMs = options?.intervalMs ?? 45 * 60 * 1000; // 45 minutes by default
-
-  const ping = async () => {
-    console.log("[identity:keep-alive] 💓 Pinging session endpoint:", endpoint);
+  const intervalMs = options?.intervalMs ?? 45 * 60 * 1000;
+  const checkStatus = async () => {
     try {
-      const response = await fetch(endpoint, { method: "GET" });
-      console.log("[identity:keep-alive] ✅ Ping successful, status:", response.status);
-      // Intentionally ignore the body; route will refresh cookies as needed
-    } catch (e) {
-      console.warn("[identity:startSessionKeepAlive] ping failed", e);
-      options?.onError?.(e);
+      // No `initialize=1`: this is deliberately not a billable-token trigger.
+      await fetch(endpoint, { method: "GET", credentials: "include", cache: "no-store" });
+    } catch (error) {
+      options?.onError?.(error);
     }
   };
-
-  // Clear any previous timer to avoid duplicates
-  if (keepAliveTimer) {
-    try { clearInterval(keepAliveTimer); } catch {}
-    keepAliveTimer = null;
-  }
-
-  // Kick off immediately, then on interval
-  ping();
-  keepAliveTimer = setInterval(ping, intervalMs);
-
+  statusTimer && clearInterval(statusTimer);
+  statusTimer = setInterval(checkStatus, intervalMs);
   return () => {
-    try { clearInterval(keepAliveTimer); } catch {}
-    keepAliveTimer = null;
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = null;
   };
+}
+
+export function notifyAuthTabs(type: "login" | "logout" | "renewed" | "reauthentication-required" | "account-changed") {
+  if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") return;
+  const channel = new BroadcastChannel("erp-auth");
+  channel.postMessage({ type });
+  channel.close();
 }

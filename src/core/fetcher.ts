@@ -16,6 +16,10 @@ export interface ApiRequestOptions {
   token?: string | null;
 }
 
+type InternalApiRequestOptions = ApiRequestOptions & {
+  tokenReplacementAttempted?: boolean;
+};
+
 /**
  * Error thrown by apiFetch when backend returns non-2xx.
  * Contains the HTTP status and the parsed response body (if any).
@@ -103,9 +107,9 @@ function findMessageInError(
  */
 export async function apiFetch<T>(
   url: string,
-  options: ApiRequestOptions = {}
+  options: InternalApiRequestOptions = {}
 ): Promise<T> {
-  const { method = "GET", headers = {}, data, query, token } = options;
+  const { method = "GET", headers = {}, data, query, token, tokenReplacementAttempted } = options;
 
   let endpoint = url;
 
@@ -175,6 +179,24 @@ export async function apiFetch<T>(
     headers: requestHeaders,
     body,
   });
+
+  // A concrete backend rejection is the only automatic replacement trigger.
+  // Mark the server-side state revoked, then retry exactly once; network
+  // timeouts are deliberately never retried because they may already be a
+  // billable issuance at the identity backend.
+  if (
+    token &&
+    !tokenReplacementAttempted &&
+    (response.status === 401 || response.status === 403)
+  ) {
+    const { default: getToken, markCurrentErpTokenRevoked } = await import("../token");
+    await markCurrentErpTokenRevoked();
+    return apiFetch<T>(url, {
+      ...options,
+      token: await getToken(),
+      tokenReplacementAttempted: true,
+    });
+  }
   
  
   // Handle response errors - parse body and throw ApiError so callers must handle non-2xx
