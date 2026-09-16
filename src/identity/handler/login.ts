@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
   try {
     // Parse request body safely
     const body = await request.json().catch(() => ({}));
-    console.log("[identity:handler:login] POST body", { hasUsername: !!body.username, hasPassword: !!body.password, hasThirdPartyToken: !!body.thirdPartyToken });
+    const firebaseToken = body.firebaseToken ?? body.thirdPartyToken;
+    console.log("[identity:handler:login] POST body", { hasUsername: !!body.username, hasPassword: !!body.password, hasFirebaseToken: !!firebaseToken });
 
     // Merge provided body with fallback env config
     const config = getAuthConfig();
@@ -27,12 +28,12 @@ export async function POST(request: NextRequest) {
       Language: body.Language ?? config.language ?? 0,
       GMT: body.GMT ?? config.gmt ?? 3,
       IsFromNotification: false,
-      thirdPartyToken: body.thirdPartyToken ?? config.thirdPartyToken,
+      firebaseToken: firebaseToken ?? config.thirdPartyToken,
     };
-    console.log("[identity:handler:login] credentials prepared", { hasUsername: !!credentials.username, hasPassword: !!credentials.password, hasThirdPartyToken: !!credentials.thirdPartyToken });
+    console.log("[identity:handler:login] credentials prepared", { hasUsername: !!credentials.username, hasPassword: !!credentials.password, hasFirebaseToken: !!credentials.firebaseToken });
 
-    // ✅ Server-side dedupe: avoid re-signing if already logged in with same thirdPartyToken
-    if (body.thirdPartyToken) {
+    // ✅ Server-side dedupe: avoid re-signing if already logged in with the same Firebase token
+    if (firebaseToken) {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
       
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
         const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
         const existingTpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
         
-        if (existingToken && existingTpId === body.thirdPartyToken) {
+        if (existingToken && existingTpId === firebaseToken) {
           hasValidToken = true;
         }
       } catch {}
@@ -52,13 +53,13 @@ export async function POST(request: NextRequest) {
       if (!hasValidToken) {
         const existingToken = cookieStore.get("session_id")?.value;
         const existingTpId = cookieStore.get("tp_id")?.value;
-        if (existingToken && existingTpId === body.thirdPartyToken) {
+        if (existingToken && existingTpId === firebaseToken) {
           hasValidToken = true;
         }
       }
       
       if (hasValidToken) {
-        console.log("[identity:handler:login] already logged in with same thirdPartyToken, skipping re-auth");
+        console.log("[identity:handler:login] already logged in with same Firebase token, skipping re-auth");
         return NextResponse.json(
           {
             success: true,
@@ -87,8 +88,8 @@ export async function POST(request: NextRequest) {
     const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
     console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
 
-    // If login provided a thirdPartyToken, persist it encrypted for AUTO mode re-auth
-    if (body.thirdPartyToken) {
+    // If login provided a Firebase token, persist it for AUTO mode re-auth
+    if (firebaseToken) {
       console.log("[identity:handler:login] setting encrypted tp_id cookie");
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
       try {
         cookieStore.delete("tp_id");
       } catch {}
-      setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, { maxAge: 3600 });
+      setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, firebaseToken, { maxAge: 3600 });
     }
 
     // Respond with success and relevant data
@@ -116,13 +117,13 @@ export async function POST(request: NextRequest) {
     );
 
     // Also set tp_id in response cookie for client (encrypted preferred)
-    if (body.thirdPartyToken) {
+    if (firebaseToken) {
       try {
         const { setPlainCookie } = await import("../../utils/cookie");
-        setPlainCookie(res.cookies, "tp_id", body.thirdPartyToken, { maxAge: 3600 });
+        setPlainCookie(res.cookies, "tp_id", firebaseToken, { maxAge: 3600 });
       } catch (e) {
         // If cookie util import fails, set plain as last resort
-        res.cookies.set("tp_id", body.thirdPartyToken, {
+        res.cookies.set("tp_id", firebaseToken, {
           httpOnly: true,
           secure: true,
           sameSite: "lax",

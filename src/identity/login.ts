@@ -11,7 +11,10 @@ export interface LoginRequest {
   username?: string;
   password?: string;
   playerId?: string;
-  thirdPartyToken?: string; // Firebase ID token when logging via phone auth
+  /** Firebase ID token used for phone/Firebase authentication. */
+  firebaseToken?: string;
+  /** Firebase ID token; supported as an alias for firebaseToken. */
+  thirdPartyToken?: string;
 }
 
 /**
@@ -89,13 +92,15 @@ export async function loginUser(
     // Merge user credentials with env config
     // In AUTO mode: use env credentials as fallback
     // In STRICT mode: credentials must be provided
-    const thirdPartyToken =
-      credentials.thirdPartyToken || config.thirdPartyToken;
+    const firebaseToken =
+      credentials.firebaseToken ??
+      credentials.thirdPartyToken ??
+      config.thirdPartyToken;
 
     // Build request body based on auth type
     let requestBody: Record<string, any>;
 
-    if (thirdPartyToken) {
+    if (firebaseToken) {
       // Third-party authentication (Firebase, etc.)
       requestBody = {
         clientId: config.clientId,
@@ -103,7 +108,7 @@ export async function loginUser(
         Language: config.language ?? 0,
         GMT: config.gmt ?? 3,
         IsFromNotification: false,
-        ThirdPartyToken: thirdPartyToken,
+        ThirdPartyToken: firebaseToken,
         ThirdPartyAuthType: 100, // Firebase auth type
       };
     } else {
@@ -197,7 +202,7 @@ export async function loginUser(
     );
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
-    if (credentials.thirdPartyToken) {
+    if (credentials.firebaseToken || credentials.thirdPartyToken) {
       console.log("[login] Third party token present, saving tp_id cookie");
       // Save third-party token plainly for re-login
       try {
@@ -209,7 +214,7 @@ export async function loginUser(
       setPlainCookie(
         cookieStore,
         COOKIE_NAMES.TP_ID,
-        decodeURIComponent(credentials.thirdPartyToken),
+        decodeURIComponent(credentials.firebaseToken || credentials.thirdPartyToken!),
 
         {
           maxAge: 3600, // 1 hour typical Firebase token lifetime
