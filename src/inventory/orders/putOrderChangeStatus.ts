@@ -1,3 +1,4 @@
+import { postCopyToStore } from "../items";
 
 export interface ChangeOrderStatusRequest {
   status: number;
@@ -25,9 +26,18 @@ export async function putOrderChangeStatus(
     },
     body: JSON.stringify(data),
   });
-    if (!res.ok) {
-        throw new Error(`Failed to change order status: ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+      // ignore
     }
-    return res.json();
+    throw new Error(errorMessage);
+  }
 
+  return res.json();
 }
+
+export default putOrderChangeStatus;

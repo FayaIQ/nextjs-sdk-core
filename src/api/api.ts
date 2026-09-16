@@ -1,13 +1,39 @@
 export class Api {
-  private static LOCAL_BASE = "http://localhost:3000";
-  private static IDENTITY_BASE = `https://storeak-identity-service.azurewebsites.net/api`;
-  private static NEWS_BASE = `https://storeak-news-service.azurewebsites.net/api`;
-  private static STORES_BASE = `https://storeak-stores-service.azurewebsites.net/api`;
-  private static GPS_BASE = `https://storeak-gps-service.azurewebsites.net/api`;
-  private static THEME_BASE = `https://storeak-Theme-service.azurewebsites.net/api`;
-  private static INVENTORY_BASE = `https://storeak-inventory-service.azurewebsites.net/api`;
-  private static CRM_BASE = `https://storeak-crm-service.azurewebsites.net/api`;
-  public static IDENTITY_URL = `https://storeak-identity-service.azurewebsites.net/api`;
+  private static LOCAL_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_LOCAL_BASE) ||
+    "http://localhost:3000";
+
+  private static IDENTITY_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_IDENTITY_BASE) ||
+    `https://storeak-identity-service.azurewebsites.net/api`;
+
+  private static NEWS_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_NEWS_BASE) ||
+    `https://storeak-news-service.azurewebsites.net/api`;
+
+  private static STORES_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_STORES_BASE) ||
+    `https://storeak-stores-service.azurewebsites.net/api`;
+
+  private static GPS_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_GPS_BASE) ||
+    `https://storeak-gps-service.azurewebsites.net/api`;
+
+  private static THEME_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_THEME_BASE) ||
+    `https://storeak-Theme-service.azurewebsites.net/api`;
+
+  private static INVENTORY_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_INVENTORY_BASE) ||
+    `https://storeak-inventory-service.azurewebsites.net/api`;
+
+  private static CRM_BASE =
+    (typeof process !== "undefined" && process.env.STOREAK_CRM_BASE) ||
+    `https://storeak-crm-service.azurewebsites.net/api`;
+
+  public static IDENTITY_URL =
+    (typeof process !== "undefined" && process.env.STOREAK_IDENTITY_URL) ||
+    `https://storeak-identity-service.azurewebsites.net/api`;
 
   static signIn: string = `${Api.IDENTITY_BASE}/v1/token`;
   static refreshToken: string = `${Api.IDENTITY_BASE}/v1/token/refresh`;
@@ -35,7 +61,12 @@ export class Api {
 
   // Other services
   static getProducts: string = `${Api.INVENTORY_BASE}/v1/Items/Paging/Mobile`;
+  static getNews: string = `${Api.NEWS_BASE}/v1/News/Paging/ForCustomer`;
   static getItemsPaging: string = `${Api.INVENTORY_BASE}/v2/Items/Paging`;
+  static getFilterParams: string = `${Api.INVENTORY_BASE}/v1/Items/FilterParameters`;
+  static getItemFeatures(id: string): string {
+    return `${Api.INVENTORY_BASE}/v1/Items/${id}/Features`;
+  }
   static getProductInfo(id: string): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${id}/FullInfo`;
   }
@@ -58,12 +89,12 @@ export class Api {
   static getOffersCustomerItemLoggedIn: string = `${Api.INVENTORY_BASE}/v1/Offers/CustomerItem/LoggedIn`;
   static getStoreInvoiceDiscount(
     storeId: string | number,
-    coupon: string
+    coupon: string,
   ): string {
     return `${
       Api.STORES_BASE
     }/v1/Stores/${storeId}/Offers/InvoiceDiscount/${encodeURIComponent(
-      String(coupon)
+      String(coupon),
     )}`;
   }
   static getOffersDeliveryZones(deliveryZoneId: string | number): string {
@@ -78,12 +109,12 @@ export class Api {
   static postOffersItemsDiscount: string = `${Api.INVENTORY_BASE}/v1/Offers/ItemsDiscount`;
   static postOffersAddItemsByFilter(
     offerId: string | number,
-    forceUpdate: boolean | string
+    forceUpdate: boolean | string,
   ): string {
     return `${
       Api.INVENTORY_BASE
     }/v1/Offers/${offerId}/AddItemsByFilter/${encodeURIComponent(
-      String(forceUpdate)
+      String(forceUpdate),
     )}`;
   }
   static postOffersDeliveryZones(offerId: string | number): string {
@@ -98,7 +129,7 @@ export class Api {
 
   static deleteOffersGroup(
     offerId: string | number,
-    id: string | number
+    id: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Offers/${offerId}/OfferGroups/${id}`;
   }
@@ -149,12 +180,22 @@ export class Api {
     return `${Api.STORES_BASE}/v1/Stores/${id}`;
   }
   static getWishes: string = `${Api.INVENTORY_BASE}/v1/wishes/paging`;
-  static getOrders: string = `${Api.INVENTORY_BASE}/v1/Orders/Paging`;
+  static getOrders: string = `${Api.INVENTORY_BASE}/v2/Orders/Paging`;
   // CRM - Clients
   static getClientsPaging: string = `${Api.CRM_BASE}/v1/Clients/Paging`;
+  static putClient(id: string | number): string {
+    return `${Api.CRM_BASE}/v1/Clients/${id}`;
+  }
   static getClients: string = `${Api.CRM_BASE}/v1/Clients`;
   static postClients: string = `${Api.CRM_BASE}/v1/Clients`;
+  // CRM - Delegate Types
+  static getDelegateTypes: string = `${Api.CRM_BASE}/v1/DelegateTypes`;
   static postOrders: string = `${Api.INVENTORY_BASE}/v2/Orders`;
+  static postOrderDelagates(orderId: string | number): string {
+    return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates`;
+  }
+  static putOrderDelagatesListed: string = `${Api.INVENTORY_BASE}/v1/Orders/Delagates/List`;
+
   static putOrderPayment(orderId: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Payment`;
   }
@@ -182,6 +223,7 @@ export class Api {
   static postPayments: string = `${Api.INVENTORY_BASE}/v1/Payments`;
   static getPayments: string = `${Api.INVENTORY_BASE}/v1/Payments`;
   static getPaymentsReport: string = `${Api.INVENTORY_BASE}/v1/Payments/Report`;
+  static getCustomSections: string = `${Api.THEME_BASE}/v1/Sections`;
   static getSlideShows: string = `${Api.THEME_BASE}/v1/SlideShows/Paging?pageSize=20`;
 
   static getItemById(id: string | number): string {
@@ -213,7 +255,7 @@ export class Api {
   // Order item endpoints (v3)
   static getOrderItem(
     orderId: string | number,
-    itemId: string | number
+    itemId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Items/${itemId}`;
   }
@@ -224,7 +266,7 @@ export class Api {
 
   static putOrderItemCancel(
     orderId: string | number,
-    itemId: string | number
+    itemId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/cancel`;
   }
@@ -234,14 +276,14 @@ export class Api {
 
   static putOrderItemUndoCancel(
     orderId: string | number,
-    itemId: string | number
+    itemId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/UndoCancel`;
   }
 
   static putOrderItemUpdate(
     orderId: string | number,
-    itemId: string | number
+    itemId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/OrderItems/${itemId}/update`;
   }
@@ -286,7 +328,7 @@ export class Api {
 
   static deleteDelagate(
     orderId: string | number,
-    delegateId: string | number
+    delegateId: string | number,
   ): string {
     return `${Api.INVENTORY_BASE}/v1/Orders/${orderId}/Delagates/${delegateId}`;
   }
@@ -360,16 +402,25 @@ export class Api {
   }
 
   // Item collection endpoint (update a specific collection for an item)
-  static putItemCollection(itemId: string | number, id: string | number): string {
+  static putItemCollection(
+    itemId: string | number,
+    id: string | number,
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}`;
   }
-  
+
   // Activate / Deactivate an item collection
-  static putItemCollectionActivate(itemId: string | number, id: string | number): string {
+  static putItemCollectionActivate(
+    itemId: string | number,
+    id: string | number,
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Activate`;
   }
 
-  static putItemCollectionDeactivate(itemId: string | number, id: string | number): string {
+  static putItemCollectionDeactivate(
+    itemId: string | number,
+    id: string | number,
+  ): string {
     return `${Api.INVENTORY_BASE}/v1/Items/${itemId}/Collections/${id}/Deactivate`;
   }
 
@@ -390,12 +441,12 @@ export class Api {
   static postCartItems: string = `${Api.INVENTORY_BASE}/v1/Carts/Items`;
   static patchCartItem(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
-      String(id)
+      String(id),
     )}`;
   }
   static deleteCartItem(id: string | number): string {
     return `${Api.INVENTORY_BASE}/v1/Carts/Items/${encodeURIComponent(
-      String(id)
+      String(id),
     )}`;
   }
 }

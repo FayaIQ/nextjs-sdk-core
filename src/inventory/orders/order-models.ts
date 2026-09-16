@@ -140,6 +140,7 @@ export class OrdersFilterParameters {
   // User and delegate
   username: string | null;
   customerId: string | null; // UUID
+  clientId: string | null; // UUID
   delegateId: string | null; // UUID
   delegateWithCustomerId: string | null; // UUID
   statusChangedBy: string | null; // UUID
@@ -181,6 +182,7 @@ export class OrdersFilterParameters {
     DeleveryType = null,
     username = null,
     customerId = null,
+    clientId = null,
     delegateId = null,
     delegateWithCustomerId = null,
     statusChangedBy = null,
@@ -217,6 +219,7 @@ export class OrdersFilterParameters {
     DeleveryType?: DeleveryType | null;
     username?: string | null;
     customerId?: string | null;
+    clientId?: string | null;
     delegateId?: string | null;
     delegateWithCustomerId?: string | null;
     statusChangedBy?: string | null;
@@ -253,6 +256,7 @@ export class OrdersFilterParameters {
     this.DeleveryType = DeleveryType;
     this.username = username;
     this.customerId = customerId;
+    this.clientId = clientId;
     this.delegateId = delegateId;
     this.delegateWithCustomerId = delegateWithCustomerId;
     this.statusChangedBy = statusChangedBy;
@@ -353,6 +357,7 @@ export class OrdersFilterParameters {
     if (this.DeleveryType !== null) params.set("DeleveryType", this.DeleveryType.toString());
     if (this.username !== null) params.set("Username", this.username);
     if (this.customerId !== null) params.set("CustomerId", this.customerId);
+    if (this.clientId !== null) params.set("ClientId", this.clientId);
     if (this.delegateId !== null) params.set("DelagateId", this.delegateId);
     if (this.delegateWithCustomerId !== null) params.set("DelegateWithCustomerId", this.delegateWithCustomerId);
     if (this.statusChangedBy !== null) params.set("StatusChangedBy", this.statusChangedBy);
@@ -400,6 +405,7 @@ export class OrdersFilterParameters {
     if (this.DeleveryType !== null) map.DeleveryType = this.DeleveryType;
     if (this.username !== null) map.Username = this.username;
     if (this.customerId !== null) map.CustomerId = this.customerId;
+    if (this.clientId !== null) map.ClientId = this.clientId;
     if (this.delegateId !== null) map.DelagateId = this.delegateId;
     if (this.delegateWithCustomerId !== null) map.DelegateWithCustomerId = this.delegateWithCustomerId;
     if (this.statusChangedBy !== null) map.StatusChangedBy = this.statusChangedBy;
@@ -455,6 +461,7 @@ export class OrdersFilterParameters {
       DeleveryType: params.get("DeleveryType") ? parseInt(params.get("DeleveryType")!) as DeleveryType : null,
       username: params.get("Username") || null,
       customerId: params.get("CustomerId") || null,
+      clientId: params.get("ClientId") || null,
       delegateId: params.get("DelagateId") || null,
       delegateWithCustomerId: params.get("DelegateWithCustomerId") || null,
       statusChangedBy: params.get("StatusChangedBy") || null,
@@ -689,4 +696,18 @@ export interface PostOrderRequest {
   points?: number;
   applyDarkOffer?: boolean;
   orderItems?: PostOrderItemRequest[];
+}
+
+// === Delegate assignment models ===
+export interface AssignDelegateRequest {
+  delagateTypeId: string; // UUID
+  delagateId: string; // UUID
+  orderStatusId?: number;
+}
+
+export interface AssignDelegateListRequest {
+  orderIds: number[];
+  delagateTypeId: string; // UUID
+  delagateId: string; // UUID
+  orderStatusId?: number;
 }

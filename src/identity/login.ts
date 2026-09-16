@@ -70,7 +70,7 @@ export interface LoginResponse {
  */
 export async function loginUser(
   credentials: LoginRequest,
-  userAgent?: string
+  userAgent?: string,
 ): Promise<LoginResponse> {
   const isServer = typeof window === "undefined";
   const authMode = process.env.AUTH_MODE || "auto";
@@ -127,7 +127,7 @@ export async function loginUser(
           };
         } else {
           throw new Error(
-            "Username/password or ThirdPartyToken must be provided"
+            "Username/password or ThirdPartyToken must be provided",
           );
         }
       } else {
@@ -147,6 +147,8 @@ export async function loginUser(
       requestBody.playerId = credentials.playerId;
     }
 
+    console.log("[identity:login] 🚀 Sending login request to backend for:", credentials.username || "third-party user");
+
     const headers = userAgent
       ? {
           "User-Agent":
@@ -157,27 +159,28 @@ export async function loginUser(
     const response = await postWithoutAuth<LoginResponse>(
       Api.signIn,
       requestBody,
-      (headers as Record<string, string>) || {}
+      (headers as Record<string, string>) || {},
     );
 
     if (!response?.access_token) {
+      console.error("[identity:login] ❌ Login failed: No access_token in response");
       throw new Error("Invalid login response: missing access token");
     }
+    
+    console.log("[identity:login] ✅ Login successful, received access_token");
+
     const cookieStore = await cookies();
-    const expiresIn = response.expires || 7200;
-    console.log(
-      `[login] Setting cookies. expiresIn: ${expiresIn}, access_token length: ${
-        response.access_token?.length || 0
-      }`
-    );
+    
+    // Get configurable cookie TTLs (default: 1 hour to match Firebase token expiration)
+    const { getCookieTTLConfig } = await import("../core/config");
+    const cookieTTL = getCookieTTLConfig();
+    const expiresIn = cookieTTL.sessionTTL;
 
     // Import cookie utilities for encrypted storage
-    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } = await import(
-      "../utils/cookie"
-    );
+    const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } =
+      await import("../utils/cookie");
 
     // Save session token (plain)
-    console.log("[login] Saving session_id cookie (plain)");
     // Remove any legacy/encrypted cookies before writing new plain cookie
     try {
       cookieStore.delete(COOKIE_NAMES.CRF);
@@ -188,17 +191,19 @@ export async function loginUser(
     try {
       cookieStore.delete(COOKIE_NAMES.SESSION_ID);
     } catch {}
-    console.log(
-      "[SAVING TOKEN] token login plain store",
-      response.access_token.slice(0, 30)
-    );
-    setPlainCookie(
+    // token saved to cookie
+    // Store session token as HttpOnly and secure in production so it isn't
+    // accessible to client-side scripts. This reduces XSS risk.
+    console.log("[identity:login] 🍪 Setting session cookie (expires in:", expiresIn, "s)");
+    await setEncryptedCookie(
       cookieStore,
       COOKIE_NAMES.SESSION_ID,
       decodeURIComponent(response.access_token),
       {
         maxAge: expiresIn,
-      }
+        httpOnly: true,
+        secure: true,
+      },
     );
 
     // If request included Firebase ID token, cache it encrypted for re-login in AUTO mode
@@ -221,31 +226,55 @@ export async function loginUser(
         }
       );
       console.log("[login] tp_id saved (plain)");
+      // Store TP_ID encrypted for security; decrypt when reading for re-login
+      try {
+        await setEncryptedCookie(
+          cookieStore,
+          COOKIE_NAMES.TP_ID,
+          decodeURIComponent(credentials.firebaseToken || credentials.thirdPartyToken!),
+          {
+            maxAge: cookieTTL.tpIdTTL,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+          },
+        );
+      } catch (e) {
+        // Fallback: if encryption isn't available, store plain but warn
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[identity:login] failed to encrypt TP_ID; storing plain as fallback",
+          (e as any)?.message || e,
+        );
+        setPlainCookie(
+          cookieStore,
+          COOKIE_NAMES.TP_ID,
+          decodeURIComponent(credentials.firebaseToken || credentials.thirdPartyToken!),
+          {
+            maxAge: cookieTTL.tpIdTTL,
+          },
+        );
+      }
     } else {
-      console.log("[login] No third party token present");
     }
 
     // AUTO mode: only save isUser flag based on roles
     if (authMode === "auto") {
-      console.log("[login] Auto mode: saving isUser flag");
       const isUser = !!(response.roles && response.roles.length > 0);
-      console.log(
-        `[login] isUser determined: ${isUser} (roles count: ${
-          response.roles?.length || 0
-        })`
-      );
+      // Make the isUser flag readable from client-side JavaScript
+      // (not HttpOnly) so consumer apps can check it without server roundtrips.
+      // Use persistent TTL (1 year) so user stays logged in across sessions
       setPlainCookie(cookieStore, COOKIE_NAMES.IS_USER, String(isUser), {
-        maxAge: expiresIn,
+        maxAge: cookieTTL.isUserTTL,
+        httpOnly: false,
       });
     }
 
     // STRICT mode: save all user data
     if (authMode === "strict") {
-      console.log("[login] Strict mode: saving user data");
       if (response.employeeStoreId) {
         cookieStore.set("employee_store_id", String(response.employeeStoreId), {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure: true,
           sameSite: "lax",
           path: "/",
           maxAge: expiresIn,
@@ -255,7 +284,7 @@ export async function loginUser(
       if (response.roles?.length) {
         cookieStore.set("roles", response.roles.join(","), {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure: true,
           sameSite: "lax",
           path: "/",
           maxAge: expiresIn,
@@ -265,7 +294,7 @@ export async function loginUser(
       if (response.user?.username) {
         cookieStore.set("username", response.user.username, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure: true,
           sameSite: "lax",
           path: "/",
           maxAge: expiresIn,

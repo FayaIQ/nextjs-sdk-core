@@ -22,7 +22,6 @@ export async function putItem(
   if (typeof window === "undefined") {
     const { putWithAuth } = await import("../../core/fetcher");
     const { Api } = await import("../../api/api");
-    console.log("putItem data:", data);
     return putWithAuth<UpdateItemResponse>(Api.putItem(id), data);
   }
 

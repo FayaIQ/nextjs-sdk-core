@@ -1,9 +1,11 @@
 /**
  * Secure cookie utilities for encrypted token storage.
  * Server-side only - works with Next.js cookies API.
+ * Uses Edge Runtime compatible Web Crypto API.
  */
 
 import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { encryptForCookie, decryptForCookie } from "./crypto";
 
 /**
  * Cookie names used by the SDK
@@ -23,6 +25,7 @@ export const COOKIE_NAMES = {
 
 /**
  * Default cookie options for secure httpOnly cookies
+ * `secure` should only be true in production environments where HTTPS is used.
  */
 export const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie> = {
   httpOnly: true,
@@ -34,28 +37,52 @@ export const SECURE_COOKIE_OPTIONS: Partial<ResponseCookie> = {
 
 /**
  * Set an encrypted cookie value.
- * Server-side only.
+ * Server-side only. If an encryption key is provided via
+ * `SESSION_ENCRYPTION_KEY` or `ENCRYPTION_KEY` env var, the value will be encrypted
+ * using AES-256-GCM. Otherwise the value will be stored as plain text.
  */
-export function setEncryptedCookie(
+export async function setEncryptedCookie(
   cookieStore: any,
   name: string,
   value: string,
-  options?: Partial<ResponseCookie>
-): void {
+  options?: Partial<ResponseCookie>,
+): Promise<void> {
   if (typeof window !== "undefined") {
     throw new Error("setEncryptedCookie must only be called server-side");
   }
 
+  const secret =
+    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+  let toStore = value;
+
+  if (!secret) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[cookie] no encryption key configured (SESSION_ENCRYPTION_KEY or ENCRYPTION_KEY); storing ${name} in plaintext`,
+    );
+  } else {
+    try {
+      toStore = await encryptForCookie(secret, value);
+    } catch (e) {
+      // If encryption fails, fall back to plaintext but warn the operator.
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[cookie] encryption failed for ${name}, storing plain value`,
+        e,
+      );
+      toStore = value;
+    }
+  }
+
   try {
-    // Encryption removed: store plain value
-    cookieStore.set(name, value, {
+    cookieStore.set(name, toStore, {
       ...SECURE_COOKIE_OPTIONS,
       ...options,
     });
   } catch (e) {
     console.error(
       `[cookie:setEncryptedCookie] Failed to set cookie ${name}:`,
-      e
+      e,
     );
     throw e;
   }
@@ -66,10 +93,10 @@ export function setEncryptedCookie(
  * Server-side only.
  * Returns null if cookie doesn't exist or decryption fails.
  */
-export function getEncryptedCookie(
+export async function getEncryptedCookie(
   cookieStore: any,
-  name: string
-): string | null {
+  name: string,
+): Promise<string | null> {
   if (typeof window !== "undefined") {
     throw new Error("getEncryptedCookie must only be called server-side");
   }
@@ -77,10 +104,118 @@ export function getEncryptedCookie(
   try {
     const cookie = cookieStore.get(name);
     if (!cookie?.value) return null;
-    // Encryption removed — return plain cookie value
+
+    const secret =
+      process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+
+    // If no secret is configured but the cookie looks like an encrypted blob, warn
+    if (!secret) {
+      try {
+        const maybeBuf = Buffer.from(cookie.value, "base64");
+        if (maybeBuf.length >= 12 + 16 + 1) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[cookie] cookie ${name} looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; server will not decrypt it`,
+          );
+        }
+      } catch {}
+      return cookie.value || null;
+    }
+
+    if (secret) {
+      try {
+        const decrypted = await decryptForCookie(cookie.value, secret);
+        return decrypted || null;
+      } catch (e) {
+        // If decryption fails, log a warning and return the raw value as fallback
+        try {
+          const len = cookie.value?.length || 0;
+          const prefix = String(cookie.value || "").slice(0, 8);
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[cookie] decryption failed for ${name}; blobLen=${len}, prefix=${prefix}...`,
+            (e as any)?.message || e,
+          );
+        } catch {}
+        return cookie.value || null;
+      }
+    }
     return cookie.value || null;
   } catch (e) {
     console.error(`[cookie:getEncryptedCookie] Failed to read ${name}:`, e);
+    return null;
+  }
+}
+
+/**
+ * Try to decrypt an arbitrary string that may be an encrypted cookie blob.
+ * Returns the decrypted string on success, or null on failure / if no key.
+ * Safe for server-side and Edge Runtime use.
+ */
+export async function tryDecryptString(value: string): Promise<string | null> {
+  if (typeof window !== "undefined") {
+    throw new Error("tryDecryptString must only be called server-side");
+  }
+
+  const secret =
+    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+
+  if (!secret) {
+    // Basic heuristic to check if it looks like encrypted data
+    try {
+      if (value.length > 40) {
+        // minimum length for IV+Tag+some data
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[cookie] tryDecryptString: value looks encrypted but no SESSION_ENCRYPTION_KEY/ENCRYPTION_KEY is configured; cannot decrypt`,
+        );
+      }
+    } catch {}
+    return null;
+  }
+
+  try {
+    return await decryptForCookie(value, secret);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[cookie] tryDecryptString decryption failed",
+      (e as any)?.message || e,
+    );
+    return null;
+  }
+}
+
+/**
+ * Try to encrypt an arbitrary string using the configured secret.
+ * Returns the encrypted blob (base64 iv|tag|ciphertext) on success, or null
+ * if no key is configured or encryption fails.
+ * Server-side and Edge Runtime compatible.
+ */
+export async function tryEncryptString(value: string): Promise<string | null> {
+  if (typeof window !== "undefined") {
+    throw new Error("tryEncryptString must only be called server-side");
+  }
+
+  const secret =
+    process.env.SESSION_ENCRYPTION_KEY || process.env.ENCRYPTION_KEY;
+
+  if (!secret) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[cookie] tryEncryptString: no encryption key configured; cannot encrypt",
+    );
+    return null;
+  }
+
+  try {
+    return await encryptForCookie(secret, value);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "[cookie] tryEncryptString: encryption failed",
+      (e as any)?.message || e,
+    );
     return null;
   }
 }
@@ -93,34 +228,19 @@ export function setPlainCookie(
   cookieStore: any,
   name: string,
   value: string,
-  options?: Partial<ResponseCookie>
+  options?: Partial<ResponseCookie>,
 ): void {
-  console.log(
-    `[cookie:setPlainCookie] Setting plain cookie: ${name}, value length: ${
-      value?.length || 0
-    }`
-  );
   try {
     cookieStore.set(name, value, {
       ...SECURE_COOKIE_OPTIONS,
-      httpOnly: true, // Allow client-side read for flags
+      httpOnly: false, // Allow client-side read for flags
       ...options,
     });
-    console.log(
-      `[cookie:setPlainCookie] Plain cookie ${name} set successfully`
-    );
   } catch (e) {
     console.error(
       `[cookie:setPlainCookie] Failed to set plain cookie ${name}:`,
-      e
+      e,
     );
     throw e;
   }
-}
-
-/**
- * Delete a cookie by name.
- */
-export function deleteCookie(cookieStore: any, name: string): void {
-  cookieStore.delete(name);
 }

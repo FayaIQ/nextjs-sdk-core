@@ -17,6 +17,18 @@ export async function putOrderItemCancel(id: string | number , itemId : string |
   }
 
   const res = await fetch(`/api/orders/${id}/orderItems/${itemId}/cancel`, { method: "PUT" });
-  if (!res.ok) throw new Error(`Failed to cancel order item: ${res.statusText}`);
+
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+      // ignore
+    }
+    throw new Error(errorMessage);
+  }
+
   return res.json();
 }
+

@@ -1,7 +1,5 @@
 // file   : nextjs-sdk-core/npm/src/inventory/orders/handler/orders.ts
-
 import { NextRequest, NextResponse } from "next/server";
-import { ItemsFilterParameters } from "../../items/filter-models";
 import { getMenus } from "../getMenus";
 
 /**
@@ -13,16 +11,12 @@ import { getMenus } from "../getMenus";
  */
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const filterParams =
-      ItemsFilterParameters.fromURLSearchParams(searchParams);
-
-    const menus = await getMenus({ filterParams });
+    const menus = await getMenus();
     return NextResponse.json(menus);
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Failed to fetch orders";
-    console.error("orders error:", message);
+      error instanceof Error ? error.message : "Failed to fetch menus";
+    console.error("menus error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

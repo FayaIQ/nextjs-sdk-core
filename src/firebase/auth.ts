@@ -49,7 +49,7 @@ function extractProjectIdFromIss(iss?: string | null): string | null {
 
 /**
  * Start phone sign-in via WhatsApp OTP.
- * Sends OTP code via Cloud Function on secondary Firebase app.
+ * Calls secure server-side API route to send OTP (keeps Cloud Functions hidden from client).
  *
  * @param phoneNumber - E.164 format (e.g., "+9647XXXXXXXXX")
  * @param options - Optional configuration
@@ -57,30 +57,32 @@ function extractProjectIdFromIss(iss?: string | null): string | null {
  */
 export async function startPhoneSignIn(
   phoneNumber: string,
-  options?: WhatsAppOTPOptions
+  options?: WhatsAppOTPOptions,
 ): Promise<StartPhoneSignInResult> {
   if (typeof window === "undefined") {
     throw new Error("startPhoneSignIn must be called in the browser");
   }
 
-  console.log("[firebase:startPhoneSignIn]", { phoneNumber });
-
-  const { getSecondaryApp } = await import("./config");
-  const { getFunctions, httpsCallable } = await import("firebase/functions");
-
-  const secondaryApp = await getSecondaryApp();
-  const functions = getFunctions(secondaryApp);
-  const sendFunctionName = options?.sendFunctionName || "whatsapp";
-
-  // Call Cloud Function to send OTP via WhatsApp
-  const sendOtpFunction = httpsCallable(functions, sendFunctionName);
+  // Call secure server-side API route to send OTP
+  // Server handles Cloud Functions, keeping them hidden from client
+  const sendOtpEndpoint = options?.sendFunctionName || "/api/auth/send-otp";
+  const projectName = options?.projectName || "serlab";
 
   try {
-    await sendOtpFunction({
-      phoneNumber,
-      projectName: options?.projectName || "serlab",
+    const response = await fetch(sendOtpEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phoneNumber,
+        projectName,
+      }),
+      credentials: "include",
     });
-    console.log("[firebase:startPhoneSignIn] OTP sent via WhatsApp");
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || "Failed to send OTP");
+    }
   } catch (error) {
     console.error("[firebase:startPhoneSignIn] failed to send OTP", error);
     throw error;
@@ -89,113 +91,60 @@ export async function startPhoneSignIn(
   // Return confirmation object with verify method
   return {
     confirm: async (code: string) => {
-      console.log("[firebase:confirmPhoneCode] verifying code");
-
       // Set flag to prevent auth state sync during login
       __isSigningIn = true;
 
-      const verifyFunctionName = options?.verifyFunctionName || "verifySMS";
-      const verifyOtpFunction = httpsCallable(functions, verifyFunctionName);
+      // Call secure server-side API route to verify OTP and complete login
+      // Server handles: OTP verification, token exchange, backend login, cookie setting
+      const verifyOtpEndpoint =
+        options?.verifyFunctionName || "/api/auth/verify-otp";
+      const projectName = options?.projectName || "serlab";
 
       try {
-        const response = await verifyOtpFunction({
-          phoneNumber,
-          code,
-          projectName: options?.projectName || "serlab",
+        const response = await fetch(verifyOtpEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phoneNumber,
+            code,
+            projectName,
+          }),
+          credentials: "include",
         });
 
-        const customToken = (response.data as { token: string }).token;
-        console.log("[firebase:confirmPhoneCode] custom token received");
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || "Failed to verify OTP");
+        }
 
-        // Sign in with custom token on PRIMARY app
+        // Server has already authenticated and set cookies
+        // Now sync to Firebase by getting fresh token
         const { getPrimaryApp } = await import("./config");
-        const {
-          getAuth,
-          signInWithCustomToken,
-          setPersistence,
-          browserLocalPersistence,
-        } = await import("firebase/auth");
+        const { getAuth, setPersistence, browserLocalPersistence } =
+          await import("firebase/auth");
 
         const primaryApp = await getPrimaryApp();
         const auth = getAuth(primaryApp);
 
         try {
           await setPersistence(auth, browserLocalPersistence);
-          console.log(":confirmPhoneCode] persistence set to LOCAL");
-        } catch (e) {
-          console.warn(
-            "[firebase:confirmPhoneCode] failed to set persistence",
-            e
-          );
-        }
-        // Try to sign in; if mismatch, provide a clear diagnostic error
-        try {
-          await signInWithCustomToken(auth, customToken);
-          console.log(
-            "[firebase:confirmPhoneCode] user signed in on primary app"
-          );
-        } catch (e: any) {
-          const appProjectId = (primaryApp as any)?.options?.projectId;
-          const payload = decodeJwtPayload(customToken) || {};
-          // For Firebase custom tokens, aud is a fixed IdentityToolkit URL.
-          // The projectId is best inferred from the issuer service account email.
-          const tokenProjectId =
-            extractProjectIdFromIss(payload.iss) || payload.project_id || null;
-          const code = e?.code || e?.message || String(e);
-          const likelyMismatch =
-            code?.includes("auth/custom-token-mismatch") ||
-            code?.includes("custom-token-mismatch") ||
-            code?.includes("auth/invalid-custom-token") ||
-            code?.includes("invalid-custom-token") ||
-            code?.includes("CREDENTIAL_MISMATCH");
+        } catch {}
 
-          if (likelyMismatch) {
-            console.error(
-              "[firebase:confirmPhoneCode] CREDENTIAL_MISMATCH → token project != client app",
-              {
-                code,
-                clientProjectId: appProjectId,
-                tokenIss: payload.iss,
-                tokenProjectId,
-                tokenAud: payload.aud,
-              }
-            );
-            throw new Error(
-              `CREDENTIAL_MISMATCH: Custom token was minted for project "${
-                tokenProjectId ?? "<unknown>"
-              }" but you are signing into "${appProjectId}". ` +
-                `Ensure your verifySMS Cloud Function mints tokens using the PRIMARY project's service account (the same project used by getPrimaryApp).`
-            );
-          }
-          // Re-throw any other error as-is
-          throw e;
-        }
+        // Wait a moment for auth state to update if needed
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Wait for auth state to update
-        const { onAuthStateChanged } = await import("firebase/auth");
-        await new Promise<void>((resolve) => {
-          const unsubscribe = onAuthStateChanged(auth, (user: any) => {
-            if (user) {
-              unsubscribe();
-              resolve();
-            }
-          });
-        });
-
-        // Get fresh ID token with force refresh to ensure it's valid
+        // Get current token (server has authenticated the user)
         const { getIdToken } = await import("firebase/auth");
-        const idToken = await getIdToken(auth.currentUser!, true);
+        const user = auth.currentUser;
+        if (user) {
+          const idToken = await getIdToken(user, true);
+          __isSigningIn = false;
+          return idToken;
+        }
 
-        console.log(
-          "[firebase:confirmPhoneCode] ID token obtained (refreshed)"
-        );
-
-        // Clear the flag BEFORE returning so app can proceed
-        // The onIdTokenChanged from the refresh above will be skipped because flag is cleared
         __isSigningIn = false;
-        console.log("[firebase:confirmPhoneCode] sign-in flag cleared");
-
-        return idToken;
+        // Return a dummy token - user is authenticated via session cookies
+        return "";
       } catch (error) {
         console.error("[firebase:confirmPhoneCode] verification failed", error);
         __isSigningIn = false; // Clear flag on error
@@ -226,12 +175,8 @@ export async function getFirebaseIdToken(forceRefresh = false) {
   if (!user) return null;
 
   try {
-    console.log("[firebase:getFirebaseIdToken] fetching token", {
-      forceRefresh,
-    });
     return await getIdToken(user, forceRefresh);
   } catch (e) {
-    console.log("[firebase:getFirebaseIdToken] failed to get ID token", e);
     return null;
   }
 }
@@ -250,7 +195,6 @@ export async function signOutFirebase(): Promise<void> {
   const app = await getPrimaryApp();
   const auth = getAuth(app);
 
-  console.log("[firebase:signOutFirebase] signing out");
   await signOut(auth);
 }
 
@@ -265,11 +209,74 @@ let __authSyncPromise: Promise<() => void> | null = null;
 let __lastSyncedToken: string | null = null;
 let __lastSyncTime = 0;
 let __isSigningIn = false; // Flag to prevent sync during login
+let __tokenRefreshTimer: ReturnType<typeof setTimeout> | null = null; // Timer for proactive token refresh
+
+/**
+ * Schedule proactive token refresh before expiration.
+ * Prevents tp_id cookie from expiring by refreshing the Firebase token early.
+ * 
+ * @param token - Current Firebase ID token
+ * @param auth - Firebase Auth instance
+ */
+const scheduleTokenRefresh = (token: string, auth: any) => {
+  // Clear existing timer
+  if (__tokenRefreshTimer) {
+    clearTimeout(__tokenRefreshTimer);
+    __tokenRefreshTimer = null;
+  }
+
+  // Decode token to get expiration time
+  const payload = decodeJwtPayload(token);
+  if (!payload?.exp) {
+    console.warn("[firebase:scheduleTokenRefresh] Could not decode token expiration");
+    return;
+  }
+
+  const expiresAt = payload.exp * 1000; // Convert to milliseconds
+  const now = Date.now();
+  const timeUntilExpiry = expiresAt - now;
+
+  // Dynamic refresh timing based on token lifetime:
+  // - For tokens > 10 min: refresh 5 min before expiration
+  // - For tokens < 10 min: refresh at 80% of lifetime
+  // This allows testing with short-lived tokens (e.g., 2 min → refresh at 1m36s)
+  let refreshIn: number;
+  const TEN_MINUTES = 10 * 60 * 1000;
+  
+  if (timeUntilExpiry > TEN_MINUTES) {
+    // Long-lived token: refresh 5 minutes before expiration
+    const REFRESH_BEFORE_EXPIRY_MS = 5 * 60 * 1000;
+    refreshIn = Math.max(60000, timeUntilExpiry - REFRESH_BEFORE_EXPIRY_MS);
+  } else {
+    // Short-lived token (testing): refresh at 80% of lifetime
+    refreshIn = Math.max(10000, timeUntilExpiry * 0.8); // Minimum 10 seconds
+  }
+
+  console.log(
+    `[firebase:scheduleTokenRefresh] ⏰ Token expires in ${Math.round(timeUntilExpiry / 1000)}s, refreshing in ${Math.round(refreshIn / 1000)}s`
+  );
+
+  __tokenRefreshTimer = setTimeout(async () => {
+    console.log("[firebase:scheduleTokenRefresh] 🔄 Proactively refreshing token before expiration...");
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const { getIdToken } = await import("firebase/auth");
+        const newToken = await getIdToken(user, true); // Force refresh
+        console.log("[firebase:scheduleTokenRefresh] ✅ Token refreshed successfully");
+        // onIdTokenChanged will fire and handle syncing + rescheduling
+      }
+    } catch (e) {
+      console.error("[firebase:scheduleTokenRefresh] ❌ Token refresh failed:", e);
+    }
+  }, refreshIn);
+};
 
 /**
  * Start auth state synchronization.
  * Listens to Firebase token changes and syncs to backend automatically.
  * Implements singleton pattern, debouncing, and persistent guard.
+ * NOW WITH PROACTIVE TOKEN REFRESH to prevent tp_id expiration.
  *
  * @param options - Configuration options
  * @returns Unsubscribe function
@@ -301,11 +308,10 @@ export async function startAuthStateSync(options?: {
 
     try {
       await setPersistence(auth, browserLocalPersistence);
-      console.log("[firebase:startAuthStateSync] persistence set");
     } catch (e) {
       console.warn(
         "[firebase:startAuthStateSync] failed to set persistence",
-        e
+        e,
       );
     }
 
@@ -336,40 +342,50 @@ export async function startAuthStateSync(options?: {
     const pushTokenToServer = async (forceRefresh = false) => {
       // Skip if currently signing in to prevent duplicate token syncs
       if (__isSigningIn) {
-        console.log(
-          "[firebase:startAuthStateSync] skipping sync during sign-in"
-        );
+        console.log("[firebase:startAuthStateSync] ⏭️ Skipping push (sign-in in progress)");
         return;
       }
 
       try {
         const user = auth.currentUser;
-        if (!user) return;
+        if (!user) {
+          console.log("[firebase:startAuthStateSync] ℹ️ No current user found during push");
+          return;
+        }
         // Only read the current token; don't force refresh unless explicitly requested
         const token = await getIdToken(user, forceRefresh);
-        if (!token) return;
+        if (!token) {
+          console.log("[firebase:startAuthStateSync] ⚠️ Could not retrieve token during push");
+          return;
+        }
 
         const now = Date.now();
         // In-memory debounce
-        if (token === __lastSyncedToken && now - __lastSyncTime < 3000) return;
+        if (token === __lastSyncedToken && now - __lastSyncTime < 3000) {
+          console.log("[firebase:startAuthStateSync] ⏭️ Skipping push (debounced)");
+          return;
+        }
 
         // Persistent guard using hash: check sessionStorage (safer than localStorage)
         const tokenHash = await hashToken(token);
         try {
           const lastPersistedHash = sessionStorage.getItem(STORAGE_KEY);
           if (lastPersistedHash && lastPersistedHash === tokenHash) {
-            console.log(
-              "[firebase:startAuthStateSync] token already synced (session cache hit)"
-            );
+            console.log("[firebase:startAuthStateSync] ⏭️ Skipping push (already synced in this session)");
             return;
           }
         } catch {}
+        console.log(
+          "[firebase:startAuthStateSync] 🔄 Syncing fresh token to server at",
+          endpoint,
+        );
 
-        await fetch(endpoint, {
+        const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ thirdPartyToken: token }),
         });
+        console.log("[firebase:startAuthStateSync] ✅ Server responded to token sync:", response.status);
 
         __lastSyncedToken = token;
         __lastSyncTime = now;
@@ -378,26 +394,45 @@ export async function startAuthStateSync(options?: {
         try {
           sessionStorage.setItem(STORAGE_KEY, tokenHash);
         } catch {}
-        console.log("[firebase:startAuthStateSync] token synced → server");
+
+        // Schedule proactive token refresh to prevent tp_id expiration
+        scheduleTokenRefresh(token, auth);
       } catch (e) {
-        console.error("[firebase:startAuthStateSync] sync failed", e);
+        console.error("[firebase:startAuthStateSync] ❌ Sync failed", e);
         options?.onError?.(e);
       }
     };
 
     // Subscribe once
     const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      console.log("[firebase:startAuthStateSync] 🔔 onIdTokenChanged triggered for user:", user?.uid || "none");
       if (!user) return;
       // Only push when the token actually changes; onIdTokenChanged already signals that
       await pushTokenToServer(false);
     });
 
-    // Do NOT push on init; only sync when the token changes
+    // Check if user is already logged in and schedule initial token refresh
+    // This ensures we schedule refresh on page reload without forcing a sync
+    if (auth.currentUser) {
+      try {
+        const token = await getIdToken(auth.currentUser, false);
+        if (token) {
+          console.log("[firebase:startAuthStateSync] 👤 User already logged in, scheduling token refresh");
+          scheduleTokenRefresh(token, auth);
+        }
+      } catch (e) {
+        console.warn("[firebase:startAuthStateSync] ⚠️ Could not schedule initial token refresh:", e);
+      }
+    }
 
     __authSyncUnsubscribe = () => {
       try {
         unsubscribe();
       } catch {}
+      if (__tokenRefreshTimer) {
+        clearTimeout(__tokenRefreshTimer);
+        __tokenRefreshTimer = null;
+      }
       __authSyncPromise = null;
       __authSyncUnsubscribe = null;
     };

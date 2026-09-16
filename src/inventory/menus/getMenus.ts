@@ -1,20 +1,13 @@
 import { Category } from "../../types";
-import { ItemsFilterParameters } from "../items/filter-models";
-export async function getMenus({
-  filterParams,
-}: {
-  filterParams: ItemsFilterParameters;
-}): Promise<Category[]> {
-  const params = filterParams.toURLSearchParams();
+export async function getMenus(): Promise<Category[]> {
   // Map categoryId -> menuId and remove categoryId
   if (typeof window === "undefined") {
-    const {getWithAuth} = await import("../../core");
+    const { getWithAuth } = await import("../../core");
     const { Api } = await import("../../api/api");
 
-    return getWithAuth<Category[]>(`${Api.getMenus}?${params.toString()}`, {
-    });
+    return getWithAuth<Category[]>(`${Api.getMenus}`, {});
   } else {
-    return fetch(`/api/menus?${params.toString()}`).then((res) => {
+    return fetch(`/api/menus`).then((res) => {
       if (!res.ok) throw new Error("Failed to fetch from src products");
       return res.json();
     });

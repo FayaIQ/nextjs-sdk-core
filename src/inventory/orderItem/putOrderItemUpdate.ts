@@ -23,6 +23,18 @@ export async function putOrderItemUpdate( id: string | number, itemId: string | 
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) throw new Error(`Failed to update order item: ${res.statusText}`);
+ 
+  if (!res.ok) {
+    let errorMessage = `failed: ${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+      // ignore
+    }
+    throw new Error(errorMessage);
+  }
+
   return res.json();
 }
+

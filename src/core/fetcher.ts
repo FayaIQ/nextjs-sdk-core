@@ -151,12 +151,12 @@ export async function apiFetch<T>(
     // Use token as provided (encryption removed)
     requestHeaders["Authorization"] = `Bearer ${token}`;
     try {
-      console.log(`[apiFetch] Authorization header set with token preview: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`);
+      // Authorization header set
     } catch {
-      console.log('[apiFetch] Authorization header set (token preview unavailable)');
+      // ignore
     }
   } else {
-    console.log('[apiFetch] No token provided, skipping Authorization header');
+    // No token provided
   }
 
   if (data && !(data instanceof FormData)) {
@@ -176,11 +176,10 @@ export async function apiFetch<T>(
     body,
   });
   
-  console.log(`[apiFetch] ${method} ${endpoint} -> Status: ${response.status} ${response.statusText}`);
-  
+ 
   // Handle response errors - parse body and throw ApiError so callers must handle non-2xx
   if (!response.ok) {
-    console.log(`[apiFetch] Request failed with status ${response.status}`);
+  // request failed
     try {
       const text = await response.text();
       if (text && text.trim()) {
@@ -209,6 +208,9 @@ export async function apiFetch<T>(
         const derivedMessage =
           findMessageInError(errorData) ||
           (typeof errorData === "string" ? errorData : response.statusText);
+
+        // eslint-disable-next-line no-console
+        console.error('[apiFetch] non-2xx response', { endpoint, status: response.status, derivedMessage });
 
         throw new ApiError(response.status, errorData, derivedMessage);
       }
@@ -249,6 +251,8 @@ export async function apiFetch<T>(
     // Return response as-is without any normalization
     return parsed as T;
   } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[apiFetch] Failed to parse JSON response', { endpoint, err: (err as any)?.message, snippet: text.substring(0, 200) });
     throw new Error(
       `Failed to parse response as JSON: ${text.substring(0, 100)}`
     );
@@ -281,9 +285,12 @@ export async function getWithAuth<T>(
 ): Promise<T> {
   let token: string | null = null;
   try {
+    // eslint-disable-next-line no-console
     token = await getToken();
   } catch (err: any) {
     // Normalize token-related unauthorized errors to ApiError(401)
+    // eslint-disable-next-line no-console
+    console.error('[getWithAuth] getToken error', { err: (err as any)?.message || String(err) });
     if (
       err &&
       (err.status === 401 || /unauthor/i.test(String(err.message || err)))
@@ -345,8 +352,11 @@ export async function postWithAuth<T>(
 ): Promise<T> {
   let token: string | null = null;
   try {
+    // eslint-disable-next-line no-console
     token = await getToken();
   } catch (err: any) {
+    // eslint-disable-next-line no-console
+    console.error('[postWithAuth] getToken error', { err: (err as any)?.message || String(err) });
     if (
       err &&
       (err.status === 401 || /unauthor/i.test(String(err.message || err)))

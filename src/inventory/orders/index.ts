@@ -12,6 +12,8 @@ export * from "./putOrderReferenceId";
 export * from "./putOrderReferenceDeliveryId";
 export * from "./postOrder";
 export * from "./putOrderCancel";
+export * from "./postOrderDelegate";
+export * from "./postOrderDelegatesList";
 // Re-export handlers for Next.js API routes
 export { POST as POSTOrder } from "./handler/post-order";
 export { POST as POSTOrderFullInfo } from "./handler/full-info";
@@ -29,3 +31,5 @@ export { PUT as PUTOrderDiscount } from "./handler/discount";
 export { PUT as PUTOrderReferenceId } from "./handler/reference-id";
 export { PUT as PUTOrderReferenceDeliveryId } from "./handler/reference-delivery-id";
 export { PUT as PUTOrderCancel } from "./handler/cancel";
+export { POST as POSTOrderDelegate } from "./handler/delegate";
+export { POST as POSTOrderDelegatesList } from "./handler/delegates-list";

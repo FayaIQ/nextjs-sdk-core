@@ -21,7 +21,6 @@ export async function getPrimaryApp(): Promise<FirebaseApp> {
 
   if (primaryApp) return primaryApp;
 
-  console.log("[firebase:getPrimaryApp] initializing primary app");
   const { initializeApp, getApps } = await import("firebase/app");
 
   const config = {
@@ -38,7 +37,6 @@ export async function getPrimaryApp(): Promise<FirebaseApp> {
   const existing = getApps().find(app => app.name === '[DEFAULT]');
   primaryApp = existing || initializeApp(config);
   
-  console.log("[firebase:getPrimaryApp] primary app ready");
   return primaryApp;
 }
 
@@ -53,7 +51,6 @@ export async function getSecondaryApp(): Promise<FirebaseApp> {
 
   if (secondaryApp) return secondaryApp;
 
-  console.log("[firebase:getSecondaryApp] initializing secondary app");
   const { initializeApp, getApps } = await import("firebase/app");
 
   const config = {
@@ -68,7 +65,6 @@ export async function getSecondaryApp(): Promise<FirebaseApp> {
   const existing = getApps().find(app => app.name === 'secondary');
   secondaryApp = existing || initializeApp(config, 'secondary');
   
-  console.log("[firebase:getSecondaryApp] secondary app ready");
   return secondaryApp;
 }
 

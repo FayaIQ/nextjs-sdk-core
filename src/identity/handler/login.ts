@@ -30,25 +30,31 @@ export async function POST(request: NextRequest) {
       IsFromNotification: false,
       firebaseToken: firebaseToken ?? config.thirdPartyToken,
     };
-    console.log("[identity:handler:login] credentials prepared", { hasUsername: !!credentials.username, hasPassword: !!credentials.password, hasFirebaseToken: !!credentials.firebaseToken });
 
     // ✅ Server-side dedupe: avoid re-signing if already logged in with the same Firebase token
     if (firebaseToken) {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      
+
       // Check if we have a valid access_token and matching tp_id
       let hasValidToken = false;
       try {
-        const { getEncryptedCookie, COOKIE_NAMES } = await import("../../utils/cookie");
-        const existingToken = getEncryptedCookie(cookieStore, COOKIE_NAMES.CRF);
-        const existingTpId = getEncryptedCookie(cookieStore, COOKIE_NAMES.TP_ID);
-        
+        const { getEncryptedCookie, COOKIE_NAMES } =
+          await import("../../utils/cookie");
+        const existingToken = await getEncryptedCookie(
+          cookieStore,
+          COOKIE_NAMES.CRF,
+        );
+        const existingTpId = await getEncryptedCookie(
+          cookieStore,
+          COOKIE_NAMES.TP_ID,
+        );
+
         if (existingToken && existingTpId === firebaseToken) {
           hasValidToken = true;
         }
       } catch {}
-      
+
       // Fallback to legacy plain cookies
       if (!hasValidToken) {
         const existingToken = cookieStore.get("session_id")?.value;
@@ -57,9 +63,8 @@ export async function POST(request: NextRequest) {
           hasValidToken = true;
         }
       }
-      
+
       if (hasValidToken) {
-        console.log("[identity:handler:login] already logged in with same Firebase token, skipping re-auth");
         return NextResponse.json(
           {
             success: true,
@@ -68,7 +73,7 @@ export async function POST(request: NextRequest) {
             roles: [],
             user: null,
           },
-          { status: 200 }
+          { status: 200 },
         );
       }
     }
@@ -77,7 +82,8 @@ export async function POST(request: NextRequest) {
     // Prefer incoming request's user-agent when available
     let userAgent: string | undefined;
     try {
-      userAgent = (request as any)?.headersList?.get?.("user-agent") || undefined;
+      userAgent =
+        (request as any)?.headersList?.get?.("user-agent") || undefined;
     } catch {}
     if (!userAgent) {
       try {
@@ -85,23 +91,51 @@ export async function POST(request: NextRequest) {
       } catch {}
     }
 
-    const response = await loginUser(credentials, userAgent + " login in user server side in nextjs-sdk-core api/login");
-    console.log("[identity:handler:login] loginUser response", { ok: !!response?.access_token, rolesCount: response?.roles?.length || 0 });
+    const response = await loginUser(
+      credentials,
+      userAgent + " login in user server side in nextjs-sdk-core api/login",
+    );
 
     // If login provided a Firebase token, persist it for AUTO mode re-auth
     if (firebaseToken) {
-      console.log("[identity:handler:login] setting encrypted tp_id cookie");
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const { setPlainCookie, COOKIE_NAMES } = await import("../../utils/cookie");
-      // Remove legacy tp_id cookies and save tp_id plainly for re-login
+      const { setEncryptedCookie, setPlainCookie, COOKIE_NAMES } =
+        await import("../../utils/cookie");
+      
+      // Get configurable cookie TTLs
+      const { getCookieTTLConfig } = await import("../../core/config");
+      const cookieTTL = getCookieTTLConfig();
+      
+      // Remove legacy tp_id cookies and save tp_id encrypted for re-login
       try {
         cookieStore.delete(COOKIE_NAMES.TP_ID);
       } catch {}
       try {
         cookieStore.delete("tp_id");
       } catch {}
-      setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, firebaseToken, { maxAge: 3600 });
+      try {
+        await setEncryptedCookie(
+          cookieStore,
+          COOKIE_NAMES.TP_ID,
+          body.thirdPartyToken,
+          {
+            maxAge: cookieTTL.tpIdTTL,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+          },
+        );
+      } catch (e) {
+        // Fallback to plain if encryption not available
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[identity:handler:login] failed to encrypt TP_ID for cookie store; storing plain as fallback",
+          (e as any)?.message || e,
+        );
+        setPlainCookie(cookieStore, COOKIE_NAMES.TP_ID, body.thirdPartyToken, {
+          maxAge: cookieTTL.tpIdTTL,
+        });
+      }
     }
 
     // Respond with success and relevant data
@@ -113,23 +147,44 @@ export async function POST(request: NextRequest) {
         roles: response.roles || [],
         user: response.user || null,
       },
-      { status: 200 }
+      { status: 200 },
     );
 
     // Also set tp_id in response cookie for client (encrypted preferred)
-    if (firebaseToken) {
+    if (body.thirdPartyToken) {
+      // Get configurable cookie TTLs (reuse if already imported, otherwise get it)
+      const { getCookieTTLConfig } = await import("../../core/config");
+      const cookieTTL = getCookieTTLConfig();
+      
       try {
-        const { setPlainCookie } = await import("../../utils/cookie");
-        setPlainCookie(res.cookies, "tp_id", firebaseToken, { maxAge: 3600 });
+        const { setEncryptedCookie, COOKIE_NAMES } =
+          await import("../../utils/cookie");
+        await setEncryptedCookie(
+          res.cookies,
+          COOKIE_NAMES.TP_ID,
+          body.thirdPartyToken,
+          {
+            maxAge: cookieTTL.tpIdTTL,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+          },
+        );
       } catch (e) {
-        // If cookie util import fails, set plain as last resort
-        res.cookies.set("tp_id", firebaseToken, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "lax",
-          path: "/",
-          maxAge: 3600,
-        });
+        try {
+          const { setPlainCookie } = await import("../../utils/cookie");
+          setPlainCookie(res.cookies, "tp_id", body.thirdPartyToken, {
+            maxAge: cookieTTL.tpIdTTL,
+          });
+        } catch (e2) {
+          // If cookie util import fails, set plain as last resort
+          res.cookies.set("tp_id", firebaseToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: cookieTTL.tpIdTTL,
+          });
+        }
       }
     }
     return res;
@@ -141,19 +196,27 @@ export async function POST(request: NextRequest) {
       let serverMessage: string = "Login failed";
       try {
         // Try to find a friendly message in body
-        serverMessage = typeof serverBody === "string" ? serverBody : (serverBody?.message || serverBody?.error || JSON.stringify(serverBody));
+        serverMessage =
+          typeof serverBody === "string"
+            ? serverBody
+            : serverBody?.message ||
+              serverBody?.error ||
+              JSON.stringify(serverBody);
       } catch {}
-      console.error("[identity:handler:login] ApiError", { status, serverMessage });
+      console.error("[identity:handler:login] ApiError", {
+        status,
+        serverMessage,
+      });
       return NextResponse.json(
         { success: false, error: serverMessage, status },
-        { status }
+        { status },
       );
     }
     const message = error?.message || "Login failed unexpectedly";
     console.error("[identity:handler:login] Unexpected error", { message });
     return NextResponse.json(
       { success: false, error: message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

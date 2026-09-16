@@ -48,3 +48,10 @@ export interface ClientsPagingResponse {
 export interface ClientsApiResponse {
   data: Client[];
 }
+
+export interface DelegateType {
+  id: string;
+  name: string;
+  nameEn?: string;
+  description?: string;
+}

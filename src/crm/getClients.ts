@@ -21,7 +21,6 @@ function toQueryString(filter?: FilterLike): string {
 
 export async function getClients({ filterParams } : { filterParams?: FilterLike } = {}): Promise<Client[]> {
   const qs = toQueryString(filterParams);
-console.log("getClients query string:", qs);
   // Server-side: call the backend directly with auth
   if (typeof window === "undefined") {
     const { getWithAuth } = await import("../core/fetcher");

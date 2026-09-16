@@ -18,7 +18,9 @@ export async function getOrders({
     const { Api } = await import("../../api/api");
 
     const token = await getToken();
+    console.log("Fetching orders with params:", `${Api.getOrders}?${params.toString()}`);
     return getWithAuth<OrdersApiResponse>(
+
       `${Api.getOrders}?${params.toString()}`,
     );
   }
@@ -28,8 +30,15 @@ export async function getOrders({
 
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+    let errorMessage = `failed: ${response.status} ${response.statusText}`;
+    try {
+      const body = await response.json();
+      errorMessage = body.error || body.message || errorMessage;
+    } catch (e) {
+      // ignore
+    }
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  return  response.json();
 }
